@@ -56,6 +56,7 @@ public class LoginDaoImpl implements ILoginDao{
             e.printStackTrace();
             e.getMessage();
             temp = null;
+            //akaza
         }
         finally {
             try{
