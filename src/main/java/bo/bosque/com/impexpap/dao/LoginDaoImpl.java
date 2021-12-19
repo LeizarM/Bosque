@@ -36,7 +36,7 @@ public class LoginDaoImpl implements ILoginDao{
     public Login obtainUser(String login, String password) {
         Login temp = new Login();
         try {
-              temp = this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ACCION=?",
+              temp =   this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ACCION=?",
                      new Object[] { login, password, "X1" }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
@@ -53,13 +53,17 @@ public class LoginDaoImpl implements ILoginDao{
                     });
 
         }  catch (BadSqlGrammarException e) {
-            System.out.println("DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException)e.getCause()).getErrorCode());
+            System.out.println("DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             temp = new Login();
+            this.jdbcTemplate = null;
         }
 
-        System.out.println(temp.toString());
+        temp.getEmp().setCodEmpleado( 98745 );
+        temp.getEmp().getPer().setApPaterno("************ JAIMES ***************** ");
+        System.out.println( " El objeto real es "+ temp.toString() );
 
         return temp;
+
     }
 
     /**
