@@ -55,7 +55,7 @@ public class LoginDaoImpl implements ILoginDao{
             System.out.println(" LoginDaoImp en obtainUser Error general: " + e);
             e.printStackTrace();
             e.getMessage();
-            temp = null;
+            temp = new Login();
 
         }
         finally {
