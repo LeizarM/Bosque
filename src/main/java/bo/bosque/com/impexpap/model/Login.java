@@ -2,14 +2,15 @@ package bo.bosque.com.impexpap.model;
 
 import java.io.Serializable;
 
-import lombok.*;
-
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-
 public class Login implements Serializable {
 
     private int codUsuario;
