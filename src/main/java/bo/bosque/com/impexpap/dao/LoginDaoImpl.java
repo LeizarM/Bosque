@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.stereotype.Repository;
@@ -33,10 +34,10 @@ public class LoginDaoImpl implements ILoginDao{
      * @return
      */
     public Login obtainUser(String login, String password) {
-        Login temp;
+        Login temp = new Login();
         try {
-             temp = this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ACCION=?",
-                    new Object[] { login, password, "X1" }
+              temp = this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ACCION=?",
+                     new Object[] { login, password, "X1" }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
                         login1.getEmp().setNumCuenta(rs.getInt(1));
@@ -51,26 +52,16 @@ public class LoginDaoImpl implements ILoginDao{
                         return login1;
                     });
 
-        }  catch (Exception e){
-            System.out.println(" LoginDaoImp en obtainUser Error general: " + e);
-            e.printStackTrace();
-            e.getMessage();
+        }  catch (BadSqlGrammarException e) {
+            System.out.println("DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException)e.getCause()).getErrorCode());
             temp = new Login();
-
-        }
-        finally {
-            try{
-                this.jdbcTemplate = null;
-            }
-            catch (Exception e){
-                System.out.println(" TarRuXCargoDao en abmTarRuXCargo Error cerrando: " + e);
-            }
         }
 
         System.out.println(temp.toString());
 
         return temp;
     }
+
     /**
      * Procedimiento para obtener menu
      */
