@@ -56,7 +56,7 @@ public class LoginDaoImpl implements ILoginDao{
             e.printStackTrace();
             e.getMessage();
             temp = null;
-            //akaza
+
         }
         finally {
             try{
@@ -71,4 +71,7 @@ public class LoginDaoImpl implements ILoginDao{
 
         return temp;
     }
+    /**
+     * Procedimiento para obtener menu
+     */
 }
