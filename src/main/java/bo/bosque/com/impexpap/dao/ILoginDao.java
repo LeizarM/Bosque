@@ -17,5 +17,5 @@ public interface ILoginDao {
      * @param password
      * @return
      */
-    Login obtainUser( String login, String password );
+    Login verifyUser( String login, String password, String ip );
 }

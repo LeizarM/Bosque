@@ -30,6 +30,12 @@ public class Persona implements Serializable {
     private String sexo;
     private int audUsuarioI;
 
+    /**
+     * Variable de apoyo
+     */
+    private String datoPersona;
+
+
 
     /**
      * Constructor

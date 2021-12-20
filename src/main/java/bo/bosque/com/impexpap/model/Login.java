@@ -38,10 +38,7 @@ public class Login implements Serializable {
         this.audUsuarioI = audUsuarioI;
     }
 
-
-    public Login(int numCuenta, int codUsuario, int codEmpleado, String login, String password, String tipoUsuario,String esAutorizador, String estado, int audUsuarioI) {
-
-        this.emp.setNumCuenta(numCuenta);
+    public Login(int codUsuario, int codEmpleado, String login, String password, String tipoUsuario, String esAutorizador, String estado, int audUsuarioI, Empleado emp) {
         this.codUsuario = codUsuario;
         this.codEmpleado = codEmpleado;
         this.login = login;
@@ -50,7 +47,6 @@ public class Login implements Serializable {
         this.esAutorizador = esAutorizador;
         this.estado = estado;
         this.audUsuarioI = audUsuarioI;
+        this.emp = emp;
     }
-
-
 }

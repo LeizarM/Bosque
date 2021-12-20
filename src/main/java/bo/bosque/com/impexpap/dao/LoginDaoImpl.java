@@ -33,11 +33,11 @@ public class LoginDaoImpl implements ILoginDao{
      * @param password
      * @return
      */
-    public Login obtainUser(String login, String password) {
+    public Login verifyUser(String login, String password, String ip) {
         Login temp = new Login();
         try {
-              temp =   this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ACCION=?",
-                     new Object[] { login, password, "X1" }
+              temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
+                      new Object[] { login, password, ip ,"X1" }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
                         login1.getEmp().setNumCuenta(rs.getInt(1));
@@ -57,11 +57,6 @@ public class LoginDaoImpl implements ILoginDao{
             temp = new Login();
             this.jdbcTemplate = null;
         }
-
-        temp.getEmp().setCodEmpleado( 98745 );
-        temp.getEmp().getPer().setApPaterno("************ JAIMES ***************** ");
-        System.out.println( " El objeto real es "+ temp.toString() );
-
         return temp;
 
     }
