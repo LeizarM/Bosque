@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 
 import java.sql.SQLException;
-import java.util.List;
 
 @Repository
 public class LoginDaoImpl implements ILoginDao{
@@ -19,11 +18,12 @@ public class LoginDaoImpl implements ILoginDao{
 
 
     /**
-     * Procedimiento para el abm de la informacion
+     * Procedimiento para el abm del login
      * @param login
-     * @return
+     * @param oper
+     * @return true si se realizo con exito
      */
-    public boolean abmLogin(Login login) {
+    public boolean abmLogin( Login login, String oper ) {
         return false;
     }
 

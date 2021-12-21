@@ -2,7 +2,6 @@ package bo.bosque.com.impexpap.controller;
 
 import bo.bosque.com.impexpap.dao.ILoginDao;
 import bo.bosque.com.impexpap.model.Login;
-import bo.bosque.com.impexpap.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;

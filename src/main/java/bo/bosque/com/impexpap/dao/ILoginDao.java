@@ -9,7 +9,7 @@ public interface ILoginDao {
      * @param login
      * @return
      */
-    boolean abmLogin( Login login );
+    boolean abmLogin( Login login, String oper );
 
     /**
      * Para obtener el usuario

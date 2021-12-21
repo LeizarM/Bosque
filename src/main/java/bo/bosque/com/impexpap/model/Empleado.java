@@ -1,18 +1,15 @@
 package bo.bosque.com.impexpap.model;
-
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-
-import java.io.Serializable;
-
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class Empleado implements Serializable {
+public class Empleado extends Persona implements Serializable {
 
     private int codEmpleado;
     private int codPersona;
