@@ -23,9 +23,13 @@ public class Login implements Serializable {
     private int audUsuarioI;
 
 
+    private String elTemaSelecionado = "";
+    private Empleado empleado = new Empleado();
+    private Sucursal sucursal = new Sucursal();
 
-    private Empleado emp = new Empleado();
-
+    /**
+     * Constructores
+     */
     public Login(int codUsuario, int codEmpleado, String login, String password, String tipoUsuario,String esAutorizador, String estado, int audUsuarioI) {
 
         this.codUsuario = codUsuario;
@@ -38,15 +42,25 @@ public class Login implements Serializable {
         this.audUsuarioI = audUsuarioI;
     }
 
-    public Login(int codUsuario, int codEmpleado, String login, String password, String tipoUsuario, String esAutorizador, String estado, int audUsuarioI, Empleado emp) {
+    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombre, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado ) {
         this.codUsuario = codUsuario;
-        this.codEmpleado = codEmpleado;
-        this.login = login;
-        this.password = password;
+        this.empleado.getPersona().setDatoPersona( datoPersona );
+
+        this.sucursal.setCodSucursal( codSucursal );
+        this.sucursal.setNombre( nombre );
+
+        this.sucursal.setCodCiudad( codCiudad );
+        this.sucursal.setNombreCiudad( datoCiudad );
+
+        this.empleado.getCargo().setDescripcion( descripcionCargo );
         this.tipoUsuario = tipoUsuario;
-        this.esAutorizador = esAutorizador;
-        this.estado = estado;
-        this.audUsuarioI = audUsuarioI;
-        this.emp = emp;
+
+        this.sucursal.setCodEmpresa( codEmpresa );
+        this.sucursal.setNombreEmpresa( nombreEmpresa );
+
+        this.elTemaSelecionado = elTemaSelecionado;
     }
+
+
+
 }

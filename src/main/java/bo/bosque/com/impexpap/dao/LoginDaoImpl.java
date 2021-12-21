@@ -37,18 +37,21 @@ public class LoginDaoImpl implements ILoginDao{
         Login temp = new Login();
         try {
               temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
-                      new Object[] { login, password, ip ,"X1" }
+                      new Object[] { login, password, ip ,"V" }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
-                        login1.getEmp().setNumCuenta(rs.getInt(1));
-                        login1.setCodUsuario(rs.getInt(2));
-                        login1.setCodEmpleado(rs.getInt(3));
-                        login1.setLogin(rs.getString(4));
-                        login1.setPassword(rs.getString(5));
-                        login1.setTipoUsuario(rs.getString(6));
-                        login1.setEsAutorizador(rs.getString(7));
-                        login1.setEstado(rs.getString(8));
-                        login1.setAudUsuarioI(rs.getInt(9));
+                        login1.setCodUsuario(rs.getInt(1));
+                        login1.getEmpleado().getPersona().setDatoPersona(rs.getString(2));
+                        login1.getSucursal().setCodSucursal(rs.getInt(3));
+                        login1.getSucursal().setNombre(rs.getString(4));
+                        login1.getSucursal().setCodCiudad(rs.getInt(5));
+                        login1.getSucursal().setNombreCiudad(rs.getString(6));
+                        login1.getEmpleado().getCargo().setDescripcion(rs.getString(7));
+                        login1.setTipoUsuario(rs.getString(8));
+                        login1.getSucursal().setCodEmpresa(rs.getInt(9));
+                        login1.getSucursal().setNombreEmpresa(rs.getString(10));
+                        login1.setElTemaSelecionado(rs.getString(11));
+
                         return login1;
                     });
 
@@ -57,6 +60,7 @@ public class LoginDaoImpl implements ILoginDao{
             temp = new Login();
             this.jdbcTemplate = null;
         }
+        System.out.println( temp.toString() );
         return temp;
 
     }

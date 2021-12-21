@@ -21,7 +21,8 @@ public class Empleado implements Serializable {
     private int codRelPlanilla;
     private int audUsuarioI;
 
-    Persona per = new Persona();
+    Persona persona = new Persona();
+    Cargo cargo  = new Cargo();
 
     /**
      * Constructores

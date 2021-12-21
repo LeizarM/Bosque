@@ -14,11 +14,14 @@ import java.io.Serializable;
 public class Sucursal implements Serializable {
 
     private int codSucursal;
-    private String nombre;
+    private String nombre; //el nombre de la sucursal
     private int codEmpresa;
     private int codCiudad;
     private int audUsuarioI;
 
+
+    private String nombreEmpresa;
+    private String nombreCiudad;
 
     /**
      * Constructores

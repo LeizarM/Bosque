@@ -9,6 +9,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin
@@ -25,11 +26,10 @@ public class LoginController {
     public Login login( @RequestBody Login obj ) {
 
         // extraemos la ip de donde se esta logueando
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        System.out.println("el ip de acceso es = "+ request.getRemoteAddr());
+        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        return this.ldao.verifyUser( obj.getLogin(), obj.getPassword(), request.getRemoteAddr() );
 
-        //System.out.println( obj.toString() );
-        return this.ldao.verifyUser( obj.getLogin(), obj.getPassword() );
+
     }
 
 }
