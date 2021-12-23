@@ -40,13 +40,13 @@ public class LoginController {
      * Procedimiento para obtener el menu dinamico por usuario
      */
     @PostMapping("/vistaDinamica")
-    public List<Vista> obtenerMenuDinamico( @RequestBody int codUsuario ) {
+    public List<Vista> obtenerMenuDinamico( @RequestBody Login obj ) {
         List<Vista> lstMenu;
 
-        lstMenu = this.vdao.obtainMenuXUser( codUsuario );
+        lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
 
-
-        return lstMenu;
+        System.out.println( lstMenu.toString() );
+        return null;
 
     }
 
