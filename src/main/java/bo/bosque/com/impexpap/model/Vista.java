@@ -19,22 +19,40 @@ public class Vista implements Serializable {
     private String titulo;
     private String descripcion;
     private String imagen; //nombre de la imagen
-    private String esRaiz;
+    private int esRaiz;
     private int autorizar;
     private int audUsuarioI;
 
     /**
+     * Variables de Apoyo
+     */
+    private int fila;
+
+    /**
      * Constructores
      */
-    public Vista(int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, String esRaiz, int autorizar, int audUsuarioI) {
-        this.codVista = codVista;
-        this.codVistaPadre = codVistaPadre;
-        this.direccion = direccion;
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-        this.imagen = imagen;
-        this.esRaiz = esRaiz;
-        this.autorizar = autorizar;
-        this.audUsuarioI = audUsuarioI;
+    public Vista(int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, int audUsuarioI) {
+        this.codVista       = codVista;
+        this.codVistaPadre  = codVistaPadre;
+        this.direccion      = direccion;
+        this.titulo         = titulo;
+        this.descripcion    = descripcion;
+        this.imagen         = imagen;
+        this.esRaiz         = esRaiz;
+        this.autorizar      = autorizar;
+        this.audUsuarioI    = audUsuarioI;
+    }
+
+    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, int audUsuarioI) {
+        this.fila           = fila;
+        this.codVista       = codVista;
+        this.codVistaPadre  = codVistaPadre;
+        this.direccion      = direccion;
+        this.titulo         = titulo;
+        this.descripcion    = descripcion;
+        this.imagen         = imagen;
+        this.esRaiz         = esRaiz;
+        this.autorizar      = autorizar;
+        this.audUsuarioI    = audUsuarioI;
     }
 }

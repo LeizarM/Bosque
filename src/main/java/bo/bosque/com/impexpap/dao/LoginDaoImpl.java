@@ -13,6 +13,9 @@ import java.sql.SQLException;
 @Repository
 public class LoginDaoImpl implements ILoginDao{
 
+    /**
+     * El Datasource
+     */
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -40,27 +43,28 @@ public class LoginDaoImpl implements ILoginDao{
                       new Object[] { login, password, ip ,"V" }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
-                        login1.setCodUsuario(rs.getInt(1));
-                        login1.getEmpleado().getPersona().setDatoPersona(rs.getString(2));
-                        login1.getSucursal().setCodSucursal(rs.getInt(3));
-                        login1.getSucursal().setNombre(rs.getString(4));
-                        login1.getSucursal().setCodCiudad(rs.getInt(5));
-                        login1.getSucursal().setNombreCiudad(rs.getString(6));
-                        login1.getEmpleado().getCargo().setDescripcion(rs.getString(7));
-                        login1.setTipoUsuario(rs.getString(8));
-                        login1.getSucursal().setCodEmpresa(rs.getInt(9));
-                        login1.getSucursal().setNombreEmpresa(rs.getString(10));
-                        login1.setElTemaSelecionado(rs.getString(11));
+
+                        login1.setCodUsuario(rs.getInt(1 ));
+                        login1.getEmpleado().getPersona().setDatoPersona(rs.getString(2 ));
+                        login1.getSucursal().setCodSucursal(rs.getInt(3 ));
+                        login1.getSucursal().setNombre(rs.getString(4 ));
+                        login1.getSucursal().setCodCiudad(rs.getInt(5 ));
+                        login1.getSucursal().setNombreCiudad(rs.getString(6 ));
+                        login1.getEmpleado().getCargo().setDescripcion(rs.getString(7 ));
+                        login1.setTipoUsuario( rs.getString(8) );
+                        login1.getSucursal().setCodEmpresa(rs.getInt(9 ));
+                        login1.getSucursal().setNombreEmpresa(rs.getString(10 ));
+                        login1.setElTemaSelecionado(rs.getString(11 ));
 
                         return login1;
                     });
 
         }  catch (BadSqlGrammarException e) {
-            System.out.println("DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            System.out.println("Error: LoginDaoImpl en verifyUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             temp = new Login();
             this.jdbcTemplate = null;
         }
-        System.out.println( temp.toString() );
+        //System.out.println( temp.toString() );
         return temp;
 
     }
