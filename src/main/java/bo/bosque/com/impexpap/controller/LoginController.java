@@ -6,6 +6,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,10 +43,16 @@ public class LoginController {
     @PostMapping("/vistaDinamica")
     public List<Vista> obtenerMenuDinamico( @RequestBody Login obj ) {
         List<Vista> lstMenu;
-
+        List<List<Vista>> lstTemp = new ArrayList<List<Vista>>();
+        System.out.println("El tamaño de la lista Temp antes de agregar elementos "+lstTemp.size());
         lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
-
-        System.out.println( lstMenu.toString() );
+        System.out.println("****************************************************************************");
+        lstTemp.add(lstMenu);
+        System.out.println("El tamaño de la lista Temp despues de agregar elementos una vez "+lstTemp.size());
+        lstTemp.add(lstMenu);
+        System.out.println("El tamaño de la lista Temp antes de agregar elementos segunda vez  "+lstTemp.size());
+        System.out.println( lstTemp.size() );
+        System.out.println("El tamaño de la lista Temp total "+lstTemp.size());
         return null;
 
     }
