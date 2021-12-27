@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 
 @Getter
 @Setter
@@ -27,7 +28,7 @@ public class Vista implements Serializable {
      * Variables de Apoyo
      */
     private int fila;
-
+    private Vista items;
     /**
      * Constructores
      */
@@ -43,7 +44,7 @@ public class Vista implements Serializable {
         this.audUsuarioI    = audUsuarioI;
     }
 
-    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, int audUsuarioI) {
+    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, Vista items , int audUsuarioI) {
         this.fila           = fila;
         this.codVista       = codVista;
         this.codVistaPadre  = codVistaPadre;
@@ -53,6 +54,7 @@ public class Vista implements Serializable {
         this.imagen         = imagen;
         this.esRaiz         = esRaiz;
         this.autorizar      = autorizar;
+        this.items          = items;
         this.audUsuarioI    = audUsuarioI;
     }
 }

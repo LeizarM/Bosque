@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 @Repository
@@ -25,7 +26,7 @@ public class VistaDaoImpl implements IVistaDao {
      * @param codUsuario
      * @return
      */
-    public List<Vista> obtainMenuXUser( int codUsuario ) {
+    public List<Vista> obtainMenuXUser(int codUsuario ) {
         List<Vista> lstTemp;
         try {
             lstTemp =  this.jdbcTemplate.query("execute dbo.p_list_VistaUsuario  @codUsuario=?, @ACCION=?",  new Object[] { codUsuario, "K" }, (rs, rowNum) -> {
@@ -37,6 +38,7 @@ public class VistaDaoImpl implements IVistaDao {
                 temp.setDireccion(rs.getString(4 ));
                 temp.setTitulo(rs.getString(5 ));
                 temp.setEsRaiz(rs.getInt(6 ));
+
                 return temp;
 
             });
@@ -47,6 +49,6 @@ public class VistaDaoImpl implements IVistaDao {
             this.jdbcTemplate = null;
         }
 
-        return lstTemp;
+        return  lstTemp;
     }
 }
