@@ -47,48 +47,27 @@ public class LoginController {
      */
     @PostMapping("/vistaDinamica")
     public List<Vista> obtenerMenuDinamico( @RequestBody Login obj ) {
-        List<Vista> lstMenu;
-        //List<List<Vista>> lstTemp = new ArrayList<List<Vista>>();
-
+        /**
+         * Nota: la lista recursiva tiene que estar ordenada de forma ascendente
+         * desde el nivel mas profundo hasta el nivel mas externo
+         */
+        List<Vista>  lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
         LinkedList<Vista> items = new LinkedList<Vista>();
-        LinkedList<Vista> items1 = new LinkedList<Vista>();
-        lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
-
-
         for ( Vista i  : lstMenu ) items.add(i);
-        items1 = items;
-        items  = new LinkedList<Vista>();
-        for ( int i = 0; i< items1.size(); i++ ) {
-            if(  items1.get(i).getCodVistaPadre() == 0 ){
-                 items.add(items1.get(i));
 
-            }
-            if( items1.get(i).getCodVistaPadre() > 0 ){
-                for ( int j = 0; j < items1.size(); j++ ){
-                    if( items1.get(i).getCodVistaPadre() == items1.get(j).getCodVista() ){
-                        items1.get(i).setItems( new Vista( j, items1.get(j).getCodVista(), items1.get(j).getCodVistaPadre(), items1.get(j).getDireccion(), items1.get(j).getTitulo(), items1.get(j).getDescripcion(), items1.get(j).getImagen(), items1.get(j).getEsRaiz(), items1.get(j).getAutorizar(), items1.get(j).getItems(), -1  ) );
+        for ( int i = 0; i < items.size(); i++ ){
+            while (  items.get(i).getCodVistaPadre() > 0 ){
+                for ( int j = 0; j < items.size(); j++ ){
+                    if ( items.get(j).getCodVista() == items.get(i).getCodVistaPadre() ){
+                        items.get(j).getItems().add( items.get(i) );
+                        //Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
+                        items.remove( items.get(i) );
+                        break;
                     }
                 }
-                items.add(items1.get(i));
             }
-
         }
-
         return items;
-
-       // System.out.println("El nodo es = " + items.toString());
-
-        /*System.out.println("El tamaño de la lista Temp antes de agregar elementos "+lstTemp.size());
-        lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
-        System.out.println("****************************************************************************");
-        lstTemp.add(lstMenu);
-        System.out.println("El tamaño de la lista Temp despues de agregar elementos una vez "+lstTemp.size());
-        lstTemp.add(lstMenu);
-        System.out.println("El tamaño de la lista Temp antes de agregar elementos segunda vez  "+lstTemp.size());
-        System.out.println( lstTemp.size() );
-        System.out.println("El tamaño de la lista Temp total "+lstTemp.size());*/
-
-
     }
 
 }

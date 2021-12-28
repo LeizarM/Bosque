@@ -28,7 +28,7 @@ public class Vista implements Serializable {
      * Variables de Apoyo
      */
     private int fila;
-    private Vista items;
+    private LinkedList<Vista> items = new LinkedList<Vista>();
     /**
      * Constructores
      */
@@ -44,7 +44,7 @@ public class Vista implements Serializable {
         this.audUsuarioI    = audUsuarioI;
     }
 
-    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, Vista items , int audUsuarioI) {
+    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, LinkedList<Vista> items , int audUsuarioI) {
         this.fila           = fila;
         this.codVista       = codVista;
         this.codVistaPadre  = codVistaPadre;
