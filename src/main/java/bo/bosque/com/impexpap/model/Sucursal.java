@@ -19,7 +19,9 @@ public class Sucursal implements Serializable {
     private int codCiudad;
     private int audUsuarioI;
 
-
+    /**
+     * Variables de apoyo
+     */
     private String nombreEmpresa;
     private String nombreCiudad;
 

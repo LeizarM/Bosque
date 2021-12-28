@@ -55,13 +55,13 @@ public class LoginController {
         LinkedList<Vista> items = new LinkedList<Vista>();
         for ( Vista i  : lstMenu ) items.add(i);
 
-        for ( int i = 0; i < items.size(); i++ ){
-            while (  items.get(i).getCodVistaPadre() > 0 ){
-                for ( int j = 0; j < items.size(); j++ ){
-                    if ( items.get(j).getCodVista() == items.get(i).getCodVistaPadre() ){
-                        items.get(j).getItems().add( items.get(i) );
+        for ( int i = 0; i < items.size(); i++ ) {
+            while (items.get(i).getCodVistaPadre() > 0) {
+                for (int j = 0; j < items.size(); j++) {
+                    if (items.get(j).getCodVista() == items.get(i).getCodVistaPadre()) {
+                        items.get(j).getItems().add(items.get(i));
                         //Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
-                        items.remove( items.get(i) );
+                        items.remove(items.get(i));
                         break;
                     }
                 }

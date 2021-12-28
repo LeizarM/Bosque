@@ -18,6 +18,10 @@ public class Empleado extends Persona implements Serializable {
     private int codRelPlanilla;
     private int audUsuarioI;
 
+
+    /**
+     * Variables de apoyo
+     */
     Persona persona = new Persona();
     Cargo cargo  = new Cargo();
 
