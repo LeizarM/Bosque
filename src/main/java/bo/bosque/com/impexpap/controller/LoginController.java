@@ -50,6 +50,7 @@ public class LoginController {
         // Generando el menu en forma de arbol
         for ( int i = 0; i < lstMenu.size(); i++ ) {
             while (lstMenu.get(i).getCodVistaPadre() > 0) {
+                System.out.println( "en while el codvista "+ lstMenu.get(i).getCodVista()+" el codVistaPadre es= "+lstMenu.get(i).getCodVistaPadre()+" la raiz es "+ lstMenu.get(i).getEsRaiz()   );
                 for (int j = 0; j < lstMenu.size(); j++) {
                     if ( lstMenu.get(j).getCodVista() == lstMenu.get(i).getCodVistaPadre() ) {
                         lstMenu.get(j).getItems().add(lstMenu.get(i));
@@ -59,6 +60,11 @@ public class LoginController {
                 }
             }
         }
+        /**
+         * Usando recursividad para eliminar listas vacias de los hijos mas profundos de los nodos
+         */
+
+
         return lstMenu;
     }
 
