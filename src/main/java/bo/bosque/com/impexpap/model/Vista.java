@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -58,7 +59,7 @@ public class Vista implements Serializable {
         this.esRaiz         = esRaiz;
         this.autorizar      = autorizar;
         this.items          = items;
-        this.label          = label;
+        this.titulo          = label;
         this.audUsuarioI    = audUsuarioI;
     }
 
