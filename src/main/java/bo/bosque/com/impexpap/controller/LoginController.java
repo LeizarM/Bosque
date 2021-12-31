@@ -53,7 +53,9 @@ public class LoginController {
                 System.out.println( "en while el codvista "+ lstMenu.get(i).getCodVista()+" el codVistaPadre es= "+lstMenu.get(i).getCodVistaPadre()+" la raiz es "+ lstMenu.get(i).getEsRaiz()   );
                 for (int j = 0; j < lstMenu.size(); j++) {
                     if ( lstMenu.get(j).getCodVista() == lstMenu.get(i).getCodVistaPadre() ) {
-                        
+                        if( lstMenu.get(i).getTieneHijo() == -1 ){
+                            lstMenu.get(i).setItems(null);
+                        }
                         lstMenu.get(j).getItems().add(lstMenu.get(i));
                         lstMenu.remove(lstMenu.get(i));//Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
                         break;
