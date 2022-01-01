@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Accessors( chain = true )
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,6 +34,7 @@ public class Vista implements Serializable {
     private List<Vista> items = new ArrayList<Vista>();
     private String label; // label para desplegarlo en el arbol de primeNG
     private int tieneHijo;
+    private String routerLink;
     /**
      * Constructores
      */
@@ -49,7 +50,7 @@ public class Vista implements Serializable {
         this.audUsuarioI    = audUsuarioI;
     }
 
-    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, List<Vista> items, String label, int tieneHijo ,int audUsuarioI) {
+    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, List<Vista> items, String label, int tieneHijo, String routerLink, int audUsuarioI) {
         this.fila           = fila;
         this.codVista       = codVista;
         this.codVistaPadre  = codVistaPadre;
@@ -62,6 +63,7 @@ public class Vista implements Serializable {
         this.items          = items;
         this.titulo         = label;
         this.tieneHijo      = tieneHijo;
+        this.routerLink     = routerLink;
         this.audUsuarioI    = audUsuarioI;
     }
 

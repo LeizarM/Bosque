@@ -55,6 +55,7 @@ public class LoginController {
                         if( lstMenu.get(i).getTieneHijo() == -1 ){
                             lstMenu.get(i).setItems(null);
                         }
+                        //lstMenu.get(i).setRouterLink(lstMenu.get(i).getDireccion());
                         lstMenu.get(j).getItems().add(lstMenu.get(i));
                         lstMenu.remove(lstMenu.get(i));//Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
                         break;
@@ -62,11 +63,6 @@ public class LoginController {
                 }
             }
         }
-        /**
-         * Usando recursividad para eliminar listas vacias de los hijos mas profundos de los nodos
-         */
-
-
         return lstMenu;
     }
 
