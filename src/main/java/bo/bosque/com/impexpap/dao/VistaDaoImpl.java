@@ -32,14 +32,14 @@ public class VistaDaoImpl implements IVistaDao {
             lstTemp =  this.jdbcTemplate.query("execute dbo.p_list_VistaUsuario  @codUsuario=?, @ACCION=?",  new Object[] { codUsuario, "K" }, (rs, rowNum) -> {
                 Vista temp = new Vista();
 
-                temp.setFila(rs.getInt(1 ));
-                temp.setCodVista(rs.getInt(2 ));
-                temp.setCodVistaPadre(rs.getInt(3 ));
-                temp.setDireccion(rs.getString(4 ));
-                temp.setTitulo(rs.getString(5 ));
-                temp.setEsRaiz(rs.getInt(6 ));
-                temp.setLabel(rs.getString(5 ));
-                temp.setTieneHijo(rs.getInt(7 ));
+                temp.setFila(rs.getInt(1 ))
+                .setCodVista(rs.getInt(2 ))
+                .setCodVistaPadre(rs.getInt(3 ))
+                .setDireccion(rs.getString(4 ))
+                .setTitulo(rs.getString(5 ))
+                .setEsRaiz(rs.getInt(6 ))
+                .setTieneHijo(rs.getInt(7 ))
+                .setLabel(temp.getTitulo());
                 return temp;
 
             });

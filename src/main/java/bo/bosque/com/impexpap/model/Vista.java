@@ -34,7 +34,7 @@ public class Vista implements Serializable {
     private List<Vista> items = new ArrayList<Vista>();
     private String label; // label para desplegarlo en el arbol de primeNG
     private int tieneHijo;
-    private String routerLink;
+    private String routerLink; // router
     /**
      * Constructores
      */
