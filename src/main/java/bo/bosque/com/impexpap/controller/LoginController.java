@@ -53,8 +53,9 @@ public class LoginController {
                 for (int j = 0; j < lstMenu.size(); j++) {
                     if ( lstMenu.get(j).getCodVista() == lstMenu.get(i).getCodVistaPadre() ) {
                         if( lstMenu.get(i).getTieneHijo() == -1 ){
-                            lstMenu.get(i).setItems(null);
-                            lstMenu.get(i).setRouterLink( lstMenu.get(i).getDireccion() );
+                            lstMenu.get(i).setItems(null)
+                                    .setRouterLink( lstMenu.get(i).getDireccion() )
+                                    .setIcon( "pi pi-circle" );
                         }
                         lstMenu.get(j).getItems().add(lstMenu.get(i));
                         lstMenu.remove(lstMenu.get(i));//Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
@@ -64,6 +65,16 @@ public class LoginController {
             }
         }
         return lstMenu;
+    }
+
+    /**
+     * Procedimiento para obtener las rutas de las paginas por usuario, pero solo de los hijos del menu
+     * @param obj
+     * @return
+     */
+    @PostMapping("/routes")
+    public List<Vista> obtenerRutas( @RequestBody Login obj ) {
+        return this.vdao.obtainRoutes( obj.getCodUsuario() );
     }
 
 }

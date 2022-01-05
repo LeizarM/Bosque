@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 
 import java.sql.SQLException;
+import java.sql.Types;
 
 @Repository
 public class LoginDaoImpl implements ILoginDao{
@@ -40,7 +41,8 @@ public class LoginDaoImpl implements ILoginDao{
         Login temp = new Login();
         try {
               temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
-                      new Object[] { login, password, ip ,"V" }
+                      new Object[] { login, password, ip ,"V" },
+                      new int[] { Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR, Types.VARCHAR }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
 
