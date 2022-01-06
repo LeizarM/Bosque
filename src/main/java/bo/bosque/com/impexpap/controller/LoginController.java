@@ -69,6 +69,7 @@ public class LoginController {
 
     /**
      * Procedimiento para obtener las rutas de las paginas por usuario, pero solo de los hijos del menu
+     * ****** SE DEJARA ESTE METODO EN CASO DE QUE SE LLEGARA A NECESITAR
      * @param obj
      * @return
      */
