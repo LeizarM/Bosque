@@ -54,7 +54,7 @@ public class LoginController {
                     if ( lstMenu.get(j).getCodVista() == lstMenu.get(i).getCodVistaPadre() ) {
                         if( lstMenu.get(i).getTieneHijo() == -1 ){
                             lstMenu.get(i).setItems(null)
-                                    .setRouterLink( lstMenu.get(i).getDireccion() )
+                                    .setRouterLink( lstMenu.get(i).getPath() )
                                     .setIcon( "pi pi-circle" );
                         }
                         lstMenu.get(j).getItems().add(lstMenu.get(i));

@@ -44,6 +44,7 @@ public class VistaDaoImpl implements IVistaDao {
                                     .setTitulo( rs.getString(5 ) )
                                     .setEsRaiz( rs.getInt(6 ) )
                                     .setTieneHijo( rs.getInt(7 ) )
+                                    .setPath( rs.getString(8 ) )
                                     .setLabel( temp.getTitulo() );
                             return temp;
                     });
