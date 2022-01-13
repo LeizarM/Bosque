@@ -20,7 +20,7 @@ public class VistaDaoImpl implements IVistaDao {
      * El Datasource
      */
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
 
     /**
