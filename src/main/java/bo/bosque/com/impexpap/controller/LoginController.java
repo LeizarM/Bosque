@@ -1,6 +1,8 @@
 package bo.bosque.com.impexpap.controller;
 
+import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -16,7 +18,7 @@ import bo.bosque.com.impexpap.model.Vista;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/login")
+@RequestMapping("/auth")
 public class LoginController {
 
     @Autowired()
@@ -24,7 +26,11 @@ public class LoginController {
     @Autowired()
     private IVistaDao vdao;
 
+    @Autowired()
+    AuthenticationManager authenticationManager;
 
+    @Autowired()
+    JwtProvider jwtProvider;
 
     /**
      * Procedimiento para listar el login del usuario

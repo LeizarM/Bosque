@@ -5,14 +5,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import org.springframework.stereotype.Repository;
-
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 
-@Repository
-public class LoginDaoImpl implements ILoginDao{
+@Service
+//@Repository
+public class LoginDaoImpl implements ILoginDao, UserDetailsService {
 
     /**
      * El Datasource
@@ -66,12 +73,37 @@ public class LoginDaoImpl implements ILoginDao{
             temp = new Login();
             this.jdbcTemplate = null;
         }
-        //System.out.println( temp.toString() );
         return temp;
 
     }
 
     /**
-     * Procedimiento para obtener menu
+     * Procedimiento para verificar si existe el usuario en la BD
+     * @param login
+     * @return Userdetails
+     * @throws UsernameNotFoundException
      */
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        Login temp = new Login();
+        try {
+            temp = this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @ACCION=?",
+                    new Object[]{login, "B"},
+                    new int[]{Types.VARCHAR, Types.VARCHAR}
+                    , (rs, rowNum) -> {
+                        Login login1 = new Login();
+                        login1.setLogin(rs.getString(1));
+                        return login1;
+                    });
+
+        } catch (BadSqlGrammarException e) {
+            System.out.println("Error: LoginDaoImpl en loadUserByUsername, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            temp = new Login();
+            this.jdbcTemplate = null;
+        } catch (UsernameNotFoundException e) {
+            System.out.println("Error: LoginDaoImpl en loadUserByUsername, UsernameNotFoundException->" + e.getMessage());
+        }
+        GrantedAuthority authority = new SimpleGrantedAuthority(temp.getTipoUsuario());
+        return new User(temp.getLogin(), temp.getPassword(), Arrays.asList(authority));
+
+    }
 }
