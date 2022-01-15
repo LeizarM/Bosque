@@ -1,8 +1,17 @@
 package bo.bosque.com.impexpap.controller;
 
-import bo.bosque.com.impexpap.security.jwt.JwtProvider;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -10,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 
+import bo.bosque.com.impexpap.security.jwt.JwtProvider;
+import bo.bosque.com.impexpap.security.model.Jwt;
 import bo.bosque.com.impexpap.dao.ILoginDao;
 import bo.bosque.com.impexpap.dao.IVistaDao;
 import bo.bosque.com.impexpap.model.Login;
@@ -26,20 +37,32 @@ public class LoginController {
     @Autowired()
     private IVistaDao vdao;
 
-    @Autowired()
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     AuthenticationManager authenticationManager;
 
-    @Autowired()
+    @Autowired
     JwtProvider jwtProvider;
 
     /**
      * Procedimiento para listar el login del usuario
      */
     @PostMapping("/login")
-    public Login login( @RequestBody Login obj ) {
+    public ResponseEntity<Jwt> login( @RequestBody Login obj,  BindingResult bindingResult) {
 
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();  // extraemos la ip de donde se esta logueando
-        return this.ldao.verifyUser( obj.getLogin(), obj.getPassword(), request.getRemoteAddr() );
+        //return this.ldao.verifyUser( obj.getLogin(), obj.getPassword(), request.getRemoteAddr() );
+        if(bindingResult.hasErrors())
+            return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
+        Authentication authentication =
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(obj.getLogin(), obj.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+        String jwt = jwtProvider.generateToken( authentication );
+        UserDetails userDetails = ( UserDetails )authentication.getPrincipal();
+        Jwt jwtT = new Jwt( jwt, obj.getEmpleado().getPersona().getDatoPersona(), "Cargo", "adm", 34 ,userDetails.getAuthorities() );
+        return new ResponseEntity(jwtT, HttpStatus.OK);
 
     }
 
