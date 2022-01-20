@@ -28,7 +28,7 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
     JwtEntryPoint jwtEntryPoint;
 
     @Autowired()
-    LoginDaoImpl login;
+    LoginDaoImpl loginImpl;
 
     @Bean
     public JwtTokenFilter jwtTokenFilter(){
@@ -42,7 +42,7 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService( this.login ).passwordEncoder(passwordEncoder());
+        auth.userDetailsService( this.loginImpl ).passwordEncoder(passwordEncoder());
     }
 
 

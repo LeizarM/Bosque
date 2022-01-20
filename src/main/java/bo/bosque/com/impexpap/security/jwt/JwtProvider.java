@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
 import bo.bosque.com.impexpap.model.Login;
+
 
 
 @Component
@@ -26,8 +26,12 @@ public class JwtProvider {
      * @return
      */
     public String generateToken(Authentication authentication) {
-        Login usuario = (Login) authentication.getPrincipal();
-        return Jwts.builder().setSubject(usuario.getLogin())
+
+        Login usuario = new Login();
+        usuario.setLogin( authentication.getName() );
+        usuario.setAuthorities(authentication.getAuthorities() );
+
+        return Jwts.builder().setSubject( usuario.getLogin() )
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration * 1000))
                 .signWith(SignatureAlgorithm.HS512, secret)

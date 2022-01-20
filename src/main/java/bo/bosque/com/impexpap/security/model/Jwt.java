@@ -2,6 +2,8 @@ package bo.bosque.com.impexpap.security.model;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+
+import java.io.Serializable;
 import java.util.Collection;
 
 
@@ -9,7 +11,7 @@ import java.util.Collection;
 @Setter
 @NoArgsConstructor
 @ToString
-public class Jwt {
+public class Jwt implements Serializable {
 
     private String token;
     private String bearer = "Bearer";

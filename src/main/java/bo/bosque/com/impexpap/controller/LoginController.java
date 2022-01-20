@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.controller;
 
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import bo.bosque.com.impexpap.model.Vista;
 @RestController
 @CrossOrigin
 @RequestMapping("/auth")
+@Slf4j
 public class LoginController {
 
     @Autowired()
@@ -48,20 +50,28 @@ public class LoginController {
 
     /**
      * Procedimiento para listar el login del usuario
+     * @return
      */
     @PostMapping("/login")
-    public ResponseEntity<Jwt> login( @RequestBody Login obj,  BindingResult bindingResult) {
+    public ResponseEntity login(@RequestBody Login obj, BindingResult bindingResult) {
 
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();  // extraemos la ip de donde se esta logueando
-        //return this.ldao.verifyUser( obj.getLogin(), obj.getPassword(), request.getRemoteAddr() );
-        if(bindingResult.hasErrors())
-            return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
-        Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(obj.getLogin(), obj.getPassword()));
+
+
+        if(bindingResult.hasErrors()) return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
+
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken( obj.getLogin(), obj.getPassword() ) );
+
         SecurityContextHolder.getContext().setAuthentication( authentication );
         String jwt = jwtProvider.generateToken( authentication );
         UserDetails userDetails = ( UserDetails )authentication.getPrincipal();
-        Jwt jwtT = new Jwt( jwt, obj.getEmpleado().getPersona().getDatoPersona(), "Cargo", "adm", 34 ,userDetails.getAuthorities() );
+
+
+        Login loginTemp = this.ldao.verifyUser(userDetails.getUsername(), userDetails.getPassword() , request.getRemoteAddr());
+
+        log.info( loginTemp.toString() );
+
+        Jwt jwtT = new Jwt( jwt, loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getCargo().getDescripcion(), loginTemp.getTipoUsuario(), loginTemp.getCodUsuario() ,userDetails.getAuthorities() );
         return new ResponseEntity(jwtT, HttpStatus.OK);
 
     }

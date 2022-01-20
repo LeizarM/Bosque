@@ -1,6 +1,9 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
+import bo.bosque.com.impexpap.security.jwt.JwtEntryPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,7 +51,7 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
         Login temp = new Login();
         try {
               temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
-                      new Object[] { login, password, ip ,"V" },
+                      new Object[] { login, password, ip ,"C" },
                       new int[] { Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR, Types.VARCHAR }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
@@ -84,6 +87,7 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
      * @throws UsernameNotFoundException
      */
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+
         Login temp = new Login();
         try {
             temp = this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @ACCION=?",
@@ -92,6 +96,8 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
                     , (rs, rowNum) -> {
                         Login login1 = new Login();
                         login1.setLogin(rs.getString(1));
+                        login1.setTipoUsuario( rs.getString( 2) );
+                        login1.setPassword( rs.getString( 3 ) );
                         return login1;
                     });
 
@@ -103,7 +109,7 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
             System.out.println("Error: LoginDaoImpl en loadUserByUsername, UsernameNotFoundException->" + e.getMessage());
         }
         GrantedAuthority authority = new SimpleGrantedAuthority(temp.getTipoUsuario());
-        return new User(temp.getLogin(), temp.getPassword(), Arrays.asList(authority));
+        return new User(temp.getLogin(), temp.getPassword() ,Arrays.asList( authority ));
 
     }
 }
