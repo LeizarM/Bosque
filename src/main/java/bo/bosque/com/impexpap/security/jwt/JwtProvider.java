@@ -14,8 +14,6 @@ import bo.bosque.com.impexpap.model.Login;
 public class JwtProvider {
     private final static Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
-    @Value("${jwt.secret}")
-    private String secret;
 
     @Value("${jwt.expiration}")
     private int expiration;
@@ -34,7 +32,7 @@ public class JwtProvider {
         return Jwts.builder().setSubject( usuario.getLogin() )
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret)
+                .signWith(SignatureAlgorithm.HS512, JwtConfig.RSA_PRIVATE)
                 .compact();
     }
 
@@ -44,7 +42,7 @@ public class JwtProvider {
      * @return
      */
     public String getNombreUsuarioFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(JwtConfig.RSA_PRIVATE).parseClaimsJws(token).getBody().getSubject();
     }
 
     /**
@@ -54,7 +52,8 @@ public class JwtProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(JwtConfig.RSA_PRIVATE)
+                          .parseClaimsJws(token);
             return true;
         } catch (MalformedJwtException e) {
             logger.error("token mal formado");

@@ -23,9 +23,7 @@ import java.util.Objects;
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import bo.bosque.com.impexpap.security.model.Jwt;
 import bo.bosque.com.impexpap.dao.ILoginDao;
-import bo.bosque.com.impexpap.dao.IVistaDao;
 import bo.bosque.com.impexpap.model.Login;
-import bo.bosque.com.impexpap.model.Vista;
 
 
 @RestController
@@ -36,8 +34,6 @@ public class LoginController {
 
     @Autowired()
     private ILoginDao ldao;
-    @Autowired()
-    private IVistaDao vdao;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -56,18 +52,18 @@ public class LoginController {
     public ResponseEntity login(@RequestBody Login obj, BindingResult bindingResult) {
 
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();  // extraemos la ip de donde se esta logueando
-
-
         if(bindingResult.hasErrors()) return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
-
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken( obj.getLogin(), obj.getPassword() ) );
-
         SecurityContextHolder.getContext().setAuthentication( authentication );
         String jwt = jwtProvider.generateToken( authentication );
         UserDetails userDetails = ( UserDetails )authentication.getPrincipal();
 
+                                                //con este parametro
+                                                //obtendra la informacion
+                                                // del usuario                      // solo para la bitacora            // ip solo para la bitacora
+        Login loginTemp = this.ldao.verifyUser(userDetails.getUsername(),  passwordEncoder.encode( obj.getPassword() ), request.getRemoteAddr());
 
-        Login loginTemp = this.ldao.verifyUser(userDetails.getUsername(), userDetails.getPassword() , request.getRemoteAddr());
+        if ( loginTemp.getCodUsuario() <= 0) return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
 
         log.info( loginTemp.toString() );
 
@@ -76,45 +72,6 @@ public class LoginController {
 
     }
 
-    /**
-     * Procedimiento para obtener el menu dinamico por usuario
-     */
-    @PostMapping("/vistaDinamica")
-    public List<Vista> obtenerMenuDinamico( @RequestBody Login obj ) {
-        /**
-         * Nota: la lista recursiva tiene que devolverlo  ordenado de forma ascendente
-         * desde el nivel mas profundo hasta el nivel mas externo
-         */
-        List<Vista>  lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
-        // Generando el menu en forma de arbol
-        for ( int i = 0; i < lstMenu.size(); i++ ) {
-            while (lstMenu.get(i).getCodVistaPadre() > 0) {
-                for (int j = 0; j < lstMenu.size(); j++) {
-                    if ( lstMenu.get(j).getCodVista() == lstMenu.get(i).getCodVistaPadre() ) {
-                        if( lstMenu.get(i).getTieneHijo() == -1 ){
-                            lstMenu.get(i).setItems(null)
-                                    .setRouterLink( lstMenu.get(i).getDireccion() )
-                                    .setIcon( "pi pi-circle" );
-                        }
-                        lstMenu.get(j).getItems().add(lstMenu.get(i));
-                        lstMenu.remove(lstMenu.get(i));//Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
-                        break;
-                    }
-                }
-            }
-        }
-        return lstMenu;
-    }
 
-    /**
-     * Procedimiento para obtener las rutas de las paginas por usuario, pero solo de los hijos del menu
-     * ****** SE DEJARA ESTE METODO EN CASO DE QUE SE LLEGARA A NECESITAR
-     * @param obj
-     * @return
-     */
-    @PostMapping("/routes")
-    public List<Vista> obtenerRutas( @RequestBody Login obj ) {
-        return this.vdao.obtainRoutes( obj.getCodUsuario() );
-    }
 
 }
