@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.controller;
 
 
 
+import bo.bosque.com.impexpap.dao.ILoginDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,16 +15,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Objects;
 
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import bo.bosque.com.impexpap.security.model.Jwt;
-import bo.bosque.com.impexpap.dao.ILoginDao;
 import bo.bosque.com.impexpap.model.Login;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 
 @RestController
@@ -31,9 +31,6 @@ import bo.bosque.com.impexpap.model.Login;
 @RequestMapping("/auth")
 @Slf4j
 public class LoginController {
-
-    @Autowired()
-    private ILoginDao ldao;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -44,30 +41,32 @@ public class LoginController {
     @Autowired
     JwtProvider jwtProvider;
 
+    @Autowired()
+    private ILoginDao ldao;
+
+
     /**
-     * Procedimiento para listar el login del usuario
+     * EndPoint para listar el login del usuario
      * @return
      */
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody Login obj, BindingResult bindingResult) {
+    public ResponseEntity login(@RequestBody Login login, BindingResult bindingResult) {
 
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();  // extraemos la ip de donde se esta logueando
+
+        //con este parametro
+        //obtendra la informacion
+        // del usuario                      // solo para la bitacora            // ip solo para la bitacora
+        Login loginTemp = this.ldao.verifyUser(login.getUsername(),  passwordEncoder.encode( login.getPassword() ), request.getRemoteAddr());
+        if( loginTemp.getCodUsuario() <= 0 )  if(bindingResult.hasErrors()) return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
+
         if(bindingResult.hasErrors()) return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken( obj.getLogin(), obj.getPassword() ) );
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken( login.getLogin(), login.getPassword() ) );
         SecurityContextHolder.getContext().setAuthentication( authentication );
-        String jwt = jwtProvider.generateToken( authentication );
+        String jwt = jwtProvider.generateToken( authentication, loginTemp );
         UserDetails userDetails = ( UserDetails )authentication.getPrincipal();
 
-                                                //con este parametro
-                                                //obtendra la informacion
-                                                // del usuario                      // solo para la bitacora            // ip solo para la bitacora
-        Login loginTemp = this.ldao.verifyUser(userDetails.getUsername(),  passwordEncoder.encode( obj.getPassword() ), request.getRemoteAddr());
-
-        if ( loginTemp.getCodUsuario() <= 0) return new ResponseEntity("campos mal puestos", HttpStatus.BAD_REQUEST);
-
-        log.info( loginTemp.toString() );
-
-        Jwt jwtT = new Jwt( jwt, loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getCargo().getDescripcion(), loginTemp.getTipoUsuario(), loginTemp.getCodUsuario() ,userDetails.getAuthorities() );
+        Jwt jwtT = new Jwt( jwt,loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getCargo().getDescripcion(), loginTemp.getTipoUsuario() , loginTemp.getCodUsuario(), loginTemp.getSucursal().getCodEmpresa() ,userDetails.getAuthorities() );
         return new ResponseEntity(jwtT, HttpStatus.OK);
 
     }

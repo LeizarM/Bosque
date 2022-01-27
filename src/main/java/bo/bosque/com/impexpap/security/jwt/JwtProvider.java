@@ -1,18 +1,27 @@
 package bo.bosque.com.impexpap.security.jwt;
 import java.util.Date;
+import java.util.Objects;
+
+import bo.bosque.com.impexpap.dao.ILoginDao;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import bo.bosque.com.impexpap.model.Login;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 
 
 @Component
 public class JwtProvider {
     private final static Logger logger = LoggerFactory.getLogger(JwtProvider.class);
+
 
 
     @Value("${jwt.expiration}")
@@ -23,13 +32,18 @@ public class JwtProvider {
      * @param authentication
      * @return
      */
-    public String generateToken(Authentication authentication) {
+    public String generateToken(Authentication authentication, Login login) {
 
-        Login usuario = new Login();
-        usuario.setLogin( authentication.getName() );
-        usuario.setAuthorities(authentication.getAuthorities() );
+        login.setLogin( authentication.getName() );
+        login.setAuthorities(authentication.getAuthorities() );
 
-        return Jwts.builder().setSubject( usuario.getLogin() )
+        return Jwts.builder().setSubject( login.getLogin() )
+                .setId( String.valueOf ( login.getCodUsuario() ) )
+                .claim ("nombreCompleto", login.getEmpleado().getPersona().getDatoPersona() )
+                .claim("cargo", login.getEmpleado().getCargo().getDescripcion() )
+                .claim("codSucursal", login.getSucursal().getCodSucursal())
+                .claim( "codEmpresa", login.getSucursal().getCodEmpresa())
+                .claim( "tipoUsuario", login.getTipoUsuario())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration * 1000))
                 .signWith(SignatureAlgorithm.HS512, JwtConfig.RSA_PRIVATE)

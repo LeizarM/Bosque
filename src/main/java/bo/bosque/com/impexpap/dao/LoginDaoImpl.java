@@ -1,10 +1,8 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
-import bo.bosque.com.impexpap.security.jwt.JwtEntryPoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -107,6 +105,9 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
             this.jdbcTemplate = null;
         } catch (UsernameNotFoundException e) {
             System.out.println("Error: LoginDaoImpl en loadUserByUsername, UsernameNotFoundException->" + e.getMessage());
+        }catch (EmptyResultDataAccessException e) {
+            System.out.println("No record found in database for "+login+" "+ e.getMessage());
+
         }
         GrantedAuthority authority = new SimpleGrantedAuthority(temp.getTipoUsuario());
         return new User(temp.getLogin(), temp.getPassword() ,Arrays.asList( authority ));

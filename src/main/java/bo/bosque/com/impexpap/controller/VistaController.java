@@ -6,14 +6,13 @@ import bo.bosque.com.impexpap.model.Login;
 import bo.bosque.com.impexpap.model.Vista;
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@CrossOrigin
+@CrossOrigin("*")
 @RequestMapping("/view")
 public class VistaController {
 
@@ -21,20 +20,18 @@ public class VistaController {
     private IVistaDao vdao;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
     JwtProvider jwtProvider;
 
 
     /**
      * Procedimiento para obtener el menu dinamico por usuario
+     * @param obj
+     * @return JWT
      */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" }) //que un usuario admin o limitado si tiene acceso para consumir este recurso
     @PostMapping("/vistaDinamica")
-    public List<Vista> obtenerMenuDinamico(@RequestBody Login obj ) {
+    public List<Vista> obtenerMenuDinamico( @RequestBody Login obj ) {
+
         /**
          * Nota: la lista recursiva tiene que devolverlo  ordenado de forma ascendente
          * desde el nivel mas profundo hasta el nivel mas externo
@@ -64,8 +61,9 @@ public class VistaController {
      * Procedimiento para obtener las rutas de las paginas por usuario, pero solo de los hijos del menu
      * ****** SE DEJARA ESTE METODO EN CASO DE QUE SE LLEGARA A NECESITAR
      * @param obj
-     * @return
+     * @return List
      */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" }) //que un usuario admin o limitado si tiene acceso para consumir este recurso
     @PostMapping("/routes")
     public List<Vista> obtenerRutas( @RequestBody Login obj ) {
         return this.vdao.obtainRoutes( obj.getCodUsuario() );

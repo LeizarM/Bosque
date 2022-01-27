@@ -19,17 +19,19 @@ public class Jwt implements Serializable {
     private String cargo;
     private String tipoUsuario;
     private int codUsuario;
+    private int codEmpresa;
     private Collection<? extends GrantedAuthority> authorities;
-
+    
     /**
      * Constructor
      */
-    public Jwt(String token, String nombreCompleto, String cargo, String tipoUsuario, int codUsuario, Collection<? extends GrantedAuthority> authorities) {
+    public Jwt(String token, String nombreCompleto, String cargo, String tipoUsuario, int codUsuario, int codEmpresa ,Collection<? extends GrantedAuthority> authorities) {
         this.token = token;
         this.nombreCompleto = nombreCompleto;
         this.cargo = cargo;
         this.tipoUsuario = tipoUsuario;
         this.codUsuario = codUsuario;
+        this.codEmpresa = codEmpresa;
         this.authorities = authorities;
     }
 }
