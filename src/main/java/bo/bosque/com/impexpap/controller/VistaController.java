@@ -19,10 +19,6 @@ public class VistaController {
     @Autowired()
     private IVistaDao vdao;
 
-    @Autowired
-    JwtProvider jwtProvider;
-
-
     /**
      * Procedimiento para obtener el menu dinamico por usuario
      * @param obj
