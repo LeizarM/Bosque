@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.model;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Accessors( chain = true )
 public class Propuesta implements Serializable {
 
     private int idPropuesta;
@@ -18,8 +20,13 @@ public class Propuesta implements Serializable {
     private String titulo;
     private String obs;
     private int estado;
-    private int audUsGenerado;
+    private Date audUsGenerado;
     private Date audFecGenerado;
-    private int audFecha;
+    private Date audFecha;
+
+    /**
+     * Variables auxiliares
+     */
+    private String estadoCad;
 
 }

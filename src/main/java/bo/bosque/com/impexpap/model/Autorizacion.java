@@ -1,15 +1,16 @@
 package bo.bosque.com.impexpap.model;
 
-import lombok.*;
-
 import java.io.Serializable;
 import java.util.Date;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Accessors( chain = true)
 public class Autorizacion implements Serializable {
 
     private int idAutorizacion;
