@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 import java.util.List;
 
 import bo.bosque.com.impexpap.model.Autorizacion;
+import bo.bosque.com.impexpap.utils.Tipos;
 
 
 public interface IAutorizacionDao {
@@ -11,4 +12,11 @@ public interface IAutorizacionDao {
      * @return
      */
     List<Autorizacion> listAutorizacion();
+
+
+    /**
+     * Devolvera una lista de los estados de las propuestas
+      * @return
+     */
+    List<Tipos> lstEstadoPropuestas();
 }

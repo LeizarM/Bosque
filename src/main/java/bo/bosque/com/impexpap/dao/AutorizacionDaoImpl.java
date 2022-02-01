@@ -1,18 +1,14 @@
 package bo.bosque.com.impexpap.dao;
-
-import bo.bosque.com.impexpap.model.Autorizacion;
-
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
+import bo.bosque.com.impexpap.model.Autorizacion;
+import bo.bosque.com.impexpap.utils.Tipos;
 
 
 @Repository
@@ -24,6 +20,7 @@ public class AutorizacionDaoImpl implements IAutorizacionDao{
      */
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
 
     /**
      * Metodo para listar las autorizaciones
@@ -59,4 +56,14 @@ public class AutorizacionDaoImpl implements IAutorizacionDao{
         }
         return lstTemp;
     }
+
+    /**
+     * Obtendra una lista de los estados de las propuestas
+     * @return
+     */
+    public List<Tipos> lstEstadoPropuestas() {
+        return new Tipos().lstEstadoPropuesta();
+    }
+
+
 }
