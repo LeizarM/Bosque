@@ -24,9 +24,6 @@ public class Propuesta implements Serializable {
     private Date audFecGenerado;
     private Date audFecha;
 
-    /**
-     * Variables auxiliares
-     */
-    private String estadoCad;
+
 
 }

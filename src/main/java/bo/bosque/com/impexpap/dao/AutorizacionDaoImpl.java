@@ -42,7 +42,7 @@ public class AutorizacionDaoImpl implements IAutorizacionDao{
                         temp.getRegProp().setTitulo( rs.getString(4 ));
                         temp.setDatoUsuarioP( rs.getString(5 ) );
                         temp.getRegProp().setAudFecha( rs.getDate(6 ) );
-                        temp.getRegProp().setEstadoCad( rs.getString(7 ) );
+                        temp.setEstadoCad( rs.getString(7 ) );
                         temp.setDatoUsuarioAP( rs.getString(8 ) );
                         temp.setAudFecha(rs.getDate(9 ) );
                         temp.setDatoUsuarioGP(rs.getString(10 ) );

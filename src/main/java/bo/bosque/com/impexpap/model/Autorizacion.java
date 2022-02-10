@@ -28,7 +28,10 @@ public class Autorizacion implements Serializable {
 
     private String correo;
 
-
+    /**
+     * Variables auxiliares
+     */
+    private String estadoCad;
     private Propuesta regProp = new Propuesta();
 
 
