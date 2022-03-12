@@ -13,7 +13,7 @@ import java.io.Serializable;
 @ToString
 public class Articulo implements Serializable {
 
-    private String codArticulo;
+    private String codArticulo; // esta es una prueba
     private int codigoFamilia;
     private String datoArt;
     private String datoArtExt;
