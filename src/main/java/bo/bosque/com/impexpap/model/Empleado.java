@@ -1,5 +1,4 @@
 package bo.bosque.com.impexpap.model;
-import java.io.Serializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class Empleado extends Persona implements Serializable {
+public class Empleado {
 
     private int codEmpleado;
     private int codPersona;
@@ -24,6 +23,7 @@ public class Empleado extends Persona implements Serializable {
      */
     Persona persona = new Persona();
     Cargo cargo  = new Cargo();
+    RelEmplEmpr relEmpEmpr =  new RelEmplEmpr();
 
     /**
      * Constructores
