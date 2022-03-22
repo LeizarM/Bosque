@@ -38,6 +38,7 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.setCodPersona( rs.getInt(2) );
                         temp.getPersona().setDatoPersona( rs.getString(3) );
                         temp.getRelEmpEmpr().setEsActivo( rs.getInt(4) );
+                        temp.getCargo().setDescripcion(rs.getString(5));
                         return temp;
                     });
 

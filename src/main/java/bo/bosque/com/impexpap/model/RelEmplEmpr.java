@@ -2,10 +2,11 @@ package bo.bosque.com.impexpap.model;
 
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class RelEmplEmpr {
+public class RelEmplEmpr implements Serializable {
 
     private int codRelEmplEmpr;
     private int codEmpleado;

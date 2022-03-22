@@ -3,12 +3,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import java.io.Serializable;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class Empleado {
+public class Empleado implements Serializable {
 
     private int codEmpleado;
     private int codPersona;
