@@ -26,12 +26,12 @@ public class EmpleadoDAO implements IEmpleado{
      * Procedimiento para obtener los Empleados
      * @return
      */
-    public List<Empleado> obtenerEmpleados() {
+    public List<Empleado> obtenerEmpleados( int esActivo ) {
         List<Empleado>lstTemp;
         try {
-            lstTemp =  this.jdbcTemplate.query("execute p_list_Empleado @ACCION=?",
-                    new Object[] {  "B" },
-                    new int[] {  Types.VARCHAR },
+            lstTemp =  this.jdbcTemplate.query("execute p_list_Empleado @esActivo=?, @ACCION=?",
+                    new Object[] { esActivo, "B" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Empleado temp = new Empleado();
                         temp.setCodEmpleado( rs.getInt(1) );
