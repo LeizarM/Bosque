@@ -1,14 +1,11 @@
 package bo.bosque.com.impexpap.utils;
 
 import lombok.ToString;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 @ToString
 public class Utiles implements Serializable{
@@ -336,24 +333,6 @@ public class Utiles implements Serializable{
             System.out.print("Error en la conversion s_a_i = " + e.getMessage());
         }
         return sqlStringInt;
-    }
-    /**
-     * Procedimiento para generar tokens por usuario y una llave (considerar enviar el password)
-     * @param usuario
-     * @param key
-     * @return 
-     */
-    public String genJWTToken(String usuario, String key) {
-        long tiempo = System.currentTimeMillis();
-        String token = Jwts.builder()
-                    .setId("ipxJwt")//le agregamos un id en comun a los tokens
-                    .signWith(SignatureAlgorithm.HS512, key.getBytes())//generamos con que algoritmo deseamos encriptar
-                    .setSubject("impexpap "+usuario)//procedencia del token
-                    .setIssuedAt(new Date(tiempo))//cuando fue creado el token
-                    .setExpiration(new Date(tiempo + 900000))//tiempo limite de expiracion del token, en este caso 15 min
-                    .claim("bosque", "ipx")//firmas adicionales
-                    .compact();
-        return token;
     }
     
 }
