@@ -24,12 +24,21 @@ public class RrhhController {
     @PostMapping("/listEmpleados")
     public List<Empleado> obtenerListaPropuesta(@RequestBody Empleado emp){
 
-        System.out.println("el es activo es= "+emp.getRelEmpEmpr().getEsActivo());
-
         List <Empleado> lstTemp = this.empDao.obtenerEmpleados( emp.getRelEmpEmpr().getEsActivo() );
 
         if( lstTemp.size() == 0 ) return new ArrayList<>();
 
         return lstTemp;
+    }
+    /**
+     * Procedimiento que obtendra lo datos de un empleado por su codigo
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/detalleEmpleado")
+    public Empleado obtenerDetalleEmpleado ( @RequestBody  Empleado emp ){
+
+        Empleado temp = this.empDao.obtenerEmpleado( emp.getCodEmpleado() );
+        if(temp == null) return new Empleado();
+        return temp;
     }
 }

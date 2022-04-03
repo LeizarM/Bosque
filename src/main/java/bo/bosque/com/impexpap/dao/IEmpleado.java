@@ -11,4 +11,9 @@ public interface IEmpleado {
      */
     List<Empleado> obtenerEmpleados ( int esActivo );
 
+    /**
+     * Procedimiento que obtendra al empleado por codigo
+     * @return
+     */
+    Empleado obtenerEmpleado ( int codEmpleado );
 }

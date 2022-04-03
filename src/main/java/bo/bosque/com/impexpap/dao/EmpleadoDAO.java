@@ -50,4 +50,40 @@ public class EmpleadoDAO implements IEmpleado{
 
         return  lstTemp;
     }
+
+    /**
+     *
+     * Obtendra a un empleado por su codigo
+     * @param codEmpleado
+     * @return
+     */
+    public Empleado obtenerEmpleado( int codEmpleado ) {
+        Empleado emp = new Empleado();
+        try {
+            emp =  this.jdbcTemplate.queryForObject("execute p_list_Empleado @codEmpleado=?, @ACCION=?",
+                    new Object[] { codEmpleado, "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Empleado temp = new Empleado();
+                        temp.setCodEmpleado( rs.getInt(1) );
+                        temp.setCodPersona( rs.getInt(2) );
+                        temp.setNumCuenta(rs.getString(3) );
+                        temp.setCodRelBeneficios(rs.getInt(4));
+                        temp.getRelEmpEmpr().setFechaIni(rs.getDate(5));
+                        temp.getRelEmpEmpr().setFechaFin(rs.getDate(6));
+                        temp.getCargo().setDescripcion(rs.getString(7));
+                        temp.getRelEmpEmpr().setTipoRel(rs.getString(8));
+                        temp.setCodRelPlanilla(rs.getInt(9));
+                        temp.getCargo().setDescripcion(rs.getString(10));
+                    return temp;
+                    });
+
+        }  catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmpleadoDAO en obtenerEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            emp = new Empleado();
+            this.jdbcTemplate = null;
+        }
+
+        return emp;
+    }
 }
