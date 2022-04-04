@@ -1,17 +1,13 @@
 package bo.bosque.com.impexpap.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
+import lombok.*;
 import java.io.Serializable;
 import java.util.Date;
 
-@Getter
-@Setter
-@ToString
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Persona implements Serializable {
 
     private int codPersona;
@@ -34,7 +30,9 @@ public class Persona implements Serializable {
      * Variable de apoyo
      */
     private String datoPersona;
-
+    private Pais pais;
+    private Ciudad ciudad;
+    private Zona zona;
     /**
      * Constructor
      */

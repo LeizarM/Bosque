@@ -6,6 +6,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class RelEmplEmpr implements Serializable {
 
     private int codRelEmplEmpr;

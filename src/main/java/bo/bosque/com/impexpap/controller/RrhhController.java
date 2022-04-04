@@ -1,6 +1,8 @@
 package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.dao.IEmpleado;
+import bo.bosque.com.impexpap.model.Ciudad;
 import bo.bosque.com.impexpap.model.Empleado;
+import bo.bosque.com.impexpap.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;

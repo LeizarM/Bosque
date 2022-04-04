@@ -1,16 +1,13 @@
 package bo.bosque.com.impexpap.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@Builder
 public class Cargo implements Serializable {
 
     private int codCargo;
@@ -22,16 +19,5 @@ public class Cargo implements Serializable {
     private int audUsuario;
 
 
-    /*********************
-     * *******Constructor
-     ********************/
-    public Cargo(int codCargo, int codCargoPadre, String descripcion, int codEmpresa, int codNivel, int posicion, int audUsuario) {
-        this.codCargo = codCargo;
-        this.codCargoPadre = codCargoPadre;
-        this.descripcion = descripcion;
-        this.codEmpresa = codEmpresa;
-        this.codNivel = codNivel;
-        this.posicion = posicion;
-        this.audUsuario = audUsuario;
-    }
+
 }
