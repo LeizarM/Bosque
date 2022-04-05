@@ -17,7 +17,7 @@ public class Persona implements Serializable {
     private String apMaterno;
     private String ciExpedido;
     private Date ciFechaVencimiento;
-    private long ciNumuro;
+    private long ciNumero;
     private String direccion;
     private String estadoCivil;
     private Date fechaNacimiento;
