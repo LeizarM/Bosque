@@ -24,18 +24,5 @@ public class Empleado implements Serializable {
     Cargo cargo  = new Cargo();
     RelEmplEmpr relEmpEmpr =  new RelEmplEmpr();
 
-    /**
-     * Constructores
-     */
-    public Empleado(int codEmpleado, int codPersona, String numCuenta, int codRelBeneficios, int codRelPlanilla, int audUsuarioI) {
-
-        this.codEmpleado = codEmpleado;
-        this.codPersona = codPersona;
-        this.numCuenta = numCuenta;
-        this.codRelBeneficios = codRelBeneficios;
-        this.codRelPlanilla = codRelPlanilla;
-        this.audUsuarioI = audUsuarioI;
-    }
-
 
 }

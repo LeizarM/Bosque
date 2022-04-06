@@ -7,10 +7,13 @@ import bo.bosque.com.impexpap.model.Zona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 import java.sql.Types;
 
+
+@Repository
 public class PersonaDao implements IPersona {
 
     @Autowired

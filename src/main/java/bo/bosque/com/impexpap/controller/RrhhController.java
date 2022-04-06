@@ -18,7 +18,7 @@ public class RrhhController {
     @Autowired()
     private IEmpleado empDao;
 
-    @Autowired
+    @Autowired()
     private IPersona perDao;
 
     /**
