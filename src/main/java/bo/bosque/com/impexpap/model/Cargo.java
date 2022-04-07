@@ -4,10 +4,10 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
+@ToString
 public class Cargo implements Serializable {
 
     private int codCargo;
@@ -18,6 +18,10 @@ public class Cargo implements Serializable {
     private int posicion;
     private int audUsuario;
 
+    //variables de apoyo
+    private String descripcionCargoPlanilla;
+    private CargoSucursal cargoSucursal;
 
+    private Empresa empresa;
 
 }

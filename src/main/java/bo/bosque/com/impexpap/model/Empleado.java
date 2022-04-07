@@ -3,10 +3,10 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
+@ToString
 public class Empleado implements Serializable {
 
     private int codEmpleado;
@@ -23,6 +23,7 @@ public class Empleado implements Serializable {
     Persona persona = new Persona();
     Cargo cargo  = new Cargo();
     RelEmplEmpr relEmpEmpr =  new RelEmplEmpr();
+    EmpleadoCargo empleadoCargo = new EmpleadoCargo();
 
 
 }

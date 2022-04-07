@@ -1,15 +1,12 @@
 package bo.bosque.com.impexpap.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
+@ToString
 public class Empresa {
 
     private int codEmpresa;
@@ -17,4 +14,6 @@ public class Empresa {
     private int codPadre;
     private String sigla;
     private int audUsuario;
+
+    private Sucursal sucursal;
 }

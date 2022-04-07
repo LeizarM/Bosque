@@ -1,6 +1,8 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.model.Cargo;
 import bo.bosque.com.impexpap.model.Empleado;
+import bo.bosque.com.impexpap.model.RelEmplEmpr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,11 +36,21 @@ public class EmpleadoDAO implements IEmpleado{
                     new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Empleado temp = new Empleado();
-                        temp.setCodEmpleado( rs.getInt(1) );
-                        temp.setCodPersona( rs.getInt(2) );
-                        temp.getPersona().setDatoPersona( rs.getString(3) );
-                        temp.getRelEmpEmpr().setEsActivo( rs.getInt(4) );
-                        temp.getCargo().setDescripcion(rs.getString(5));
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setCodPersona( rs.getInt(2));
+                        temp.setNumCuenta(rs.getString(3));
+                        temp.setCodRelBeneficios(rs.getInt(4));
+                        temp.getRelEmpEmpr().setFechaIni(rs.getDate(5));
+                        temp.getRelEmpEmpr().setFechaFin(rs.getDate(6));
+                        temp.getCargo().setDescripcion(rs.getString(7));
+                        temp.getRelEmpEmpr().setTipoRel(rs.getString(8));
+                        temp.setCodRelPlanilla(rs.getInt(9));
+                        temp.getCargo().setDescripcionCargoPlanilla(rs.getString(10));
+                        temp.getCargo().getEmpresa().setCodEmpresa(rs.getInt(11));
+                        temp.getCargo().getEmpresa().setNombreEmpresa(rs.getString(12));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(13));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(14));
+
                         return temp;
                     });
 

@@ -1,16 +1,13 @@
 package bo.bosque.com.impexpap.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
+@ToString
 public class Pais implements Serializable {
 
     private int codPais;

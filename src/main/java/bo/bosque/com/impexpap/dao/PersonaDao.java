@@ -32,24 +32,26 @@ public class PersonaDao implements IPersona {
                     new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Persona temp = new Persona();
-                        temp.builder().codPersona(rs.getInt(1))
-                                .codZona(rs.getInt(2))
-                                .nombres(rs.getString(3))
-                                .apPaterno(rs.getString(4))
-                                .apMaterno(rs.getString(5))
-                                .ciExpedido(rs.getString(6))
-                                .ciFechaVencimiento(rs.getDate(7))
-                                .ciNumero( rs.getInt(8) )
-                                .direccion(rs.getString(9))
-                                .estadoCivil(rs.getString(10))
-                                .fechaNacimiento(rs.getDate(11))
-                                .lugarNacimiento(rs.getString(12))
-                                .nacionalidad(rs.getInt(13))
-                                .sexo(rs.getString(14))
-                                .pais( Pais.builder().pais(rs.getString(15)).build())
-                                .zona(Zona.builder().zona(rs.getString(16)).build())
-                                .ciudad(Ciudad.builder().codCiudad(rs.getInt(17)).ciudad(rs.getString(18)).codPais(rs.getInt(rs.getInt(19))).build())
-                                .pais(Pais.builder().pais(rs.getString(20)).build()).build();
+                        temp.setCodPersona(rs.getInt(1));
+                        temp.setCodZona(rs.getInt(2));
+                        temp.setNombres(rs.getString(3));
+                        temp.setApPaterno(rs.getString(4));
+                        temp.setApMaterno(rs.getString(5));
+                        temp.setCiExpedido(rs.getString(6));
+                        temp.setCiFechaVencimiento(rs.getDate(7));
+                        temp.setCiNumero( rs.getInt(8) );
+                        temp.setDireccion(rs.getString(9));
+                        temp.setEstadoCivil(rs.getString(10));
+                        temp.setFechaNacimiento(rs.getDate(11));
+                        temp.setLugarNacimiento(rs.getString(12));
+                        temp.setNacionalidad(rs.getInt(13));
+                        temp.setSexo(rs.getString(14));
+                        temp.getPais().setPais(rs.getString(15));
+                        temp.getZona().setZona(rs.getString(16));
+                        temp.getCiudad().setCodCiudad(rs.getInt(17));
+                        temp.getCiudad().setCiudad(rs.getString(18));
+                        temp.getCiudad().setCodPais(rs.getInt(19));
+                        temp.getPais().setPais(rs.getString(20));
                         return temp;
                     });
 

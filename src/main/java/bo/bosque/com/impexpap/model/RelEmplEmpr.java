@@ -5,10 +5,10 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.Date;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
+@ToString
 public class RelEmplEmpr implements Serializable {
 
     private int codRelEmplEmpr;
