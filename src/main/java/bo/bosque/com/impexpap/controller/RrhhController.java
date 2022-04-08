@@ -29,7 +29,7 @@ public class RrhhController {
     @PostMapping("/listEmpleados")
     public List<Empleado> obtenerListaPropuesta(@RequestBody Empleado emp){
 
-        List <Empleado> lstTemp = this.empDao.obtenerEmpleados( emp.getRelEmpEmpr().getEsActivo() );
+        List <Empleado> lstTemp = this.empDao.obtenerListaEmpleados( emp.getRelEmpEmpr().getEsActivo() );
 
         if( lstTemp.size() == 0 ) return new ArrayList<>();
 

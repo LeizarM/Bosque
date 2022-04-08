@@ -28,7 +28,7 @@ public class EmpleadoDAO implements IEmpleado{
      * Procedimiento para obtener los Empleados
      * @return
      */
-    public List<Empleado> obtenerEmpleados( int esActivo ) {
+    public List<Empleado> obtenerListaEmpleados( int esActivo ) {
         List<Empleado>lstTemp;
         try {
             lstTemp =  this.jdbcTemplate.query("execute p_list_Empleado @esActivo=?, @ACCION=?",
@@ -36,20 +36,11 @@ public class EmpleadoDAO implements IEmpleado{
                     new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Empleado temp = new Empleado();
-                        temp.setCodEmpleado(rs.getInt(1));
-                        temp.setCodPersona( rs.getInt(2));
-                        temp.setNumCuenta(rs.getString(3));
-                        temp.setCodRelBeneficios(rs.getInt(4));
-                        temp.getRelEmpEmpr().setFechaIni(rs.getDate(5));
-                        temp.getRelEmpEmpr().setFechaFin(rs.getDate(6));
-                        temp.getCargo().setDescripcion(rs.getString(7));
-                        temp.getRelEmpEmpr().setTipoRel(rs.getString(8));
-                        temp.setCodRelPlanilla(rs.getInt(9));
-                        temp.getCargo().setDescripcionCargoPlanilla(rs.getString(10));
-                        temp.getCargo().getEmpresa().setCodEmpresa(rs.getInt(11));
-                        temp.getCargo().getEmpresa().setNombreEmpresa(rs.getString(12));
-                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(13));
-                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(14));
+                        temp.setCodEmpleado( rs.getInt(1) );
+                        temp.setCodPersona( rs.getInt(2) );
+                        temp.getPersona().setDatoPersona( rs.getString(3) );
+                        temp.getRelEmpEmpr().setEsActivo( rs.getInt(4) );
+                        temp.getCargo().setDescripcion(rs.getString(5));
 
                         return temp;
                     });
@@ -77,16 +68,21 @@ public class EmpleadoDAO implements IEmpleado{
                     new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Empleado temp = new Empleado();
-                        temp.setCodEmpleado( rs.getInt(1) );
-                        temp.setCodPersona( rs.getInt(2) );
-                        temp.setNumCuenta(rs.getString(3) );
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setCodPersona( rs.getInt(2));
+                        temp.setNumCuenta(rs.getString(3));
                         temp.setCodRelBeneficios(rs.getInt(4));
                         temp.getRelEmpEmpr().setFechaIni(rs.getDate(5));
                         temp.getRelEmpEmpr().setFechaFin(rs.getDate(6));
                         temp.getCargo().setDescripcion(rs.getString(7));
                         temp.getRelEmpEmpr().setTipoRel(rs.getString(8));
                         temp.setCodRelPlanilla(rs.getInt(9));
-                        temp.getCargo().setDescripcion(rs.getString(10));
+                        temp.getCargo().setDescripcionCargoPlanilla(rs.getString(10));
+                        temp.getCargo().setCodEmpresa(rs.getInt(11));
+                        temp.getCargo().getEmpresa().setNombreEmpresa(rs.getString(12));
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(13));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(14));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(15));
                     return temp;
                     });
 

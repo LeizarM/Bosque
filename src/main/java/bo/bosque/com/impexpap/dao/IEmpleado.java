@@ -9,7 +9,7 @@ public interface IEmpleado {
      * Procedimiento para obtener la lista de empleados
      * @return
      */
-    List<Empleado> obtenerEmpleados ( int esActivo );
+    List<Empleado> obtenerListaEmpleados ( int esActivo );
 
     /**
      * Procedimiento que obtendra al empleado por codigo
