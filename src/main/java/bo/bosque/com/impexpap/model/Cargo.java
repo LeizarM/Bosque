@@ -12,7 +12,7 @@ public class Cargo implements Serializable {
 
     private int codCargo;
     private int codCargoPadre;
-    private String descripcion; //cual es el cargo
+    private String descripcion;
     private int codEmpresa;
     private int codNivel;
     private int posicion;
@@ -20,8 +20,8 @@ public class Cargo implements Serializable {
 
     //variables de apoyo
     private String descripcionCargoPlanilla;
-    private CargoSucursal cargoSucursal;
+    private CargoSucursal cargoSucursal = new CargoSucursal();
 
-    private Empresa empresa;
+    private Sucursal sucursal = new Sucursal();
 
 }

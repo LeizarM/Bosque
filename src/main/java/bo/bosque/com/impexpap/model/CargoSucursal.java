@@ -16,5 +16,5 @@ public class CargoSucursal {
     private int audUsuario;
 
 
-    private Sucursal sucursal;
+    private Sucursal sucursal = new Sucursal();
 }

@@ -38,7 +38,7 @@ public class ChBancoDAO implements IChBanco {
                           (rs, rowNum) -> {
                         	  ChBanco temp = new ChBanco();
 
-                              temp.setFila( 1 );
+                              temp.setFila( rowNum +1 );
                               temp.setCodBanco( rs.getInt(1 ) );
                               temp.setNombre( rs.getString(2) );
                               
@@ -46,7 +46,7 @@ public class ChBancoDAO implements IChBanco {
                       });
 
           }  catch (BadSqlGrammarException e) {
-              System.out.println("Error: VistaDaoImpl en obtainMenuXUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+              System.out.println("Error: BancoDao en obtainMenuXUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
               lstTemp = new ArrayList<ChBanco>();
               this.jdbcTemplate = null;
           }

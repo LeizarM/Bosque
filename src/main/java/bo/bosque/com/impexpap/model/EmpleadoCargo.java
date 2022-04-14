@@ -16,5 +16,5 @@ public class EmpleadoCargo {
     private Date fechaInicio;
     private int audUsuario;
 
-    private CargoSucursal cargoSucursal;
+    private CargoSucursal cargoSucursal = new CargoSucursal();
 }

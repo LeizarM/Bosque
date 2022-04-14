@@ -20,10 +20,11 @@ public class Empleado implements Serializable {
     /**
      * Variables de apoyo
      */
-    Persona persona = new Persona();
-    Cargo cargo  = new Cargo();
-    RelEmplEmpr relEmpEmpr =  new RelEmplEmpr();
-    EmpleadoCargo empleadoCargo = new EmpleadoCargo();
+
+    private Persona persona = new Persona();
+    private Cargo cargo  = new Cargo();
+    private RelEmplEmpr relEmpEmpr =  new RelEmplEmpr();
+
 
 
 }

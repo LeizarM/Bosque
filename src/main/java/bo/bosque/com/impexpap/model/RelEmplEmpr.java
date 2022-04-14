@@ -20,4 +20,9 @@ public class RelEmplEmpr implements Serializable {
     private Date fechaFin;
     private String motivoFin;
     private int audUsuario;
+
+    /**
+     * Variables de apoyo
+     */
+    private String descripcionTipo;
 }

@@ -30,8 +30,8 @@ public class Persona implements Serializable {
      * Variable de apoyo
      */
     private String datoPersona;
-    private Pais pais;
-    private Ciudad ciudad;
-    private Zona zona;
+    private Pais pais = new Pais();
+    private Ciudad ciudad = new Ciudad();
+    private Zona zona =  new Zona();
 
 }
