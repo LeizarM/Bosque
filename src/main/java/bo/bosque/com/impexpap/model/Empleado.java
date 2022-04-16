@@ -1,17 +1,19 @@
 package bo.bosque.com.impexpap.model;
-import lombok.*;
-
 import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
-public class Empleado implements Serializable {
+@NoArgsConstructor
+public class Empleado extends Persona implements Serializable {
 
     private int codEmpleado;
     private int codPersona;
-    private String numCuenta;
+    private long numCuenta;
     private int codRelBeneficios;
     private int codRelPlanilla;
     private int audUsuarioI;
@@ -20,11 +22,21 @@ public class Empleado implements Serializable {
     /**
      * Variables de apoyo
      */
+    Persona persona = new Persona();
+    Cargo cargo  = new Cargo();
+    RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
+    /**
+     * Constructores
+     */
+    public Empleado(int codEmpleado, int codPersona, long numCuenta, int codRelBeneficios, int codRelPlanilla, int audUsuarioI) {
 
-    private Persona persona = new Persona();
-    private Cargo cargo  = new Cargo();
-    private RelEmplEmpr relEmpEmpr =  new RelEmplEmpr();
-
+        this.codEmpleado = codEmpleado;
+        this.codPersona = codPersona;
+        this.numCuenta = numCuenta;
+        this.codRelBeneficios = codRelBeneficios;
+        this.codRelPlanilla = codRelPlanilla;
+        this.audUsuarioI = audUsuarioI;
+    }
 
 
 }

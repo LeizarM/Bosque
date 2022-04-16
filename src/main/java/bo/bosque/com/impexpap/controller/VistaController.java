@@ -4,6 +4,7 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.dao.IVistaDao;
 import bo.bosque.com.impexpap.model.Login;
 import bo.bosque.com.impexpap.model.Vista;
+import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;

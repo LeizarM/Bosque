@@ -25,5 +25,14 @@ public class Sucursal implements Serializable {
     private String nombreEmpresa;
     private String nombreCiudad;
 
-    private Empresa empresa = new  Empresa();
+    /**
+     * Constructores
+     */
+    public Sucursal(int codSucursal, String nombre, int codEmpresa, int codCiudad, int audUsuarioI) {
+        this.codSucursal = codSucursal;
+        this.nombre = nombre;
+        this.codEmpresa = codEmpresa;
+        this.codCiudad = codCiudad;
+        this.audUsuarioI = audUsuarioI;
+    }
 }

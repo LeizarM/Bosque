@@ -13,7 +13,7 @@ import java.io.Serializable;
 @ToString
 public class Articulo implements Serializable {
 
-    private String codArticulo; // esta es una prueba
+    private String codArticulo;
     private int codigoFamilia;
     private String datoArt;
     private String datoArtExt;
@@ -23,4 +23,19 @@ public class Articulo implements Serializable {
     private String gramajeSap;
     private int audUsuario;
 
+
+    /**
+     * Constructores
+     */
+    public Articulo(String codArticulo, int codigoFamilia, String datoArt, String datoArtExt, float stock, float utm, String unidadMedida, String gramajeSap, int audUsuario) {
+        this.codArticulo = codArticulo;
+        this.codigoFamilia = codigoFamilia;
+        this.datoArt = datoArt;
+        this.datoArtExt = datoArtExt;
+        this.stock = stock;
+        this.utm = utm;
+        this.unidadMedida = unidadMedida;
+        this.gramajeSap = gramajeSap;
+        this.audUsuario = audUsuario;
+    }
 }

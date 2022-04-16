@@ -1,9 +1,5 @@
 package bo.bosque.com.impexpap.dao;
-
-import bo.bosque.com.impexpap.model.Ciudad;
-import bo.bosque.com.impexpap.model.Pais;
 import bo.bosque.com.impexpap.model.Persona;
-import bo.bosque.com.impexpap.model.Zona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,7 +35,7 @@ public class PersonaDao implements IPersona {
                         temp.setApMaterno(rs.getString(5));
                         temp.setCiExpedido(rs.getString(6));
                         temp.setCiFechaVencimiento(rs.getDate(7));
-                        temp.setCiNumero( rs.getInt(8) );
+                        temp.setCiNumero( rs.getString(8) );
                         temp.setDireccion(rs.getString(9));
                         temp.setEstadoCivil(rs.getString(10));
                         temp.setFechaNacimiento(rs.getDate(11));
