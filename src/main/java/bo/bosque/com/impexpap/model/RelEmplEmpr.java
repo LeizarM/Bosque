@@ -21,6 +21,10 @@ public class RelEmplEmpr implements Serializable {
     private String motivoFin;
     private int audUsuario;
 
+
+    private Date fechaInicioBeneficio;
+    private Date fechaInicioPlanilla;
+
     /**
      * Variables de apoyo
      */

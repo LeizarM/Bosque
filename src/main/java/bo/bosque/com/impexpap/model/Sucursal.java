@@ -22,7 +22,7 @@ public class Sucursal implements Serializable {
     /**
      * Variables de apoyo
      */
-    private String nombreEmpresa;
+    private Empresa empresa  = new Empresa();
     private String nombreCiudad;
 
     /**

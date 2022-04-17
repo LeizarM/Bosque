@@ -13,7 +13,7 @@ public class Empleado extends Persona implements Serializable {
 
     private int codEmpleado;
     private int codPersona;
-    private long numCuenta;
+    private String numCuenta;
     private int codRelBeneficios;
     private int codRelPlanilla;
     private int audUsuarioI;
@@ -22,13 +22,15 @@ public class Empleado extends Persona implements Serializable {
     /**
      * Variables de apoyo
      */
-    Persona persona = new Persona();
-    Cargo cargo  = new Cargo();
-    RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
+    private Persona persona = new Persona();
+    private Cargo cargo  = new Cargo();
+    private EmpleadoCargo empleadoCargo = new EmpleadoCargo();
+    private RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
+
     /**
      * Constructores
      */
-    public Empleado(int codEmpleado, int codPersona, long numCuenta, int codRelBeneficios, int codRelPlanilla, int audUsuarioI) {
+    public Empleado(int codEmpleado, int codPersona, String numCuenta, int codRelBeneficios, int codRelPlanilla, int audUsuarioI) {
 
         this.codEmpleado = codEmpleado;
         this.codPersona = codPersona;

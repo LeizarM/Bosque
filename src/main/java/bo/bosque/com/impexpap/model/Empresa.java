@@ -17,5 +17,4 @@ public class Empresa implements Serializable {
     private String sigla;
     private int audUsuario;
 
-    private Sucursal sucursal = new Sucursal();
 }

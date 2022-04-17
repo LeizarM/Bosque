@@ -65,6 +65,24 @@ public class EmpleadoDAO implements IEmpleado{
                     new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Empleado temp = new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setCodPersona(rs.getInt(2));
+                        temp.setNumCuenta(rs.getString(3));
+                        temp.getRelEmpEmpr().setFechaInicioBeneficio(rs.getDate(4));
+                        temp.getRelEmpEmpr().setFechaInicioPlanilla(rs.getDate(5));
+                        temp.getRelEmpEmpr().setCodRelEmplEmpr(rs.getInt(6));
+                        temp.getRelEmpEmpr().setEsActivo(rs.getInt(7));
+                        temp.getRelEmpEmpr().setNombreFileContrato(rs.getString(8));
+                        temp.getRelEmpEmpr().setFechaIni(rs.getDate(9));
+                        temp.getRelEmpEmpr().setFechaFin(rs.getDate(10));
+                        temp.getRelEmpEmpr().setMotivoFin(rs.getString(11));
+                        temp.getRelEmpEmpr().setTipoRel(rs.getString(12));
+                        temp.getCargo().setCodCargo(rs.getInt(13));
+                        temp.getCargo().setDescripcion(rs.getString(14));
+                        temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setCodEmpresa(rs.getInt(15));
+                        temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setNombreEmpresa(rs.getString(16));
+                        temp.getCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(17));
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(18));
 
                     return temp;
                     });
