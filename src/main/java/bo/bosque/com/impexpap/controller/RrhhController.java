@@ -1,8 +1,12 @@
 package bo.bosque.com.impexpap.controller;
+import bo.bosque.com.impexpap.dao.IEmail;
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.IPersona;
+import bo.bosque.com.impexpap.dao.ITelefono;
+import bo.bosque.com.impexpap.model.Email;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.Persona;
+import bo.bosque.com.impexpap.model.Telefono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,13 @@ public class RrhhController {
 
     @Autowired()
     private IPersona perDao;
+
+    @Autowired()
+    private IEmail emailDao;
+
+    @Autowired()
+    private ITelefono telfDao;
+
 
     /**
      * Procedimiento para obtener la lista de empleados
@@ -59,4 +70,32 @@ public class RrhhController {
         if(temp == null ) return new Persona();
         return temp;
     }
+    /**
+     * Procedimiento para que obtendra los correos por persona
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/emailPersona")
+    public List<Email> obtenerEmail ( @RequestBody Email email ){
+
+        List<Email> lstEmail = this.emailDao.obtenerCorreos( email.getCodPersona() );
+        if(lstEmail.size() == 0) return new ArrayList<>();
+        return lstEmail;
+    }
+
+    /**
+     * Procedimiento que obtendra los telefonos de una persona
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/telfPersona")
+    public List<Telefono> obtenerTelefono( @RequestBody Telefono tel ){
+
+        List<Telefono> lstTelefono = this.telfDao.obtenerTelefonos( tel.getCodPersona() );
+        if( lstTelefono.size() == 0 ) return new ArrayList<>();
+        return lstTelefono;
+
+    }
+
+
+
+
 }
