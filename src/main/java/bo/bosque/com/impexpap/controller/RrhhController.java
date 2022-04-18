@@ -1,12 +1,6 @@
 package bo.bosque.com.impexpap.controller;
-import bo.bosque.com.impexpap.dao.IEmail;
-import bo.bosque.com.impexpap.dao.IEmpleado;
-import bo.bosque.com.impexpap.dao.IPersona;
-import bo.bosque.com.impexpap.dao.ITelefono;
-import bo.bosque.com.impexpap.model.Email;
-import bo.bosque.com.impexpap.model.Empleado;
-import bo.bosque.com.impexpap.model.Persona;
-import bo.bosque.com.impexpap.model.Telefono;
+import bo.bosque.com.impexpap.dao.*;
+import bo.bosque.com.impexpap.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +24,9 @@ public class RrhhController {
 
     @Autowired()
     private ITelefono telfDao;
+
+    @Autowired()
+    private IExperienciaLaboral expLabDao;
 
 
     /**
@@ -96,6 +93,18 @@ public class RrhhController {
     }
 
 
+    /**
+     * Procedimiento para obtener la experiencia laboral de un empleado
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/expLabEmpleado")
+    public List<ExperienciaLaboral> obtenerExperienciaLaboral ( @RequestBody ExperienciaLaboral expLab ){
+
+        List<ExperienciaLaboral> lstExpLab = this.expLabDao.obtenerExperienciaLaboral( expLab.getCodEmpleado() );
+        if( lstExpLab.size() == 0 ) return new ArrayList<>();
+        return lstExpLab;
+
+    }
 
 
 }
