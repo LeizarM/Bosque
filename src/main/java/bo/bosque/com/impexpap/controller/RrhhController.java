@@ -28,6 +28,12 @@ public class RrhhController {
     @Autowired()
     private IExperienciaLaboral expLabDao;
 
+    @Autowired()
+    private IFormacion formDao;
+
+    @Autowired()
+    private ILicencia licenDao;
+
 
     /**
      * Procedimiento para obtener la lista de empleados
@@ -81,6 +87,8 @@ public class RrhhController {
 
     /**
      * Procedimiento que obtendra los telefonos de una persona
+     * @param tel
+     * @return
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/telfPersona")
@@ -95,6 +103,8 @@ public class RrhhController {
 
     /**
      * Procedimiento para obtener la experiencia laboral de un empleado
+     * @param expLab
+     * @return
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/expLabEmpleado")
@@ -107,4 +117,32 @@ public class RrhhController {
     }
 
 
+    /**
+     * Procedimiento para obtener la formacion de un empleado
+     * @param form
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/formacionEmpleado")
+    public List<Formacion> obtenerFormacion ( @RequestBody Formacion form ){
+
+        List<Formacion> lstForm = this.formDao.obtenerFormacion( form.getCodEmpleado() );
+        if( lstForm.size() == 0) return new ArrayList<>();
+        return lstForm;
+    }
+
+    /**
+     * Procedimiento para obtener la licencja de conducir de una persona
+     * @param lic
+     * @return
+     */
+    @Secured({"ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/licenciaPersona")
+    public List<Licencia> obtenerLicencia ( @RequestBody Licencia lic ){
+
+        List<Licencia> lstLic = this.licenDao.obtenerLicencia( lic.getCodPersona() );
+        if(lstLic.size() == 0 ) return new ArrayList<>();
+        return  lstLic;
+
+    }
 }
