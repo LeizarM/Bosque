@@ -38,7 +38,7 @@ public class TelefonoDao implements ITelefono {
                             temp.setCodTelefono(rs.getInt(1));
                             temp.setCodPersona(rs.getInt(2));
                             temp.setCodTipoTel(rs.getInt(3));
-                            temp.setTelefono(rs.getInt(5));
+                            temp.setTelefono(rs.getString(5));
                             temp.setAudUsuario(rs.getInt(6));
                          return temp;
                      }

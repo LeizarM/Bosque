@@ -11,7 +11,7 @@ public class Telefono {
     private int codTelefono;
     private int codPersona;
     private int codTipoTel;
-    private int telefono;
+    private String telefono;
     private int audUsuario;
 
 }

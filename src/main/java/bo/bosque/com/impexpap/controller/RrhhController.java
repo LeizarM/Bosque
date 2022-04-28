@@ -34,6 +34,15 @@ public class RrhhController {
     @Autowired()
     private ILicencia licenDao;
 
+    @Autowired()
+    private ICiudad ciudadDao;
+
+    @Autowired()
+    private IPais paisDao;
+
+    @Autowired()
+    private IZona zonaDao;
+
 
     /**
      * Procedimiento para obtener la lista de empleados
@@ -145,4 +154,47 @@ public class RrhhController {
         return  lstLic;
 
     }
+
+    /**
+     * Procedimiento para obtener las ciudades por pais
+     * @param ciu
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/ciudadxPais")
+    public List<Ciudad> obtenerCiudadxPais( @RequestBody Ciudad ciu  ){
+
+        List<Ciudad> lstCiudad =  this.ciudadDao.obtenerCiudadesXPais( ciu.getCodPais() );
+        if( lstCiudad.size() == 0 ) return new ArrayList<>();
+        return lstCiudad;
+    }
+
+    /**
+     * Procedimiento para obtener las Zonas por ciudad
+     * @param ciu
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/zonas")
+    public List<Zona> obtenerZona( @RequestBody Ciudad ciu  ){
+
+        List<Zona> lstZona = this.zonaDao.obtenerZonaXCiudad( ciu.getCodCiudad() );
+        if( lstZona.size() == 0 ) return new ArrayList<>();
+        return lstZona;
+    }
+
+    /**
+     * Procedimiento para obtener los paises registrados
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/paises")
+    public List<Pais> obtenerPaises(){
+
+        List<Pais> lstPais = this.paisDao.obtenerPais();
+        if( lstPais.size() == 0 ) return new ArrayList<>();
+        return lstPais;
+    }
+
+
 }
