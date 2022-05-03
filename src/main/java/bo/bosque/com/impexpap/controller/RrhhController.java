@@ -8,8 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.springframework.web.servlet.function.ServerResponse.status;
 
 @RestController
 @CrossOrigin("*")
@@ -204,7 +209,10 @@ public class RrhhController {
      */
     @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
     @PostMapping("/registroPersona")
-    public ResponseEntity<Persona> registrarPersona( @RequestBody Persona per ){
+    public ResponseEntity<?> registrarPersona( @RequestBody Persona per ){
+
+        Map<String, Object> response = new HashMap<>();
+
         per.setCiFechaVencimiento( new Utiles().fechaJ_a_Sql(per.getCiFechaVencimiento()));
         per.setFechaNacimiento(new Utiles().fechaJ_a_Sql(per.getFechaNacimiento()));
         String acc = "U";
@@ -212,9 +220,14 @@ public class RrhhController {
             acc = "I";
         }
         if( !this.perDao.registrarPersona(per, acc) ){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            System.out.println("No se pudo Actualizar");
+            response.put("msg", "Error al Actualizar los Datos de la persona");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 
