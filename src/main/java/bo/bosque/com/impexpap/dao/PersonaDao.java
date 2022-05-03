@@ -5,6 +5,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -59,5 +60,41 @@ public class PersonaDao implements IPersona {
 
         return per;
 
+    }
+
+    /**
+     * Procedimiento para el abm
+     * @param persona
+     * @param acc
+     */
+    public boolean registrarPersona(Persona per, String acc) {
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_persona @codPersona=?, @codZona=?, @nombres=?, @apPaterno=?, @apMaterno=?, @ciExpedido=?, @ciFechaVencimiento=?, @ciNumero=?, @direccion=?, @estadoCivil=?, @fechaNacimiento=?, @lugarNacimiento=?, @nacionalidad=?, @sexo=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                    ps.setInt(1, per.getCodPersona() );
+                    ps.setInt(2, per.getCodZona() );
+                    ps.setString(3, per.getNombres() );
+                    ps.setString(4, per.getApPaterno() );
+                    ps.setString(5, per.getApMaterno() );
+                    ps.setString(6, per.getCiExpedido() );
+                    ps.setDate(7, (Date) per.getCiFechaVencimiento());
+                    ps.setString(8, per.getCiNumero() );
+                    ps.setString(9,per.getDireccion() );
+                    ps.setString(10, per.getEstadoCivil() );
+                    ps.setDate(11, (Date) per.getFechaNacimiento());
+                    ps.setString(12, per.getLugarNacimiento());
+                    ps.setInt(13, per.getNacionalidad());
+                    ps.setString(14, per.getSexo() );
+                    ps.setInt(15, per.getAudUsuarioI() );
+                    ps.setString(16, acc);
+                    ps.executeUpdate();
+                   });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: PersonaDao en obtenerDatosPersonales, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp!=0;
     }
 }

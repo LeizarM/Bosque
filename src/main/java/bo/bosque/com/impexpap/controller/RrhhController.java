@@ -1,7 +1,10 @@
 package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
@@ -194,6 +197,24 @@ public class RrhhController {
         List<Pais> lstPais = this.paisDao.obtenerPais();
         if( lstPais.size() == 0 ) return new ArrayList<>();
         return lstPais;
+    }
+
+    /**
+     * Procedimiento para el abm de una persona
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroPersona")
+    public ResponseEntity<Persona> registrarPersona( @RequestBody Persona per ){
+        per.setCiFechaVencimiento( new Utiles().fechaJ_a_Sql(per.getCiFechaVencimiento()));
+        per.setFechaNacimiento(new Utiles().fechaJ_a_Sql(per.getFechaNacimiento()));
+        String acc = "U";
+        if( per.getCodPersona() == 0 ){
+            acc = "I";
+        }
+        if( !this.perDao.registrarPersona(per, acc) ){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 
