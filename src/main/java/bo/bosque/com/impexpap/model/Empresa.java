@@ -12,7 +12,7 @@ import java.io.Serializable;
 public class Empresa implements Serializable {
 
     private int codEmpresa;
-    private String nombreEmpresa;
+    private String nombre;
     private int codPadre;
     private String sigla;
     private int audUsuario;

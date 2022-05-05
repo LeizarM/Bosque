@@ -220,7 +220,6 @@ public class RrhhController {
             acc = "I";
         }
         if( !this.perDao.registrarPersona(per, acc) ){
-            System.out.println("No se pudo Actualizar");
             response.put("msg", "Error al Actualizar los Datos de la persona");
             response.put("error", "ok");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);

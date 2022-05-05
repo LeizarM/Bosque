@@ -63,7 +63,7 @@ public class Login implements Serializable, UserDetails {
         this.tipoUsuario = tipoUsuario;
 
         this.sucursal.setCodEmpresa( codEmpresa );
-        this.sucursal.getEmpresa().setNombreEmpresa( nombreEmpresa );
+        this.sucursal.getEmpresa().setNombre( nombreEmpresa );
 
         this.elTemaSelecionado = elTemaSelecionado;
 

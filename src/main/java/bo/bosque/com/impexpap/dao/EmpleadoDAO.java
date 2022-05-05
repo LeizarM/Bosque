@@ -80,9 +80,10 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.getCargo().setCodCargo(rs.getInt(13));
                         temp.getCargo().setDescripcion(rs.getString(14));
                         temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setCodEmpresa(rs.getInt(15));
-                        temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setNombreEmpresa(rs.getString(16));
-                        temp.getCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(17));
-                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(18));
+                        temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(16));
+                        temp.getCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(17));
+                        temp.getCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(18));
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(19));
 
                     return temp;
                     });

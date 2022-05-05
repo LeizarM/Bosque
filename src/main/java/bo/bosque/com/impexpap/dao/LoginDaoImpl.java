@@ -63,7 +63,7 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
                         login1.getEmpleado().getCargo().setDescripcion(rs.getString(7 ));
                         login1.setTipoUsuario( rs.getString(8) );
                         login1.getSucursal().setCodEmpresa(rs.getInt(9 ));
-                        login1.getSucursal().getEmpresa().setNombreEmpresa(rs.getString(10 ));
+                        login1.getSucursal().getEmpresa().setNombre(rs.getString(10 ));
                         login1.setElTemaSelecionado(rs.getString(11 ));
 
                         return login1;
