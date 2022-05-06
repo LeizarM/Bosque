@@ -29,7 +29,7 @@ public class EmpresaDao implements IEmpresa {
 
         try{
             lstTemp = this.jdbcTemplate.query("execute p_list_empresa @ACCION=?",
-                    new Object[]{ "A" },
+                    new Object[]{ "L" },
                     new int[]{ Types.VARCHAR },
                     (rs, rowCount) ->{
                         Empresa temp = new Empresa();
