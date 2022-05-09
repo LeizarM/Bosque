@@ -51,6 +51,13 @@ public class RrhhController {
     @Autowired()
     private IZona zonaDao;
 
+    @Autowired()
+    private ISucursal sucDao;
+
+    @Autowired()
+    private ICargoSucursal cagoSucDao;
+
+
 
     /**
      * Procedimiento para obtener la lista de empleados
@@ -229,5 +236,36 @@ public class RrhhController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+
+    /**
+     * Procedimiento para obtener las sucursales por empresa
+     * @param suc
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/sucXEmpresa")
+    public List<Sucursal> obtenerSucursalesXEmpresa ( @RequestBody Sucursal suc  ){
+
+        List<Sucursal> lstSuc = this.sucDao.obtenerSucursalesXEmpresa( suc.getCodEmpresa() );
+        if(lstSuc.size() == 0 ) return new ArrayList<>();
+        return lstSuc;
+    }
+
+    /**
+     * Procedimiento para devovler una lista de los cargos por sucursal que pertenecea a una empresa
+     * @param cs
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/cargoXSuc")
+    public List<CargoSucursal> obtenerSucursalesXEmpresa ( @RequestBody CargoSucursal cs  ){
+
+        List<CargoSucursal> lstCs = this.cagoSucDao.obtenerSucursalesXEmpresa(  cs.getCodSucursal() );
+
+        if( lstCs.size() == 0 ) return new ArrayList<>();
+
+        return lstCs;
+
+    }
 
 }

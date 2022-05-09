@@ -1,14 +1,9 @@
 package bo.bosque.com.impexpap.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-@ToString
 public class CargoSucursal {
     private int codCargoSucursal;
     private int codSucursal;
@@ -17,4 +12,5 @@ public class CargoSucursal {
 
 
     private Sucursal sucursal = new Sucursal();
+    private String datoCargo;
 }
