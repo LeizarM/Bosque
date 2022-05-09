@@ -10,7 +10,9 @@ public class CargoSucursal {
     private int codCargo;
     private int audUsuario;
 
-
-    private Sucursal sucursal = new Sucursal();
     private String datoCargo;
+    private Sucursal sucursal = new Sucursal();
+    private Cargo cargo = new Cargo();
+
+    //aqui tendria que estar el Cargo()
 }

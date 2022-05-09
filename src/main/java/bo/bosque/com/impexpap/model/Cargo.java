@@ -21,8 +21,9 @@ public class Cargo implements Serializable {
     private int posicion;
     private int audUsuario;
 
-    private CargoSucursal cargoSucursal = new CargoSucursal();
+    private String nombreEmpresa;
     private NivelJerarquico nivelJerarquico = new NivelJerarquico();
+
 
     /*********************
      * *******Constructor

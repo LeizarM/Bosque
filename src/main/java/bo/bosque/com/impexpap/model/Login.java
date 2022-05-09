@@ -28,11 +28,23 @@ public class Login implements Serializable, UserDetails {
     private int audUsuarioI;
     private String elTemaSelecionado = "";
 
+    /*
+    **** Variables de apoyo
+     */
+   private int codSucursal;
+   private String nombreSucursal;
+   private int codCiudad;
+   private String nombreCiudad;
+   private int codEmpresa;
+   private String nombreEmpresa;
+
+
+
     /**
      * Variables Auxiliares
      */
     private Empleado empleado = new Empleado();
-    private Sucursal sucursal = new Sucursal();
+
     private Collection<? extends GrantedAuthority> authorities;
     /**
      * Constructores
@@ -49,21 +61,21 @@ public class Login implements Serializable, UserDetails {
         this.audUsuarioI = audUsuarioI;
     }
 
-    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombre, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado, Collection<? extends GrantedAuthority> authorities ) {
+    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombreSucursal, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado, Collection<? extends GrantedAuthority> authorities ) {
         this.codUsuario = codUsuario;
         this.empleado.getPersona().setDatoPersona( datoPersona );
 
-        this.sucursal.setCodSucursal( codSucursal );
-        this.sucursal.setNombre( nombre );
+        this.codSucursal = codSucursal;
+        this.nombreSucursal =  nombreSucursal;
 
-        this.sucursal.setCodCiudad( codCiudad );
-        this.sucursal.setNombreCiudad( datoCiudad );
+        this.codCiudad = codCiudad;
+        this.nombreCiudad = datoCiudad;
 
-        this.empleado.getCargo().setDescripcion( descripcionCargo );
+        this.empleado.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion( descripcionCargo );
         this.tipoUsuario = tipoUsuario;
 
-        this.sucursal.setCodEmpresa( codEmpresa );
-        this.sucursal.getEmpresa().setNombre( nombreEmpresa );
+        this.codEmpresa = codEmpresa;
+        this.nombreEmpresa =  nombreEmpresa;
 
         this.elTemaSelecionado = elTemaSelecionado;
 

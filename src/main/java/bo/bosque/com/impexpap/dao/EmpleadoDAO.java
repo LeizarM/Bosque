@@ -37,7 +37,7 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.setCodPersona( rs.getInt(2) );
                         temp.getPersona().setDatoPersona( rs.getString(3) );
                         temp.getRelEmpEmpr().setEsActivo( rs.getInt(4) );
-                        temp.getCargo().setDescripcion(rs.getString(5));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(5));
 
                         return temp;
                     });
@@ -77,12 +77,12 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.getRelEmpEmpr().setFechaFin(rs.getDate(10));
                         temp.getRelEmpEmpr().setMotivoFin(rs.getString(11));
                         temp.getRelEmpEmpr().setTipoRel(rs.getString(12));
-                        temp.getCargo().setCodCargo(rs.getInt(13));
-                        temp.getCargo().setDescripcion(rs.getString(14));
-                        temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setCodEmpresa(rs.getInt(15));
-                        temp.getCargo().getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(16));
-                        temp.getCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(17));
-                        temp.getCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(18));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargo(rs.getInt(13));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(14));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresa(rs.getInt(15));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(16));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(17));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(18));
                         temp.getEmpleadoCargo().setFechaInicio(rs.getDate(19));
 
                     return temp;

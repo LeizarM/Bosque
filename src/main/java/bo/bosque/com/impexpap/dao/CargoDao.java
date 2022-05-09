@@ -40,7 +40,7 @@ public class CargoDao implements ICargo {
                         temp.setCodCargoPadre(rs.getInt(2));
                         temp.setDescripcion(rs.getString(3));
                         temp.setCodEmpresa(rs.getInt(4));
-                        temp.getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(5));
+                        temp.setNombreEmpresa(rs.getString(5));
                         temp.setCodNivel(rs.getInt(6));
                         temp.setPosicion(rs.getInt(7));
                         temp.setAudUsuario(rs.getInt(8));

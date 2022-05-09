@@ -23,7 +23,6 @@ public class Empleado extends Persona implements Serializable {
      * Variables de apoyo
      */
     private Persona persona = new Persona();
-    private Cargo cargo  = new Cargo();
     private EmpleadoCargo empleadoCargo = new EmpleadoCargo();
     private RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
 

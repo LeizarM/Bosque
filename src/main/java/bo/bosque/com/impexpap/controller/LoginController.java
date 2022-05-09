@@ -66,7 +66,7 @@ public class LoginController {
         String jwt = jwtProvider.generateToken( authentication, loginTemp );
         UserDetails userDetails = ( UserDetails )authentication.getPrincipal();
 
-        Jwt jwtT = new Jwt( jwt,loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getCargo().getDescripcion(), loginTemp.getTipoUsuario() , loginTemp.getCodUsuario(), loginTemp.getSucursal().getCodEmpresa(), login.getLogin() ,userDetails.getAuthorities() );
+        Jwt jwtT = new Jwt( jwt,loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().getDescripcion(), loginTemp.getTipoUsuario() , loginTemp.getCodUsuario(), loginTemp.getCodEmpresa(), login.getLogin() ,userDetails.getAuthorities() );
         return new ResponseEntity(jwtT, HttpStatus.OK);
 
     }
