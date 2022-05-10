@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Sucursal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,7 @@ public class SucursalDao implements  ISucursal {
     /**
      * El Datasource
      */
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     /**
