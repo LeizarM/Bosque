@@ -58,7 +58,8 @@ public class EmpleadoDAO implements IEmpleado{
      * @return
      */
     public Empleado obtenerEmpleado( int codEmpleado ) {
-        Empleado emp;
+        System.out.println("el codEmpleado = "+codEmpleado);
+        Empleado emp = new Empleado();
         try {
             emp =  this.jdbcTemplate.queryForObject("execute p_list_Empleado @codEmpleado=?, @ACCION=?",
                     new Object[] { codEmpleado, "A" },
