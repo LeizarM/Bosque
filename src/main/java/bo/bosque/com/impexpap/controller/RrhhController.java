@@ -83,6 +83,7 @@ public class RrhhController {
 
         Empleado temp = this.empDao.obtenerEmpleado( emp.getCodEmpleado() );
         if(temp == null) return new Empleado();
+        System.out.println(temp.toString());
         return temp;
     }
 
