@@ -83,7 +83,7 @@ public class RrhhController {
 
         Empleado temp = this.empDao.obtenerEmpleado( emp.getCodEmpleado() );
         if(temp == null) return new Empleado();
-        System.out.println(temp.toString());
+        //System.out.println(temp.toString());
         return temp;
     }
 
@@ -269,4 +269,29 @@ public class RrhhController {
 
     }
 
+    /**
+     * Procedimiento para registrar Empleado
+     * @param emp
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroEmpleado")
+    public ResponseEntity<?> registrarEmpleado( @RequestBody Empleado emp ){
+        Map<String, Object> response = new HashMap<>();
+
+
+        String acc = "U";
+        if( emp.getCodEmpleado() == 0 ){
+            acc = "I";
+        }
+
+        if( !this.empDao.registroEmpleado( emp, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 }

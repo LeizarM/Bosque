@@ -17,4 +17,6 @@ public class EmpleadoCargo {
     private int audUsuario;
 
     private CargoSucursal cargoSucursal = new CargoSucursal();
+
+    private String cargoPlanilla;
 }
