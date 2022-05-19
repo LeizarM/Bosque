@@ -57,6 +57,8 @@ public class RrhhController {
     @Autowired()
     private ICargoSucursal cagoSucDao;
 
+    @Autowired()
+    private IEmpleadoCargo empCargoDao;
 
 
     /**
@@ -287,6 +289,34 @@ public class RrhhController {
 
         if( !this.empDao.registroEmpleado( emp, acc ) ){
             response.put("msg", "Error al Actualizar los Datos del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Procedimiento para el registro de empleado y cargo
+     * @param empCar
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroEmpleadoCargo")
+    public ResponseEntity<?> registrarEmpleado( @RequestBody EmpleadoCargo empCar ){
+        Map<String, Object> response = new HashMap<>();
+        empCar.setFechaInicio( new Utiles().fechaJ_a_Sql(empCar.getFechaInicio()));
+
+        System.out.println(empCar.toString());
+
+        String acc = "U";
+        if( empCar.getCodEmpleado() == 0 && empCar.getFechaInicio() == null){
+            acc = "I";
+        }
+
+        if( !this.empCargoDao.registrarEmpleadoCargo( empCar, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos del Empleado Cargo");
             response.put("error", "ok");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }

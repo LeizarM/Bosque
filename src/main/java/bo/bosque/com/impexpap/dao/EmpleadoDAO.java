@@ -126,7 +126,7 @@ public class EmpleadoDAO implements IEmpleado{
                      });
 
          }catch ( BadSqlGrammarException e ){
-             System.out.println("Error: PersonaDao en registroEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+             System.out.println("Error: EmpleadoDAO en registroEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
              this.jdbcTemplate = null;
              resp = 0;
          }
