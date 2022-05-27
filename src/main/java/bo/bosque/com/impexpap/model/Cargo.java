@@ -1,9 +1,6 @@
 package bo.bosque.com.impexpap.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -11,6 +8,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @ToString
+@AllArgsConstructor
 public class Cargo implements Serializable {
 
     private int codCargo;
@@ -21,20 +19,12 @@ public class Cargo implements Serializable {
     private int posicion;
     private int audUsuario;
 
+    private String sucursal;
+    private String sucursalPlanilla;
     private String nombreEmpresa;
-    private NivelJerarquico nivelJerarquico = new NivelJerarquico();
+    private String nombreEmpresaPlanilla;
+    private int codEmpresaPlanilla;
+    private int codCargoPlanilla;
+    private String descripcionPlanilla;
 
-
-    /*********************
-     * *******Constructor
-     ********************/
-    public Cargo(int codCargo, int codCargoPadre, String descripcion, int codEmpresa, int codNivel, int posicion, int audUsuario) {
-        this.codCargo = codCargo;
-        this.codCargoPadre = codCargoPadre;
-        this.descripcion = descripcion;
-        this.codEmpresa = codEmpresa;
-        this.codNivel = codNivel;
-        this.posicion = posicion;
-        this.audUsuario = audUsuario;
-    }
 }

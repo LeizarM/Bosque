@@ -82,15 +82,25 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.getRelEmpEmpr().setFechaFin(rs.getDate(12));
                         temp.getRelEmpEmpr().setMotivoFin(rs.getString(13));
                         temp.getRelEmpEmpr().setTipoRel(rs.getString(14));
-                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargo(rs.getInt(15));
-                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(16));
-                        temp.getEmpleadoCargo().setCodEmpleado(rs.getInt(17));
-                        temp.getEmpleadoCargo().setCargoPlanilla(rs.getString(18));
+
+                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(15));
+                        temp.getEmpleadoCargo().setCodCargoSucPlanilla(rs.getInt(16));
+
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargo(rs.getInt(17));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(18));
                         temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresa(rs.getInt(19));
-                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(20));
-                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(21));
-                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(22));
-                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(23));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresa(rs.getString(20));
+                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(21));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setSucursal(rs.getString(22));
+
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargoPlanilla(rs.getInt(23));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcionPlanilla(rs.getString(24));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresaPlanilla(rs.getInt(25));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresaPlanilla(rs.getString(26));
+                        temp.getEmpleadoCargo().setCodCargoSucPlanilla(rs.getInt(27));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setSucursalPlanilla(rs.getString(28));
+
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(29));
 
                     return temp;
                     });
