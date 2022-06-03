@@ -60,6 +60,9 @@ public class RrhhController {
     @Autowired()
     private IEmpleadoCargo empCargoDao;
 
+    @Autowired()
+    private IRelEmpEmpr reeDao;
+
 
     /**
      * Procedimiento para obtener la lista de empleados
@@ -324,4 +327,22 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    /**
+     * Procedimiento para listar las fechas de beneficio interno y para planilla
+     * @param ree
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/fechasBeneficio")
+    public List<RelEmplEmpr> obtenerFechasBeneficios ( @RequestBody RelEmplEmpr ree  ){
+
+        List<RelEmplEmpr> lstRee = this.reeDao.obtenerRelacionesLaborales(  ree.getCodEmpleado() );
+
+        if( lstRee.size() == 0 ) return new ArrayList<>();
+
+        return lstRee;
+
+    }
+
 }

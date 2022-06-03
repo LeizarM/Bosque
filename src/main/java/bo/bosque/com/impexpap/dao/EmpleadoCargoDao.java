@@ -39,6 +39,7 @@ public class EmpleadoCargoDao implements IEmpleadoCargo{
                         ps.executeUpdate();
                     });
 
+
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: EmpleadoCargoDao en registrarEmpleadoCargo, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             this.jdbcTemplate = null;

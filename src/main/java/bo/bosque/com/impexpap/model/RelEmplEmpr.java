@@ -28,5 +28,5 @@ public class RelEmplEmpr implements Serializable {
     /**
      * Variables de apoyo
      */
-    private String descripcionTipo;
+    private String datoFechasBeneficio;
 }
