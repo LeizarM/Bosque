@@ -6,6 +6,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -46,5 +47,38 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
         }
 
         return lstTemp;
+    }
+
+    /**
+     * Procedimiento para el abm
+     * @param empCar
+     * @param acc
+     * @return
+     */
+    public boolean registrarRelEmpEmpr(RelEmplEmpr empCar, String acc) {
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_RelEmplEmpr @codRelEmplEmpr=?, @codEmpleado=?, @esActivo=?, @tipoRel=?, @nombreFileContrato=?, @fechaIni=?, @fechaFin=?, @motivoFin=? ,@audUsuarioI=?, @ACCION=?",
+                    ps->{
+                        ps.setInt(1, empCar.getCodRelEmplEmpr() );
+                        ps.setInt(2, empCar.getCodEmpleado() );
+                        ps.setInt(3, empCar.getEsActivo());
+                        ps.setString ( 4, empCar.getTipoRel() );
+                        ps.setString ( 5, empCar.getNombreFileContrato());
+                        ps.setDate(6, (Date) empCar.getFechaIni());
+                        ps.setDate(7, (Date) empCar.getFechaFin());
+                        ps.setString(8, empCar.getMotivoFin());
+                        ps.setInt(9, empCar.getAudUsuario());
+                        ps.setString(10, acc);
+                        ps.executeUpdate();
+                    });
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: RelEmpEmprDAO en registrarRelEmpEmpr, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+
+        return resp!=0;
     }
 }

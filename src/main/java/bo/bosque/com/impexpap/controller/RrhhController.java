@@ -311,8 +311,6 @@ public class RrhhController {
         Map<String, Object> response = new HashMap<>();
         empCar.setFechaInicio( new Utiles().fechaJ_a_Sql(empCar.getFechaInicio()));
 
-        System.out.println(empCar.toString());
-
         String acc = "U";
         if( empCar.getCodEmpleado() == 0 && empCar.getFechaInicio() == null){
             acc = "I";
@@ -343,6 +341,33 @@ public class RrhhController {
 
         return lstRee;
 
+    }
+
+    /**
+     * Procedimiento para el registro de Relacion del empleado con la empresa
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroRelEmp")
+    public ResponseEntity<?> registrarRelEmpEmpr( @RequestBody RelEmplEmpr ree ){
+        Map<String, Object> response = new HashMap<>();
+        ree.setFechaIni( new Utiles().fechaJ_a_Sql(ree.getFechaIni()));
+        ree.setFechaFin( new Utiles().fechaJ_a_Sql(ree.getFechaFin()));
+
+        String acc = "U";
+        if( ree.getCodRelEmplEmpr() == 0){
+            acc = "I";
+        }
+
+        if( !this.reeDao.registrarRelEmpEmpr( ree, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos del Empleado Relacion Empresa");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 }

@@ -1,5 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 import java.util.List;
+
+import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
 
 
@@ -12,4 +14,12 @@ public interface IRelEmpEmpr {
      * @return
      */
     List<RelEmplEmpr> obtenerRelacionesLaborales(int codEmpleado );
+
+    /**
+     * Procedimiento para el abm
+     * @param empCar
+     * @param acc
+     * @return
+     */
+    boolean registrarRelEmpEmpr (RelEmplEmpr empCar, String acc);
 }
