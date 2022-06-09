@@ -310,7 +310,7 @@ public class RrhhController {
     public ResponseEntity<?> registrarEmpleado( @RequestBody EmpleadoCargo empCar ){
         Map<String, Object> response = new HashMap<>();
         empCar.setFechaInicio( new Utiles().fechaJ_a_Sql(empCar.getFechaInicio()));
-
+        System.out.println(empCar.toString());
         String acc = "U";
         if( empCar.getCodEmpleado() == 0 && empCar.getFechaInicio() == null){
             acc = "I";
@@ -370,4 +370,54 @@ public class RrhhController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+
+    /**
+     * Procedimiento para el registro de Email
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroEmail")
+    public ResponseEntity<?> registroEmail( @RequestBody Email e ){
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( e.getCodEmail() == 0){
+            acc = "I";
+        }
+
+        if( !this.emailDao.registrarEmail( e, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos del Email del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Procedimiento para el registro de Telefono
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroTelefono")
+    public ResponseEntity<?> registroEmail( @RequestBody Telefono tel ){
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( tel.getCodTelefono() == 0){
+            acc = "I";
+        }
+
+        if( !this.telfDao.registrarTelefono( tel,acc ) ){
+            response.put("msg", "Error al Actualizar los Datos del Telefono del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 }

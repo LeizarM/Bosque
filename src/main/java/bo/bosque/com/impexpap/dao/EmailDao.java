@@ -49,4 +49,31 @@ public class EmailDao implements IEmail {
 
         return lstTemp;
     }
+
+    /**
+     * Procedimiento para registrar los Emails
+     * @param email
+     * @param acc
+     * @return
+     */
+    public boolean registrarEmail( Email email, String acc ){
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Email @codEmail=?, @codPersona=?, @email=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                    	ps.setInt(1, email.getCodEmail() );
+                    	ps.setInt(2, email.getCodPersona() );
+                    	ps.setString(3, email.getEmail() );
+                    	ps.setInt(4, email.getAudUsuario());
+                    	ps.setString(5, acc);
+                    	ps.executeUpdate();
+                    });
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: EmailDao en registrarEmail, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
+    }
 }

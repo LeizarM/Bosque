@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.model.Email;
 import bo.bosque.com.impexpap.model.Telefono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -52,4 +53,34 @@ public class TelefonoDao implements ITelefono {
 
         return lstTemp;
     }
+
+    /**
+     * Procedimiento para registro de Telefono
+     * @param tel
+     * @param acc
+     * @return
+     */
+    public boolean registrarTelefono(Telefono tel, String acc) {
+       int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Email @codTelefono=?, @codPersona=?, @codTipoTel=?, @telefono=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, tel.getCodTelefono() );
+                        ps.setInt(2, tel.getCodPersona() );
+                        ps.setInt(3, tel.getCodTipoTel() );
+                        ps.setString(4, tel.getTelefono());
+                        ps.setInt(5, tel.getAudUsuario());
+                        ps.setString(6, acc);
+                        ps.executeUpdate();
+                    });
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: TelefonoDao en registrarTelefono, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
+    }
+
+
 }
