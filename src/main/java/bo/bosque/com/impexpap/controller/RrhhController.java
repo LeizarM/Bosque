@@ -397,6 +397,26 @@ public class RrhhController {
     }
 
     /**
+     * Procedimiento para eliminar un Email
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/eliminarEmail")
+    public ResponseEntity<?> eliminarEmail( @RequestBody Email e ){
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.emailDao.registrarEmail( e, "D" ) ){
+            response.put("msg", "Error al Eliminar el Email del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos de Email Eliminados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
      * Procedimiento para el registro de Telefono
      * @param
      * @return
