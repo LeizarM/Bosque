@@ -57,6 +57,9 @@ public class EmailDao implements IEmail {
      * @return
      */
     public boolean registrarEmail( Email email, String acc ){
+
+        System.out.println(email.toString());
+        System.out.println(acc);
         int resp;
         try{
             resp = this.jdbcTemplate.update("execute p_abm_Email @codEmail=?, @codPersona=?, @email=?, @audUsuarioI=?, @ACCION=?",
@@ -66,7 +69,7 @@ public class EmailDao implements IEmail {
                     	ps.setString(3, email.getEmail() );
                     	ps.setInt(4, email.getAudUsuario());
                     	ps.setString(5, acc);
-                    	ps.executeUpdate();
+                    	//ps.executeUpdate();
                     });
 
         }catch ( BadSqlGrammarException e ){
