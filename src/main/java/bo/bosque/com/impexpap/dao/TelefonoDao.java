@@ -63,7 +63,7 @@ public class TelefonoDao implements ITelefono {
     public boolean registrarTelefono(Telefono tel, String acc) {
        int resp;
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_Email @codTelefono=?, @codPersona=?, @codTipoTel=?, @telefono=?, @audUsuarioI=?, @ACCION=?",
+            resp = this.jdbcTemplate.update("execute p_abm_Telefono @codTelefono=?, @codPersona=?, @codTipoTel=?, @telefono=?, @audUsuarioI=?, @ACCION=?",
                     ps -> {
                         ps.setInt(1, tel.getCodTelefono() );
                         ps.setInt(2, tel.getCodPersona() );
@@ -71,7 +71,7 @@ public class TelefonoDao implements ITelefono {
                         ps.setString(4, tel.getTelefono());
                         ps.setInt(5, tel.getAudUsuario());
                         ps.setString(6, acc);
-                        ps.executeUpdate();
+
                     });
 
         }catch ( BadSqlGrammarException e ){

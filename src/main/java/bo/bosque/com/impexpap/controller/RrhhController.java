@@ -440,4 +440,24 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    /**
+     * Procedimiento para eliminar un Email
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/eliminarTelefono")
+    public ResponseEntity<?> eliminarTelefono( @RequestBody Telefono tel ){
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.telfDao.registrarTelefono( tel, "D" ) ){
+            response.put("msg", "Error al Eliminar el Telefono del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos de Telefono Eliminados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 }
