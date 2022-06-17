@@ -1,8 +1,8 @@
 package bo.bosque.com.impexpap.dao;
-
+import java.util.List;
 import bo.bosque.com.impexpap.model.Formacion;
 
-import java.util.List;
+
 
 public interface IFormacion {
 
@@ -12,5 +12,13 @@ public interface IFormacion {
      * @return
      */
     List<Formacion> obtenerFormacion( int codEmpleado );
+
+    /**
+     * Procecimiento para el abm
+     * @param fr
+     * @param acc
+     * @return
+     */
+    boolean registrarFormacion( Formacion fr, String acc );
 
 }

@@ -1,8 +1,8 @@
 package bo.bosque.com.impexpap.dao;
-
+import java.util.List;
 import bo.bosque.com.impexpap.model.Licencia;
 
-import java.util.List;
+
 
 public interface ILicencia {
 
@@ -11,5 +11,13 @@ public interface ILicencia {
      * @param codPersona
      * @return
      */
-    List<Licencia> obtenerLicencia(int codPersona );
+    List<Licencia> obtenerLicencia( int codPersona );
+
+    /**
+     * Procedimiento para el abm de la licencia de conducir
+     * @param lc
+     * @param acc
+     * @return
+     */
+    boolean registrarLicencia( Licencia  lc, String acc );
 }

@@ -488,4 +488,58 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    /**
+     * Procedimiento para registrar o actualizar la formacion de un empleado
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registrarFormacion")
+    public ResponseEntity<?> registrarFormacion( @RequestBody Formacion fr ){
+        Map<String, Object> response = new HashMap<>();
+
+        fr.setFechaFormacion( new Utiles().fechaJ_a_Sql(fr.getFechaFormacion()) );
+
+        String acc = "U";
+        if( fr.getCodFormacion() == 0){
+            acc = "I";
+        }
+
+        if( !this.formDao.registrarFormacion( fr, acc ) ){
+            response.put("msg", "Error al Registrar la Formacion del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos de Formacion Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Procedimiento para registrar o actualizar la formacion de un empleado
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registrarLicencia")
+    public ResponseEntity<?> registrarLicencia( @RequestBody Licencia lc ){
+        Map<String, Object> response = new HashMap<>();
+
+        lc.setFechaCaducidad( new Utiles().fechaJ_a_Sql(lc.getFechaCaducidad()) );
+
+        String acc = "U";
+        if( lc.getCodLicencia() == 0){
+            acc = "I";
+        }
+
+        if( !this.licenDao.registrarLicencia( lc, acc ) ){
+            response.put("msg", "Error al Registrar la Licencia del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos de Licencia Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 }

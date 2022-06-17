@@ -6,6 +6,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -54,5 +55,35 @@ public class FormacionDao implements  IFormacion {
             this.jdbcTemplate = null;
         }
         return lstTemp;
+    }
+
+    /**
+     * Procedimiento para el abm de la formacion de un empleado
+     * @param fr
+     * @param acc
+     * @return
+     */
+    public boolean registrarFormacion(Formacion fr, String acc) {
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Formacion @codFormacion  = ?,@codEmpleado = ?,@descripcion  = ?,@duracion = ?,@tipoDuracion= ?,@tipoFormacion = ?,@fechaFormacion= ? ,@audUsuarioI = ?, @ACCION = ?",
+                    ps -> {
+                        ps.setInt(1, fr.getCodFormacion() );
+                        ps.setInt(2, fr.getCodEmpleado() );
+                        ps.setString(3, fr.getDescripcion() );
+                        ps.setInt(4, fr.getDuracion());
+                        ps.setString(5, fr.getTipoDuracion());
+                        ps.setString( 6, fr.getTipoFormacion() );
+                        ps.setDate( 7, (Date) fr.getFechaFormacion());
+                        ps.setInt(8, fr.getAudUsuario());
+                        ps.setString(9, acc);
+                    });
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: FormacionDao en registrarFormacion, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
     }
 }

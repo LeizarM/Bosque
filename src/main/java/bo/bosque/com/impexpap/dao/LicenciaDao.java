@@ -6,6 +6,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -52,5 +53,32 @@ public class LicenciaDao implements  ILicencia {
         }
         return lstTemp;
 
+    }
+
+    /**
+     * Procedimiento para registrar el abm de la licencia
+     * @param lc
+     * @param acc
+     * @return
+     */
+    public boolean registrarLicencia( Licencia lc, String acc ) {
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Licencia  @codLicencia=?,@codPersona =?,@categoria =?,@fechaCaducidad =?,@audUsuarioI =?,@ACCION=?",
+                    ps -> {
+                        ps.setInt(1, lc.getCodLicencia());
+                        ps.setInt(2, lc.getCodPersona() );
+                        ps.setString(3, lc.getCategoria() );
+                        ps.setDate( 4, (Date) lc.getFechaCaducidad());
+                        ps.setInt(5, lc.getAudUsuario());
+                        ps.setString(6, acc);
+                    });
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: LicenciaDao en registrarLicencia, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
     }
 }
