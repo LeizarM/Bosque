@@ -441,22 +441,50 @@ public class RrhhController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+        /**
+         * Procedimiento para eliminar un Email
+         * @param
+         * @return
+         */
+        @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+        @PostMapping("/eliminarTelefono")
+        public ResponseEntity<?> eliminarTelefono( @RequestBody Telefono tel ){
+            Map<String, Object> response = new HashMap<>();
+
+            if( !this.telfDao.registrarTelefono( tel, "D" ) ){
+                response.put("msg", "Error al Eliminar el Telefono del Empleado");
+                response.put("error", "ok");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            response.put("msg", "Datos de Telefono Eliminados");
+            response.put("ok", "ok");
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        }
+
     /**
-     * Procedimiento para eliminar un Email
+     * Procedimiento para registrar o actualizar la experiencia Laboral
      * @param
      * @return
      */
     @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
-    @PostMapping("/eliminarTelefono")
-    public ResponseEntity<?> eliminarTelefono( @RequestBody Telefono tel ){
+    @PostMapping("/registrarExpLaboral")
+    public ResponseEntity<?> registrarExpLaboral( @RequestBody ExperienciaLaboral expl ){
         Map<String, Object> response = new HashMap<>();
 
-        if( !this.telfDao.registrarTelefono( tel, "D" ) ){
-            response.put("msg", "Error al Eliminar el Telefono del Empleado");
+        expl.setFechaInicio( new Utiles().fechaJ_a_Sql(expl.getFechaInicio()));
+        expl.setFechaFin( new Utiles().fechaJ_a_Sql(expl.getFechaFin()));
+
+        String acc = "U";
+        if( expl.getCodExperienciaLaboral() == 0){
+            acc = "I";
+        }
+
+        if( !this.expLabDao.registrarExpLaboral( expl, acc ) ){
+            response.put("msg", "Error al Registrar la experiencia laboral del Empleado");
             response.put("error", "ok");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        response.put("msg", "Datos de Telefono Eliminados");
+        response.put("msg", "Datos de ExperienciaLaboral Actualizados");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

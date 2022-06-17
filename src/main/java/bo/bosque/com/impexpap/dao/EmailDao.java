@@ -58,8 +58,6 @@ public class EmailDao implements IEmail {
      */
     public boolean registrarEmail( Email email, String acc ){
 
-        System.out.println(email.toString());
-        System.out.println(acc);
         int resp;
         try{
             resp = this.jdbcTemplate.update("execute p_abm_Email @codEmail=?, @codPersona=?, @email=?, @audUsuarioI=?, @ACCION=?",

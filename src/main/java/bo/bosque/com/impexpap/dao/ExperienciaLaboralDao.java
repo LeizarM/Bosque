@@ -6,6 +6,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -55,5 +56,36 @@ public class ExperienciaLaboralDao implements IExperienciaLaboral {
             this.jdbcTemplate = null;
         }
         return lstTemp;
+    }
+
+    /**
+     * Procedimiento para registrar la experiencia laboral por empleado
+     * @param exlab
+     * @param acc
+     * @return
+     */
+    public boolean registrarExpLaboral( ExperienciaLaboral exlab, String acc ) {
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_ExperienciaLaboral @codExperienciaLaboral=?,@codEmpleado=? ,@nombreEmpresa=? ,@cargo=? ,@descripcion=? ,@fechaInicio=? ,@fechaFin=? ,@nroReferencia=? ,@audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, exlab.getCodExperienciaLaboral() );
+                        ps.setInt(2, exlab.getCodEmpleado() );
+                        ps.setString(3, exlab.getNombreEmpresa() );
+                        ps.setString(4, exlab.getCargo());
+                        ps.setString(5, exlab.getDescripcion());
+                        ps.setDate( 6, (Date) exlab.getFechaInicio());
+                        ps.setDate( 7, (Date) exlab.getFechaFin());
+                        ps.setString( 8, exlab.getNroReferencia() );
+                        ps.setInt(9, exlab.getAudUsuario());
+                        ps.setString(10, acc);
+                    });
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: ExperienciaLaboralDao en registrarExpLaboral, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
     }
 }

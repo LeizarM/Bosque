@@ -8,6 +8,8 @@ public interface IFormacion {
 
     /**
      * procedimiento que obtendra la formacion de un empleado
+     * @param codEmpleado
+     * @return
      */
     List<Formacion> obtenerFormacion( int codEmpleado );
 
