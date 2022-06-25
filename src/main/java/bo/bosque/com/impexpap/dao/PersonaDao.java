@@ -49,6 +49,8 @@ public class PersonaDao implements IPersona {
                         temp.getCiudad().setCiudad(rs.getString(18));
                         temp.getCiudad().setCodPais(rs.getInt(19));
                         temp.getPais().setPais(rs.getString(20));
+                        temp.setLat(rs.getFloat(21));
+                        temp.setLng(rs.getFloat(22));
                         return temp;
                     });
 
@@ -64,13 +66,13 @@ public class PersonaDao implements IPersona {
 
     /**
      * Procedimiento para el abm
-     * @param persona
+     * @param per
      * @param acc
      */
     public boolean registrarPersona(Persona per, String acc) {
         int resp;
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_persona @codPersona=?, @codZona=?, @nombres=?, @apPaterno=?, @apMaterno=?, @ciExpedido=?, @ciFechaVencimiento=?, @ciNumero=?, @direccion=?, @estadoCivil=?, @fechaNacimiento=?, @lugarNacimiento=?, @nacionalidad=?, @sexo=?, @audUsuarioI=?, @ACCION=?",
+            resp = this.jdbcTemplate.update("execute p_abm_persona @codPersona=?, @codZona=?, @nombres=?, @apPaterno=?, @apMaterno=?, @ciExpedido=?, @ciFechaVencimiento=?, @ciNumero=?, @direccion=?, @estadoCivil=?, @fechaNacimiento=?, @lugarNacimiento=?, @nacionalidad=?, @sexo=?, @lat=?, @lng=?,  @audUsuarioI=?, @ACCION=?",
                     ps -> {
                     ps.setInt(1, per.getCodPersona() );
                     ps.setInt(2, per.getCodZona() );
@@ -86,8 +88,10 @@ public class PersonaDao implements IPersona {
                     ps.setString(12, per.getLugarNacimiento());
                     ps.setInt(13, per.getNacionalidad());
                     ps.setString(14, per.getSexo() );
-                    ps.setInt(15, per.getAudUsuarioI() );
-                    ps.setString(16, acc);
+                    ps.setFloat( 15, per.getLat() );
+                    ps.setFloat( 16, per.getLng());
+                    ps.setInt(17, per.getAudUsuarioI() );
+                    ps.setString(18, acc);
                     ps.executeUpdate();
                    });
         }catch ( BadSqlGrammarException e){
