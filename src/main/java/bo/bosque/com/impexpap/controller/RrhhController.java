@@ -224,6 +224,7 @@ public class RrhhController {
     @PostMapping("/registroPersona")
     public ResponseEntity<?> registrarPersona( @RequestBody Persona per ){
 
+        System.out.println(per.toString());
         Map<String, Object> response = new HashMap<>();
 
         per.setCiFechaVencimiento( new Utiles().fechaJ_a_Sql(per.getCiFechaVencimiento()));
@@ -308,13 +309,14 @@ public class RrhhController {
     @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
     @PostMapping("/registroEmpleadoCargo")
     public ResponseEntity<?> registrarEmpleado( @RequestBody EmpleadoCargo empCar ){
+
+
         Map<String, Object> response = new HashMap<>();
         empCar.setFechaInicio( new Utiles().fechaJ_a_Sql(empCar.getFechaInicio()));
         System.out.println(empCar.toString());
+
         String acc = "U";
-        if( empCar.getCodEmpleado() == 0 && empCar.getFechaInicio() == null){
-            acc = "I";
-        }
+        if(empCar.getExiste() == 0)  acc = "I";
 
         if( !this.empCargoDao.registrarEmpleadoCargo( empCar, acc ) ){
             response.put("msg", "Error al Actualizar los Datos del Empleado Cargo");
@@ -425,7 +427,7 @@ public class RrhhController {
     @PostMapping("/registroTelefono")
     public ResponseEntity<?> registroEmail( @RequestBody Telefono tel ){
         Map<String, Object> response = new HashMap<>();
-
+        System.out.println(tel.toString());
         String acc = "U";
         if( tel.getCodTelefono() == 0){
             acc = "I";
@@ -542,4 +544,31 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    /**
+     * Procedimiento para obtener el ultimo codigo insertado de empleado
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/ultimoCodEmpleado")
+    public Empleado obtenerUltimoCodEmpleado ( ){
+        Empleado temp = new Empleado();
+        temp.setCodEmpleado( this.empDao.obtenerUltimoEmpleado() );
+        if(temp.getCodEmpleado() <= 0 ) return new Empleado();
+        return temp;
+    }
+
+    /**
+     * Procedimiento para obtener el ultimo codigo insertado de una persona
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/ultimoCodPersona")
+    public Persona obtenerUltimoCodPersona ( ){
+        Persona temp = new Persona();
+        temp.setCodPersona( this.perDao.obtenerUltimoPersona() );
+        if(temp.getCodPersona() <= 0 ) return new Persona();
+        return temp;
+    }
+
 }

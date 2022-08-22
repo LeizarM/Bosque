@@ -19,4 +19,5 @@ public class EmpleadoCargo {
     private CargoSucursal cargoSucursal = new CargoSucursal();
 
     private String cargoPlanilla;
+    private int existe;
 }

@@ -132,7 +132,7 @@ public class EmpleadoDAO implements IEmpleado{
                         ps.setInt( 5, emp.getCodRelPlanilla() );
                         ps.setInt( 6, emp.getAudUsuarioI());
                         ps.setString( 7, acc  );
-                        ps.executeUpdate();
+
                      });
 
          }catch ( BadSqlGrammarException e ){
@@ -143,4 +143,31 @@ public class EmpleadoDAO implements IEmpleado{
 
         return resp!=0;
     }
-}
+
+
+    /**
+     *
+     * Obtendra el codigo del ultimo empleado insertado
+     * @return
+     */
+    public int obtenerUltimoEmpleado() {
+
+        Empleado temp = new Empleado();
+        try {
+            temp = this.jdbcTemplate.queryForObject("execute p_list_Empleado @ACCION=?",
+                    new Object[] {  "K" },
+                    new int[] { Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Empleado emp = new Empleado();
+                        emp.setCodEmpleado(rs.getInt(1));
+                       return emp;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en registroEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            temp = new Empleado();
+        }
+        return temp.getCodEmpleado();
+     }
+
+    }

@@ -17,5 +17,9 @@ public interface IPersona {
      */
     boolean registrarPersona ( Persona persona, String acc);
 
-
+    /**
+     * Procedimiento para obtener el ultimo codigo de la persona insertada
+     * @return
+     */
+    int obtenerUltimoPersona();
 }

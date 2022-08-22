@@ -70,7 +70,7 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
                         ps.setString(8, empCar.getMotivoFin());
                         ps.setInt(9, empCar.getAudUsuario());
                         ps.setString(10, acc);
-                        ps.executeUpdate();
+
                     });
 
         }catch ( BadSqlGrammarException e ){

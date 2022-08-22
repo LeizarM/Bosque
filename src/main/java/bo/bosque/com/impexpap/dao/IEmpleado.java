@@ -25,4 +25,10 @@ public interface IEmpleado {
      * @return
      */
     boolean registroEmpleado ( Empleado emp, String acc );
+
+    /**
+     * Procedimiento para obtener el ultimo codigo de empleado insertado
+     * @return
+     */
+    int obtenerUltimoEmpleado();
 }

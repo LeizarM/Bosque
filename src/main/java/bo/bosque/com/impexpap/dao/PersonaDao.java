@@ -1,4 +1,5 @@
 package bo.bosque.com.impexpap.dao;
+import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -92,7 +93,6 @@ public class PersonaDao implements IPersona {
                     ps.setFloat( 16, per.getLng());
                     ps.setInt(17, per.getAudUsuarioI() );
                     ps.setString(18, acc);
-                    ps.executeUpdate();
                    });
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: PersonaDao en obtenerDatosPersonales, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
@@ -100,5 +100,30 @@ public class PersonaDao implements IPersona {
             resp = 0;
         }
         return resp!=0;
+    }
+
+    /**
+     * Procedimiento para obtener el ultimo codigo de la persona insertad
+     * @return
+     */
+    public int obtenerUltimoPersona() {
+        Persona temp = new Persona();
+        try {
+            temp = this.jdbcTemplate.queryForObject("execute p_list_Persona @ACCION=?",
+                    new Object[] { "B" },
+                    new int[] { Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Persona per = new Persona();
+                        per.setCodPersona(rs.getInt(1));
+                        return per;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: PersonaDao en obtenerUltimoPersona, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            temp = new Persona();
+        }
+        System.out.println("el codigo ultima persona es "+temp.getCodPersona()
+        );
+        return temp.getCodPersona();
     }
 }

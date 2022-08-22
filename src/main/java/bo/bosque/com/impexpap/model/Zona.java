@@ -6,8 +6,9 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Zona implements Serializable {
 
     private int codZona;

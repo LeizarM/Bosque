@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.EmpleadoCargo;
+import bo.bosque.com.impexpap.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Types;
 
 @Repository
 public class EmpleadoCargoDao implements IEmpleadoCargo{
@@ -36,7 +38,7 @@ public class EmpleadoCargoDao implements IEmpleadoCargo{
                         ps.setDate( 4, (Date) empCar.getFechaInicio());
                         ps.setInt( 5, empCar.getAudUsuario());
                         ps.setString(6, acc);
-                        ps.executeUpdate();
+
                     });
 
 

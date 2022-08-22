@@ -12,4 +12,5 @@ public interface IEmpleadoCargo {
      * @return
      */
     boolean registrarEmpleadoCargo (EmpleadoCargo empCar, String acc);
+
 }
