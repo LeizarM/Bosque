@@ -1,21 +1,13 @@
 package bo.bosque.com.impexpap.security.jwt;
 import java.util.Date;
-import java.util.Objects;
 
-import bo.bosque.com.impexpap.dao.ILoginDao;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import bo.bosque.com.impexpap.model.Login;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 @Component
@@ -40,6 +32,7 @@ public class JwtProvider {
         return Jwts.builder().setSubject( login.getLogin() )
                 .setId( String.valueOf ( login.getCodUsuario() ) )
                 .claim ("nombreCompleto", login.getEmpleado().getPersona().getDatoPersona() )
+                .claim("codEmpleado", login.getCodEmpleado())
                 .claim("cargo", login.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().getDescripcion() )
                 .claim("codSucursal", login.getCodSucursal())
                 .claim( "codEmpresa", login.getCodEmpresa())

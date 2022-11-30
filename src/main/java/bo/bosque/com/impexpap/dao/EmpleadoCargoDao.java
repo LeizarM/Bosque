@@ -29,6 +29,7 @@ public class EmpleadoCargoDao implements IEmpleadoCargo{
     public boolean registrarEmpleadoCargo(EmpleadoCargo empCar, String acc) {
 
         int resp;
+
         try{
             resp = this.jdbcTemplate.update("execute p_abm_EmpleadoCargo @codEmpleado=?, @codCargoSucursal=?, @codCargoSucPlanilla=?, @fechaInicio=?, @audUsuarioI=?, @ACCION=?",
                     ps->{
@@ -40,8 +41,7 @@ public class EmpleadoCargoDao implements IEmpleadoCargo{
                         ps.setString(6, acc);
 
                     });
-
-
+            
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: EmpleadoCargoDao en registrarEmpleadoCargo, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             this.jdbcTemplate = null;

@@ -4,10 +4,8 @@ package bo.bosque.com.impexpap.security;
 import bo.bosque.com.impexpap.dao.LoginDaoImpl;
 import bo.bosque.com.impexpap.security.jwt.JwtEntryPoint;
 import bo.bosque.com.impexpap.security.jwt.JwtTokenFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -25,11 +23,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class MainSecurity extends WebSecurityConfigurerAdapter {
 
 
-    @Autowired
-    JwtEntryPoint jwtEntryPoint;
+    private final JwtEntryPoint jwtEntryPoint;
 
-    @Autowired()
-    LoginDaoImpl loginImpl;
+    private final LoginDaoImpl loginImpl;
+
+    public MainSecurity(JwtEntryPoint jwtEntryPoint, LoginDaoImpl loginImpl) {
+        this.jwtEntryPoint = jwtEntryPoint;
+        this.loginImpl = loginImpl;
+    }
 
     @Bean
     public JwtTokenFilter jwtTokenFilter(){
@@ -53,10 +54,6 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    @Override
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

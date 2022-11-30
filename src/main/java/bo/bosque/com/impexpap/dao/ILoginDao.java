@@ -2,7 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 
 public interface ILoginDao {
 

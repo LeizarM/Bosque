@@ -2,66 +2,56 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.Utiles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.springframework.web.servlet.function.ServerResponse.status;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/rrhh")
 public class RrhhController {
 
-    @Autowired()
-    private IEmpleado empDao;
+    private final IEmpleado empDao;
+    private final IPersona perDao;
+    private final IEmail emailDao;
+    private final ITelefono telfDao;
+    private final IExperienciaLaboral expLabDao;
+    private final IFormacion formDao;
+    private final ILicencia licenDao;
+    private final ICiudad ciudadDao;
+    private final IPais paisDao;
+    private final IZona zonaDao;
+    private final ISucursal sucDao;
+    private final ICargoSucursal cagoSucDao;
+    private final IEmpleadoCargo empCargoDao;
+    private final IRelEmpEmpr reeDao;
 
-    @Autowired()
-    private IPersona perDao;
 
-    @Autowired()
-    private IEmail emailDao;
+    public RrhhController(IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao) {
+        this.emailDao   = emailDao;
+        this.telfDao    = telfDao;
+        this.empDao     = empDao;
+        this.perDao     = perDao;
+        this.expLabDao  = expLabDao;
+        this.formDao    = formDao;
+        this.licenDao   = licenDao;
+        this.reeDao     = reeDao;
+        this.ciudadDao  = ciudadDao;
+        this.empCargoDao = empCargoDao;
+        this.paisDao     = paisDao;
+        this.zonaDao     = zonaDao;
+        this.sucDao      = sucDao;
+        this.cagoSucDao  = cagoSucDao;
+    }
 
-    @Autowired()
-    private ITelefono telfDao;
 
-    @Autowired()
-    private IExperienciaLaboral expLabDao;
-
-    @Autowired()
-    private IFormacion formDao;
-
-    @Autowired()
-    private ILicencia licenDao;
-
-    @Autowired()
-    private ICiudad ciudadDao;
-
-    @Autowired()
-    private IPais paisDao;
-
-    @Autowired()
-    private IZona zonaDao;
-
-    @Autowired()
-    private ISucursal sucDao;
-
-    @Autowired()
-    private ICargoSucursal cagoSucDao;
-
-    @Autowired()
-    private IEmpleadoCargo empCargoDao;
-
-    @Autowired()
-    private IRelEmpEmpr reeDao;
 
 
     /**
@@ -234,11 +224,11 @@ public class RrhhController {
             acc = "I";
         }
         if( !this.perDao.registrarPersona(per, acc) ){
-            response.put("msg", "Error al Actualizar los Datos de la persona");
-            response.put("error", "ok");
+            response.put("msg", "Error al Actualizar los Datos de la Persona");
+            response.put("ok", "error");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        response.put("msg", "Datos Actualizados");
+        response.put("msg", "Datos Actualizados de la Persona");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

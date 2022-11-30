@@ -2,8 +2,6 @@ package bo.bosque.com.impexpap.model;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

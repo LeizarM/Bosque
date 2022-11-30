@@ -70,6 +70,7 @@ public class EmailDao implements IEmail {
                     	//ps.executeUpdate();
                     });
 
+
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: EmailDao en registrarEmail, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             this.jdbcTemplate = null;

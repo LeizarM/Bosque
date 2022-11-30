@@ -46,6 +46,8 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
      * @return
      */
     public Login verifyUser(String login, String password, String ip) {
+
+        System.out.println(password);
         Login temp = new Login();
         try {
               temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
@@ -55,16 +57,17 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
                         Login login1 = new Login();
 
                         login1.setCodUsuario(rs.getInt(1 ));
-                        login1.getEmpleado().getPersona().setDatoPersona(rs.getString(2 ));
-                        login1.setCodSucursal(rs.getInt(3 ));
-                        login1.setNombreSucursal(rs.getString(4 ));
-                        login1.setCodCiudad(rs.getInt(5 ));
-                        login1.setNombreCiudad(rs.getString(6 ));
-                        login1.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(7 ));
-                        login1.setTipoUsuario( rs.getString(8) );
-                        login1.setCodEmpresa(rs.getInt(9 ));
-                        login1.setNombreEmpresa(rs.getString(10 ));
-                        login1.setElTemaSelecionado(rs.getString(11 ));
+                        login1.setCodEmpleado(rs.getInt(2));
+                        login1.getEmpleado().getPersona().setDatoPersona(rs.getString(3 ));
+                        login1.setCodSucursal(rs.getInt(4 ));
+                        login1.setNombreSucursal(rs.getString(5 ));
+                        login1.setCodCiudad(rs.getInt(6 ));
+                        login1.setNombreCiudad(rs.getString(7 ));
+                        login1.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(8 ));
+                        login1.setTipoUsuario( rs.getString(9) );
+                        login1.setCodEmpresa(rs.getInt(10 ));
+                        login1.setNombreEmpresa(rs.getString(11 ));
+                        login1.setElTemaSelecionado(rs.getString(12 ));
 
                         return login1;
                     });
