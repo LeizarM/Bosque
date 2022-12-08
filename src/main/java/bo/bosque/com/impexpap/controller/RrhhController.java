@@ -214,7 +214,7 @@ public class RrhhController {
     @PostMapping("/registroPersona")
     public ResponseEntity<?> registrarPersona( @RequestBody Persona per ){
 
-        System.out.println(per.toString());
+
         Map<String, Object> response = new HashMap<>();
 
         per.setCiFechaVencimiento( new Utiles().fechaJ_a_Sql(per.getCiFechaVencimiento()));

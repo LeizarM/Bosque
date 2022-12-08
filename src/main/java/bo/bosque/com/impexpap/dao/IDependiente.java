@@ -16,4 +16,11 @@ public interface IDependiente {
      */
     List<Dependiente> obtenerDependientes( int codEmpleado );
 
+    /**
+     * Para el abm de dependientes
+     * @param dep
+     * @param acc
+     * @return true si lo hizo correctamente
+     */
+    boolean registrarDependiente( Dependiente dep, String acc );
 }
