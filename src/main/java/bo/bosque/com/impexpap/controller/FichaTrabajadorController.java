@@ -26,6 +26,7 @@ public class FichaTrabajadorController {
     private final IPersona personaDao;
 
 
+
     public FichaTrabajadorController(IDependiente dependienteDao, IGaranteReferencia garanteReferenciaDao, IPersona personaDao){
 
         this.dependienteDao = dependienteDao;
@@ -92,6 +93,35 @@ public class FichaTrabajadorController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("msg", "Datos de Dependientes Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Procedimiento para registrar o actualizar la informacion de un garante y referencia
+     * @param garRef
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registrarGaranteReferencia")
+    public ResponseEntity<?> registrarGaranteReferencia( @RequestBody GaranteReferencia garRef ){
+
+        int codPersona =  this.personaDao.obtenerUltimoPersona();
+        garRef.setCodPersona(codPersona);
+
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( garRef.getCodGarante() == 0){
+            acc = "I";
+        }
+
+        if( !this.garanteReferenciaDao.registrarGaranteReferencia ( garRef, acc ) ){
+            response.put("msg", "Error al Registrar Al Garante o Referencia");
+            response.put("ok", "error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos de Garante o Referencia Actualizados");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

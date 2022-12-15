@@ -54,4 +54,36 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
 
         return lstTemp;
     }
+
+    /**
+     * Para el abm de garante referencia
+     *
+     * @param garRef
+     * @param acc
+     * @return true si lo hizo correctamente
+     */
+    public boolean registrarGaranteReferencia(GaranteReferencia garRef, String acc) {
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_GaranteReferencia @codGarante=?, @codPersona=?, @codEmpleado=?, @direccionTrabajo=?, @empresaTrabajo=?, @tipo=?, @observacion=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, garRef.getCodGarante() );
+                        ps.setInt(2, garRef.getCodPersona() );
+                        ps.setInt (3, garRef.getCodEmpleado() );
+                        ps.setString(4, garRef.getDireccionTrabajo() );
+                        ps.setString(5, garRef.getEmpresaTrabajo() );
+                        ps.setString(6, garRef.getTipo());
+                        ps.setString(7, garRef.getObservacion());
+                        ps.setInt(8, garRef.getAudUsuario() );
+                        ps.setString(9, acc);
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: GaranteReferenciaDao en registrarGaranteReferencia, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp!=0;
+    }
+
+
 }
