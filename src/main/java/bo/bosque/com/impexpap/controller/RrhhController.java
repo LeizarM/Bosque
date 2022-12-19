@@ -500,7 +500,7 @@ public class RrhhController {
 
         if( !this.formDao.registrarFormacion( fr, acc ) ){
             response.put("msg", "Error al Registrar la Formacion del Empleado");
-            response.put("error", "ok");
+            response.put("ok", "error");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("msg", "Datos de Formacion Actualizados");
