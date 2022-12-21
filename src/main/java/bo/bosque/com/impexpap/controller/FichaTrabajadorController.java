@@ -1,4 +1,8 @@
 package bo.bosque.com.impexpap.controller;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import bo.bosque.com.impexpap.dao.IDependiente;
 import bo.bosque.com.impexpap.model.Dependiente;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @CrossOrigin("*")
@@ -123,6 +128,25 @@ public class FichaTrabajadorController {
         }
         response.put("msg", "Datos de Garante o Referencia Actualizados");
         response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @RequestParam("codPersona") int codPersona ){
+
+        Map<String, Object> response = new HashMap<>();
+        //obtener datos de persona ??
+        if(!file.isEmpty()){
+            String nombreArchivo = file.getOriginalFilename();
+            Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
+
+            try {
+                Files.copy(file.getInputStream(), rutaArchivo);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
