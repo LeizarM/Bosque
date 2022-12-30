@@ -1,5 +1,7 @@
 package bo.bosque.com.impexpap.controller;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,6 +14,9 @@ import bo.bosque.com.impexpap.dao.IGaranteReferencia;
 import bo.bosque.com.impexpap.dao.IPersona;
 import bo.bosque.com.impexpap.model.GaranteReferencia;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -21,10 +26,16 @@ import bo.bosque.com.impexpap.dao.IDependiente;
 import bo.bosque.com.impexpap.model.Dependiente;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/fichaTrabajador")
 public class FichaTrabajadorController {
+
+
+    private HttpServletRequest servletRequest;
 
     private final IDependiente dependienteDao;
     private final IGaranteReferencia garanteReferenciaDao;
@@ -131,23 +142,73 @@ public class FichaTrabajadorController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+
+    /**
+     * para subir la imagen al servidor
+     * @param file
+     * @param codEmpleado
+     * @return
+     */
     @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @RequestParam("codPersona") int codPersona ){
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @RequestParam("codEmpleado") int codEmpleado ){
 
         Map<String, Object> response = new HashMap<>();
         //obtener datos de persona ??
         if(!file.isEmpty()){
-            String nombreArchivo = file.getOriginalFilename();
+
+            String nombreArchivo = file.getOriginalFilename().replace(file.getOriginalFilename(),  String.valueOf(codEmpleado) +".jpg");// y de paso renombramos el archivo
+
+            Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
+            File archivoFotoAnterior = rutaFotoAnterior.toFile();
+
+            if(archivoFotoAnterior.exists() || archivoFotoAnterior.canRead()) {
+                archivoFotoAnterior.delete();
+            }
+
+
             Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
 
             try {
                 Files.copy(file.getInputStream(), rutaArchivo);
+
+
+
             } catch (IOException e) {
-                e.printStackTrace();
+                response.put("msg", "Error al subir la imagen "+e.getMessage());
+                response.put("ok", "error");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
+
         }
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    /**
+     * Para obtener la imagen directamente del servidor
+     * @param nombreFoto
+     * @return
+     */
+    @GetMapping("uploads/img/{nombreFoto:.+}")
+    public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto ){
+
+        Path rutaArchivo = Paths.get("uploads").resolve(nombreFoto).toAbsolutePath();
+        Resource recurso = null;
+
+        try {
+            recurso = new UrlResource(rutaArchivo.toUri());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        if( !recurso.exists() && !recurso.isReadable() ) {
+            throw new RuntimeException("Error, no se pudo cargar la imagen o foto "+nombreFoto );
+        }
+
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
+
+
+        return new ResponseEntity<Resource>(recurso, header, HttpStatus.OK);
+    }
 }
