@@ -1,6 +1,9 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Persona;
+
+import java.util.List;
+
 public interface IPersona {
 
     /**
@@ -22,4 +25,5 @@ public interface IPersona {
      * @return
      */
     int obtenerUltimoPersona();
+
 }

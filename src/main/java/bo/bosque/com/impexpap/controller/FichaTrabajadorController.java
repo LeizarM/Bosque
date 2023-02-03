@@ -5,21 +5,28 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.IGaranteReferencia;
 import bo.bosque.com.impexpap.dao.IPersona;
 import bo.bosque.com.impexpap.model.GaranteReferencia;
+
+import bo.bosque.com.impexpap.model.Persona;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.annotation.Secured;
+
 import org.springframework.web.bind.annotation.*;
 
 import bo.bosque.com.impexpap.dao.IDependiente;
@@ -36,15 +43,16 @@ public class FichaTrabajadorController {
 
 
     private HttpServletRequest servletRequest;
-
+    private JdbcTemplate jdbcTemplate;
     private final IDependiente dependienteDao;
     private final IGaranteReferencia garanteReferenciaDao;
     private final IPersona personaDao;
 
 
 
-    public FichaTrabajadorController(IDependiente dependienteDao, IGaranteReferencia garanteReferenciaDao, IPersona personaDao){
+    public FichaTrabajadorController( JdbcTemplate jdbcTemplate, IDependiente dependienteDao, IGaranteReferencia garanteReferenciaDao, IPersona personaDao){
 
+        this.jdbcTemplate = jdbcTemplate;
         this.dependienteDao = dependienteDao;
         this.garanteReferenciaDao = garanteReferenciaDao;
         this.personaDao = personaDao;
@@ -210,5 +218,46 @@ public class FichaTrabajadorController {
 
 
         return new ResponseEntity<Resource>(recurso, header, HttpStatus.OK);
+    }
+
+
+    /**
+     * Procedimiento para exportar a pdf
+     * @param per
+     * @return
+     */
+
+    @PostMapping("/pdf")
+    public ResponseEntity<?> exportPDF( @RequestBody Persona per )  {
+
+        String nombreRpt = "RptPrueba";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+            params.put("idActa", 1);
+
+
+            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDF(nombreRpt, params);
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            /*headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("filename", nombreRpt+".pdf");*/
+
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add("Content-Disposition", "attachment; filename=\"file.pdf\"");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            //headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +  nombreRpt+".pdf");
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            System.out.println(e.getCause()+" msg:  "+e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+
     }
 }

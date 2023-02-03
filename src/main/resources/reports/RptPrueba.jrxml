@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptPrueba" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="fb291f95-513e-4c55-876b-2c0465ef09b7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUECOMISIONES"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="502"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="498"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="idActa" class="java.lang.Integer" evaluationTime="Late"/>
+	<queryString>
+		<![CDATA[execute p_list_acta @idActa =$P{idActa}, @ACCION='C']]>
+	</queryString>
+	<field name="idTarea" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="idTarea"/>
+		<property name="com.jaspersoft.studio.field.label" value="idTarea"/>
+	</field>
+	<field name="detalle" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="detalle"/>
+		<property name="com.jaspersoft.studio.field.label" value="detalle"/>
+	</field>
+	<field name="nombreCompleto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nombreCompleto"/>
+		<property name="com.jaspersoft.studio.field.label" value="nombreCompleto"/>
+	</field>
+	<field name="fechaInicioP" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="fechaInicioP"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaInicioP"/>
+	</field>
+	<field name="fechaFinP" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="fechaFinP"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaFinP"/>
+	</field>
+	<field name="nota" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nota"/>
+		<property name="com.jaspersoft.studio.field.label" value="nota"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="240" y="30" width="100" height="30" uuid="f444fbce-10c4-48be-b85a-d2f45bd269c8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[EL TITULO]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="30" uuid="2bc38989-e257-4941-a755-ff44232a2fe5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45ef8e2c-bca8-41af-90f2-14a8df2f2068"/>
+				</reportElement>
+				<text><![CDATA[detalle]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="0" width="100" height="30" uuid="fd4347e3-e467-44da-b16f-0663023f4d4a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0117fbd8-ea04-4c48-b31e-7c95e2292919"/>
+				</reportElement>
+				<text><![CDATA[nombreCompleto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="1" width="100" height="30" uuid="8e77a340-abe2-4c92-a1b8-1678d6248551">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="aec17372-3b0c-430a-9aa3-7566ff4bd291"/>
+				</reportElement>
+				<text><![CDATA[fechaInicioP]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="0" width="100" height="30" uuid="25efb5ad-727a-443c-869e-b2da44cdaa52">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="28889259-2f9e-47ad-92a0-21a787ba0762"/>
+				</reportElement>
+				<text><![CDATA[nota]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="0" width="100" height="30" uuid="497a43ef-09c9-4bcb-8982-a4d548b6890b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5c7ed6fa-dd95-43f5-b046-49c786680423"/>
+				</reportElement>
+				<text><![CDATA[fechaFinP]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="41" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="30" uuid="a5e262e9-7d53-4174-9cc9-bc64ff43b828">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="45ef8e2c-bca8-41af-90f2-14a8df2f2068"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{detalle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="100" height="30" uuid="a4212b1f-0bf7-46cd-ab12-45ff6e5d0210">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0117fbd8-ea04-4c48-b31e-7c95e2292919"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="200" y="0" width="100" height="30" isRemoveLineWhenBlank="true" uuid="54dbe828-493e-4030-b1b2-a4072b008ca1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="aec17372-3b0c-430a-9aa3-7566ff4bd291"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fechaInicioP}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="0" width="100" height="30" uuid="e56b9b83-ad7c-461e-9ff2-1ec7b3da8ba8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="28889259-2f9e-47ad-92a0-21a787ba0762"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{nota}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="0" width="100" height="30" uuid="ebb33c43-3ef9-48b4-b767-0b74e2820fe5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5c7ed6fa-dd95-43f5-b046-49c786680423"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fechaFinP}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="33" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+</jasperReport>
