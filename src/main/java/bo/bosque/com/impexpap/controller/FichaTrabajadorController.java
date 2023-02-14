@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.controller;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,10 +15,12 @@ import java.util.Map;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.IGaranteReferencia;
 import bo.bosque.com.impexpap.dao.IPersona;
+import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.GaranteReferencia;
 
 import bo.bosque.com.impexpap.model.Persona;
 
+import lombok.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +37,6 @@ import bo.bosque.com.impexpap.model.Dependiente;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @CrossOrigin("*")
@@ -42,7 +44,6 @@ import javax.servlet.http.HttpServletRequest;
 public class FichaTrabajadorController {
 
 
-    private HttpServletRequest servletRequest;
     private JdbcTemplate jdbcTemplate;
     private final IDependiente dependienteDao;
     private final IGaranteReferencia garanteReferenciaDao;
@@ -223,33 +224,25 @@ public class FichaTrabajadorController {
 
     /**
      * Procedimiento para exportar a pdf
-     * @param per
+     * @param emp
      * @return
      */
-
     @PostMapping("/pdf")
-    public ResponseEntity<?> exportPDF( @RequestBody Persona per )  {
+    public ResponseEntity<?> exportPDF(@RequestBody Empleado emp)  {
 
-        String nombreRpt = "RptPrueba";
+        String nombreReporte = "RptFichaTrabajador";
 
 
         try{
             Map<String, Object> params = new HashMap<>();
-            params.put("idActa", 1);
+            params.put("codEmpleado", emp.getCodEmpleado()  );
 
-
-            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDF(nombreRpt, params);
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate ).exportPDF( nombreReporte, params);
 
             HttpHeaders headers = new HttpHeaders();
             //set the PDF format
-            /*headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", nombreRpt+".pdf");*/
-
             headers.setContentLength(reportBytes.length);
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add("Content-Disposition", "attachment; filename=\"file.pdf\"");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-            //headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +  nombreRpt+".pdf");
 
             return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
         } catch(Exception e) {
@@ -260,4 +253,7 @@ public class FichaTrabajadorController {
 
 
     }
+
+
 }
+

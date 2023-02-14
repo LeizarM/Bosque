@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptFichaTrabajador" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5bb90c5b-ad1d-4486-903d-d7a96771265d">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUECOMISIONES"/>
+	<parameter name="codEmpleado" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\Proyectos\\Bosque\\Bosque\\src\\main\\resources\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[execute p_list_Empleado @codEmpleado =$P{codEmpleado} , @ACCION='M']]>
+	</queryString>
+	<field name="apPaterno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apPaterno"/>
+		<property name="com.jaspersoft.studio.field.label" value="apPaterno"/>
+	</field>
+	<field name="apMaterno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apMaterno"/>
+		<property name="com.jaspersoft.studio.field.label" value="apMaterno"/>
+	</field>
+	<field name="nombres" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nombres"/>
+		<property name="com.jaspersoft.studio.field.label" value="nombres"/>
+	</field>
+	<field name="ciNumero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ciNumero"/>
+		<property name="com.jaspersoft.studio.field.label" value="ciNumero"/>
+	</field>
+	<field name="ciExpedido" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ciExpedido"/>
+		<property name="com.jaspersoft.studio.field.label" value="ciExpedido"/>
+	</field>
+	<field name="ciFechaVencimiento" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="ciFechaVencimiento"/>
+		<property name="com.jaspersoft.studio.field.label" value="ciFechaVencimiento"/>
+	</field>
+	<field name="sexo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sexo"/>
+		<property name="com.jaspersoft.studio.field.label" value="sexo"/>
+	</field>
+	<field name="fechaNacimiento" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="fechaNacimiento"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaNacimiento"/>
+	</field>
+	<field name="lugarNacimiento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="lugarNacimiento"/>
+		<property name="com.jaspersoft.studio.field.label" value="lugarNacimiento"/>
+	</field>
+	<field name="nacionalidad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nacionalidad"/>
+		<property name="com.jaspersoft.studio.field.label" value="nacionalidad"/>
+	</field>
+	<field name="estadoCivil" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="estadoCivil"/>
+		<property name="com.jaspersoft.studio.field.label" value="estadoCivil"/>
+	</field>
+	<field name="direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="direccion"/>
+		<property name="com.jaspersoft.studio.field.label" value="direccion"/>
+	</field>
+	<field name="zona" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="zona"/>
+		<property name="com.jaspersoft.studio.field.label" value="zona"/>
+	</field>
+	<field name="ciudad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ciudad"/>
+		<property name="com.jaspersoft.studio.field.label" value="ciudad"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="71" splitType="Stretch">
+			<staticText>
+				<reportElement x="160" y="20" width="239" height="28" uuid="6502d399-afca-49f5-81be-3fb6b9e4e337"/>
+				<textElement textAlignment="Center">
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[FICHA DEL TRABAJADOR]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="118">
+			<textField>
+				<reportElement x="80" y="0" width="110" height="19" uuid="864ad77b-220c-47fe-b8a7-d211c098a85f"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{apPaterno}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="80" height="19" uuid="4dfcc27b-0434-4519-b293-e19f4738d818"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Apellido Paterno]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="0" width="80" height="19" uuid="d94700b9-87af-4779-b935-3cad51497e1d"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Apellido Materno]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="270" y="0" width="90" height="19" uuid="989ce379-2191-42ea-ad4e-a640064a4a07"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{apMaterno}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="0" width="59" height="19" uuid="34f69aff-70e6-4f37-93d3-844894798265"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Nombres]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="419" y="0" width="151" height="19" uuid="75ff55b9-7cfb-4e3f-9e81-5275c41dc7ce"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{nombres}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="19" width="80" height="19" uuid="c86dcf63-342f-41ca-bffb-e33a090e6bbd"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Nº CI]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="19" width="110" height="19" uuid="17a86e90-f799-4bbd-b4b1-59bf5a3e747f"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ciNumero}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="190" y="19" width="80" height="19" uuid="7322272a-f9b6-416a-9ed7-9e3076904683"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Expedido en]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="270" y="19" width="90" height="19" uuid="13c6bc83-c198-4d73-8f64-77857c0be6ff"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ciExpedido}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="19" width="90" height="19" uuid="5be84f0e-4cb1-417a-87b6-e6f82bc79168"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Fecha Vencimiento]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="450" y="19" width="120" height="19" uuid="5850c344-253e-4e13-af68-a4ee9b6695b0"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ciFechaVencimiento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="38" width="80" height="19" uuid="1c1632f0-a561-4afe-909f-ee373ee2537b"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Sexo]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="38" width="110" height="19" uuid="93cf7849-c6ab-48cf-9693-f07dd480726e"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{sexo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="190" y="38" width="80" height="19" uuid="66668bc2-f2a9-47f4-9e44-1d9ceeec4d31"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Fecha Nacimiento]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="270" y="38" width="90" height="19" uuid="a140e94d-874a-437d-9563-78c4f9759f49"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaNacimiento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="57" width="80" height="19" uuid="4a28e025-bec7-4658-b0d9-2a6a9442c735"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Lugar de Nacimiento]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="57" width="100" height="19" uuid="053f482f-8422-417b-adfa-23e33e14ab4f"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{lugarNacimiento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="180" y="57" width="80" height="19" uuid="bc37ed65-1d49-4648-ba87-8ddc4e0b265b"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Nacionalidad]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="260" y="57" width="100" height="19" uuid="4fa9713f-35a0-4d8c-b9c1-13262004d69a"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{nacionalidad}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="360" y="57" width="59" height="19" uuid="a2645ca3-0878-4029-b7e4-e20e01489980"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Estado Civil]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="419" y="57" width="81" height="19" uuid="cca7860a-cfe1-41e0-bb79-492e5fead5d0"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{estadoCivil}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="76" width="80" height="19" uuid="bbcf97d1-1fb9-42ef-bd73-e836c2019354"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Direccion]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="76" width="180" height="19" uuid="dde16347-87a7-4376-bc04-2f07c1330143"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="260" y="76" width="50" height="19" uuid="97e81dc4-b87f-4e77-ac68-42b28ae30c2a"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Zona]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="310" y="76" width="190" height="19" uuid="4b8d2f10-de9d-4f6e-ab61-86550f6095b3"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="95" width="100" height="15" uuid="1396c7de-3264-4c96-85fa-b05fcc90da41"/>
+				<textFieldExpression><![CDATA[$F{ciudad}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="95" width="80" height="15" uuid="a85a8332-59d7-450f-ac6a-a7d871c1e12c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Ciudad]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="27" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="200" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<subreport>
+				<reportElement x="-1" y="20" width="572" height="150" uuid="9376dd9a-742e-42c8-b876-9b355913b579"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptPrueba.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="203">
+			<subreport>
+				<reportElement x="0" y="20" width="562" height="150" uuid="807eda3e-96e2-4e5b-8889-a8ab15cf79e6"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptPrueba2.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+</jasperReport>
