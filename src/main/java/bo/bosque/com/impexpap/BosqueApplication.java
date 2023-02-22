@@ -8,7 +8,7 @@ public class BosqueApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(BosqueApplication.class, args);
-        System.out.println("Iniciando...");
+        System.out.println("Iniciando servidor...");
     }
 
 }
