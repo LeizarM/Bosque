@@ -1,7 +1,6 @@
 package bo.bosque.com.impexpap.controller;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,9 +17,6 @@ import bo.bosque.com.impexpap.dao.IPersona;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.GaranteReferencia;
 
-import bo.bosque.com.impexpap.model.Persona;
-
-import lombok.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.annotation.Secured;
 
 import org.springframework.web.bind.annotation.*;
@@ -250,10 +247,7 @@ public class FichaTrabajadorController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-
-
     }
-
 
 }
 
