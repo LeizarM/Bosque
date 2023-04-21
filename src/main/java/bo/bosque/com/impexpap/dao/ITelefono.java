@@ -19,4 +19,11 @@ public interface ITelefono {
      * @return
      */
     boolean registrarTelefono( Telefono tel ,String acc );
+
+    /**
+     * Procedimiento para obtener el ultimo codigo de persona registrado
+     * @param audUsuario
+     * @return
+     */
+    int obtenerUltimoCodPersona( int audUsuario );
 }

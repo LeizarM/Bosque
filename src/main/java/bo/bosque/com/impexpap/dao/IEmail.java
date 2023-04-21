@@ -21,4 +21,12 @@ public interface IEmail {
      * @return
      */
     boolean registrarEmail( Email email, String acc);
+
+
+    /**
+     * Procedimiento para obtener el ultimo codigo de persona
+     * @param audUsuario
+     * @return
+     */
+    int obtenerUltimoCodPersona( int audUsuario );
 }

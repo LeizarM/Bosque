@@ -37,11 +37,12 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
                         garRef.setCodGarante(rs.getInt(1));
                         garRef.setCodPersona(rs.getInt(2));
                         garRef.setNombreCompleto(rs.getString(3));
-                        garRef.setDireccionTrabajo(rs.getString(4));
-                        garRef.setEmpresaTrabajo(rs.getString(5));
-                        garRef.setTipo(rs.getString(6));
-                        garRef.setObservacion( rs.getString(7));
-                        garRef.setEsEmpleado( rs.getString(8));
+                        garRef.setDireccionDomicilio(rs.getString(4));
+                        garRef.setDireccionTrabajo(rs.getString(5));
+                        garRef.setEmpresaTrabajo(rs.getString(6));
+                        garRef.setTipo(rs.getString(7));
+                        garRef.setObservacion( rs.getString(8));
+                        garRef.setEsEmpleado( rs.getString(9));
 
                         return garRef;
 
@@ -65,15 +66,15 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
     public boolean registrarGaranteReferencia(GaranteReferencia garRef, String acc) {
         int resp;
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_GaranteReferencia @codGarante=?, @codPersona=?, @codEmpleado=?, @direccionTrabajo=?, @empresaTrabajo=?, @tipo=?, @observacion=?, @audUsuarioI=?, @ACCION=?",
+            resp = this.jdbcTemplate.update("execute p_abm_GaranteReferencia @codGarante=?, @codPersona=?, @codEmpleado=?, @direccionTrabajo=? ,@empresaTrabajo=?, @tipo=?, @observacion=?, @audUsuarioI=?, @ACCION=?",
                     ps -> {
                         ps.setInt(1, garRef.getCodGarante() );
                         ps.setInt(2, garRef.getCodPersona() );
                         ps.setInt (3, garRef.getCodEmpleado() );
                         ps.setString(4, garRef.getDireccionTrabajo() );
                         ps.setString(5, garRef.getEmpresaTrabajo() );
-                        ps.setString(6, garRef.getTipo());
-                        ps.setString(7, garRef.getObservacion());
+                        ps.setString(6, garRef.getTipo() );
+                        ps.setString(7, garRef.getObservacion() );
                         ps.setInt(8, garRef.getAudUsuario() );
                         ps.setString(9, acc);
                     });

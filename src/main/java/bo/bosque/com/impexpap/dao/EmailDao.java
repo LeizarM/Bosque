@@ -3,6 +3,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import bo.bosque.com.impexpap.model.Telefono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -77,5 +79,29 @@ public class EmailDao implements IEmail {
             resp = 0;
         }
         return resp != 0;
+    }
+
+    /**
+     * Procedimiento para obtener el ultimo codigo de persona
+     * @param audUsuario
+     * @return
+     */
+    public int obtenerUltimoCodPersona( int audUsuario ) {
+        Email temp = new Email();
+        try {
+            temp = this.jdbcTemplate.queryForObject("execute p_list_email @audUsuarioI=?,  @ACCION=?",
+                    new Object[] { audUsuario, "A" },
+                    new int[] {Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Email eml = new Email();
+                        eml.setCodPersona(rs.getInt(1));
+                        return eml;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: EmailDao en obtenerUltimoPersona, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            temp = new Email();
+        }
+        return temp.getCodPersona();
     }
 }

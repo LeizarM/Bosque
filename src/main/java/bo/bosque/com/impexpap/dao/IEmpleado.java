@@ -30,5 +30,5 @@ public interface IEmpleado {
      * Procedimiento para obtener el ultimo codigo de empleado insertado
      * @return
      */
-    int obtenerUltimoEmpleado();
+    int obtenerUltimoEmpleado( );
 }
