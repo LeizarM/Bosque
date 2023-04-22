@@ -18,7 +18,7 @@ import java.util.Map;
 public class JasperReportExport {
 
     private static final String REPORT_FOLDER = "reports";
-    private static final String SUBREPORT_DIR = "D:\\Proyectos\\Bosque\\Bosque\\src\\main\\resources\\reports\\";
+    private static final String SUBREPORT_DIR = "src\\main\\resources\\reports\\";
     private static final String JRXML = ".jrxml";
     private static final String JASPER = ".jasper";
 
