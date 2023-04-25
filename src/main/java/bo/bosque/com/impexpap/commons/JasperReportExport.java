@@ -42,7 +42,7 @@ public class JasperReportExport {
 
         byte[] reportBytes;
         String path = "\\"+REPORT_FOLDER+"\\"+fileName+JRXML;
-        System.out.println(path);
+
         params.put("SUBREPORT_DIR", SUBREPORT_DIR);
         try {
 

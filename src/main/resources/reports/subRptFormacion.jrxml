@@ -105,8 +105,8 @@
 	</columnHeader>
 	<detail>
 		<band height="19" splitType="Stretch">
-			<textField>
-				<reportElement x="0" y="0" width="198" height="19" uuid="bcfab4fb-2d11-4fe4-ba43-50eb71cf751c">
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="198" height="19" isPrintWhenDetailOverflows="true" uuid="bcfab4fb-2d11-4fe4-ba43-50eb71cf751c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2ad9f742-0209-48e4-91f0-6da76fdda3c2"/>
 				</reportElement>
 				<box>
@@ -116,7 +116,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8"/>
+					<font size="6"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
