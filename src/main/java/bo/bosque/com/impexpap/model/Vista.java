@@ -36,7 +36,6 @@ public class Vista implements Serializable {
     private int tieneHijo;
     private String routerLink; // router de Angular
     private String icon; // icono de PrimeNG
-    private String path;
 
     /**
      * Constructores
@@ -53,7 +52,7 @@ public class Vista implements Serializable {
         this.audUsuarioI    = audUsuarioI;
     }
 
-    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, List<Vista> items, String label, int tieneHijo, String routerLink, String icon, String path,int audUsuarioI) {
+    public Vista(int fila, int codVista, int codVistaPadre, String direccion, String titulo, String descripcion, String imagen, int esRaiz, int autorizar, List<Vista> items, String label, int tieneHijo, String routerLink, String icon,int audUsuarioI) {
         this.fila           = fila;
         this.codVista       = codVista;
         this.codVistaPadre  = codVistaPadre;
@@ -68,7 +67,6 @@ public class Vista implements Serializable {
         this.tieneHijo      = tieneHijo;
         this.routerLink     = routerLink;
         this.icon           = icon;
-        this.path           = path;
         this.audUsuarioI    = audUsuarioI;
     }
 

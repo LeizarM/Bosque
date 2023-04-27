@@ -47,10 +47,10 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
      */
     public Login verifyUser(String login, String password, String ip) {
 
-        System.out.println(password);
+
         Login temp = new Login();
         try {
-              temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
+              temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password2=?, @ip=? ,@ACCION=?",
                       new Object[] { login, password, ip ,"C" },
                       new int[] { Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR, Types.VARCHAR }
                     ,(rs, rowNum) -> {
