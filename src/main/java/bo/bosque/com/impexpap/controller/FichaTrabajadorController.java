@@ -1,7 +1,6 @@
 package bo.bosque.com.impexpap.controller;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,9 +17,6 @@ import bo.bosque.com.impexpap.dao.IPersona;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.GaranteReferencia;
 
-import bo.bosque.com.impexpap.model.Persona;
-
-import lombok.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -236,8 +232,8 @@ public class FichaTrabajadorController {
         try{
             Map<String, Object> params = new HashMap<>();
             params.put("codEmpleado", emp.getCodEmpleado()  );
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDF( nombreReporte, params);
 
-            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate ).exportPDF( nombreReporte, params);
 
             HttpHeaders headers = new HttpHeaders();
             //set the PDF format
