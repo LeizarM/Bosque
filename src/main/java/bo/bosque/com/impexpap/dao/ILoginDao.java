@@ -16,10 +16,10 @@ public interface ILoginDao {
     /**
      * Para obtener el usuario
      * @param login
-     * @param password
+     * @param password2
      * @return
      */
-    Login verifyUser( String login, String password, String ip );
+    Login verifyUser( String login, String password2, String ip );
 
     /**
      * Procedimiento para verificar los usuarios por nombre

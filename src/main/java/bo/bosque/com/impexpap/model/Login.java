@@ -20,11 +20,13 @@ public class Login implements Serializable, UserDetails {
     private int codEmpleado;
     private String login;
     private String password;
+    private String password2;
     private String tipoUsuario;
     private String esAutorizador;
     private String estado;
     private int audUsuarioI;
     private String elTemaSelecionado = "";
+    private String npassword;
 
     /*
     **** Variables de apoyo
@@ -47,12 +49,14 @@ public class Login implements Serializable, UserDetails {
     /**
      * Constructores
      */
-    public Login(int codUsuario, int codEmpleado, String login, String password, String tipoUsuario,String esAutorizador, String estado, int audUsuarioI) {
+    public Login(int codUsuario, int codEmpleado, String login, String password, String password2, String npassword ,String tipoUsuario,String esAutorizador, String estado, int audUsuarioI) {
 
         this.codUsuario = codUsuario;
         this.codEmpleado = codEmpleado;
         this.login = login;
         this.password = password;
+        this.password2 = password2;
+        this.npassword = npassword;
         this.tipoUsuario = tipoUsuario;
         this.esAutorizador = esAutorizador;
         this.estado = estado;
