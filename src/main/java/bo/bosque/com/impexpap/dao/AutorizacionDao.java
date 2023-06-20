@@ -12,7 +12,7 @@ import bo.bosque.com.impexpap.utils.Tipos;
 
 
 @Repository
-public class AutorizacionDaoImpl implements IAutorizacionDao{
+public class AutorizacionDao implements IAutorizacion{
 
 
     /**
@@ -46,11 +46,11 @@ public class AutorizacionDaoImpl implements IAutorizacionDao{
                         temp.setDatoUsuarioAP( rs.getString(8 ) );
                         temp.setAudFecha(rs.getDate(9 ) );
                         temp.setDatoUsuarioGP(rs.getString(10 ) );
-                        temp.getRegProp().setAudUsGenerado( rs.getDate(11) );
+                        temp.getRegProp().setAudFecGenerado( rs.getDate(11) );
                         return temp;
                     });
         }catch ( BadSqlGrammarException e){
-            System.out.println("Error: VistaDaoImpl en AutorizacionDaoImpl, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            System.out.println("Error: VistaDaoImpl en AutorizacionDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<Autorizacion>();
             this.jdbcTemplate = null;
         }

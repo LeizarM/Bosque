@@ -79,7 +79,11 @@ public class LoginController {
 
     }
 
-
+    /**
+     * Serv. para cambiar la contraseña
+     * @param login
+     * @return
+     */
     @PostMapping("/changePassword")
     public ResponseEntity<?>login(@RequestBody Login login) {
         Map<String, Object> response = new HashMap<>();

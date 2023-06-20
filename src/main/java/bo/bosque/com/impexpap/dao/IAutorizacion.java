@@ -5,7 +5,7 @@ import bo.bosque.com.impexpap.model.Autorizacion;
 import bo.bosque.com.impexpap.utils.Tipos;
 
 
-public interface IAutorizacionDao {
+public interface IAutorizacion {
 
     /**
      * Procedimiento que listara las propuestas
