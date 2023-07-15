@@ -29,7 +29,10 @@ public class Producto implements Serializable {
     /**
      * Variables de Apoyo
      */
-
     private String nombreProveedor;
     private String nombreFamilia;
+    private String presentacion;
+    private String color;
+    private String tipo;
+    private String rangoGramaje;
 }

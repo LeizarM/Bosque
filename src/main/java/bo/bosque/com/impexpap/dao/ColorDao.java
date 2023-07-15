@@ -43,7 +43,6 @@ public class ColorDao implements IColor {
             resp = 0;
         }
 
-        return resp != 0
-                ;
+        return resp != 0;
     }
 }

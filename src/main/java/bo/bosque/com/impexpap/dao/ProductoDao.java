@@ -145,4 +145,46 @@ public class ProductoDao implements IProducto {
 
     }
 
+    /**
+     * Devolvera un objecto de acuerrdo al codigo de familia
+     *
+     * @param codigoFamilia
+     * @return
+     */
+    public Producto cargarDatoFamilia( int codigoFamilia ) {
+        Producto p = new Producto();
+        try {
+            p =  this.jdbcTemplate.queryForObject("execute p_list_producto @codigoFamilia=?, @ACCION=?",
+                    new Object[] { codigoFamilia, "L" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+
+                        Producto temp = new Producto();
+
+                        temp.setCodigoFamilia( rs.getInt(1 ) );
+                        temp.setNombreProveedor( rs.getString(2));
+                        temp.setNombreFamilia( rs.getString(3 ) );
+                        temp.setPresentacion(rs.getString(4) );
+                        temp.setTipo( rs.getString(5) );
+                        temp.setRangoGramaje( rs.getString(6) );
+                        temp.setGramaje( rs.getString(7) );
+                        temp.setFormato( rs.getString(8) );
+                        temp.setColor( rs.getString(9) );
+                        temp.setEstado( rs.getInt(10));
+                        temp.setCostoTM( rs.getFloat(11) );
+                        temp.setIdPropuestaAprobada( rs.getInt(12) );
+                        temp.setAudUsuario( rs.getInt(13) );
+
+
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: cargarDatoFamilia en ProductoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            p = new Producto();
+            this.jdbcTemplate = null;
+        }
+
+        return p;
+    }
+
 }

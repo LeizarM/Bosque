@@ -19,4 +19,11 @@ public interface IArticuloPropuesto {
      * @return
      */
     List<ArticuloPropuesto> listarArticulosXFamilia( String codCad );
+
+    /**
+     * Para listar los articulos que se van a cambiar de precios por cada propuesta
+     * @param idPropuesta
+     * @return
+     */
+    List<ArticuloPropuesto> listarArticulosPropuesta (  int idPropuesta );
 }

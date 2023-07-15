@@ -88,5 +88,54 @@ public class ArticuloPropuestoDao implements IArticuloPropuesto {
         return lstTemp;
     }
 
+    /**
+     * Para listar los articulos que se van a cambiar de precios por cada propuesta
+     *
+     * @param idPropuesta
+     * @return
+     */
+    public List<ArticuloPropuesto> listarArticulosPropuesta( int idPropuesta ) {
+
+        List<ArticuloPropuesto> lstTemp = new ArrayList<ArticuloPropuesto>();
+        try {
+            lstTemp =  this.jdbcTemplate.query("execute p_list_ArticuloProp @idPropuesta=?, @ACCION=?",
+                    new Object[] { idPropuesta, "D" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        ArticuloPropuesto temp = new ArticuloPropuesto();
+
+                       temp.setCodigoFamilia(rs.getInt(1));
+                       temp.setCosto(rs.getFloat(2));
+                       temp.setProveedor(rs.getString(3));
+                       temp.setFamilia(rs.getString(4));
+                       temp.setCodArticulo(rs.getString(5));
+                       temp.setDatoArticulo(rs.getString(6));
+                       temp.setNombreSucursal(rs.getString(7));
+                       temp.setVpp(rs.getInt(8));
+                       temp.setListNumPap(rs.getInt(9));
+                       temp.setListNumIpx(rs.getInt(10));
+                       temp.setUtm(rs.getFloat(11));
+                       temp.setPrecioPropuesto(rs.getFloat(12));
+                       temp.setPrecioCalc(rs.getFloat(13));
+                       temp.setPrecioUnitUsdIpx(rs.getFloat(14));
+                       temp.setPrecioUnitBsIpx(rs.getFloat(15));
+                       temp.setPrecioUnitUsdPap(rs.getFloat(16));
+                       temp.setPrecioUnitBsPap(rs.getFloat(17));
+                       temp.setMonedaUSD(rs.getString(18));
+                       temp.setMonedaBS(rs.getString(19));
+
+
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: listarArticulosPropuesta en ArticuloPropuestoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+
+
+
 
 }

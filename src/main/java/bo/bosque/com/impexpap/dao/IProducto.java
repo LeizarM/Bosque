@@ -32,4 +32,11 @@ public interface IProducto {
      * @return
      */
     List<Producto> listadoFamiliaXGrupo( int idGrpFamiliaSap );
+
+    /**
+     * Devolvera un objecto de acuerrdo al codigo de familia
+     * @param codigoFamilia
+     * @return
+     */
+    Producto cargarDatoFamilia( int codigoFamilia );
 }

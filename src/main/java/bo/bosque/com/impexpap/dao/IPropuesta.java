@@ -11,4 +11,11 @@ public interface IPropuesta {
      */
     boolean registrarPropuesta(Propuesta propuesta, String acc );
 
+    /**
+     * Metodo para obtener el ultimo id de la ultima propuesta registrada
+     * @param audUsuario
+     * @return
+     */
+    int ultimaIdPropuesta ( int audUsuario );
+
 }
