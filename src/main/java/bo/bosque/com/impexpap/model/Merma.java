@@ -9,11 +9,13 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+public class Merma implements Serializable {
 
-public class Color implements Serializable {
-
-    private int idColor;
-    private String color;
-    private int estado;
+    private int idMe;
+    private int idLp;
+    private String codArticulo;
+    private String descripcion;
+    private float peso;
     private int audUsuario;
+
 }

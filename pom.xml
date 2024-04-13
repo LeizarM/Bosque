@@ -36,7 +36,7 @@
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency>º
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
