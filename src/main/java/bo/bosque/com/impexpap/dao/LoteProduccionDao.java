@@ -37,9 +37,10 @@ public class LoteProduccionDao implements ILoteProduccion {
         try{
             resp = this.jdbcTemplate.update("execute p_abm_tprod_loteProduccion @idLp=?, @numLote=?, @anio=?, @fecha=?, @hraInicioCorte=? , @hraInicio=? , @hraFin=? " +
                                                 ", @cantBobinasIngresoTotal=?, @pesoKilosTotalIngreso=? , @pesoTotalSalida=? , @pesoPaletaSalida=? , @pesoMaterialSalida=? , @cantResmaSalida=?" +
-                                                ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=? , @obs=? , @audUsuario=? ,  @ACCION=?",
+                                                ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=?, @diferenciaProdResma = ?, @cantEstimadaResma = ?, @pesoBalanzaTotal = ? , @estado = ? ,@obs=? , @audUsuario=? ,  @ACCION=?",
                     ps -> {
 
+                        ps.setEscapeProcessing( true );
                         ps.setInt(1, loProd.getIdLp());
                         ps.setInt(2, loProd.getNumLote());
                         ps.setInt(3, loProd.getAnio());
@@ -56,9 +57,13 @@ public class LoteProduccionDao implements ILoteProduccion {
                         ps.setFloat(14, loProd.getCantHojasSalida());
                         ps.setFloat(15, loProd.getMermaTotal());
                         ps.setFloat(16, loProd.getDiferenciaProduccion());
-                        ps.setString(17, loProd.getObs());
-                        ps.setInt(18, loProd.getAudUsuario());
-                        ps.setString(19, acc);
+                        ps.setFloat(17, loProd.getDiferenciaProdResma());
+                        ps.setFloat(18, loProd.getCantEstimadaResma());
+                        ps.setFloat(19, loProd.getPesoBalanzaTotal());
+                        ps.setInt(20, loProd.getEstado());
+                        ps.setString(21, loProd.getObs());
+                        ps.setInt(22, loProd.getAudUsuario());
+                        ps.setString(23, acc);
 
                     });
 
@@ -137,7 +142,7 @@ public class LoteProduccionDao implements ILoteProduccion {
                         temp.setCodArticulo(rs.getString(1));
                         temp.setDatoArt(rs.getString(2));
                         temp.setArticulo(rs.getString(3));
-
+                        temp.setUtm(rs.getFloat(4));
 
                         return temp;
 

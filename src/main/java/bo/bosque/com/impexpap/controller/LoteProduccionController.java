@@ -45,7 +45,7 @@ public class LoteProduccionController {
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/newLoteProduccion")
-    public List<LoteProduccion> obtenerGaranteReferencia(){
+    public List<LoteProduccion> obtenerListadeLotesDeProduccion(){
 
         List<LoteProduccion> lstTemp = this.loteProducionDao.obtenerLotesProduccionNew();
 
@@ -80,6 +80,7 @@ public class LoteProduccionController {
     @PostMapping("/registroLoteProduccion")
     public ResponseEntity<?> registrarLoteProduccion(@RequestBody LoteProduccion regLoteProduccion ) {
 
+        System.out.println("Se registro LP");
         Map<String, Object> response = new HashMap<>();
         regLoteProduccion.setFecha( new Utiles().fechaJ_a_Sql(regLoteProduccion.getFecha()));
         String acc = "U";
@@ -105,22 +106,6 @@ public class LoteProduccionController {
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/registroIngreso")
     public ResponseEntity<?> registrarMaterialIngreso( @RequestBody List<MaterialIngreso> regMatIng  ) {
-
-        /*Map<String, Object> response = new HashMap<>();
-
-        String acc = "U";
-        if( regMatIng.getIdMi() == 0){
-            acc = "I";
-        }
-
-        if( !this.materialIngresoDao.registrarMaterialIngreso( regMatIng, acc ) ){
-            response.put("msg", "Error al Registrar el Metarial de ingreso");
-            response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("msg", "Datos de Ingreso Actualizados");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);*/
 
         Map<String, Object> response = new HashMap<>();
         boolean errorOccurred = false;

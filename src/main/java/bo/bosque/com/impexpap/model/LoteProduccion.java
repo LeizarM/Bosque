@@ -28,6 +28,10 @@ public class LoteProduccion implements Serializable {
     private float cantHojasSalida;
     private float mermaTotal;
     private float diferenciaProduccion;
+    private float diferenciaProdResma;
+    private float cantEstimadaResma;
+    private float pesoBalanzaTotal;
+    private int estado;
     private String obs;
     private int audUsuario;
 
@@ -35,5 +39,6 @@ public class LoteProduccion implements Serializable {
     private String codArticulo;
     private String datoArt;
     private String articulo;
+    private float utm;
 
 }

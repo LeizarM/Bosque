@@ -17,6 +17,7 @@ public class MaterialIngreso implements Serializable {
     private String descripcion;
     private float pesoKilos;
     private float balanza;
+    private String numImportacion;
     private int audUsuario;
 
 
