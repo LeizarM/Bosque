@@ -33,6 +33,9 @@ public class LoteProduccion implements Serializable {
     private float pesoBalanzaTotal;
     private int estado;
     private String obs;
+    private int numCorte;
+    private int anioCorte;
+
     private int audUsuario;
 
     //===== ATRIBUTOS ADICIONALES

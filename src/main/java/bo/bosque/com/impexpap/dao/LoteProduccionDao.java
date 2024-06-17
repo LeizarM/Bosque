@@ -37,7 +37,7 @@ public class LoteProduccionDao implements ILoteProduccion {
         try{
             resp = this.jdbcTemplate.update("execute p_abm_tprod_loteProduccion @idLp=?, @numLote=?, @anio=?, @fecha=?, @hraInicioCorte=? , @hraInicio=? , @hraFin=? " +
                                                 ", @cantBobinasIngresoTotal=?, @pesoKilosTotalIngreso=? , @pesoTotalSalida=? , @pesoPaletaSalida=? , @pesoMaterialSalida=? , @cantResmaSalida=?" +
-                                                ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=?, @diferenciaProdResma = ?, @cantEstimadaResma = ?, @pesoBalanzaTotal = ? , @estado = ? ,@obs=? , @audUsuario=? ,  @ACCION=?",
+                                                ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=?, @diferenciaProdResma = ?, @cantEstimadaResma = ?, @pesoBalanzaTotal = ? , @estado = ? ,@obs=?, @numCorte=?, @anioCorte=? , @audUsuario=? ,  @ACCION=?",
                     ps -> {
 
                         ps.setEscapeProcessing( true );
@@ -62,8 +62,10 @@ public class LoteProduccionDao implements ILoteProduccion {
                         ps.setFloat(19, loProd.getPesoBalanzaTotal());
                         ps.setInt(20, loProd.getEstado());
                         ps.setString(21, loProd.getObs());
-                        ps.setInt(22, loProd.getAudUsuario());
-                        ps.setString(23, acc);
+                        ps.setInt(22, loProd.getNumCorte());
+                        ps.setInt(23, loProd.getAnioCorte());
+                        ps.setInt(24, loProd.getAudUsuario());
+                        ps.setString(25, acc);
 
                     });
 

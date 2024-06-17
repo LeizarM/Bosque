@@ -33,7 +33,7 @@ public class ResmadoDao implements IResmado {
         int resp;
 
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_tprod_Resmado @idRes=?, @idGrupo=?, @codEmpleado=?, @fecha=?, @total=?,  @audUsuario=? ,  @ACCION=?",
+            resp = this.jdbcTemplate.update("execute p_abm_tprod_Resmado @idRes=?, @idGrupo=?, @codEmpleado=?, @fecha=?, @total=?, @hraInicio=?, @hraFin=?,  @audUsuario=? ,  @ACCION=?",
                     ps -> {
 
                         ps.setEscapeProcessing( true );
@@ -42,8 +42,10 @@ public class ResmadoDao implements IResmado {
                         ps.setInt(3, rmd.getCodEmpleado());
                         ps.setDate(4, (Date) rmd.getFecha());
                         ps.setFloat(5, rmd.getTotal());
-                        ps.setInt(6, rmd.getAudUsuario());
-                        ps.setString(7, acc);
+                        ps.setString(6, rmd.getHraInicio());
+                        ps.setString(7, rmd.getHraFin());
+                        ps.setInt(8, rmd.getAudUsuario());
+                        ps.setString(9, acc);
 
                     });
 
