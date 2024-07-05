@@ -20,13 +20,14 @@ public class Jwt implements Serializable {
     private int codUsuario;
     private int codEmpleado;
     private int codEmpresa;
+    private int codCiudad;
     private String login;
     private Collection<? extends GrantedAuthority> authorities;
     
     /**
      * Constructor
      */
-    public Jwt(String token, String nombreCompleto, String cargo, String tipoUsuario, int codUsuario, int codEmpleado,int codEmpresa , String login, Collection<? extends GrantedAuthority> authorities) {
+    public Jwt(String token, String nombreCompleto, String cargo, String tipoUsuario, int codUsuario, int codEmpleado,int codEmpresa , int codCiudad, String login, Collection<? extends GrantedAuthority> authorities) {
         this.token = token;
         this.nombreCompleto = nombreCompleto;
         this.cargo = cargo;
@@ -34,6 +35,7 @@ public class Jwt implements Serializable {
         this.codUsuario = codUsuario;
         this.codEmpleado = codEmpleado;
         this.codEmpresa = codEmpresa;
+        this.codCiudad = codCiudad;
         this.login = login;
         this.authorities = authorities;
     }

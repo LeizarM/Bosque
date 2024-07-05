@@ -1,0 +1,64 @@
+package bo.bosque.com.impexpap.dao;
+
+import bo.bosque.com.impexpap.model.ArticuloPrecioDisponible;
+import bo.bosque.com.impexpap.model.ArticuloPropuesto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+
+
+ @Repository
+public class ArticuloPrecioDisponibleDao implements  IArticuloPrecioDisponible {
+
+    /**
+     * El Datasource
+     */
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    /**
+     * Para obtener los articulos de IPX y ESPP
+     *
+     * @return
+     */
+    @Override
+    public List<ArticuloPrecioDisponible> obtenerArticulosIPXyESPP( int codCiudad ) {
+
+
+        List<ArticuloPrecioDisponible> lstTemp = new ArrayList<ArticuloPrecioDisponible>();
+        try {
+            lstTemp = this.jdbcTemplate.query("execute p_list_articuloPrecioDisponible  @codCiudad = ? ,@ACCION=?",
+                    new Object[]{ codCiudad, "E" },
+                    new int[]{Types.INTEGER, Types.VARCHAR},
+                    (rs, rowNum) -> {
+                        ArticuloPrecioDisponible temp = new ArticuloPrecioDisponible();
+
+                        temp.setCodArticulo(rs.getString(1));
+                        temp.setDatoArt(rs.getString(2));
+                        temp.setListaPrecio(rs.getInt(3));
+                        temp.setPrecio(rs.getFloat(4));
+                        temp.setMoneda(rs.getString(5));
+                        temp.setCodigoFamilia(rs.getInt(6));
+                        temp.setDisponible(rs.getInt(7));
+                        temp.setUnidadMedida(rs.getString(8));
+                        temp.setCodCiudad( rs.getInt(9) );
+                        temp.setCodGrpFamiliaSap( rs.getInt(11));
+                        temp.setRuta( rs.getString(12));
+                        temp.setDb( rs.getString(13));
+
+                        return temp;
+                    });
+        } catch (BadSqlGrammarException e) {
+            System.out.println("Error: obtenerArticulosIPXyESPP en ArticuloPrecioDisponibleDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+}

@@ -36,6 +36,7 @@ public class JwtProvider {
                 .claim("cargo", login.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().getDescripcion() )
                 .claim("codSucursal", login.getCodSucursal())
                 .claim( "codEmpresa", login.getCodEmpresa())
+                .claim( "codCiudad", login.getCodCiudad())
                 .claim( "tipoUsuario", login.getTipoUsuario())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration * 1000))

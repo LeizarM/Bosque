@@ -29,7 +29,7 @@ import bo.bosque.com.impexpap.model.Login;
 
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/auth")
 @Slf4j
 public class LoginController {
@@ -73,7 +73,7 @@ public class LoginController {
         String jwt = jwtProvider.generateToken( authentication, loginTemp );
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        Jwt jwtT = new Jwt( jwt,loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().getDescripcion(), loginTemp.getTipoUsuario() , loginTemp.getCodUsuario(), loginTemp.getCodEmpleado() ,loginTemp.getCodEmpresa(), login.getLogin() ,userDetails.getAuthorities() );
+        Jwt jwtT = new Jwt( jwt, loginTemp.getEmpleado().getPersona().getDatoPersona(), loginTemp.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().getDescripcion(), loginTemp.getTipoUsuario() , loginTemp.getCodUsuario(), loginTemp.getCodEmpleado() ,loginTemp.getCodEmpresa(), loginTemp.getCodCiudad() ,login.getLogin() ,userDetails.getAuthorities() );
 
         return new ResponseEntity<>(jwtT, HttpStatus.OK);
 
