@@ -48,9 +48,9 @@ public class ArticuloPrecioDisponibleDao implements  IArticuloPrecioDisponible {
                         temp.setDisponible(rs.getInt(7));
                         temp.setUnidadMedida(rs.getString(8));
                         temp.setCodCiudad( rs.getInt(9) );
-                        temp.setCodGrpFamiliaSap( rs.getInt(11));
-                        temp.setRuta( rs.getString(12));
-                        temp.setDb( rs.getString(13));
+                        temp.setCodGrpFamiliaSap( rs.getInt(10));
+                        temp.setRuta( rs.getString(11));
+                        temp.setDb( rs.getString(12));
 
                         return temp;
                     });
