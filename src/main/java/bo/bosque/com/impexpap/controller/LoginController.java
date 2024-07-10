@@ -116,5 +116,29 @@ public class LoginController {
     }
 
 
+    /**
+     * Serv. para cambiar la contraseña que aparece por default
+     * @param login
+     * @return
+     */
+    @PostMapping("/changePasswordDefault")
+    public ResponseEntity<?>changePasswordDefault(@RequestBody Login login) {
+
+
+
+        Map<String, Object> response = new HashMap<>();
+        login.setPassword2(passwordEncoder.encode( login.getNpassword() ));
+
+        if(!this.ldao.abmLogin(login,"Q")){
+            response.put("error", "Error En las credenciales");
+            response.put("ok", false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        response.put("msg", "Constraseña actualizada correctamente");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+    }
+
 
 }
