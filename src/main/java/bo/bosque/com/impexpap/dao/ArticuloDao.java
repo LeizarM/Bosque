@@ -15,7 +15,7 @@ public class ArticuloDao implements IArticulo {
     private JdbcTemplate jdbcTemplate;
 
     /**
-     * Para registrar el Articulo
+     * Para registrar el Articulos
      *
      * @param articulo
      * @param acc
