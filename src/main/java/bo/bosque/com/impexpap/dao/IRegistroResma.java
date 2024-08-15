@@ -22,5 +22,20 @@ public interface IRegistroResma {
      */
     List<RegistroResma> lstRegistroResma();
 
+    /**
+     * Obtiene la lista de los registros de resma que están entrando por empresa
+     * @param codEmpresa
+     * @return
+     */
+    List<RegistroResma> lstEntradaDeMercaderias( int codEmpresa );
+
+    /**
+     * Obtiene la lista de artculos por numero de documento y empresa
+     * @param codEmpresa
+     * @param docNum
+     * @return
+     */
+    List<RegistroResma> lstArticuloXEntrada( int codEmpresa, int docNum );
+
 
 }

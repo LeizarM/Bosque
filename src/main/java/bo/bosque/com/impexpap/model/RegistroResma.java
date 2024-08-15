@@ -19,7 +19,16 @@ public class RegistroResma implements Serializable {
         private float totalUSD;
         private String obs;
         private int codEmpleado;
+        private int docNum;
         private int audUsuario;
+
+        // atributos auxiliares
+        private String codArticulo;
+        private String descripcion;
+        private int docNumB;
+        private String db;
+        private int codEmpresa;
+        private String articulo;
 
 
 }

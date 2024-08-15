@@ -20,6 +20,14 @@ public class RegistroDanoBobina implements Serializable {
     private float totalKilosDanadosReal;
     private float totalUsd;
     private String obs;
+    private int docNum;
     private int audUsuario;
 
+    // atributos auxiliares
+    private String codArticulo;
+    private String descripcion;
+    private int docNumB;
+    private String db;
+    private int codEmpresa;
+    private String articulo;
 }

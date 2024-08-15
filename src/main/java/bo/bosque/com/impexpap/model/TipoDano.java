@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.model;
 
+import java.io.Serializable;
 
 import lombok.*;
 
@@ -8,9 +9,10 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TipoDano {
+public class TipoDano implements Serializable {
 
     private int idTd;
     private String descripcion;
-    private int audUsuario;
+    private int audusuario;
+
 }
