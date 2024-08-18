@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.CostoIncre;
 import bo.bosque.com.impexpap.model.RegistroDanoBobina;
+import bo.bosque.com.impexpap.model.RegistroResma;
 
 import java.util.List;
 
@@ -20,4 +21,21 @@ public interface IRegistroDanoBobina {
      * @return
      */
     List<RegistroDanoBobina> lstRegistroDanoBobina();
+
+
+    /**
+     * Obtiene la lista de los registros de Bobina que están entrando por empresa
+     * @param codEmpresa
+     * @return
+     */
+    List<RegistroDanoBobina> lstEntradaDeMercaderiasBob(int codEmpresa );
+
+    /**
+     * Obtiene la lista de artculos por numero de documento y empresa
+     * @param codEmpresa
+     * @param docNum
+     * @return
+     */
+    List<RegistroDanoBobina> lstArticuloXEntradaBob( int codEmpresa, int docNum );
+
 }

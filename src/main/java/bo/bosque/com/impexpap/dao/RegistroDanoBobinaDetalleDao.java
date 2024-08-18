@@ -1,5 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -7,7 +9,11 @@ import java.util.List;
 @Repository
 public class RegistroDanoBobinaDetalleDao implements  IRegistroDanoBobinaDetalle {
 
-
+    /**
+     * El Datasource
+     */
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
 
     /**
