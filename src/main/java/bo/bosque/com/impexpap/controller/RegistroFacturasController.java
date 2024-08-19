@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,5 +74,22 @@ public class RegistroFacturasController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    /**
+     * Obtener las facturas registradas por fecha
+     * @param mb
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/lstFacturasRegistradas")
+    public List<RegistroFacturas> lstFacturasRegistradas( @RequestBody RegistroFacturas mb  ){
+
+
+
+        mb.setFechaSistema( new Utiles().fechaJ_a_Sql(mb.getFechaSistema()) );
+
+        List<RegistroFacturas> lstEmpr = this.registroFacturasDao.lstFacturasRegistradas( mb.getFechaSistema() );
+        if( lstEmpr.size() == 0 ) return  new ArrayList<>();
+        return lstEmpr;
+    }
 
 }

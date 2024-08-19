@@ -31,6 +31,9 @@ public class RegistroFacturas implements Serializable {
 
     //variables adicionales
     private String nombreEmpresa;
+    private String descripcionTf;
+    private String direccion;
+    private String qrCadena;
 
 
 }

@@ -37,4 +37,11 @@ public interface IRegistroFacturas {
      * @return
      */
     List<RegistroFacturas> lstEmpresas();
+
+    /**
+     * Listara las facturas registradas para una fecha especifica
+     * @param fecha
+     * @return
+     */
+    List<RegistroFacturas> lstFacturasRegistradas( Date fechaSistema );
 }

@@ -97,6 +97,8 @@ public class Tipos {
         List<Tipos> listaTemp = new ArrayList<Tipos>();
         listaTemp.add(new Tipos("1", "Factura Electronica", 60));
         listaTemp.add(new Tipos("2", "Factura Computarizada", 60));
+        listaTemp.add(new Tipos("3", "Recibo", 60));
+
         //listaTemp.add(new Tipos("3", "En Espera", 38));
         return listaTemp;
     }

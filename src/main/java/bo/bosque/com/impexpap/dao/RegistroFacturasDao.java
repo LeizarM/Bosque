@@ -119,4 +119,49 @@ public class RegistroFacturasDao implements  IRegistroFacturas {
         }
         return lstTemp;
     }
+
+    /**
+     * Listara las facturas registradas para una fecha especifica
+     *
+     * @param fechaSistema
+     * @return
+     */
+    @Override
+    public List<RegistroFacturas> lstFacturasRegistradas( Date fechaSistema ) {
+        List<RegistroFacturas> lstTemp =  new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tfsc_Factura @fechaSistema=?, @ACCION = ?",
+                    new Object[]{ fechaSistema, "B" },
+                    new int[]{ Types.DATE, Types.VARCHAR },
+                    (rs, rowCount) ->{
+                        RegistroFacturas temp = new RegistroFacturas();
+
+                        temp.setIdFac( rs.getInt(1) );
+                        temp.setDescripcionTf(rs.getString(2));
+                        temp.setNombreEmpresa(rs.getString(3));
+                        temp.setFecha(rs.getDate(4));
+                        temp.setNumFact(rs.getInt(5));
+                        temp.setProveedor(rs.getString(6));
+                        temp.setNit(rs.getString(7));
+                        temp.setMonto(rs.getFloat(8));
+                        temp.setDescripcion(rs.getString(9));
+                        temp.setCuf(rs.getString(10));
+                        temp.setNroAutorizacion(rs.getString(11));
+                        temp.setCodControl(rs.getString(12));
+                        temp.setNitEmpresa(rs.getString(13));
+                        temp.setDireccion(rs.getString(14));
+                        temp.setQrCadena(rs.getString(15));
+
+
+                        return temp;
+                    });
+
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: RegistroFacturasDao en lstFacturasRegistradas, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
 }
