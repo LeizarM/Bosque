@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.controller;
 
 
+import bo.bosque.com.impexpap.dao.IRegistroDanoBobina;
 import bo.bosque.com.impexpap.dao.IRegistroResma;
 import bo.bosque.com.impexpap.dao.IRegistroResmaDetalle;
 import bo.bosque.com.impexpap.dao.ITipoDano;
@@ -26,13 +27,15 @@ public class MaterialMalEstadoController {
     private final IRegistroResma resmaDao;
     private final IRegistroResmaDetalle resmaDetalleDao;
     private final ITipoDano tipoDanoDao;
+    private final IRegistroDanoBobina danoBobinaDao;
 
 
-    public MaterialMalEstadoController(IRegistroResma resmaDao, IRegistroResmaDetalle resmaDetalleDao, ITipoDano tipoDanoDao) {
+    public MaterialMalEstadoController(IRegistroResma resmaDao, IRegistroResmaDetalle resmaDetalleDao, ITipoDano tipoDanoDao, IRegistroDanoBobina danoBobinaDao) {
 
         this.resmaDao = resmaDao;
         this.resmaDetalleDao = resmaDetalleDao;
         this.tipoDanoDao = tipoDanoDao;
+        this.danoBobinaDao = danoBobinaDao;
     }
 
 
@@ -84,7 +87,6 @@ public class MaterialMalEstadoController {
     public ResponseEntity<?> registrarResmaMalEstado(@RequestBody RegistroResma mb ) {
 
 
-        System.out.println( mb.toString() );
 
         Map<String, Object> response = new HashMap<>();
         mb.setFecha( new Utiles().fechaJ_a_Sql(mb.getFecha()));
@@ -135,7 +137,32 @@ public class MaterialMalEstadoController {
     }
 
 
+    //====================== CASO BOBINAS =========================
 
+    /**
+     * Procedimiento para listar todos los documentos de Bobina por empresa
+     * @param mb
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/lstDocNumBob")
+    public List<RegistroDanoBobina> obtenerDocNumBob( @RequestBody RegistroDanoBobina mb  ){
 
+        List<RegistroDanoBobina> lstTemp = this.danoBobinaDao.lstEntradaDeMercaderiasBob( mb.getCodEmpresa() );
+        if( lstTemp.size() == 0 ) return  new ArrayList<>();
+        return lstTemp;
+    }
+
+    /**
+     * Procedimiento para obtener todos los documentos de Bobina por empresa y número de documento
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/lstArticuloXEntradaBob")
+    public List<RegistroDanoBobina> obtenerArticuloXEntradaBob( @RequestBody RegistroDanoBobina mb  ){
+        List<RegistroDanoBobina> lstEmpr = this.danoBobinaDao.lstArticuloXEntradaBob( mb.getCodEmpresa(), mb.getDocNum() );
+        if( lstEmpr.size() == 0 ) return  new ArrayList<>();
+        return lstEmpr;
+    }
 
 }

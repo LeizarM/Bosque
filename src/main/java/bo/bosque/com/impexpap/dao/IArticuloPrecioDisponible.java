@@ -15,4 +15,12 @@ public interface IArticuloPrecioDisponible {
      */
     List<ArticuloPrecioDisponible> obtenerArticulosIPXyESPP( int codCiudad );
 
+    /**
+     * Para obtener los almacenes por item y su disponibilidad
+     * @param codArticulo
+     * @param codCiudad
+     * @return
+     */
+    List<ArticuloPrecioDisponible> obtenerAlmacenXItem( String codArticulo, int codCiudad  );
+
 }

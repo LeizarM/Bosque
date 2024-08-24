@@ -27,5 +27,9 @@ public class ArticuloPrecioDisponible implements Serializable {
 
     //Atributos extra
     private String db;
+    private String whsCode;
+    private String whsName;
+    private String condicionPrecio;
+    private String ciudad;
 
 }

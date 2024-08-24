@@ -46,4 +46,27 @@ public class PaginaXAppController {
     }
 
 
+
+    /**
+     * Servicio para obtener los articulos por item y disponibilidad en almacen
+     * @return List
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+
+    @PostMapping("/articulosXAlmacen") //que un usuario admin o limitado si tiene acceso para consumir este recurso
+    public List<ArticuloPrecioDisponible> listadoXAlmacen(  @RequestBody ArticuloPrecioDisponible apd  ) {
+
+
+        List<ArticuloPrecioDisponible> lstTemp = this.articuloPrecioDisponibleDao.obtenerAlmacenXItem( apd.getCodArticulo(),  apd.getCodCiudad() );
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
+
+    }
+
+
+
+
 }
