@@ -27,6 +27,7 @@ public class Login implements Serializable, UserDetails {
     private int audUsuarioI;
     private String elTemaSelecionado = "";
     private String npassword;
+    private String versionApp;
 
     /*
     **** Variables de apoyo
@@ -63,7 +64,7 @@ public class Login implements Serializable, UserDetails {
         this.audUsuarioI = audUsuarioI;
     }
 
-    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombreSucursal, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado, Collection<? extends GrantedAuthority> authorities ) {
+    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombreSucursal, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado, String versionApp ,Collection<? extends GrantedAuthority> authorities ) {
         this.codUsuario = codUsuario;
         this.empleado.getPersona().setDatoPersona( datoPersona );
 
@@ -80,6 +81,8 @@ public class Login implements Serializable, UserDetails {
         this.nombreEmpresa =  nombreEmpresa;
 
         this.elTemaSelecionado = elTemaSelecionado;
+
+        this.versionApp = versionApp;
 
         this.authorities = authorities;
     }

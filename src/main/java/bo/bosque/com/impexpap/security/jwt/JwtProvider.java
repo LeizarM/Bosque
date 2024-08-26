@@ -38,6 +38,7 @@ public class JwtProvider {
                 .claim( "codEmpresa", login.getCodEmpresa())
                 .claim( "codCiudad", login.getCodCiudad())
                 .claim( "tipoUsuario", login.getTipoUsuario())
+                .claim("versionApp", login.getVersionApp())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration * 1000))
                 .signWith(SignatureAlgorithm.HS512, JwtConfig.RSA_PRIVATE)
