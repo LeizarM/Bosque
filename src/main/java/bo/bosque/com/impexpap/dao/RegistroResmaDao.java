@@ -38,7 +38,7 @@ public class RegistroResmaDao implements IRegistroResma {
         int resp;
 
         try{
-            resp =  this.jdbcTemplate.update("execute p_abm_tmme_RegistroResma @idMer=?, @fecha=?, @totalPeso=?, @totalUSD=?, @obs=?, @codEmpleado=?, @docNum=?  ,@audUsuario=?, @ACCION=?",
+            resp =  this.jdbcTemplate.update("execute p_abm_tmme_RegistroResma @idMer=?, @fecha=?, @totalPeso=?, @totalUSD=?, @obs=?, @codEmpleado=?, @docNum=?, @codEmpresa=?  ,@audUsuario=?, @ACCION=?",
                     ps ->{
                         ps.setEscapeProcessing(true);
                         ps.setQueryTimeout(180);
@@ -49,8 +49,9 @@ public class RegistroResmaDao implements IRegistroResma {
                         ps.setString(5, mb.getObs() );
                         ps.setInt(6, mb.getCodEmpleado() );
                         ps.setInt(7, mb.getDocNum() );
-                        ps.setInt(8, mb.getAudUsuario() );
-                        ps.setString(9, acc);
+                        ps.setInt(8, mb.getCodEmpresa() );
+                        ps.setInt(9, mb.getAudUsuario() );
+                        ps.setString(10, acc);
                     });
         }catch( BadSqlGrammarException e){
             System.out.println("Error: RegistroResmaDao en registrarRegistroResma, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());

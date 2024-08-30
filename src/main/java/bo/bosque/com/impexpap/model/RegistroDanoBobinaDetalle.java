@@ -12,7 +12,7 @@ import lombok.*;
 public class RegistroDanoBobinaDetalle implements Serializable {
 
 
-    private String idRegDet;
+    private int idRegDet;
     private int idReg;
     private int idTd;
     private String codArticulo;
@@ -29,9 +29,11 @@ public class RegistroDanoBobinaDetalle implements Serializable {
     private float cmb;
     private float kilosDanados;
     private float precioUnitario;
-    private float subtotalUsd;
+    private float subTotalUsd;
     private String placa;
     private String chofer;
+    private String numImportacion;
     private int audUsuario;
+
 
 }

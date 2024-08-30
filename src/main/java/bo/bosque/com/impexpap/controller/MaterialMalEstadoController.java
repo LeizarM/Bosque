@@ -1,10 +1,7 @@
 package bo.bosque.com.impexpap.controller;
 
 
-import bo.bosque.com.impexpap.dao.IRegistroDanoBobina;
-import bo.bosque.com.impexpap.dao.IRegistroResma;
-import bo.bosque.com.impexpap.dao.IRegistroResmaDetalle;
-import bo.bosque.com.impexpap.dao.ITipoDano;
+import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
@@ -28,14 +25,16 @@ public class MaterialMalEstadoController {
     private final IRegistroResmaDetalle resmaDetalleDao;
     private final ITipoDano tipoDanoDao;
     private final IRegistroDanoBobina danoBobinaDao;
+    private final IRegistroDanoBobinaDetalle danoBobinaDetalleDao;
 
 
-    public MaterialMalEstadoController(IRegistroResma resmaDao, IRegistroResmaDetalle resmaDetalleDao, ITipoDano tipoDanoDao, IRegistroDanoBobina danoBobinaDao) {
+    public MaterialMalEstadoController(IRegistroResma resmaDao, IRegistroResmaDetalle resmaDetalleDao, ITipoDano tipoDanoDao, IRegistroDanoBobina danoBobinaDao, IRegistroDanoBobinaDetalle danoBobinaDetalleDao) {
 
         this.resmaDao = resmaDao;
         this.resmaDetalleDao = resmaDetalleDao;
         this.tipoDanoDao = tipoDanoDao;
         this.danoBobinaDao = danoBobinaDao;
+        this.danoBobinaDetalleDao = danoBobinaDetalleDao;
     }
 
 
@@ -164,5 +163,69 @@ public class MaterialMalEstadoController {
         if( lstEmpr.size() == 0 ) return  new ArrayList<>();
         return lstEmpr;
     }
+
+
+    /**
+     * Procedimiento para registrar o actualizar un registro de resma mal estado
+     * @param mb
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/registroBobinaMalEstado")
+    public ResponseEntity<?> registrarBobinaMalEstado(@RequestBody RegistroDanoBobina mb ) {
+
+
+
+        Map<String, Object> response = new HashMap<>();
+        mb.setFecha( new Utiles().fechaJ_a_Sql(mb.getFecha()));
+        String acc = "U";
+        if( mb.getIdReg() == 0){
+            acc = "I";
+        }
+
+        if( !this.danoBobinaDao.registrarRegistroDanoBobina( mb, acc ) ){
+            response.put("msg", "Error al Registrar El Registro de bobinas en Mal estado");
+            response.put("ok", "error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos  Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Procedimiento para registrar o actualizar los detalles de resma mal estado por registro de resma mal estado
+     * @param mb
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/detRegistroBobinaMalEstado")
+    public ResponseEntity<?> detRegistrarBobinaMalEstado( @RequestBody List<RegistroDanoBobinaDetalle> mb  ) {
+
+
+        System.out.println( mb.toString() );
+
+        Map<String, Object> response = new HashMap<>();
+        boolean errorOccurred = false;
+
+        for (RegistroDanoBobinaDetalle i : mb) {
+            String acc = i.getIdRegDet() == 0 ? "I" : "U"; // Determinar la acción por cada material
+            System.out.println(i.toString());
+            if (!this.danoBobinaDetalleDao.registrarRegistroDanoBobinaDetalle(i, acc)) {
+                errorOccurred = true;
+                // Podrías optar por recolectar más detalles sobre qué material causó el error
+                response.put("msg", "Error al registrar el detalle de Bobina ");
+                response.put("ok", "error");
+
+                // Puedes decidir si retornar inmediatamente en caso de error o continuar procesando
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        response.put("msg", "Todos los datos de ingreso han sido actualizados correctamente");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 
 }

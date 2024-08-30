@@ -20,6 +20,7 @@ public class RegistroResma implements Serializable {
         private String obs;
         private int codEmpleado;
         private int docNum;
+        private int codEmpresa;
         private int audUsuario;
 
         // atributos auxiliares
@@ -27,7 +28,6 @@ public class RegistroResma implements Serializable {
         private String descripcion;
         private int docNumB;
         private String db;
-        private int codEmpresa;
         private String articulo;
 
 

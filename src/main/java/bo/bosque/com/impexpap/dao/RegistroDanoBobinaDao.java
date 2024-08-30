@@ -7,6 +7,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -29,8 +30,35 @@ public class RegistroDanoBobinaDao  implements IRegistroDanoBobina {
      * @return
      */
     @Override
-    public boolean registrarRegistroDanoBobina(RegistroDanoBobina mb, String acc) {
-        return false;
+    public boolean registrarRegistroDanoBobina( RegistroDanoBobina mb, String acc ) {
+
+        int resp;
+
+        try{
+            resp =  this.jdbcTemplate.update("execute p_abm_tmme_RegistroDanoBobina @idReg=?, @fecha=?, @codEmpleado=? ,@totalKilosBobinas=?, @totalKilosDanados=?,@totalKilosDanadosReal=?, @totalUSD=? ,@obs=?, @docNum=?, @codEmpresa=?  ,@audUsuario=?, @ACCION=?",
+                    ps ->{
+                        ps.setEscapeProcessing(true);
+                        ps.setQueryTimeout(180);
+                        ps.setInt(1, mb.getIdReg() );
+                        ps.setDate(2, (Date) mb.getFecha());
+                        ps.setInt(3, mb.getCodEmpleado() );
+                        ps.setFloat(4, mb.getTotalKilosBobinas());
+                        ps.setFloat(5, mb.getTotalKilosDanados() );
+                        ps.setFloat(6, mb.getTotalKilosDanadosReal() );
+                        ps.setFloat(7, mb.getTotalUsd() );
+                        ps.setString(8, mb.getObs() );
+                        ps.setInt(9, mb.getDocNum() );
+                        ps.setInt(10, mb.getCodEmpresa() );
+                        ps.setInt(11, mb.getAudUsuario() );
+                        ps.setString(12, acc);
+                    });
+        }catch( BadSqlGrammarException e){
+            System.out.println("Error: RegistroDanoBobinaDao en registrarRegistroDanoBobina, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+
+        return resp != 0;
     }
 
     /**

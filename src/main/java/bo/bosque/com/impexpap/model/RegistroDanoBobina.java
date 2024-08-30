@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 public class RegistroDanoBobina implements Serializable {
 
-    private String idReg;
+    private int idReg;
     private Date fecha;
     private int codEmpleado;
     private float totalKilosBobinas;
@@ -21,6 +21,7 @@ public class RegistroDanoBobina implements Serializable {
     private float totalUsd;
     private String obs;
     private int docNum;
+    private int codEmpresa;
     private int audUsuario;
 
     // atributos auxiliares
@@ -28,6 +29,5 @@ public class RegistroDanoBobina implements Serializable {
     private String descripcion;
     private int docNumB;
     private String db;
-    private int codEmpresa;
     private String articulo;
 }
