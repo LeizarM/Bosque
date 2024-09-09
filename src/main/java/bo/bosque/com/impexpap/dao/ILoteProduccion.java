@@ -19,7 +19,7 @@ public interface ILoteProduccion {
      * Para obtener la loteProduccion ultimo
      * @return
      */
-    List<LoteProduccion> obtenerLotesProduccionNew();
+    List<LoteProduccion> obtenerLotesProduccionNew( int idMa );
 
     /**
      * Para obtener los articulos

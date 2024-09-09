@@ -23,8 +23,8 @@ public class ClassGenerator {
             return;
         }*/
 
-        String className ="RegistroFacturas";
-        String tableName = "tfsc_Factura";
+        String className ="MaquinaProduccion";
+        String tableName = "tprod_Maquina";
 
         ClassGenerator classGenerator = new ClassGenerator();
         classGenerator.generateClass(className, tableName);

@@ -5,20 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bo.bosque.com.impexpap.dao.*;
+import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import bo.bosque.com.impexpap.dao.ILoteProduccion;
-import bo.bosque.com.impexpap.dao.IMaterialIngreso;
-import bo.bosque.com.impexpap.dao.IMaterialSalida;
-import bo.bosque.com.impexpap.dao.IMerma;
-import bo.bosque.com.impexpap.model.LoteProduccion;
-import bo.bosque.com.impexpap.model.MaterialIngreso;
-import bo.bosque.com.impexpap.model.MaterialSalida;
-import bo.bosque.com.impexpap.model.Merma;
-
 
 
 @RestController
@@ -31,12 +24,14 @@ public class LoteProduccionController {
     private final IMaterialIngreso materialIngresoDao;
     private final IMaterialSalida materialSalidaDao;
     private final IMerma mermaDao;
+    private final IMaquinaProduccion maquinaProduccionDao;
 
-    public LoteProduccionController(ILoteProduccion loteProducionDao, IMaterialIngreso materialIngresoDao, IMaterialSalida materialSalidaDao, IMerma mermaDao) {
+    public LoteProduccionController(ILoteProduccion loteProducionDao, IMaterialIngreso materialIngresoDao, IMaterialSalida materialSalidaDao, IMerma mermaDao, IMaquinaProduccion maquinaProduccionDao) {
         this.loteProducionDao = loteProducionDao;
         this.materialIngresoDao = materialIngresoDao;
         this.materialSalidaDao = materialSalidaDao;
         this.mermaDao = mermaDao;
+        this.maquinaProduccionDao = maquinaProduccionDao;
     }
 
     /**
@@ -45,9 +40,9 @@ public class LoteProduccionController {
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/newLoteProduccion")
-    public List<LoteProduccion> obtenerListadeLotesDeProduccion(){
+    public List<LoteProduccion> obtenerListadeLotesDeProduccion( @RequestBody LoteProduccion mb ){
 
-        List<LoteProduccion> lstTemp = this.loteProducionDao.obtenerLotesProduccionNew();
+        List<LoteProduccion> lstTemp = this.loteProducionDao.obtenerLotesProduccionNew( mb.getIdMa() );
 
         if( lstTemp.size() == 0 ) return new ArrayList<>();
 
@@ -189,6 +184,23 @@ public class LoteProduccionController {
         response.put("msg", "Todos los datos de merma han sido actualizados correctamente");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    /**
+     * Servicio para obtener las maquinas de producción
+     * @return lstTemp
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/maquina")
+    public List<MaquinaProduccion> obtenerMaquina(){
+
+        List<MaquinaProduccion> lstTemp = this.maquinaProduccionDao.obtenerMaquina();
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
     }
 
 }

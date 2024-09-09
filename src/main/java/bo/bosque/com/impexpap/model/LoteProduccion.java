@@ -12,6 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class LoteProduccion implements Serializable {
 
+    private int idMa;
     private int idLp;
     private int numLote;
     private int anio;

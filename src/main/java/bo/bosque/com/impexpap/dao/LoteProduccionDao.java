@@ -35,37 +35,38 @@ public class LoteProduccionDao implements ILoteProduccion {
         int resp;
 
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_tprod_loteProduccion @idLp=?, @numLote=?, @anio=?, @fecha=?, @hraInicioCorte=? , @hraInicio=? , @hraFin=? " +
+            resp = this.jdbcTemplate.update("execute p_abm_tprod_loteProduccion @idLp=?, @idMa=? ,@numLote=?, @anio=?, @fecha=?, @hraInicioCorte=? , @hraInicio=? , @hraFin=? " +
                                                 ", @cantBobinasIngresoTotal=?, @pesoKilosTotalIngreso=? , @pesoTotalSalida=? , @pesoPaletaSalida=? , @pesoMaterialSalida=? , @cantResmaSalida=?" +
                                                 ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=?, @diferenciaProdResma = ?, @cantEstimadaResma = ?, @pesoBalanzaTotal = ? , @estado = ? ,@obs=?, @numCorte=?, @anioCorte=? , @audUsuario=? ,  @ACCION=?",
                     ps -> {
 
                         ps.setEscapeProcessing( true );
                         ps.setInt(1, loProd.getIdLp());
-                        ps.setInt(2, loProd.getNumLote());
-                        ps.setInt(3, loProd.getAnio());
-                        ps.setDate(4, (Date) loProd.getFecha());
-                        ps.setString(5, loProd.getHraInicioCorte());
-                        ps.setString(6, loProd.getHraInicio());
-                        ps.setString(7, loProd.getHraFin());
-                        ps.setInt(8, loProd.getCantBobinasIngresoTotal());
-                        ps.setFloat(9, loProd.getPesoKilosTotalIngreso());
-                        ps.setFloat(10, loProd.getPesoTotalSalida());
-                        ps.setFloat(11, loProd.getPesoPaletaSalida());
-                        ps.setFloat(12, loProd.getPesoMaterialSalida());
-                        ps.setInt(13, loProd.getCantResmaSalida());
-                        ps.setFloat(14, loProd.getCantHojasSalida());
-                        ps.setFloat(15, loProd.getMermaTotal());
-                        ps.setFloat(16, loProd.getDiferenciaProduccion());
-                        ps.setFloat(17, loProd.getDiferenciaProdResma());
-                        ps.setFloat(18, loProd.getCantEstimadaResma());
-                        ps.setFloat(19, loProd.getPesoBalanzaTotal());
-                        ps.setInt(20, loProd.getEstado());
-                        ps.setString(21, loProd.getObs());
-                        ps.setInt(22, loProd.getNumCorte());
-                        ps.setInt(23, loProd.getAnioCorte());
-                        ps.setInt(24, loProd.getAudUsuario());
-                        ps.setString(25, acc);
+                        ps.setInt(2, loProd.getIdMa());
+                        ps.setInt(3, loProd.getNumLote());
+                        ps.setInt(4, loProd.getAnio());
+                        ps.setDate(5, (Date) loProd.getFecha());
+                        ps.setString(6, loProd.getHraInicioCorte());
+                        ps.setString(7, loProd.getHraInicio());
+                        ps.setString(8, loProd.getHraFin());
+                        ps.setInt(9, loProd.getCantBobinasIngresoTotal());
+                        ps.setFloat(10, loProd.getPesoKilosTotalIngreso());
+                        ps.setFloat(11, loProd.getPesoTotalSalida());
+                        ps.setFloat(12, loProd.getPesoPaletaSalida());
+                        ps.setFloat(13, loProd.getPesoMaterialSalida());
+                        ps.setInt(14, loProd.getCantResmaSalida());
+                        ps.setFloat(15, loProd.getCantHojasSalida());
+                        ps.setFloat(16, loProd.getMermaTotal());
+                        ps.setFloat(17, loProd.getDiferenciaProduccion());
+                        ps.setFloat(18, loProd.getDiferenciaProdResma());
+                        ps.setFloat(19, loProd.getCantEstimadaResma());
+                        ps.setFloat(20, loProd.getPesoBalanzaTotal());
+                        ps.setInt(21, loProd.getEstado());
+                        ps.setString(22, loProd.getObs());
+                        ps.setInt(23, loProd.getNumCorte());
+                        ps.setInt(24, loProd.getAnioCorte());
+                        ps.setInt(25, loProd.getAudUsuario());
+                        ps.setString(26, acc);
 
                     });
 
@@ -84,14 +85,14 @@ public class LoteProduccionDao implements ILoteProduccion {
      * Para obtener la loteProduccion ultimo
      * @return
      */
-    public List<LoteProduccion> obtenerLotesProduccionNew() {
+    public List<LoteProduccion> obtenerLotesProduccionNew(int idMa) {
 
         List<LoteProduccion> lstTemp = new ArrayList<>();
 
         try{
-            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_loteProduccion @ACCION=?",
-                    new Object[] { "A" },
-                    new int[] { Types.VARCHAR },
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_loteProduccion @idMa=?,  @ACCION=?",
+                    new Object[] {  idMa,  "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowCount)->{
 
                         LoteProduccion temp = new LoteProduccion();
