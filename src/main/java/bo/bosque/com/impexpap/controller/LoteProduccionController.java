@@ -75,7 +75,7 @@ public class LoteProduccionController {
     @PostMapping("/registroLoteProduccion")
     public ResponseEntity<?> registrarLoteProduccion(@RequestBody LoteProduccion regLoteProduccion ) {
 
-        System.out.println("Se registro LP");
+
         Map<String, Object> response = new HashMap<>();
         regLoteProduccion.setFecha( new Utiles().fechaJ_a_Sql(regLoteProduccion.getFecha()));
         String acc = "U";

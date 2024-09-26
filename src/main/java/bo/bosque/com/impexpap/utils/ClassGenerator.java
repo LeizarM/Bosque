@@ -23,8 +23,8 @@ public class ClassGenerator {
             return;
         }*/
 
-        String className ="MaquinaProduccion";
-        String tableName = "tprod_Maquina";
+        String className ="EntregaChofer";
+        String tableName = "trch_Entregas";
 
         ClassGenerator classGenerator = new ClassGenerator();
         classGenerator.generateClass(className, tableName);
@@ -105,7 +105,7 @@ public class ClassGenerator {
                 DatabaseMetaData metaData = connection.getMetaData();
                 try (ResultSet rs = metaData.getColumns(null, null, tableName, null)) {
                     while (rs.next()) {
-                        String columnName = rs.getString("COLUMN_NAME").toLowerCase();
+                        String columnName = rs.getString("COLUMN_NAME");
                         String columnType = rs.getString("TYPE_NAME");
                         columns.add(new Column(columnName, columnType));
                     }

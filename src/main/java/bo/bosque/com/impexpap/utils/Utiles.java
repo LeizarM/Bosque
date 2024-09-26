@@ -6,6 +6,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @ToString
 public class Utiles implements Serializable{
@@ -23,8 +25,29 @@ public class Utiles implements Serializable{
     /***********************************************
      *  Funciones 
      ***********************************************/
-    
-    
+
+    /**
+     * Convierte una cadena de fecha y hora a un formato de String compatible con SQL Server.
+     *
+     * @param fechaStr La cadena de fecha y hora en formato "yyyy-MM-dd HH:mm:ss"
+     * @return String en formato compatible con SQL Server
+     * @throws IllegalArgumentException si el formato de la fecha es incorrecto
+     */
+    public  String convertirAFormatoSQLServer(String fechaStr) {
+        try {
+            DateTimeFormatter formatterEntrada = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime localDateTime = LocalDateTime.parse(fechaStr, formatterEntrada);
+
+            // Formato de salida compatible con SQL Server
+            DateTimeFormatter formatterSalida = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+            return localDateTime.format(formatterSalida);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Formato de fecha incorrecto. Use: yyyy-MM-dd HH:mm:ss", e);
+        }
+    }
+
+
+
     /*
      * @Funcion  a la que se le ingresa fecha en formato Java y retorna  en formato fecha de SQL
      * @param fecJava
