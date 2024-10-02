@@ -20,11 +20,14 @@ public class Login implements Serializable, UserDetails {
     private int codEmpleado;
     private String login;
     private String password;
+    private String password2;
     private String tipoUsuario;
     private String esAutorizador;
     private String estado;
     private int audUsuarioI;
     private String elTemaSelecionado = "";
+    private String npassword;
+    private String versionApp;
 
     /*
     **** Variables de apoyo
@@ -47,19 +50,21 @@ public class Login implements Serializable, UserDetails {
     /**
      * Constructores
      */
-    public Login(int codUsuario, int codEmpleado, String login, String password, String tipoUsuario,String esAutorizador, String estado, int audUsuarioI) {
+    public Login(int codUsuario, int codEmpleado, String login, String password, String password2, String npassword ,String tipoUsuario,String esAutorizador, String estado, int audUsuarioI) {
 
         this.codUsuario = codUsuario;
         this.codEmpleado = codEmpleado;
         this.login = login;
         this.password = password;
+        this.password2 = password2;
+        this.npassword = npassword;
         this.tipoUsuario = tipoUsuario;
         this.esAutorizador = esAutorizador;
         this.estado = estado;
         this.audUsuarioI = audUsuarioI;
     }
 
-    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombreSucursal, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado, Collection<? extends GrantedAuthority> authorities ) {
+    public Login( int codUsuario,  String datoPersona , int codSucursal, String nombreSucursal, int codCiudad, String datoCiudad, String descripcionCargo, String tipoUsuario, int codEmpresa, String nombreEmpresa, String elTemaSelecionado, String versionApp ,Collection<? extends GrantedAuthority> authorities ) {
         this.codUsuario = codUsuario;
         this.empleado.getPersona().setDatoPersona( datoPersona );
 
@@ -76,6 +81,8 @@ public class Login implements Serializable, UserDetails {
         this.nombreEmpresa =  nombreEmpresa;
 
         this.elTemaSelecionado = elTemaSelecionado;
+
+        this.versionApp = versionApp;
 
         this.authorities = authorities;
     }

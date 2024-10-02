@@ -17,6 +17,7 @@ public class GaranteReferencia {
     private String empresaTrabajo;
     private String tipo;
     private String observacion;
+
     private int audUsuario;
 
     /**
@@ -25,6 +26,7 @@ public class GaranteReferencia {
 
     private String esEmpleado;
     private String nombreCompleto;
+    private String direccionDomicilio;
 
 
 }

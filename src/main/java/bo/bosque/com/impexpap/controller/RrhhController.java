@@ -371,7 +371,13 @@ public class RrhhController {
     @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
     @PostMapping("/registroEmail")
     public ResponseEntity<?> registroEmail( @RequestBody Email e ){
+
         Map<String, Object> response = new HashMap<>();
+
+        if(e.getCodPersona()==0){
+            System.out.println("Entro en codPersona e == 0");
+            e.setCodPersona(this.emailDao.obtenerUltimoCodPersona(e.getAudUsuario()));
+        }
 
         String acc = "U";
         if( e.getCodEmail() == 0){
@@ -415,9 +421,19 @@ public class RrhhController {
      */
     @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
     @PostMapping("/registroTelefono")
-    public ResponseEntity<?> registroEmail( @RequestBody Telefono tel ){
+    public ResponseEntity<?> registroTelefono( @RequestBody Telefono tel ){
+
+
+        if(tel.getCodPersona()==0){
+            System.out.println("Entro en codPersona == 0");
+            tel.setCodPersona(this.telfDao.obtenerUltimoCodPersona(tel.getAudUsuario()));
+            System.out.println(tel.toString());
+        }
+
+
+
         Map<String, Object> response = new HashMap<>();
-        System.out.println(tel.toString());
+
         String acc = "U";
         if( tel.getCodTelefono() == 0){
             acc = "I";

@@ -24,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.annotation.Secured;
 
 import org.springframework.web.bind.annotation.*;
@@ -233,8 +232,8 @@ public class FichaTrabajadorController {
         try{
             Map<String, Object> params = new HashMap<>();
             params.put("codEmpleado", emp.getCodEmpleado()  );
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDF( nombreReporte, params);
 
-            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate ).exportPDF( nombreReporte, params);
 
             HttpHeaders headers = new HttpHeaders();
             //set the PDF format
@@ -247,7 +246,10 @@ public class FichaTrabajadorController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+
+
     }
+
 
 }
 

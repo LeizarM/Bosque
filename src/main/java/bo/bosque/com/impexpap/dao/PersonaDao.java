@@ -71,6 +71,7 @@ public class PersonaDao implements IPersona {
      * @param acc
      */
     public boolean registrarPersona(Persona per, String acc) {
+
         int resp;
         try{
             resp = this.jdbcTemplate.update("execute p_abm_persona @codPersona=?, @codZona=?, @nombres=?, @apPaterno=?, @apMaterno=?, @ciExpedido=?, @ciFechaVencimiento=?, @ciNumero=?, @direccion=?, @estadoCivil=?, @fechaNacimiento=?, @lugarNacimiento=?, @nacionalidad=?, @sexo=?, @lat=?, @lng=?,  @audUsuarioI=?, @ACCION=?",

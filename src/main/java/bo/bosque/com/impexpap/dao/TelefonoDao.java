@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Email;
+import bo.bosque.com.impexpap.model.Persona;
 import bo.bosque.com.impexpap.model.Telefono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -82,5 +83,28 @@ public class TelefonoDao implements ITelefono {
         return resp != 0;
     }
 
+    /**
+     * Procedimiento para obtener el ultimo codigo de persona
+     * @param audUsuario
+     * @return
+     */
+    public int obtenerUltimoCodPersona( int audUsuario ) {
+        Telefono temp = new Telefono();
+        try {
+            temp = this.jdbcTemplate.queryForObject("execute p_list_Telefono @audUsuarioI=?, @ACCION=?",
+                    new Object[] { audUsuario, "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Telefono tel = new Telefono();
+                        tel.setCodPersona(rs.getInt(1));
+                        return tel;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: PersonaDao en obtenerUltimoPersona, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            temp = new Telefono();
+        }
+        return temp.getCodPersona();
+    }
 
 }

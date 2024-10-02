@@ -62,7 +62,7 @@ public class EmpleadoDAO implements IEmpleado{
         Empleado emp = new Empleado();
         try {
             emp =  this.jdbcTemplate.queryForObject("execute p_list_Empleado @codEmpleado=?, @ACCION=?",
-                    new Object[] { codEmpleado, "A" },
+                    new Object[] { codEmpleado, "O" },
                     new int[] { Types.INTEGER, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Empleado temp = new Empleado();

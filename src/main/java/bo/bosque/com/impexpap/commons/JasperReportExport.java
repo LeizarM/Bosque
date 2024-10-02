@@ -1,88 +1,66 @@
 package bo.bosque.com.impexpap.commons;
 
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.ResourceUtils;
+
+
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.sql.Connection;
-import java.sql.SQLException;
+
 import java.util.Map;
 
 
-@Repository
+
+@Service
 public class JasperReportExport {
 
+    private static final Logger logger = LoggerFactory.getLogger(JasperReportExport.class);
     private static final String REPORT_FOLDER = "reports";
-    private static final String SUBREPORT_DIR = "D:\\Proyectos\\Bosque\\Bosque\\src\\main\\resources\\reports\\";
+    private static final String SUBREPORT_DIR = "reports/";
     private static final String JRXML = ".jrxml";
-    private static final String JASPER = ".jasper";
-
 
     private JdbcTemplate jdbcTemplate;
-    private Connection conn;
 
-
-
+    @Autowired
     public JasperReportExport(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
-     * Metodo para exporta a pdf
+     * Method to export a Jasper Report
      * @param fileName
      * @param params
      * @return
      */
-    public byte[] exportPDF( String fileName, Map<String, Object> params ){
-
+    public byte[] exportPDF(String fileName, Map<String, Object> params) {
         byte[] reportBytes;
-        String path = "\\"+REPORT_FOLDER+"\\"+fileName+JRXML;
-
+        String path = REPORT_FOLDER + "/" + fileName + JRXML;
         params.put("SUBREPORT_DIR", SUBREPORT_DIR);
-        try {
+        try (
+                Connection conn = jdbcTemplate.getDataSource().getConnection();
+                InputStream reportInputStream = new ClassPathResource(path).getInputStream();
+        ) {
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportInputStream);
 
-            this.conn = this.jdbcTemplate.getDataSource().getConnection();
+            JasperPrint report = JasperFillManager.fillReport(jasperReport, params, conn);
 
-            JasperPrint report = JasperFillManager.fillReport
-                            (
-                                    JasperCompileManager.compileReport(
-                                            ResourceUtils.getFile("classpath:"+path)
-                                                    .getAbsolutePath()) // path of the jasper report
-                                    , params // dynamic parameters
-                                    , this.conn
-                            );
-
-            //create the report in PDF format
-            //reportBytes = JasperExportManager.exportReportToPdf( report );
-
-            JRXlsxExporter exporter = new JRXlsxExporter();
-            exporter.setExporterInput(new SimpleExporterInput(report));
-            SimpleOutputStreamExporterOutput exporterOutput = new SimpleOutputStreamExporterOutput(new ByteArrayOutputStream());
-            exporter.setExporterOutput(exporterOutput);
-            exporter.exportReport();
-            ByteArrayOutputStream byteArrayOutputStream = this.getByteArrayOutputStream(report);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            JasperExportManager.exportReportToPdfStream(report, byteArrayOutputStream);
             reportBytes = byteArrayOutputStream.toByteArray();
 
-
-        }catch (Exception e){
-            System.out.println(e.getMessage() + "  exportPDF msg: "+ e.getCause());
+        } catch (Exception e) {
+            logger.error("Error exporting PDF: {}", e.getMessage(), e);
             reportBytes = null;
-        }finally {
-            try {
-                this.conn.close();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage() + "  exportPDF close connection msg: " + e.getCause());
-            }
         }
-        this.jdbcTemplate = null;
-        this.conn = null;
-        return reportBytes;
 
+        return reportBytes;
     }
 
 
@@ -91,12 +69,12 @@ public class JasperReportExport {
      * @param jasperPrint
      * @return
      * @throws JRException
-     */
+
     protected ByteArrayOutputStream getByteArrayOutputStream( JasperPrint jasperPrint ) throws JRException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         JasperExportManager.exportReportToPdfStream(jasperPrint, byteArrayOutputStream);
         return byteArrayOutputStream;
-    }
+    } */
 
 
 }

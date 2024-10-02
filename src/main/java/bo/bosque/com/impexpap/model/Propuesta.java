@@ -20,8 +20,10 @@ public class Propuesta implements Serializable {
     private String titulo;
     private String obs;
     private int estado;
-    private Date audUsGenerado;
+    private int audUsGenerado;
     private Date audFecGenerado;
+    private int audUsuario;
+
     private Date audFecha;
 
 

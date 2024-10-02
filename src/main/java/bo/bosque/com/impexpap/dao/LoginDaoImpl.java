@@ -36,22 +36,45 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
      * @return true si se realizo con exito
      */
     public boolean abmLogin( Login login, String oper ) {
-        return false;
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Usuario @codUsuario=?, @codEmpleado=?, @login=?, @password=?, @password2=?, @tipoUsuario=?, @esAutorizador=?, @estado=?  ,@audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, login.getCodUsuario() );
+                        ps.setInt(2, login.getCodEmpleado() );
+                        ps.setString(3, login.getLogin() );
+                        ps.setString(4, login.getPassword());
+                        ps.setString(5,login.getPassword2());
+                        ps.setString(6, login.getTipoUsuario());
+                        ps.setString(7, login.getEsAutorizador());
+                        ps.setString(8, login.getEstado());
+                        ps.setInt(9, login.getAudUsuarioI());
+                        ps.setString(10, oper);
+                        //ps.executeUpdate();
+                    });
+
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: LoginDaoImpl en abmLogin, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
     }
 
     /**
      * Prccedimiento para obtener el usuario
      * @param login
-     * @param password
+     * @param password2
      * @return
      */
-    public Login verifyUser(String login, String password, String ip) {
+    public Login verifyUser(String login, String password2, String ip) {
 
-        System.out.println(password);
+
         Login temp = new Login();
         try {
-              temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password=?, @ip=? ,@ACCION=?",
-                      new Object[] { login, password, ip ,"C" },
+              temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password2=?, @ip=? ,@ACCION=?",
+                      new Object[] { login, password2, ip ,"C" },
                       new int[] { Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR, Types.VARCHAR }
                     ,(rs, rowNum) -> {
                         Login login1 = new Login();
@@ -68,7 +91,7 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
                         login1.setCodEmpresa(rs.getInt(10 ));
                         login1.setNombreEmpresa(rs.getString(11 ));
                         login1.setElTemaSelecionado(rs.getString(12 ));
-
+                        login1.setVersionApp(rs.getString(13 ));
                         return login1;
                     });
 

@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BosqueApplication {
 
     public static void main(String[] args) {
+        System.out.println("Iniciando Bosque...");
         SpringApplication.run(BosqueApplication.class, args);
+
     }
 
 }
