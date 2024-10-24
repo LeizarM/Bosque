@@ -15,6 +15,7 @@ public class EntregaChofer implements Serializable {
     private int idEntrega;
     private int docEntry;
     private int docNum;
+    private int docNumF;
     private int factura;
     private String docDate;
     private String docTime;
@@ -31,6 +32,10 @@ public class EntregaChofer implements Serializable {
     private int openQty;
     private String db;
     private String valido;
+    private float peso;
+    private String cochePlaca;
+    private String prioridad;
+    private String tipo;
     private int fueEntregado;
     private String fechaEntrega;
     private float latitud;

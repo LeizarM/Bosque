@@ -119,7 +119,8 @@ public class EntregaChoferDao implements IEntregaChofer {
                         temp.setLongitud( rs.getFloat(23 ) );
                         temp.setDireccionEntrega( rs.getString(24 ) );
                         temp.setObs( rs.getString(25 ) );
-                        temp.setAudUsuario( rs.getInt(26 ) );
+                        temp.setTipo( rs.getString(26 ) );;
+                        temp.setAudUsuario( rs.getInt(27 ) );
 
 
                         return temp;
@@ -165,6 +166,11 @@ public class EntregaChoferDao implements IEntregaChofer {
                         temp.setLatitud(rs.getFloat(15));
                         temp.setLongitud(rs.getFloat(16));
                         temp.setObs( rs.getString(17 ) );
+                        temp.setDocNumF(rs.getInt(18 ) );
+                        temp.setPeso( rs.getFloat(19 ) );
+                        temp.setCochePlaca( rs.getString(20 ) );
+                        temp.setPrioridad( rs.getString(21 ) );
+                        temp.setTipo( rs.getString(22 ) );
 
 
                         return temp;
