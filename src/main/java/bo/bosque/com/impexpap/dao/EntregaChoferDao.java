@@ -32,9 +32,6 @@ public class EntregaChoferDao implements IEntregaChofer {
     @Override
     public boolean registrarEntregaChofer(EntregaChofer mb, String acc) {
 
-        System.out.println("***************************************");
-        System.out.println(mb.toString());
-
         int resp;
         try{
             resp = this.jdbcTemplate.update("execute p_abm_trch_Entregas  @idEntrega = ?, @docEntry = ?, @docNum = ?, @factura = ?, @docDate = ?, @docTime  =? , @cardCode = ?, @cardName = ?, @addressEntregaFac = ?, @addressEntregaMat = ?, @vendedor = ?, @u_Chofer = ?, @itemCode = ?, @dscription = ?, @whsCode = ?, @quantity = ?, @openQty = ?, @db = ?, @valido = ?, @fueEntregado = ?, @fechaEntrega = ?, @latitud =? , @longitud = ?, @direccionEntrega = ?, @obs = ?, @audUsuario = ?, @ACCION = ?",
@@ -119,8 +116,9 @@ public class EntregaChoferDao implements IEntregaChofer {
                         temp.setLongitud( rs.getFloat(23 ) );
                         temp.setDireccionEntrega( rs.getString(24 ) );
                         temp.setObs( rs.getString(25 ) );
-                        temp.setTipo( rs.getString(26 ) );;
-                        temp.setAudUsuario( rs.getInt(27 ) );
+                        temp.setTipo( rs.getString(26 ) );
+                        temp.setObsF( rs.getString(27 ) );
+                        temp.setAudUsuario( rs.getInt(28 ) );
 
 
                         return temp;

@@ -36,6 +36,7 @@ public class EntregaChofer implements Serializable {
     private String cochePlaca;
     private String prioridad;
     private String tipo;
+    private String obsF;
     private int fueEntregado;
     private String fechaEntrega;
     private float latitud;
