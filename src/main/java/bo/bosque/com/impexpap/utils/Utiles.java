@@ -5,9 +5,11 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @ToString
 public class Utiles implements Serializable{
@@ -356,6 +358,33 @@ public class Utiles implements Serializable{
             System.out.print("Error en la conversion s_a_i = " + e.getMessage());
         }
         return sqlStringInt;
+    }
+
+
+    /**
+     * Funcion que extrae numeros de una cadena separados por comas y los devuelve en una lista de enteros
+     * @param cadena
+     * @return
+     */
+    public static List<Integer> extraerNumeros(String cadena) {
+        List<Integer> listaNumeros = new ArrayList<>();
+
+        if (cadena.endsWith(",")) {
+            cadena = cadena.substring(0, cadena.length() - 1);
+        }
+
+        String[] numerosComoTexto = cadena.split(",");
+
+        for (String numeroTexto : numerosComoTexto) {
+            try {
+                int numero = Integer.parseInt(numeroTexto.trim());
+                listaNumeros.add(numero);
+            } catch (NumberFormatException e) {
+                System.out.println("Valor no válido: " + numeroTexto);
+            }
+        }
+
+        return listaNumeros;
     }
     
 }

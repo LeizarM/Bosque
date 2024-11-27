@@ -28,11 +28,12 @@ public class Login implements Serializable, UserDetails {
     private String elTemaSelecionado = "";
     private String npassword;
     private String versionApp;
+    private int codSucursal;
 
     /*
     **** Variables de apoyo
      */
-   private int codSucursal;
+
    private String nombreSucursal;
    private int codCiudad;
    private String nombreCiudad;
