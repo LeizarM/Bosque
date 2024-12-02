@@ -71,16 +71,21 @@ public class PretamoChoferDao implements IPrestamoChofer {
         return resp!=0;
     }
 
-    @Override
-    public List<PrestamoChofer> lstSolicitudes( int codSucursal ) {
+    /**
+     * Metodo para listar las solicitudes de prestamo de chofer
+     * @param codSucursal
+     * @param codEmpleado
+     * @return
+     */
+    public List<PrestamoChofer> lstSolicitudes( int codSucursal, int codEmpleado ) {
 
 
         List<PrestamoChofer> lstTemp =  new ArrayList<>();
 
         try{
-            lstTemp = this.jdbcTemplate.query("execute p_list_tpre_prestamo  @codSucursal=?,  @ACCION = ?",
-                    new Object[]{ codSucursal,  "A" },
-                    new int[]{ Types.INTEGER, Types.VARCHAR },
+            lstTemp = this.jdbcTemplate.query("execute p_list_tpre_prestamo  @codSucursal=?, @codEmpEntregadoPor=? ,@ACCION = ?",
+                    new Object[]{ codSucursal, codEmpleado ,"A" },
+                    new int[]{ Types.INTEGER, Types.INTEGER ,Types.VARCHAR },
                     (rs, rowCount) ->{
                         PrestamoChofer temp = new PrestamoChofer();
 

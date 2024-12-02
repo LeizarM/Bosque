@@ -292,7 +292,7 @@ public class PrestamoCochesController {
     @PostMapping("/solicitudesPrestamo")
     public List<PrestamoChofer> obtenerSolicitudesPrestamo( @RequestBody PrestamoChofer mb  ){
 
-        List<PrestamoChofer> lstTemp = this.prestamoChoferDao.lstSolicitudes( mb.getCodSucursal() );
+        List<PrestamoChofer> lstTemp = this.prestamoChoferDao.lstSolicitudes( mb.getCodSucursal(), mb.getCodEmpEntregadoPor() );
 
         if( lstTemp.size() == 0 ) return new ArrayList<>();
 

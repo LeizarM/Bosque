@@ -10,6 +10,6 @@ public interface IPrestamoChofer {
 
     boolean registrarPrestamoChofer(PrestamoChofer mb, String acc );
 
-    List<PrestamoChofer> lstSolicitudes(int codSucursal );
+    List<PrestamoChofer> lstSolicitudes(int codSucursal, int codEmpleado );
 
 }
