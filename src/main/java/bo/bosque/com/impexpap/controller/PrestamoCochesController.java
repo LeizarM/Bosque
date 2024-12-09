@@ -1,13 +1,7 @@
 package bo.bosque.com.impexpap.controller;
 
-import bo.bosque.com.impexpap.dao.IEstadoChofer;
-import bo.bosque.com.impexpap.dao.IPrestamoChofer;
-import bo.bosque.com.impexpap.dao.IPrestamoEstado;
-import bo.bosque.com.impexpap.dao.ISolicitudChofer;
-import bo.bosque.com.impexpap.model.EstadoChofer;
-import bo.bosque.com.impexpap.model.PrestamoChofer;
-import bo.bosque.com.impexpap.model.PrestamoEstado;
-import bo.bosque.com.impexpap.model.SolicitudChofer;
+import bo.bosque.com.impexpap.dao.*;
+import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +22,16 @@ public class PrestamoCochesController {
     private final IEstadoChofer estadoChoferDao;
     private final IPrestamoChofer prestamoChoferDao;
     private final IPrestamoEstado prestamoEstadoDao;
+    private final ITipoSolicitud tipoSolicitudDao;
 
 
-    public PrestamoCochesController(ISolicitudChofer solicitudChoferDao, IEstadoChofer estadoChoferDao, IPrestamoChofer prestamoChoferDao, IPrestamoEstado prestamoEstadoDao) {
+    public PrestamoCochesController(ISolicitudChofer solicitudChoferDao, IEstadoChofer estadoChoferDao, IPrestamoChofer prestamoChoferDao, IPrestamoEstado prestamoEstadoDao, ITipoSolicitud tipoSolicitudDao) {
 
         this.solicitudChoferDao = solicitudChoferDao;
         this.estadoChoferDao = estadoChoferDao;
         this.prestamoChoferDao = prestamoChoferDao;
         this.prestamoEstadoDao = prestamoEstadoDao;
+        this.tipoSolicitudDao = tipoSolicitudDao;
     }
 
     /**
@@ -320,6 +316,24 @@ public class PrestamoCochesController {
         response.put("msg", "Datos de Actualizados de la Solicitud Correctamente");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Para obtener el detalle de la solicitud de prestamo de los coches
+     * @return
+     */
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tipoSolicitudes")
+    public List<TipoSolicitud> obtenerTipoSolicitud(){
+
+
+        List<TipoSolicitud> lstTemp = this.tipoSolicitudDao.obtenerTipoSolicitudes();
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
     }
 
 

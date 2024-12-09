@@ -1,6 +1,8 @@
 package bo.bosque.com.impexpap.dao;
-import java.util.List;
+
 import bo.bosque.com.impexpap.model.Vista;
+
+import java.util.List;
 
 
 public interface IVistaDao {

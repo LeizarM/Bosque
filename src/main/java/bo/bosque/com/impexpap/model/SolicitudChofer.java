@@ -19,6 +19,7 @@ public class SolicitudChofer implements Serializable {
     private String cargo;
     private int estado;
     private int idCocheSol;
+    private int idES;
     private int audUsuario;
 
     private String fechaSolicitudCad;
