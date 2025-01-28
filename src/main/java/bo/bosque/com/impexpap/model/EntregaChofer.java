@@ -43,11 +43,23 @@ public class EntregaChofer implements Serializable {
     private float longitud;
     private String direccionEntrega;
     private String obs;
+    private int codSucursalChofer;
+    private int codCiudadChofer;
     private int audUsuario;
 
     private String fechaNota;
     private String nombreCompleto;
     private int diferenciaMinutos;
     private int codEmpleado;
+    private int codSucursal;
     private String cargo;
+    private int flag;
+    private int ord;
+    private String fechaEntregaCad;
+    private int rutaDiaria;
+    private Date fechaInicio;
+    private Date fechaFin;
+    private String fechaInicioRutaCad;
+    private String fechaFinRutaCad;
+    private String estatusRuta;
 }

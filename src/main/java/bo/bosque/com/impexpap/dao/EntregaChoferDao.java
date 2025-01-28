@@ -6,10 +6,10 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -34,7 +34,7 @@ public class EntregaChoferDao implements IEntregaChofer {
 
         int resp;
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_trch_Entregas  @idEntrega = ?, @docEntry = ?, @docNum = ?, @factura = ?, @docDate = ?, @docTime  =? , @cardCode = ?, @cardName = ?, @addressEntregaFac = ?, @addressEntregaMat = ?, @vendedor = ?, @u_Chofer = ?, @itemCode = ?, @dscription = ?, @whsCode = ?, @quantity = ?, @openQty = ?, @db = ?, @valido = ?, @fueEntregado = ?, @fechaEntrega = ?, @latitud =? , @longitud = ?, @direccionEntrega = ?, @obs = ?, @audUsuario = ?, @ACCION = ?",
+            resp = this.jdbcTemplate.update("execute p_abm_trch_Entregas  @idEntrega = ?, @docEntry = ?, @docNum = ?, @factura = ?, @docDate = ?, @docTime  =? , @cardCode = ?, @cardName = ?, @addressEntregaFac = ?, @addressEntregaMat = ?, @vendedor = ?, @u_Chofer = ?, @itemCode = ?, @dscription = ?, @whsCode = ?, @quantity = ?, @openQty = ?, @db = ?, @valido = ?, @fueEntregado = ?, @fechaEntrega = ?, @latitud =? , @longitud = ?, @direccionEntrega = ?, @obs = ?, @codSucursalChofer=?, @codCiudadChofer=?  ,@audUsuario = ?, @ACCION = ?",
                     ps ->{
                         ps.setInt(1,mb.getIdEntrega());
                         ps.setInt(2,mb.getDocEntry());
@@ -61,8 +61,10 @@ public class EntregaChoferDao implements IEntregaChofer {
                         ps.setFloat(23, mb.getLongitud());
                         ps.setString(24, mb.getDireccionEntrega());
                         ps.setString(25, mb.getObs());
-                        ps.setInt(26, mb.getAudUsuario());
-                        ps.setString(27, acc);
+                        ps.setInt(26, mb.getCodSucursalChofer());
+                        ps.setInt(27, mb.getCodCiudadChofer());
+                        ps.setInt(28, mb.getAudUsuario());
+                        ps.setString(29, acc);
                     });
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EntregaChoferDao en registrarEntregaChofer, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
@@ -211,5 +213,49 @@ public class EntregaChoferDao implements IEntregaChofer {
         return lstTemp;
 
     }
+
+    /**
+     * Mostrara un extracto de entregas si finalizaron o no
+     *
+     * @param fechaIni
+     * @param fechaFin
+     * @param codEmpleado
+     * @return
+     */
+    public List<EntregaChofer> lstChoferesExtracto(Date fechaIni, Date fechaFin, int codSucursal, int codEmpleado) {
+
+        List<EntregaChofer> lstTemp = new ArrayList<>();
+
+        try {
+            lstTemp =  this.jdbcTemplate.query("execute p_list_trch_Entregas @fechaIni=?, @fechaFin=?, @codSucursal=?, @codEmpleado=? ,@ACCION = ?",
+                    new Object[] { fechaIni, fechaFin, codSucursal ,codEmpleado  ,"E" },
+                    new int[] { Types.DATE, Types.DATE, Types.INTEGER, Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        EntregaChofer temp = new EntregaChofer();
+
+                        temp.setOrd( rs.getInt(1 ) );
+                        temp.setCodEmpleado( rs.getInt(2 ) );
+                        temp.setNombreCompleto( rs.getString(3 ) );
+                        temp.setFechaEntregaCad( rs.getString(4 ) );
+                        temp.setRutaDiaria( rs.getInt(5 ) );
+                        temp.setFechaInicioRutaCad( rs.getString(6 ) );
+                        temp.setFechaFinRutaCad( rs.getString(7 ) );
+                        temp.setEstatusRuta( rs.getString(8 ) );
+                        temp.setFlag( rs.getInt(9 ) );
+
+
+
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: EntregaChoferDao en lstChoferesExtracto, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<EntregaChofer>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+
+
+    }
+
 
 }

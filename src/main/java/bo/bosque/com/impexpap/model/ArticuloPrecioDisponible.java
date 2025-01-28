@@ -31,5 +31,6 @@ public class ArticuloPrecioDisponible implements Serializable {
     private String whsName;
     private String condicionPrecio;
     private String ciudad;
+    private float utm;
 
 }

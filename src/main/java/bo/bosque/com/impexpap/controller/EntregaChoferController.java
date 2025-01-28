@@ -130,4 +130,22 @@ public class EntregaChoferController {
         return lstTemp;
 
     }
+
+    /**
+     * Obtiene las entregas de choferes para un lote de producción en un rango de fechas y por sucursal
+     * @param mb
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/extracto")
+    public List<EntregaChofer> lstChoferExtracto(  @RequestBody EntregaChofer mb  ){
+
+        List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferesExtracto( mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursal(), mb.getCodEmpleado() );
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
+    }
+
 }

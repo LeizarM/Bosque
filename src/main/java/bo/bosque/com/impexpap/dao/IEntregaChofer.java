@@ -35,4 +35,12 @@ public interface IEntregaChofer {
      * @return
      */
     List<EntregaChofer> lstChoferes();
+
+    /**
+     * Mostrara un extracto de entregas si finalizaron o no
+     * @param fechaIni
+     * @param fechaFin
+     * @return
+     */
+    List<EntregaChofer> lstChoferesExtracto( Date fechaIni, Date fechaFin, int codSucursal, int codEmpleado);
 }

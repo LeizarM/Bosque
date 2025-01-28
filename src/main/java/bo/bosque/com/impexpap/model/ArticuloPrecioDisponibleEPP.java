@@ -25,4 +25,13 @@ public class ArticuloPrecioDisponibleEPP implements Serializable {
     private String ruta;
     private int audUsuario;
 
+
+    //Atributos extra
+    private String db;
+    private String whsCode;
+    private String whsName;
+    private String condicionPrecio;
+    private String ciudad;
+    private float utm;
+
 }

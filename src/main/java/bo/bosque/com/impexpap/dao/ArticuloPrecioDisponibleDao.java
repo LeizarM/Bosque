@@ -51,6 +51,7 @@ public class ArticuloPrecioDisponibleDao implements  IArticuloPrecioDisponible {
                         temp.setRuta( rs.getString(11));
                         temp.setDb( rs.getString(12));
                         temp.setCondicionPrecio(rs.getString(13));
+                        temp.setUtm(rs.getFloat(14));
 
                         return temp;
                     });
