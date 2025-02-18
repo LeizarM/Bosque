@@ -20,6 +20,7 @@ public class SolicitudChofer implements Serializable {
     private int estado;
     private int idCocheSol;
     private int idES;
+    private int requiereChofer;
     private int audUsuario;
 
     private String fechaSolicitudCad;

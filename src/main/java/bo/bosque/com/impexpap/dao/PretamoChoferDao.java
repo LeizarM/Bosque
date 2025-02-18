@@ -33,7 +33,7 @@ public class PretamoChoferDao implements IPrestamoChofer {
         int resp;
 
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_tpre_prestamo @idPrestamo =?, @idCoche  =?, @idSolicitud  =?, @codSucursal  =?, @fechaEntrega  =?, @codEmpEntregadoPor  =?, @kilometrajeEntrega =?, @kilometrajeRecepcion =?, @nivelCombustibleEntrega  =?, @nivelCombustibleRecepcion  =?, @estadoLateralesEntrega  =?, @estadoInteriorEntrega  =?, @estadoDelanteraEntrega  =?, @estadoTraseraEntrega  =?, @estadoCapoteEntrega  =?, @estadoLateralRecepcion  =?, @estadoInteriorRecepcion  =?, @estadoDelanteraRecepcion  =?, @estadoTraseraRecepcion = ?, @estadoCapoteRecepcion =?, @audUsuario =?, @ACCION=? ",
+            resp = this.jdbcTemplate.update("execute p_abm_tpre_prestamo @idPrestamo =?, @idCoche  =?, @idSolicitud  =?, @codSucursal  =?, @fechaEntrega  =?, @codEmpChoferSolicitado = ?  ,@codEmpEntregadoPor  =?, @kilometrajeEntrega =?, @kilometrajeRecepcion =?, @nivelCombustibleEntrega  =?, @nivelCombustibleRecepcion  =?, @estadoLateralesEntrega  =?, @estadoInteriorEntrega  =?, @estadoDelanteraEntrega  =?, @estadoTraseraEntrega  =?, @estadoCapoteEntrega  =?, @estadoLateralRecepcion  =?, @estadoInteriorRecepcion  =?, @estadoDelanteraRecepcion  =?, @estadoTraseraRecepcion = ?, @estadoCapoteRecepcion =?, @audUsuario =?, @ACCION=? ",
                     ps -> {
 
                         ps.setEscapeProcessing( true );
@@ -42,23 +42,24 @@ public class PretamoChoferDao implements IPrestamoChofer {
                         ps.setInt(3, mb.getIdSolicitud());
                         ps.setInt(4, mb.getCodSucursal());
                         ps.setDate(5, (Date) mb.getFechaEntrega());
-                        ps.setInt(6, mb.getCodEmpEntregadoPor());
-                        ps.setFloat(7, mb.getKilometrajeEntrega());
-                        ps.setFloat(8, mb.getKilometrajeRecepcion());
-                        ps.setInt(9, mb.getNivelCombustibleEntrega());
-                        ps.setInt(10, mb.getNivelCombustibleRecepcion());
-                        ps.setInt(11, mb.getEstadoLateralesEntrega());
-                        ps.setInt(12, mb.getEstadoInteriorEntrega());
-                        ps.setInt(13, mb.getEstadoDelanteraEntrega());
-                        ps.setInt(14, mb.getEstadoTraseraEntrega());
-                        ps.setInt(15, mb.getEstadoCapoteEntrega());
-                        ps.setInt(16, mb.getEstadoLateralRecepcion());
-                        ps.setInt(17, mb.getEstadoInteriorRecepcion());
-                        ps.setInt(18, mb.getEstadoDelanteraRecepcion());
-                        ps.setInt(19, mb.getEstadoTraseraRecepcion());
-                        ps.setInt(20, mb.getEstadoCapoteRecepcion());
-                        ps.setInt(21, mb.getAudUsuario());
-                        ps.setString(22, acc);
+                        ps.setInt(6, mb.getCodEmpChoferSolicitado());
+                        ps.setInt(7, mb.getCodEmpEntregadoPor());
+                        ps.setFloat(8, mb.getKilometrajeEntrega());
+                        ps.setFloat(9, mb.getKilometrajeRecepcion());
+                        ps.setInt(10, mb.getNivelCombustibleEntrega());
+                        ps.setInt(11, mb.getNivelCombustibleRecepcion());
+                        ps.setInt(12, mb.getEstadoLateralesEntrega());
+                        ps.setInt(13, mb.getEstadoInteriorEntrega());
+                        ps.setInt(14, mb.getEstadoDelanteraEntrega());
+                        ps.setInt(15, mb.getEstadoTraseraEntrega());
+                        ps.setInt(16, mb.getEstadoCapoteEntrega());
+                        ps.setInt(17, mb.getEstadoLateralRecepcion());
+                        ps.setInt(18, mb.getEstadoInteriorRecepcion());
+                        ps.setInt(19, mb.getEstadoDelanteraRecepcion());
+                        ps.setInt(20, mb.getEstadoTraseraRecepcion());
+                        ps.setInt(21, mb.getEstadoCapoteRecepcion());
+                        ps.setInt(22, mb.getAudUsuario());
+                        ps.setString(23, acc);
 
                     });
 
@@ -98,6 +99,7 @@ public class PretamoChoferDao implements IPrestamoChofer {
                         temp.setCoche( rs.getString(7) );
                         temp.setEstadoDisponibilidad( rs.getString(8) );
                         temp.setIdCoche( rs.getInt(9) );
+                        temp.setRequiereChofer( rs.getInt(10) );
 
                         return temp;
                     });

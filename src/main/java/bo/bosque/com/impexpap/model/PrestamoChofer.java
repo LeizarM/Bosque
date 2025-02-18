@@ -17,6 +17,7 @@ public class PrestamoChofer implements Serializable {
     private int idSolicitud;
     private int codSucursal;
     private Date fechaEntrega;
+    private int codEmpChoferSolicitado;
     private int codEmpEntregadoPor;
     private float kilometrajeEntrega;
     private float kilometrajeRecepcion;
@@ -54,6 +55,9 @@ public class PrestamoChofer implements Serializable {
     private String estadoDelanteraRecepcionAux;
     private String estadoTraseraRecepcionAux;
     private String estadoCapoteRecepcionAux;
+
+
+    private int requiereChofer;
 
 
 }

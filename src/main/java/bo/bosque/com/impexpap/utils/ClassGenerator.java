@@ -23,8 +23,8 @@ public class ClassGenerator {
             return;
         }*/
 
-        String className ="TipoSolicitud";
-        String tableName = "tpre_TipoSolicitud";
+        String className ="Banco";
+        String tableName = "tch_banco";
 
         ClassGenerator classGenerator = new ClassGenerator();
         classGenerator.generateClass(className, tableName);

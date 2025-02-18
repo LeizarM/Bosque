@@ -33,7 +33,7 @@ public class SolicitudChoferDao implements ISolicitudChofer {
         int resp;
 
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_tpre_solicitud @idSolicitud=?, @fechaSolicitud=?, @motivo=?, @codEmpSoli=?, @cargo=?, @estado=?,@idCocheSol=?, @idES=? ,@audUsuario =?, @ACCION=? ",
+            resp = this.jdbcTemplate.update("execute p_abm_tpre_solicitud @idSolicitud=?, @fechaSolicitud=?, @motivo=?, @codEmpSoli=?, @cargo=?, @estado=?,@idCocheSol=?, @idES=?, @requiereChofer=? ,@audUsuario =?, @ACCION=? ",
                     ps -> {
 
                         ps.setEscapeProcessing( true );
@@ -45,8 +45,9 @@ public class SolicitudChoferDao implements ISolicitudChofer {
                         ps.setInt(6, mb.getEstado());
                         ps.setInt(7, mb.getIdCocheSol());
                         ps.setInt(8, mb.getIdES());
-                        ps.setInt(9, mb.getAudUsuario());
-                        ps.setString(10, acc);
+                        ps.setInt(9, mb.getRequiereChofer());
+                        ps.setInt(10, mb.getAudUsuario());
+                        ps.setString(11, acc);
 
                     });
 
