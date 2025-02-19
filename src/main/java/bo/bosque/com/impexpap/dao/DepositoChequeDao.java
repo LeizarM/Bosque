@@ -166,6 +166,51 @@ public class DepositoChequeDao implements IDepositoCheque {
         return lstTemp;
     }
 
+    /**
+     * Listar todos los depósitos cheque solo los ultimos X registros
+     *
+     */
+    public List<DepositoCheque> listarDepositosChequeReconciliado(  int docNum, int numFact ) {
+        List<DepositoCheque> lstTemp = new ArrayList<>();
+
+        System.out.println( docNum + " - " + numFact );
+
+        try {
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_tdep_DepositoCheques @docNum=?, @numFact=?, @ACCION = ?",
+                    new Object[] { docNum, numFact, "D" },
+                    new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        DepositoCheque temp = new DepositoCheque();
+
+                        temp.setIdDeposito(rs.getInt(1));
+                        temp.setCodCliente(rs.getString(2));
+                        temp.setDocNum(rs.getInt(3));
+                        temp.setNumFact(rs.getInt(4));
+                        temp.setAnioFact(rs.getInt(5));
+                        temp.setCodEmpresa(rs.getInt(6));
+                        temp.setCodBanco(rs.getInt(7));
+                        temp.setImporte(rs.getFloat(8));
+                        temp.setMoneda(rs.getString(9));
+                        temp.setEstado(rs.getInt(10));
+                        temp.setFotoPath(rs.getString(11));
+                        temp.setAudUsuario(rs.getInt(12));
+                        temp.setNombreBanco(rs.getString(13));
+                        temp.setNombreEmpresa(rs.getString(14));
+                        temp.setFueReconciliado(rs.getString(15));
+
+                        return temp;
+                    });
+        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+            logDataAccessException(ex, "Error al listar depósitos que fueron o no reconciliados"); // Usamos el método auxiliar
+            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+        }
+
+        return lstTemp;
+    }
+
+
+
 
     /**
      * Método auxiliar para registrar errores de acceso a datos

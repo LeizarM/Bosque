@@ -36,4 +36,7 @@ public interface IDepositoCheque {
      */
     List<DepositoCheque> listarDepositosCheque();
 
+
+    List<DepositoCheque> listarDepositosChequeReconciliado(  int docNum, int numFact  );
+
 }

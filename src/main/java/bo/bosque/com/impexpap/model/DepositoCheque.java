@@ -26,6 +26,7 @@ public class DepositoCheque implements Serializable {
 
     private String nombreBanco;
     private String nombreEmpresa;
+    private String fueReconciliado;
 
 
 }

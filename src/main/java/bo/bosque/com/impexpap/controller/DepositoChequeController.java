@@ -193,6 +193,29 @@ public class DepositoChequeController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/listar-reconciliados")
+    public ResponseEntity<ApiResponse<?>> listarDepositosReconciliados( @RequestBody DepositoCheque mb)  {
+
+        System.out.println(mb.toString());
+
+        try {
+            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getDocNum(), mb.getNumFact() );
+
+            if (depositos.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron depósitos reconciliados");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, depositos, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+
+
     /**
      *
      * Obtiene un solo registro de depósito por ID
