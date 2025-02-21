@@ -15,7 +15,7 @@ import java.util.List;
 public class CargoSucursalDao implements ICargoSucursal {
 
     /**
-     * El DataSource
+     * El DataSource de la conexion
      */
     @Autowired
     JdbcTemplate jdbcTemplate;
