@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
+import bo.bosque.com.impexpap.model.Precio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 //@Repository
@@ -137,6 +140,43 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
         }
         GrantedAuthority authority = new SimpleGrantedAuthority(temp.getTipoUsuario());
         return new User(temp.getLogin(), temp.getPassword() ,Arrays.asList( authority ));
+
+    }
+
+    /**
+     * Obtendra todos los usuarios
+     *
+     * @return
+     */
+    @Override
+    public List<Login> getAllUsers() {
+
+        List<Login> lstTemp = new ArrayList<>();
+        try {
+            lstTemp =  this.jdbcTemplate.query("execute dbo.p_list_Usuario @ACCION=?",
+                    new Object[] { "L" },
+                    new int[] {  Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Login temp = new Login();
+
+
+                        temp.setCodUsuario( rs.getInt(1));
+                        temp.setCodEmpleado( rs.getInt(2 ) );
+                        temp.setFila( rowNum + 1);
+                        temp.setNombreCompleto( rs.getString(4));
+                        temp.setLogin( rs.getString(5));
+                        temp.setTipoUsuario( rs.getString(6));
+                        temp.setEsAutorizador( rs.getString(7));
+                        temp.setEstado( rs.getString(8));
+
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: listPrecioToneladasActuales en PrecioDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
 
     }
 }

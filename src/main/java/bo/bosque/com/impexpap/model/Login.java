@@ -3,10 +3,7 @@ package bo.bosque.com.impexpap.model;
 import java.io.Serializable;
 import java.util.Collection;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Login implements Serializable, UserDetails {
 
     private int codUsuario;
@@ -39,7 +37,8 @@ public class Login implements Serializable, UserDetails {
    private String nombreCiudad;
    private int codEmpresa;
    private String nombreEmpresa;
-
+   private String nombreCompleto;
+   private int fila;
 
 
     /**

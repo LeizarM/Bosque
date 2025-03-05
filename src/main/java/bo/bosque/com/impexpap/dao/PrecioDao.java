@@ -41,8 +41,6 @@ public class PrecioDao implements  IPrecio {
      */
     public List<Precio> listPrecioToneladasActuales( int codigoFamilia ) {
 
-        System.out.println("codigoFamilia en precioDao = " + codigoFamilia);
-
         List<Precio> lstTemp = new ArrayList<>();
         try {
             lstTemp =  this.jdbcTemplate.query("execute p_list_precio @codigoFamilia=?, @ACCION=?",

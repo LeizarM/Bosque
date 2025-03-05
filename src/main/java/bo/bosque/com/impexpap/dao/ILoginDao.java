@@ -3,6 +3,8 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.Login;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
+
 
 public interface ILoginDao {
 
@@ -25,4 +27,10 @@ public interface ILoginDao {
      * Procedimiento para verificar los usuarios por nombre
      */
     UserDetails loadUserByUsername( String login );
+
+    /**
+     * Obtendra todos los usuarios
+     * @return
+     */
+    List<Login> getAllUsers();
 }
