@@ -3,9 +3,11 @@ package bo.bosque.com.impexpap.controller;
 
 
 import bo.bosque.com.impexpap.dao.ILoginDao;
+import bo.bosque.com.impexpap.model.Producto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,9 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import bo.bosque.com.impexpap.security.model.Jwt;
@@ -118,27 +118,59 @@ public class LoginController {
 
     /**
      * Serv. para cambiar la contraseña que aparece por default
-     * @param login
+     * @param datos
      * @return
      */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/changePasswordDefault")
-    public ResponseEntity<?>changePasswordDefault(@RequestBody Login login) {
-
-
-
+    public ResponseEntity<?> changePasswordDefault(@RequestBody Map<String, Object> datos) {
         Map<String, Object> response = new HashMap<>();
-        login.setPassword2(passwordEncoder.encode( login.getNpassword() ));
 
-        if(!this.ldao.abmLogin(login,"Q")){
-            response.put("error", "Error En las credenciales");
+        try {
+            // Extraer valores del mapa
+            Integer codUsuario = (Integer) datos.get("codUsuario");
+            String npassword = (String) datos.get("npassword");
+
+            if (codUsuario == null || npassword == null) {
+                response.put("error", "Datos incompletos");
+                response.put("ok", false);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            // Crear objeto Login con información mínima necesaria
+            Login login = new Login();
+            login.setCodUsuario(codUsuario);
+            login.setPassword2(passwordEncoder.encode(npassword));
+
+
+
+            if(!this.ldao.abmLogin(login, "Q")) {
+                response.put("error", "Error al actualizar las credenciales");
+                response.put("ok", false);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            response.put("msg", "Contraseña actualizada correctamente");
+            response.put("ok", true);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Exception e) {
+            log.error("Error al cambiar contraseña: ", e);
+            response.put("error", "Error interno del servidor");
+            response.put("mensaje", e.getMessage());
             response.put("ok", false);
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        response.put("msg", "Constraseña actualizada correctamente");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-
     }
 
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/lstUsers")
+    public List<Login> lstUsers(){
+
+        List<Login> lstTemp = this.ldao.getAllUsers();
+        if( lstTemp.size() == 0 ) return new ArrayList<Login>();
+        return lstTemp;
+
+    }
 
 }

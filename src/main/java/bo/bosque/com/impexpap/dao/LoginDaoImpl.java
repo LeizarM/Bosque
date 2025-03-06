@@ -39,6 +39,9 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
      * @return true si se realizo con exito
      */
     public boolean abmLogin( Login login, String oper ) {
+
+
+
         int resp;
         try{
             resp = this.jdbcTemplate.update("execute p_abm_Usuario @codUsuario=?, @codEmpleado=?, @login=?, @password=?, @password2=?, @tipoUsuario=?, @esAutorizador=?, @estado=?  ,@audUsuarioI=?, @ACCION=?",

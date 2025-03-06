@@ -168,7 +168,7 @@ public class PrecioController {
     @PostMapping("/lstPrecioTonXFamilia")
     public List<Precio> obtenerPreciosActualesXFamilia( @RequestBody Precio precio ){
 
-        System.out.println("precio.toString() = " + precio.toString());
+
         
         List<Precio> temp = new ArrayList<>();
         temp = this.precioDao.listPrecioToneladasActuales( precio.getCodigoFamilia() );
