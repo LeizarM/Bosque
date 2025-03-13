@@ -28,7 +28,7 @@ public interface IDepositoCheque {
      * @param mb
      * @return
      */
-    int existeRegistro( DepositoCheque mb );
+    //int existeRegistro( DepositoCheque mb );
 
     /**
      * Listar todos los depósitos cheque solo los ultimos X registros

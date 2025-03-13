@@ -94,8 +94,8 @@ public class PdfGeneratorService {
             addTableRow(table, cellStyle,
                     "ID Depósito: " + deposito.getIdDeposito(),
                     "Empresa: " + deposito.getNombreEmpresa(),
-                    "Cliente: " + deposito.getCodCliente(),
-                    "Documento: " + deposito.getDocNum()
+                    "Cliente: " + deposito.getCodCliente()
+                    //"Documento: " + deposito.getDocNum()
             );
 
             // Segunda sección
@@ -103,7 +103,7 @@ public class PdfGeneratorService {
             addTableRow(table, cellStyle,
                     "Banco: " + deposito.getNombreBanco(),
                     "Importe: " + String.format("%,.2f %s", deposito.getImporte(), deposito.getMoneda()),
-                    "N° Factura: " + deposito.getNumFact(),
+                    //"N° Factura: " + deposito.getNumFact(),
                     "Fecha: " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             );
 

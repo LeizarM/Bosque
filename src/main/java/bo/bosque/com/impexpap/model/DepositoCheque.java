@@ -13,15 +13,13 @@ public class DepositoCheque implements Serializable {
 
     private int idDeposito;
     private String codCliente;
-    private int docNum;
-    private int numFact;
-    private int anioFact;
     private int codEmpresa;
-    private int codBanco;
+    private int idBxC;
     private float importe;
     private String moneda;
     private int estado;
     private String fotoPath;
+    private float aCuenta;
     private int audUsuario;
 
     private String nombreBanco;

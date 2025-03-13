@@ -26,14 +26,12 @@ public class DepositoChequeDao implements IDepositoCheque {
             "execute p_abm_tdep_DepositoCheques " +
                     "@idDeposito = ?, " +
                     "@codCliente = ?, " +
-                    "@docNum = ?, " +
-                    "@numFact = ?, "+
-                    "@anioFact = ?, "+
                     "@codEmpresa = ?, " +
-                    "@codBanco = ?, " +
+                    "@idBxC = ?, " +
                     "@importe = ?, " +
                     "@moneda = ?, " +
                     "@fotoPath = ?, " +
+                    "@aCuenta = ?, " +
                     "@audUsuario = ?, " +
                     "@ACCION = ?";
 
@@ -58,16 +56,14 @@ public class DepositoChequeDao implements IDepositoCheque {
                 ps.setEscapeProcessing(true);
                 ps.setInt(1, mb.getIdDeposito());
                 ps.setString(2, mb.getCodCliente());
-                ps.setInt(3, mb.getDocNum());
-                ps.setInt(4, mb.getNumFact());
-                ps.setInt(5, mb.getAnioFact());
-                ps.setInt(6, mb.getCodEmpresa());
-                ps.setInt(7, mb.getCodBanco());
-                ps.setFloat(8, mb.getImporte());
-                ps.setString(9, mb.getMoneda());
-                ps.setString(10, mb.getFotoPath());
-                ps.setInt(11, mb.getAudUsuario());
-                ps.setString(12, acc);
+                ps.setInt(3, mb.getCodEmpresa());
+                ps.setInt(4, mb.getIdBxC());
+                ps.setFloat(5, mb.getImporte());
+                ps.setString(6, mb.getMoneda());
+                ps.setString(7, mb.getFotoPath());
+                ps.setFloat(8, mb.getACuenta());
+                ps.setInt(9, mb.getAudUsuario());
+                ps.setString(10, acc);
             });
 
             return affectedRows > 0;
@@ -107,7 +103,7 @@ public class DepositoChequeDao implements IDepositoCheque {
      * @param mb
      * @return
      */
-    @Override
+    /*@Override
     public int existeRegistro(DepositoCheque mb) {
         try {
             return this.jdbcTemplate.queryForObject("execute p_list_tdep_DepositoCheques @codEmpresa = ?, @numFact = ?, @codCliente = ?, @docNum = ?, @ACCION = ?",
@@ -122,7 +118,7 @@ public class DepositoChequeDao implements IDepositoCheque {
             System.err.println("Error de SQL: " + e.getMessage());
             return 0;
         }
-    }
+    }*/
 
     /**
      * Listar todos los depósitos cheque solo los ultimos X registros
@@ -143,11 +139,9 @@ public class DepositoChequeDao implements IDepositoCheque {
 
                         temp.setIdDeposito(rs.getInt(1));
                         temp.setCodCliente(rs.getString(2));
-                        temp.setDocNum(rs.getInt(3));
-                        temp.setNumFact(rs.getInt(4));
-                        temp.setAnioFact(rs.getInt(5));
+
                         temp.setCodEmpresa(rs.getInt(6));
-                        temp.setCodBanco(rs.getInt(7));
+
                         temp.setImporte(rs.getFloat(8));
                         temp.setMoneda(rs.getString(9));
                         temp.setEstado(rs.getInt(10));
@@ -185,11 +179,9 @@ public class DepositoChequeDao implements IDepositoCheque {
 
                         temp.setIdDeposito(rs.getInt(1));
                         temp.setCodCliente(rs.getString(2));
-                        temp.setDocNum(rs.getInt(3));
-                        temp.setNumFact(rs.getInt(4));
-                        temp.setAnioFact(rs.getInt(5));
+
                         temp.setCodEmpresa(rs.getInt(6));
-                        temp.setCodBanco(rs.getInt(7));
+
                         temp.setImporte(rs.getFloat(8));
                         temp.setMoneda(rs.getString(9));
                         temp.setEstado(rs.getInt(10));

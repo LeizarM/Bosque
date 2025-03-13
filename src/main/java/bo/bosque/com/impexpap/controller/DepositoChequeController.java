@@ -69,9 +69,7 @@ public class DepositoChequeController {
 
             System.out.println(mb.toString());
 
-            int existe = depositoChequeDao.existeRegistro( mb );
 
-            if(existe > 0){
                 // Registrar el depósito
                 String accion = mb.getIdDeposito() == 0 ? "I" : "U";
                 boolean operationSuccess = depositoChequeDao.registrarDepositoCheque(mb, accion);
@@ -91,10 +89,7 @@ public class DepositoChequeController {
 
                 HttpStatus status = accion.equals("I") ? HttpStatus.CREATED : HttpStatus.OK;
                 return buildSuccessResponse(status, SUCCESS_MESSAGE);
-            }else{
 
-                return buildErrorResponse(HttpStatus.CONFLICT, "No existe el registro en el SAP para esa empresa, verifique los datos como: Empresa, Codigo Cliente, Num Documento y Num. Factura");
-            }
 
 
 
@@ -193,7 +188,7 @@ public class DepositoChequeController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    /*@PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/listar-reconciliados")
     public ResponseEntity<ApiResponse<?>> listarDepositosReconciliados( @RequestBody DepositoCheque mb)  {
 
@@ -212,7 +207,7 @@ public class DepositoChequeController {
         } catch (Exception e) {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
-    }
+    }*/
 
 
 
