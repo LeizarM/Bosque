@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -98,6 +99,16 @@ public class DepositoChequeDao implements IDepositoCheque {
     }
 
     /**
+     * Listar todos los depósitos cheque solo los ultimos X registros
+     *
+     * @return
+     */
+    @Override
+    public List<DepositoCheque> listarDepositosCheque() {
+        return null;
+    }
+
+    /**
      * Validar si existe un registro con los mismos datos
      *
      * @param mb
@@ -123,73 +134,35 @@ public class DepositoChequeDao implements IDepositoCheque {
     /**
      * Listar todos los depósitos cheque solo los ultimos X registros
      *
-     * @return
      */
-    @Override
-    public List<DepositoCheque> listarDepositosCheque() {
+    public List<DepositoCheque> listarDepositosChequeReconciliado(int codBanco, Date fechaInicio, Date fechaFin, String codCliente){
         List<DepositoCheque> lstTemp = new ArrayList<>();
+
+        System.out.println("fecha Inicio : "+ fechaInicio);
+        System.out.println("fecha Fin : "+fechaFin);
+        System.out.println("cod Cliente : "+codCliente);
+        System.out.println("codBanco : "+codBanco);
 
         try {
             lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tdep_DepositoCheques @ACCION = ?",
-                    new Object[] { "C" },
-                    new int[] { Types.VARCHAR },
+                    "execute p_list_tdep_DepositoCheques @codBanco=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @ACCION=?",
+                    new Object[] { codBanco, fechaInicio, fechaFin, codCliente ,"C" },
+                    new int[] { Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
                     (rs, rowNum) -> {
                         DepositoCheque temp = new DepositoCheque();
 
                         temp.setIdDeposito(rs.getInt(1));
                         temp.setCodCliente(rs.getString(2));
-
-                        temp.setCodEmpresa(rs.getInt(6));
-
-                        temp.setImporte(rs.getFloat(8));
-                        temp.setMoneda(rs.getString(9));
-                        temp.setEstado(rs.getInt(10));
-                        temp.setFotoPath(rs.getString(11));
-                        temp.setAudUsuario(rs.getInt(12));
-                        temp.setNombreBanco(rs.getString(13));
-                        temp.setNombreEmpresa(rs.getString(14));
-
-                        return temp;
-                    });
-        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
-            logDataAccessException(ex, "Error al listar depósitos de cheque"); // Usamos el método auxiliar
-            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
-        }
-
-        return lstTemp;
-    }
-
-    /**
-     * Listar todos los depósitos cheque solo los ultimos X registros
-     *
-     */
-    public List<DepositoCheque> listarDepositosChequeReconciliado(  int docNum, int numFact ) {
-        List<DepositoCheque> lstTemp = new ArrayList<>();
-
-        System.out.println( docNum + " - " + numFact );
-
-        try {
-            lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tdep_DepositoCheques @docNum=?, @numFact=?, @ACCION = ?",
-                    new Object[] { docNum, numFact, "D" },
-                    new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR },
-                    (rs, rowNum) -> {
-                        DepositoCheque temp = new DepositoCheque();
-
-                        temp.setIdDeposito(rs.getInt(1));
-                        temp.setCodCliente(rs.getString(2));
-
-                        temp.setCodEmpresa(rs.getInt(6));
-
-                        temp.setImporte(rs.getFloat(8));
-                        temp.setMoneda(rs.getString(9));
-                        temp.setEstado(rs.getInt(10));
-                        temp.setFotoPath(rs.getString(11));
-                        temp.setAudUsuario(rs.getInt(12));
-                        temp.setNombreBanco(rs.getString(13));
-                        temp.setNombreEmpresa(rs.getString(14));
-                        temp.setFueReconciliado(rs.getString(15));
+                        temp.setNombreBanco(rs.getString(3));
+                        temp.setNombreEmpresa(rs.getString(4));
+                        temp.setImporte(rs.getFloat(5));
+                        temp.setMoneda(rs.getString(6));
+                        temp.setACuenta(rs.getFloat(7));
+                        temp.setNumeroDeDocumentos(rs.getString(8));
+                        temp.setFechasDeDepositos(rs.getString(9));
+                        temp.setNumeroDeFacturas(rs.getString(10));
+                        temp.setTotalMontos(rs.getString(11));
+                        temp.setEsPendiente(rs.getString(12));
 
                         return temp;
                     });

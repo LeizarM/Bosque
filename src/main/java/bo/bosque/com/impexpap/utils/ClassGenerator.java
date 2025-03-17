@@ -25,8 +25,8 @@ public class ClassGenerator {
             return;
         }*/
 
-        String className ="Banco";
-        String tableName = "tch_banco";
+        String className ="BancoXCuenta";
+        String tableName = "tdep_BancoXCuenta";
 
         ClassGenerator classGenerator = new ClassGenerator();
         classGenerator.generateClass(className, tableName);

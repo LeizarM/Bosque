@@ -8,13 +8,12 @@ import java.util.Objects;
 
 import bo.bosque.com.impexpap.commons.service.FileStorageService;
 import bo.bosque.com.impexpap.commons.service.PdfGeneratorService;
-import bo.bosque.com.impexpap.dao.IChBanco;
-import bo.bosque.com.impexpap.dao.IEmpresa;
-import bo.bosque.com.impexpap.dao.ISocionegocio;
-import bo.bosque.com.impexpap.model.ChBanco;
-import bo.bosque.com.impexpap.model.Empresa;
-import bo.bosque.com.impexpap.model.SocioNegocio;
+import bo.bosque.com.impexpap.dao.*;
+import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.Utiles;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,8 +22,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import bo.bosque.com.impexpap.dao.IDepositoCheque;
-import bo.bosque.com.impexpap.model.DepositoCheque;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,17 +38,20 @@ public class DepositoChequeController {
     private final IDepositoCheque depositoChequeDao;
     private final IEmpresa empresaDao;
     private final ISocionegocio socioNegocioDao;
-    private final IChBanco chBancoDao;
+    private final IBancoXCuenta bancoXCuentaDao;
+
     private final FileStorageService fileStorageService;
     private final PdfGeneratorService pdfGeneratorService;
+    private final INotaRemision notaRemisionDao;
 
-    public DepositoChequeController(IDepositoCheque depositoChequeDao, IEmpresa empresaDao, ISocionegocio socioNegocioDao, IChBanco chBancoDao, FileStorageService fileStorageService, PdfGeneratorService pdfGeneratorService) {
+    public DepositoChequeController(IDepositoCheque depositoChequeDao, IEmpresa empresaDao, ISocionegocio socioNegocioDao, IBancoXCuenta bancoXCuentaDao, FileStorageService fileStorageService, PdfGeneratorService pdfGeneratorService, INotaRemision notaRemisionDao) {
         this.depositoChequeDao = depositoChequeDao;
         this.empresaDao = empresaDao;
         this.socioNegocioDao = socioNegocioDao;
-        this.chBancoDao = chBancoDao;
+        this.bancoXCuentaDao = bancoXCuentaDao;
         this.fileStorageService = fileStorageService;
         this.pdfGeneratorService = pdfGeneratorService;
+        this.notaRemisionDao = notaRemisionDao;
     }
 
 
@@ -64,11 +64,10 @@ public class DepositoChequeController {
     public ResponseEntity<ApiResponse<?>> registrarDepositoCheque( @RequestParam("file") MultipartFile file, @RequestParam("depositoCheque") String depositoChequeJson) {
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = JsonMapper.builder()
+                    .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+                    .build();
             DepositoCheque mb = mapper.readValue(depositoChequeJson, DepositoCheque.class);
-
-            System.out.println(mb.toString());
-
 
                 // Registrar el depósito
                 String accion = mb.getIdDeposito() == 0 ? "I" : "U";
@@ -128,12 +127,12 @@ public class DepositoChequeController {
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/lst-banco")
-    public ResponseEntity<?> obtenerBanco() {
+    public ResponseEntity<?> obtenerBanco( @RequestBody BancoXCuenta mb ) {
         try {
-            List<ChBanco> bancos = chBancoDao.listBancos();
+            List<BancoXCuenta> bancos = bancoXCuentaDao.listarBancosXCuentas( mb.getCodEmpresa() );
 
             if (bancos.isEmpty()) {
-                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron empresas");
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron Bancos");
             }
 
             return ResponseEntity.ok()
@@ -143,6 +142,57 @@ public class DepositoChequeController {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lst-notaRemision")
+    public ResponseEntity<?> obtenerNotaRemision( @RequestBody NotaRemision mb ) {
+        try {
+            List<NotaRemision> nr = notaRemisionDao.listarNotasRemisiones( mb );
+
+            if (nr.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron Notas de Remision");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, nr, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Para el registro de una nueva Nota de Remision
+     * @param mb
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/registrar-nota-remision")
+    public ResponseEntity<?> registrarNotaRemision( @RequestBody NotaRemision mb ){
+
+        mb.setFecha( new Utiles().fechaJ_a_Sql( mb.getFecha() ));
+
+
+        try {
+
+            String acc = mb.getIdNR() == 0 ? "I" : "U";
+
+            boolean operationSuccess = this.notaRemisionDao.registrarNotaRemision( mb, acc );
+
+            if (!operationSuccess) {
+                return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
+            }
+
+            HttpStatus status = HttpStatus.CREATED;
+            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
 
 
 
@@ -172,12 +222,20 @@ public class DepositoChequeController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/listar")
-    public ResponseEntity<ApiResponse<?>> listarDepositos() {
+    public ResponseEntity<ApiResponse<?>> listarDepositos( @RequestBody DepositoCheque mb ) {
+
+
+
+        mb.setFechaInicio( new Utiles().fechaJ_a_Sql( mb.getFechaInicio() ) );
+        mb.setFechaFin( new Utiles().fechaJ_a_Sql( mb.getFechaFin() ) );
+
+
+
         try {
-            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosCheque();
+            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getCodBanco(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente() );
 
             if (depositos.isEmpty()) {
-                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron depósitos");
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron registros...");
             }
 
             return ResponseEntity.ok()
@@ -187,6 +245,12 @@ public class DepositoChequeController {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+
+
+
+
+
 
     /*@PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/listar-reconciliados")
@@ -260,6 +324,10 @@ public class DepositoChequeController {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+
+
+
 
 
 

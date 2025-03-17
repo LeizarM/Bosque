@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface IBancoXCuenta {
 
-    List<BancoXCuenta> listarBancosXCuentas();
+    List<BancoXCuenta> listarBancosXCuentas( int codEmpresa );
 }

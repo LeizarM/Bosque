@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.DepositoCheque;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -37,6 +38,8 @@ public interface IDepositoCheque {
     List<DepositoCheque> listarDepositosCheque();
 
 
-    List<DepositoCheque> listarDepositosChequeReconciliado(  int docNum, int numFact  );
+
+
+    List<DepositoCheque> listarDepositosChequeReconciliado(int codBanco, Date fechaInicio, Date fechaFin, String codCliente);
 
 }

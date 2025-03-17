@@ -1,8 +1,15 @@
 package bo.bosque.com.impexpap.dao;
+import bo.bosque.com.impexpap.model.Cargo;
+import bo.bosque.com.impexpap.model.Dependiente;
 import bo.bosque.com.impexpap.model.Empleado;
+import bo.bosque.com.impexpap.model.Persona;
+import org.exolab.castor.mapping.xml.Sql;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.relational.core.sql.SQL;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.object.SqlQuery;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
@@ -38,7 +45,6 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.getPersona().setDatoPersona( rs.getString(3) );
                         temp.getRelEmpEmpr().setEsActivo( rs.getInt(4) );
                         temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(5));
-
                         return temp;
                     });
 
@@ -170,4 +176,38 @@ public class EmpleadoDAO implements IEmpleado{
         return temp.getCodEmpleado();
      }
 
+    /**
+     * Procedimiento para obtener Empleados y Dependientes
+     * @return List<Empleado>
+     */
+
+    public List<Empleado> obtenerListaEmpleadoyDependientes() {
+        List<Empleado> lstTemp;
+        try{
+        lstTemp = this.jdbcTemplate.query(
+                "execute p_list_Empleado @ACCION=?",
+                new Object[]{"P"},
+                new int[]{Types.VARCHAR},
+                (rs, rowNum) -> {
+                    Empleado temp = new Empleado();
+                    temp.setCodEmpleado(rs.getInt("CodigoEmpleado"));
+                    temp.getEmpleado().getPersona().setApPaterno(rs.getString("ApellidoPaterno"));
+                    temp.getEmpleado().getPersona().setApMaterno(rs.getString("ApellidoMaterno"));
+                    temp.getEmpleado().getPersona().setNombres(rs.getString("Nombres"));
+                    temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString("CargoActual"));
+                    temp.getEmpleado().getDependiente().setCodEmpleado(rs.getInt("Dependiente"));
+                    temp.getEmpleado().getDependiente().setCodPersona(rs.getInt("DependientesEmpleados"));
+                    temp.getEmpleado().getRelEmpEmpr().setEsActivo(rs.getInt("Estado"));
+                    return temp;
+
+                });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerListaEmpleadoyDependientes,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+
+        }
+        return lstTemp;
     }
+
+}

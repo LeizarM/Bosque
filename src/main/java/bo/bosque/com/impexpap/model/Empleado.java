@@ -17,7 +17,7 @@ public class Empleado extends Persona implements Serializable {
     private int codRelBeneficios;
     private int codRelPlanilla;
     private int audUsuarioI;
-
+    private int codDependiente;
 
     /**
      * Variables de apoyo
@@ -25,6 +25,8 @@ public class Empleado extends Persona implements Serializable {
     private Persona persona = new Persona();
     private EmpleadoCargo empleadoCargo = new EmpleadoCargo();
     private RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
+    private Dependiente dependiente= new Dependiente();
+    private Empleado empleado = new Empleado();
 
     /**
      * Constructores

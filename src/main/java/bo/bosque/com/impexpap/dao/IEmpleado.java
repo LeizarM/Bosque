@@ -31,4 +31,10 @@ public interface IEmpleado {
      * @return
      */
     int obtenerUltimoEmpleado( );
+
+    /**
+     * Procedimiento para mostrar lista de empleados y dependientes
+     * @return
+     */
+    List <Empleado>obtenerListaEmpleadoyDependientes ();
 }

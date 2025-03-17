@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import bo.bosque.com.impexpap.commons.JasperReportExport;
-import bo.bosque.com.impexpap.dao.IGaranteReferencia;
-import bo.bosque.com.impexpap.dao.IPersona;
+import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.GaranteReferencia;
 
@@ -28,7 +27,6 @@ import org.springframework.security.access.annotation.Secured;
 
 import org.springframework.web.bind.annotation.*;
 
-import bo.bosque.com.impexpap.dao.IDependiente;
 import bo.bosque.com.impexpap.model.Dependiente;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,15 +42,17 @@ public class FichaTrabajadorController {
     private final IDependiente dependienteDao;
     private final IGaranteReferencia garanteReferenciaDao;
     private final IPersona personaDao;
+    private final IEmpleado empleadoDao;
 
 
 
-    public FichaTrabajadorController( JdbcTemplate jdbcTemplate, IDependiente dependienteDao, IGaranteReferencia garanteReferenciaDao, IPersona personaDao){
+    public FichaTrabajadorController( JdbcTemplate jdbcTemplate, IDependiente dependienteDao, IGaranteReferencia garanteReferenciaDao, IPersona personaDao,IEmpleado empleadoDao){
 
         this.jdbcTemplate = jdbcTemplate;
         this.dependienteDao = dependienteDao;
         this.garanteReferenciaDao = garanteReferenciaDao;
         this.personaDao = personaDao;
+        this.empleadoDao= empleadoDao;
     }
 
     /**
@@ -246,9 +246,20 @@ public class FichaTrabajadorController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-
-
+        /**
+         * Procedimiento para obtener empleados y sus dependientes
+         * @param
+         * @return
+         */
     }
+    @Secured({"ROL_ADM","ROL_LIM"})
+    @PostMapping("/obtener-dependientes-empleado")
+    public List<Empleado>obtenerListaEmpleadoyDependientes(@RequestBody Empleado emp){
+        List<Empleado>lstTemp=this.empleadoDao.obtenerListaEmpleadoyDependientes();
+        if (lstTemp.size()==0)return new ArrayList<>();
+        return lstTemp;
+    }
+
 
 
 }

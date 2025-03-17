@@ -8,5 +8,5 @@ public interface INotaRemision {
 
     boolean registrarNotaRemision( NotaRemision mb, String acc );
 
-    List<NotaRemision> listarNotasRemisiones( NotaRemision mb,  String acc);
+    List<NotaRemision> listarNotasRemisiones( NotaRemision mb);
 }

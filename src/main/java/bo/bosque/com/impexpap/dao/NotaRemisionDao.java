@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -20,7 +22,7 @@ public class NotaRemisionDao implements  INotaRemision{
     private static final Logger logger = LoggerFactory.getLogger(DepositoChequeDao.class);
 
     private static final String SQL_STORED_PROCEDURE =
-            "execute p_abm_tdep_DepositoCheques " +
+            "execute p_abm_tdep_NotaRemision " +
                     "@idNR = ?, " +
                     "@idDeposito = ?, " +
                     "@docNum = ?, " +
@@ -70,8 +72,35 @@ public class NotaRemisionDao implements  INotaRemision{
     }
 
     @Override
-    public List<NotaRemision> listarNotasRemisiones( NotaRemision mb, String ac ) {
-        return null;
+    public List<NotaRemision> listarNotasRemisiones( NotaRemision mb ) {
+
+        List<NotaRemision> lstTemp = new ArrayList<>();
+
+        try {
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_tdep_NotaRemision  @codEmpresa=?, @codCliente=?  ,@ACCION=?",
+                    new Object[] { mb.getCodEmpresaBosque(), mb.getCodCliente() ,"A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR ,Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        NotaRemision temp = new NotaRemision();
+
+                        temp.setDocNum(rs.getInt(1));
+                        temp.setFecha(rs.getDate(2));
+                        temp.setCodCliente(rs.getString(3));
+                        temp.setNombreCliente(rs.getString(4));
+                        temp.setTotalMonto(rs.getFloat(5));
+                        temp.setSaldoPendiente(rs.getFloat(6));
+                        temp.setDb(rs.getString(7));
+                        temp.setNumFact(rs.getInt(8));
+
+                        return temp;
+                    });
+        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+            logDataAccessException(ex, "Error al listar en listarNotasRemisiones"); // Usamos el método auxiliar
+            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+        }
+
+        return lstTemp;
     }
 
 

@@ -18,4 +18,6 @@ public class BancoXCuenta implements Serializable {
     private int codEmpresa;
     private int audUsuario;
 
+    private String nombreBanco;
+
 }
