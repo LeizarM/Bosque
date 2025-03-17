@@ -26,7 +26,6 @@ public class Empleado extends Persona implements Serializable {
     private EmpleadoCargo empleadoCargo = new EmpleadoCargo();
     private RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
     private Dependiente dependiente= new Dependiente();
-    private Empleado empleado = new Empleado();
 
     /**
      * Constructores
