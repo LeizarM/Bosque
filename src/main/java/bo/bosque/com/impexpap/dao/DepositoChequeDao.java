@@ -33,6 +33,8 @@ public class DepositoChequeDao implements IDepositoCheque {
                     "@moneda = ?, " +
                     "@fotoPath = ?, " +
                     "@aCuenta = ?, " +
+                    "@fechaI = ?,"+
+                    "@nroTransaccion = ?,"+
                     "@audUsuario = ?, " +
                     "@ACCION = ?";
 
@@ -63,8 +65,10 @@ public class DepositoChequeDao implements IDepositoCheque {
                 ps.setString(6, mb.getMoneda());
                 ps.setString(7, mb.getFotoPath());
                 ps.setFloat(8, mb.getACuenta());
-                ps.setInt(9, mb.getAudUsuario());
-                ps.setString(10, acc);
+                ps.setDate(9, (java.sql.Date) mb.getFechaI());
+                ps.setString(10, mb.getNroTransaccion());
+                ps.setInt(11, mb.getAudUsuario());
+                ps.setString(12, acc);
             });
 
             return affectedRows > 0;
@@ -135,18 +139,18 @@ public class DepositoChequeDao implements IDepositoCheque {
      * Listar todos los depósitos cheque solo los ultimos X registros
      *
      */
-    public List<DepositoCheque> listarDepositosChequeReconciliado(int codBanco, Date fechaInicio, Date fechaFin, String codCliente){
+    public List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente){
         List<DepositoCheque> lstTemp = new ArrayList<>();
 
         System.out.println("fecha Inicio : "+ fechaInicio);
         System.out.println("fecha Fin : "+fechaFin);
         System.out.println("cod Cliente : "+codCliente);
-        System.out.println("codBanco : "+codBanco);
+        System.out.println("codBanco : "+idBxC);
 
         try {
             lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tdep_DepositoCheques @codBanco=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @ACCION=?",
-                    new Object[] { codBanco, fechaInicio, fechaFin, codCliente ,"C" },
+                    "execute p_list_tdep_DepositoCheques @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @ACCION=?",
+                    new Object[] { idBxC, fechaInicio, fechaFin, codCliente ,"C" },
                     new int[] { Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
                     (rs, rowNum) -> {
                         DepositoCheque temp = new DepositoCheque();
@@ -163,6 +167,8 @@ public class DepositoChequeDao implements IDepositoCheque {
                         temp.setNumeroDeFacturas(rs.getString(10));
                         temp.setTotalMontos(rs.getString(11));
                         temp.setEsPendiente(rs.getString(12));
+                        temp.setFechaI(rs.getDate(13));
+                        temp.setNroTransaccion(rs.getString(14));
 
                         return temp;
                     });

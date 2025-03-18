@@ -40,6 +40,6 @@ public interface IDepositoCheque {
 
 
 
-    List<DepositoCheque> listarDepositosChequeReconciliado(int codBanco, Date fechaInicio, Date fechaFin, String codCliente);
+    List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente);
 
 }

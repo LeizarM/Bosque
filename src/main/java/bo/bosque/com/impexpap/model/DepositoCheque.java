@@ -21,6 +21,8 @@ public class DepositoCheque implements Serializable {
     private int estado;
     private String fotoPath;
     private float aCuenta;
+    private Date fechaI;
+    private String nroTransaccion;
     private int audUsuario;
 
 

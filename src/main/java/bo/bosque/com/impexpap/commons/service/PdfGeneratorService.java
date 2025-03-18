@@ -34,6 +34,10 @@ public class PdfGeneratorService {
     private static final DeviceRgb BORDER_COLOR = new DeviceRgb(214, 214, 214);
 
     public byte[] generarPdfDeposito(DepositoCheque deposito) {
+
+        System.out.println(deposito.toString());
+
+
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
@@ -94,8 +98,8 @@ public class PdfGeneratorService {
             addTableRow(table, cellStyle,
                     "ID Depósito: " + deposito.getIdDeposito(),
                     "Empresa: " + deposito.getNombreEmpresa(),
-                    "Cliente: " + deposito.getCodCliente()
-                    //"Documento: " + deposito.getDocNum()
+                    "Cliente: " + deposito.getCodCliente(),
+                    "Documento: " + deposito.getNumeroDeDocumentos()
             );
 
             // Segunda sección
@@ -103,7 +107,7 @@ public class PdfGeneratorService {
             addTableRow(table, cellStyle,
                     "Banco: " + deposito.getNombreBanco(),
                     "Importe: " + String.format("%,.2f %s", deposito.getImporte(), deposito.getMoneda()),
-                    //"N° Factura: " + deposito.getNumFact(),
+                    "N° Factura(s): " + deposito.getNumeroDeFacturas(),
                     "Fecha: " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             );
 

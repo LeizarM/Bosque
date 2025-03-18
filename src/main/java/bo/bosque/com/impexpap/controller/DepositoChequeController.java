@@ -232,7 +232,7 @@ public class DepositoChequeController {
 
 
         try {
-            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getCodBanco(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente() );
+            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getIdBxC(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente() );
 
             if (depositos.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron registros...");
@@ -246,6 +246,34 @@ public class DepositoChequeController {
         }
     }
 
+    /**
+     * Para el registro de una nueva Nota de Remision
+     * @param mb
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/registrar-nroTransaccion")
+    public ResponseEntity<?> registrarNroTransaccion( @RequestBody DepositoCheque mb ){
+
+        try {
+
+            String acc = "A";
+
+            System.out.println(mb.toString());
+
+            boolean operationSuccess = this.depositoChequeDao.registrarDepositoCheque( mb, acc );
+
+            if (!operationSuccess) {
+                return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
+            }
+
+            HttpStatus status = HttpStatus.CREATED;
+            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
 
 
 
