@@ -181,7 +181,7 @@ public class EmpleadoDAO implements IEmpleado{
      * @return List<Empleado>
      */
 
-    public List<Empleado> obtenerListaEmpleadoyDependientes() {
+    /*public List<Empleado> obtenerListaEmpleadoyDependientes() {
         List<Empleado> lstTemp;
         try{
         lstTemp = this.jdbcTemplate.query(
@@ -208,6 +208,6 @@ public class EmpleadoDAO implements IEmpleado{
 
         }
         return lstTemp;
-    }
+    }*/
 
 }

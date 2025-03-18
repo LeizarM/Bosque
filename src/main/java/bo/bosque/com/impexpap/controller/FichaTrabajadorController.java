@@ -252,13 +252,13 @@ public class FichaTrabajadorController {
          * @return
          */
     }
-    @Secured({"ROL_ADM","ROL_LIM"})
+    /*@Secured({"ROL_ADM","ROL_LIM"})
     @PostMapping("/obtener-dependientes-empleado")
     public List<Empleado>obtenerListaEmpleadoyDependientes(@RequestBody Empleado emp){
         List<Empleado>lstTemp=this.empleadoDao.obtenerListaEmpleadoyDependientes();
         if (lstTemp.size()==0)return new ArrayList<>();
         return lstTemp;
-    }
+    }*/
 
 
 
