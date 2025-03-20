@@ -31,10 +31,12 @@ public class DepositoChequeDao implements IDepositoCheque {
                     "@idBxC = ?, " +
                     "@importe = ?, " +
                     "@moneda = ?, " +
+                    "@estado = ?, " +
                     "@fotoPath = ?, " +
                     "@aCuenta = ?, " +
                     "@fechaI = ?,"+
                     "@nroTransaccion = ?,"+
+                    "@obs = ?,"+
                     "@audUsuario = ?, " +
                     "@ACCION = ?";
 
@@ -63,12 +65,14 @@ public class DepositoChequeDao implements IDepositoCheque {
                 ps.setInt(4, mb.getIdBxC());
                 ps.setFloat(5, mb.getImporte());
                 ps.setString(6, mb.getMoneda());
-                ps.setString(7, mb.getFotoPath());
-                ps.setFloat(8, mb.getACuenta());
-                ps.setDate(9, (java.sql.Date) mb.getFechaI());
-                ps.setString(10, mb.getNroTransaccion());
-                ps.setInt(11, mb.getAudUsuario());
-                ps.setString(12, acc);
+                ps.setInt(7, mb.getEstado());
+                ps.setString(8, mb.getFotoPath());
+                ps.setFloat(9, mb.getACuenta());
+                ps.setDate(10, (java.sql.Date) mb.getFechaI());
+                ps.setString(11, mb.getNroTransaccion());
+                ps.setString(12, mb.getObs());
+                ps.setInt(13, mb.getAudUsuario());
+                ps.setString(14, acc);
             });
 
             return affectedRows > 0;
@@ -142,11 +146,6 @@ public class DepositoChequeDao implements IDepositoCheque {
     public List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente){
         List<DepositoCheque> lstTemp = new ArrayList<>();
 
-        System.out.println("fecha Inicio : "+ fechaInicio);
-        System.out.println("fecha Fin : "+fechaFin);
-        System.out.println("cod Cliente : "+codCliente);
-        System.out.println("codBanco : "+idBxC);
-
         try {
             lstTemp = this.jdbcTemplate.query(
                     "execute p_list_tdep_DepositoCheques @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @ACCION=?",
@@ -180,7 +179,49 @@ public class DepositoChequeDao implements IDepositoCheque {
         return lstTemp;
     }
 
+    /**
+     * Listar todos los depósitos cheque por identificar con el idBxC, fecha inicio, fecha fin y código de cliente
+     *
+     * @param idBxC
+     * @param fechaInicio
+     * @param fechaFin
+     * @param codCliente
+     * @return
+     */
+    @Override
+    public List<DepositoCheque> lstDepositxIdentificar(int idBxC, Date fechaInicio, Date fechaFin, String codCliente) {
+        List<DepositoCheque> lstTemp = new ArrayList<>();
 
+        try {
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_tdep_DepositoCheques @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @ACCION=?",
+                    new Object[] { idBxC, fechaInicio, fechaFin, codCliente ,"B" },
+                    new int[] { Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        DepositoCheque temp = new DepositoCheque();
+
+                        temp.setIdDeposito(rs.getInt(1));
+                        temp.setCodCliente(rs.getString(2));
+                        temp.setCodEmpresa(rs.getInt(3));
+                        temp.setNombreEmpresa(rs.getString(4));
+                        temp.setIdBxC(rs.getInt(5));
+                        temp.setNombreBanco(rs.getString(6));
+                        temp.setImporte(rs.getFloat(7));
+                        temp.setMoneda(rs.getString(8));
+                        temp.setACuenta(rs.getFloat(9));
+                        temp.setObs(rs.getString(10));
+                        temp.setFechaI(rs.getDate(11));
+                        temp.setEsPendiente(rs.getString(12));
+
+                        return temp;
+                    });
+        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+            logDataAccessException(ex, "Error al listar lstDepositxIdentificar"); // Usamos el método auxiliar
+            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+        }
+
+        return lstTemp;
+    }
 
 
     /**

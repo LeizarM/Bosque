@@ -23,6 +23,7 @@ public class DepositoCheque implements Serializable {
     private float aCuenta;
     private Date fechaI;
     private String nroTransaccion;
+    private String obs;
     private int audUsuario;
 
 

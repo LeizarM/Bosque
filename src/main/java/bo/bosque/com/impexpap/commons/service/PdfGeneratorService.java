@@ -34,10 +34,6 @@ public class PdfGeneratorService {
     private static final DeviceRgb BORDER_COLOR = new DeviceRgb(214, 214, 214);
 
     public byte[] generarPdfDeposito(DepositoCheque deposito) {
-
-        System.out.println(deposito.toString());
-
-
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
@@ -61,18 +57,42 @@ public class PdfGeneratorService {
             float imageMaxHeight = availableHeight - dataHeight - 40;
 
             // Imagen
-            String imagePath = uploadPath.resolve("deposito_" + deposito.getIdDeposito() + ".jpg").toString();
-            ImageData imageData = ImageDataFactory.create(imagePath);
-            Image image = new Image(imageData);
+            try {
+                String imagePath = uploadPath.resolve("deposito_" + deposito.getIdDeposito() + ".jpg").toString();
+                java.io.File imageFile = new java.io.File(imagePath);
 
-            float scaleFactor = Math.min(
-                    pageWidth / image.getImageWidth(),
-                    imageMaxHeight / image.getImageHeight()
-            );
+                if (imageFile.exists() && imageFile.isFile()) {
+                    ImageData imageData = ImageDataFactory.create(imagePath);
+                    Image image = new Image(imageData);
 
-            image.scale(scaleFactor, scaleFactor);
-            image.setHorizontalAlignment(HorizontalAlignment.CENTER);
-            document.add(image);
+                    float scaleFactor = Math.min(
+                            pageWidth / image.getImageWidth(),
+                            imageMaxHeight / image.getImageHeight()
+                    );
+
+                    image.scale(scaleFactor, scaleFactor);
+                    image.setHorizontalAlignment(HorizontalAlignment.CENTER);
+                    document.add(image);
+                } else {
+                    // Si no se encuentra la imagen, agregar un mensaje
+                    Paragraph noImageMsg = new Paragraph("Sin imagen o es un deposito para identificar")
+                            .setFontSize(12)
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setMarginBottom(15)
+                            .setFontColor(ColorConstants.RED)
+                            .setItalic();
+                    document.add(noImageMsg);
+                }
+            } catch (Exception e) {
+                // Si hay un error al procesar la imagen, agregar un mensaje
+                Paragraph errorImageMsg = new Paragraph("Error al cargar la imagen: " + e.getMessage())
+                        .setFontSize(12)
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setMarginBottom(15)
+                        .setFontColor(ColorConstants.RED)
+                        .setItalic();
+                document.add(errorImageMsg);
+            }
 
             // Tabla de datos mejorada
             Table table = new Table(UnitValue.createPercentArray(new float[]{25, 25, 25, 25}))
@@ -96,18 +116,18 @@ public class PdfGeneratorService {
             // Primera sección
             addSectionHeader(table, "Información General", headerStyle, 4);
             addTableRow(table, cellStyle,
-                    "ID Depósito: " + deposito.getIdDeposito(),
-                    "Empresa: " + deposito.getNombreEmpresa(),
-                    "Cliente: " + deposito.getCodCliente(),
-                    "Documento: " + deposito.getNumeroDeDocumentos()
+                    "ID Depósito: " + nvl(deposito.getIdDeposito()),
+                    "Empresa: " + nvl(deposito.getNombreEmpresa()),
+                    "Cliente: " + nvl(deposito.getCodCliente()),
+                    "Documento: " + nvl(deposito.getNumeroDeDocumentos())
             );
 
             // Segunda sección
             addSectionHeader(table, "Detalle", headerStyle, 4);
             addTableRow(table, cellStyle,
-                    "Banco: " + deposito.getNombreBanco(),
-                    "Importe: " + String.format("%,.2f %s", deposito.getImporte(), deposito.getMoneda()),
-                    "N° Factura(s): " + deposito.getNumeroDeFacturas(),
+                    "Banco: " + nvl(deposito.getNombreBanco()),
+                    "Importe: " + formatImporte((double) deposito.getImporte(), nvl(deposito.getMoneda())),
+                    "N° Factura(s): " + nvl(deposito.getNumeroDeFacturas()),
                     "Fecha: " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             );
 
@@ -130,6 +150,21 @@ public class PdfGeneratorService {
         }
     }
 
+    // Método para manejar valores nulos
+    private String nvl(Object value) {
+        if (value == null) {
+            return "No disponible";
+        }
+        return value.toString();
+    }
+
+    // Método para formatear el importe
+    private String formatImporte(Double importe, String moneda) {
+        if (importe == null) {
+            return "0.00 " + moneda;
+        }
+        return String.format("%,.2f %s", importe, moneda);
+    }
     private void addSectionHeader(Table table, String headerText, Style headerStyle, int colspan) {
         Cell headerCell = new Cell(1, colspan)
                 .add(new Paragraph(headerText))

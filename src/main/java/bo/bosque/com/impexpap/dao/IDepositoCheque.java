@@ -38,8 +38,24 @@ public interface IDepositoCheque {
     List<DepositoCheque> listarDepositosCheque();
 
 
-
-
+    /**
+     * Lsitara los depositos con el idBxC, fecha inicio, fecha fin y código de cliente
+     * @param idBxC
+     * @param fechaInicio
+     * @param fechaFin
+     * @param codCliente
+     * @return
+     */
     List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente);
+
+    /**
+     * Listar todos los depósitos cheque por identificar con el idBxC, fecha inicio, fecha fin y código de cliente
+     * @param idBxC
+     * @param fechaInicio
+     * @param fechaFin
+     * @param codCliente
+     * @return
+     */
+    List<DepositoCheque> lstDepositxIdentificar(int idBxC, Date fechaInicio, Date fechaFin, String codCliente);
 
 }
