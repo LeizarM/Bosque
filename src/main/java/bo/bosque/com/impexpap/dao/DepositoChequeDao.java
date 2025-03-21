@@ -143,14 +143,14 @@ public class DepositoChequeDao implements IDepositoCheque {
      * Listar todos los depósitos cheque solo los ultimos X registros
      *
      */
-    public List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente){
+    public List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente, String estadoFiltro){
         List<DepositoCheque> lstTemp = new ArrayList<>();
 
         try {
             lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tdep_DepositoCheques @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @ACCION=?",
-                    new Object[] { idBxC, fechaInicio, fechaFin, codCliente ,"C" },
-                    new int[] { Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
+                    "execute p_list_tdep_DepositoCheques @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @estadoFiltro=? , @ACCION=?",
+                    new Object[] { idBxC, fechaInicio, fechaFin, codCliente, estadoFiltro ,"C" },
+                    new int[] { Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
                     (rs, rowNum) -> {
                         DepositoCheque temp = new DepositoCheque();
 

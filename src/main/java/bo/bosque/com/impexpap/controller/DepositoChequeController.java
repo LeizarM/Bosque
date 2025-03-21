@@ -287,7 +287,7 @@ public class DepositoChequeController {
 
 
         try {
-            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getIdBxC(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente() );
+            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getIdBxC(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente(), mb.getEstadoFiltro() );
 
             if (depositos.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron registros...");

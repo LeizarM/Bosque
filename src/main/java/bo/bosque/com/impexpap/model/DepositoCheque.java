@@ -41,5 +41,7 @@ public class DepositoCheque implements Serializable {
     private String numeroDeFacturas;
     private String totalMontos;
 
+    private String estadoFiltro;
+
 
 }

@@ -46,7 +46,7 @@ public interface IDepositoCheque {
      * @param codCliente
      * @return
      */
-    List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente);
+    List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente, String estadoFiltro);
 
     /**
      * Listar todos los depósitos cheque por identificar con el idBxC, fecha inicio, fecha fin y código de cliente
