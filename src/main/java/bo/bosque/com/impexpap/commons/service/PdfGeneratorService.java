@@ -21,7 +21,6 @@ import com.itextpdf.layout.properties.UnitValue;
 import org.springframework.stereotype.Service;
 import bo.bosque.com.impexpap.model.DepositoCheque;
 
-import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,27 +33,28 @@ public class PdfGeneratorService {
     private static final DeviceRgb BORDER_COLOR = new DeviceRgb(214, 214, 214);
 
     public byte[] generarPdfDeposito(DepositoCheque deposito) {
+
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf, PageSize.A4.rotate());
+            Document document = new Document(pdf, PageSize.LETTER);
 
-            document.setMargins(20, 20, 20, 20);
+            document.setMargins(15, 15, 15, 15);
 
             // Título con estilo mejorado
             Paragraph titulo = new Paragraph("Comprobante de Depósito")
-                    .setFontSize(18)
+                    .setFontSize(16)
                     .setBold()
                     .setTextAlignment(TextAlignment.CENTER)
-                    .setMarginBottom(15)
+                    .setMarginBottom(10)
                     .setFontColor(HEADER_COLOR);
             document.add(titulo);
 
-            // Calcular dimensiones
-            float pageWidth = PageSize.A4.getHeight() - 40;
-            float availableHeight = PageSize.A4.getWidth() - 40;
+            // Calcular dimensiones para tamaño carta
+            float pageWidth = PageSize.LETTER.getWidth() - 40;
+            float availableHeight = PageSize.LETTER.getHeight() - 40;
             float dataHeight = availableHeight / 3;
-            float imageMaxHeight = availableHeight - dataHeight - 40;
+            float imageMaxHeight = (float) (availableHeight * 0.5); // Limitar la altura de la imagen al 50% del espacio disponible
 
             // Imagen
             try {
@@ -94,8 +94,8 @@ public class PdfGeneratorService {
                 document.add(errorImageMsg);
             }
 
-            // Tabla de datos mejorada
-            Table table = new Table(UnitValue.createPercentArray(new float[]{25, 25, 25, 25}))
+            // Tabla de datos mejorada y optimizada para tamaño carta
+            Table table = new Table(UnitValue.createPercentArray(new float[]{30, 30, 40}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(15);
 
@@ -114,21 +114,24 @@ public class PdfGeneratorService {
                     .setBorderBottom(new SolidBorder(BORDER_COLOR, 1));
 
             // Primera sección
-            addSectionHeader(table, "Información General", headerStyle, 4);
+            addSectionHeader(table, "Información General", headerStyle, 3);
             addTableRow(table, cellStyle,
                     "ID Depósito: " + nvl(deposito.getIdDeposito()),
                     "Empresa: " + nvl(deposito.getNombreEmpresa()),
+                    "N° Transacción: " + nvl(deposito.getNroTransaccion())
+            );
+            addTableRow(table, cellStyle,
                     "Cliente: " + nvl(deposito.getCodCliente()),
-                    "Documento: " + nvl(deposito.getNumeroDeDocumentos())
+                    "Banco: " + nvl(deposito.getNombreBanco()),
+                    "Fecha: " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             );
 
             // Segunda sección
-            addSectionHeader(table, "Detalle", headerStyle, 4);
+            addSectionHeader(table, "Detalle", headerStyle, 3);
             addTableRow(table, cellStyle,
-                    "Banco: " + nvl(deposito.getNombreBanco()),
                     "Importe: " + formatImporte((double) deposito.getImporte(), nvl(deposito.getMoneda())),
                     "N° Factura(s): " + nvl(deposito.getNumeroDeFacturas()),
-                    "Fecha: " + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    "Documento: " + nvl(deposito.getNumeroDeDocumentos())
             );
 
             document.add(table);
@@ -165,6 +168,7 @@ public class PdfGeneratorService {
         }
         return String.format("%,.2f %s", importe, moneda);
     }
+
     private void addSectionHeader(Table table, String headerText, Style headerStyle, int colspan) {
         Cell headerCell = new Cell(1, colspan)
                 .add(new Paragraph(headerText))

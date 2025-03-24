@@ -123,8 +123,13 @@ public class DepositoChequeController {
                     String contentType = file.getContentType();
                     if (contentType != null && contentType.startsWith("image/")) {
                         // Obtener el ID del último registro y guardar la imagen
-                        int lastId = depositoChequeDao.obtenerUltimoId(mb.getAudUsuario());
-                        String fileName = fileStorageService.saveFile(file, (long) lastId);
+                        int lastID;
+
+                        if("I".equals(accion) ) {
+                            mb.setIdDeposito(  depositoChequeDao.obtenerUltimoId(mb.getAudUsuario()));
+                        }
+                        lastID = mb.getIdDeposito();
+                        String fileName = fileStorageService.saveFile(file, (long) lastID);
                         // Actualizar el registro con el nombre del archivo
                         mb.setFotoPath(fileName);
                     } else {
@@ -287,7 +292,7 @@ public class DepositoChequeController {
 
 
         try {
-            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getIdBxC(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente(), mb.getEstadoFiltro() );
+            List<DepositoCheque> depositos = depositoChequeDao.listarDepositosChequeReconciliado( mb.getCodEmpresa(),  mb.getIdBxC(), mb.getFechaInicio(), mb.getFechaFin(), mb.getCodCliente(), mb.getEstadoFiltro() );
 
             if (depositos.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron registros...");

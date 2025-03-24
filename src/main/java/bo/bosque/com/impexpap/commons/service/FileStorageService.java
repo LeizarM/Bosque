@@ -58,6 +58,7 @@ public class FileStorageService {
 
             // Crear nombre del archivo
             String nombreArchivo = "deposito_" + idDeposito + ".jpg";
+            System.out.println(nombreArchivo);
             Path targetPath = this.root.resolve(nombreArchivo);
 
             // Guardar como JPG con máxima calidad

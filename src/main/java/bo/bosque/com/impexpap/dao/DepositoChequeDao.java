@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
@@ -143,14 +144,14 @@ public class DepositoChequeDao implements IDepositoCheque {
      * Listar todos los depósitos cheque solo los ultimos X registros
      *
      */
-    public List<DepositoCheque> listarDepositosChequeReconciliado(int idBxC, Date fechaInicio, Date fechaFin, String codCliente, String estadoFiltro){
+    public List<DepositoCheque> listarDepositosChequeReconciliado(int codEmpresa, int idBxC, Date fechaInicio, Date fechaFin, String codCliente, String estadoFiltro){
         List<DepositoCheque> lstTemp = new ArrayList<>();
 
         try {
             lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tdep_DepositoCheques @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @estadoFiltro=? , @ACCION=?",
-                    new Object[] { idBxC, fechaInicio, fechaFin, codCliente, estadoFiltro ,"C" },
-                    new int[] { Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
+                    "execute p_list_tdep_DepositoCheques @codEmpresa=?, @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @estadoFiltro=? , @ACCION=?",
+                    new Object[] { codEmpresa, idBxC, fechaInicio, fechaFin, codCliente, estadoFiltro ,"C" },
+                    new int[] {Types.INTEGER, Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
                     (rs, rowNum) -> {
                         DepositoCheque temp = new DepositoCheque();
 
@@ -168,6 +169,8 @@ public class DepositoChequeDao implements IDepositoCheque {
                         temp.setEsPendiente(rs.getString(12));
                         temp.setFechaI(rs.getDate(13));
                         temp.setNroTransaccion(rs.getString(14));
+                        temp.setCodEmpresa( rs.getInt(15) );
+                        temp.setIdBxC( rs.getInt(16) );
 
                         return temp;
                     });
