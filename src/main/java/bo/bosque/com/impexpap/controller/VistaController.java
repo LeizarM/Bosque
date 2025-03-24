@@ -1,11 +1,11 @@
 package bo.bosque.com.impexpap.controller;
 
 
+import bo.bosque.com.impexpap.dao.IUsuarioBtn;
 import bo.bosque.com.impexpap.dao.IVistaDao;
 import bo.bosque.com.impexpap.model.Login;
+import bo.bosque.com.impexpap.model.UsuarioBtn;
 import bo.bosque.com.impexpap.model.Vista;
-import bo.bosque.com.impexpap.security.jwt.JwtProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +16,14 @@ import java.util.List;
 @RequestMapping("/view")
 public class VistaController {
 
-    @Autowired()
-    private IVistaDao vdao;
+
+    private final IVistaDao vdao;
+    private final IUsuarioBtn uDao;
+
+    public VistaController(IVistaDao vdao, IUsuarioBtn uDao) {
+        this.vdao = vdao;
+        this.uDao = uDao;
+    }
 
     /**
      * Procedimiento para obtener el menu dinamico por usuario
@@ -52,6 +58,25 @@ public class VistaController {
         }
         return lstMenu;
     }
+
+
+    /**
+     * Procedimiento para obtener los permisos por usuario por boton
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" }) //que un usuario admin o limitado si tiene acceso para consumir este recurso
+    @PostMapping("/vistaBtn")
+    public List<UsuarioBtn> obtenerPermisosBotones( @RequestBody Login obj ) {
+
+        List<UsuarioBtn> lstPermisos = this.uDao.botonesXUsuario( obj.getCodUsuario() );
+
+        if (lstPermisos.isEmpty()) {
+            throw new RuntimeException("No hay permisos asociados al usuario.");
+        }
+        return lstPermisos;
+    }
+
+
+
 
     /**
      * Procedimiento para obtener las rutas de las paginas por usuario, pero solo de los hijos del menu

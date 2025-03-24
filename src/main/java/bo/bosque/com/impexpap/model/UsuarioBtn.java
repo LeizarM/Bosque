@@ -20,6 +20,11 @@ public class UsuarioBtn implements Serializable {
     private int audUsuario;
 
 
+
+    private String boton;
+    private  int permiso;
+    private int pertenVist;
+
     /**
      * Constructores
      */
