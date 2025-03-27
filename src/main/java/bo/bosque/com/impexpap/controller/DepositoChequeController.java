@@ -281,7 +281,7 @@ public class DepositoChequeController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/listar")
+        @PostMapping("/listar")
     public ResponseEntity<ApiResponse<?>> listarDepositos( @RequestBody DepositoCheque mb ) {
 
 

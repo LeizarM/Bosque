@@ -39,6 +39,8 @@ public class PdfGeneratorService {
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf, PageSize.LETTER);
 
+
+
             document.setMargins(15, 15, 15, 15);
 
             // Título con estilo mejorado
@@ -131,7 +133,7 @@ public class PdfGeneratorService {
             addTableRow(table, cellStyle,
                     "Importe: " + formatImporte((double) deposito.getImporte(), nvl(deposito.getMoneda())),
                     "N° Factura(s): " + nvl(deposito.getNumeroDeFacturas()),
-                    "Documento: " + nvl(deposito.getNumeroDeDocumentos())
+                    "Documento: " + nvl(deposito.getNumeroDeDocumentos()) + " / Montos: " + nvl(deposito.getTotalMontos())
             );
 
             document.add(table);
