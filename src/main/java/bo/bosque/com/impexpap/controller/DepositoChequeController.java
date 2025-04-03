@@ -162,7 +162,6 @@ public class DepositoChequeController {
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/lst-empresas")
-
     public ResponseEntity<?> obtenerEmpresas() {
         try {
             List<Empresa> empresas = empresaDao.obtenerEmpresas();
