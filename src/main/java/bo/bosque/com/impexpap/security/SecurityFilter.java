@@ -48,21 +48,45 @@ public class SecurityFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Verificar patrones de ataque en parámetros
-        Map<String, String[]> params = request.getParameterMap();
-        for (String[] values : params.values()) {
-            for (String value : values) {
-                for (Pattern pattern : attackPatterns) {
-                    if (pattern.matcher(value).matches()) {
-                        logger.warn("Possible attack pattern detected from IP {}: {}", ip, value);
-                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                        response.getWriter().write("{\"error\": \"Acceso denegado\", \"ok\": false}");
-                        return;
+        // Determinar si es una solicitud de carga de archivos
+        String contentType = request.getContentType();
+        boolean isMultipart = contentType != null && contentType.toLowerCase().startsWith("multipart/form-data");
+
+        // Para subidas de archivos, omitir la verificación de parámetros del cuerpo
+        if (!isMultipart) {
+            // Verificar patrones de ataque solo en peticiones que no son de carga de archivos
+            Map<String, String[]> params = request.getParameterMap();
+            for (String[] values : params.values()) {
+                for (String value : values) {
+                    for (Pattern pattern : attackPatterns) {
+                        if (pattern.matcher(value).matches()) {
+                            logger.warn("Possible attack pattern detected from IP {}: {}", ip, value);
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("{\"error\": \"Acceso denegado\", \"ok\": false}");
+                            return;
+                        }
                     }
+                }
+            }
+        } else {
+            // Es una petición multipart (subida de archivos), permitir sin revisar el contenido del archivo
+            logger.debug("Multipart request detected, allowing file upload from IP {}", ip);
+        }
+
+        // Verificar solo parámetros de la URL para todas las peticiones
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            for (Pattern pattern : attackPatterns) {
+                if (pattern.matcher(queryString).matches()) {
+                    logger.warn("Possible attack pattern in URL from IP {}: {}", ip, queryString);
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("{\"error\": \"Acceso denegado\", \"ok\": false}");
+                    return;
                 }
             }
         }
 
+        // Si llegamos aquí, todo está bien, continuar con la cadena de filtros
         chain.doFilter(request, response);
     }
 
