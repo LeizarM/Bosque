@@ -1,6 +1,5 @@
 package bo.bosque.com.impexpap.security;
 
-
 import bo.bosque.com.impexpap.dao.LoginDaoImpl;
 import bo.bosque.com.impexpap.security.jwt.JwtEntryPoint;
 import bo.bosque.com.impexpap.security.jwt.JwtTokenFilter;
@@ -19,34 +18,38 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity( securedEnabled = true ) // Lo que protege los endpoints de acuerdo a los roles
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class MainSecurity extends WebSecurityConfigurerAdapter {
 
-
     private final JwtEntryPoint jwtEntryPoint;
-
     private final LoginDaoImpl loginImpl;
+    private final SecurityFilter securityFilter;
 
-    public MainSecurity(JwtEntryPoint jwtEntryPoint, LoginDaoImpl loginImpl) {
+    public MainSecurity(JwtEntryPoint jwtEntryPoint, LoginDaoImpl loginImpl, SecurityFilter securityFilter) {
         this.jwtEntryPoint = jwtEntryPoint;
         this.loginImpl = loginImpl;
+        this.securityFilter = securityFilter;
     }
 
     @Bean
-    public JwtTokenFilter jwtTokenFilter(){
+    public JwtTokenFilter jwtTokenFilter() {
         return new JwtTokenFilter();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public RateLimitFilter customRateLimitFilter() {
+        return new RateLimitFilter();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService( this.loginImpl ).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(this.loginImpl).passwordEncoder(passwordEncoder());
     }
-
 
     @Bean
     @Override
@@ -54,20 +57,25 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // Configuración de seguridad
         http.cors().and().csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/fichaTrabajador/uploads/img/**").permitAll()
-                //.antMatchers(HttpMethod.POST, "/view/**").hasAnyRole( "ADM", "LIM" )
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint);
+
+        // Añadir filtros en orden de ejecución
+        // 1. Filtro de seguridad para detectar ataques
+        http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
+        // 2. Filtro de rate limiting
+        http.addFilterBefore(customRateLimitFilter(), UsernamePasswordAuthenticationFilter.class);
+        // 3. Filtro JWT
         http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-
 }

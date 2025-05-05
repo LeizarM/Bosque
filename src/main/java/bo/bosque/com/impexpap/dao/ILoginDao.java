@@ -33,4 +33,19 @@ public interface ILoginDao {
      * @return
      */
     List<Login> getAllUsers();
+
+    /**
+     * Registra un intento fallido de login y verifica si la cuenta debe ser bloqueada
+     * @param login Nombre de usuario
+     * @param ip Dirección IP del cliente
+     * @return Login actualizado con información de intentos fallidos y estado
+     */
+    Login registerFailedAttempt(String login, String ip);
+
+    /**
+     * Registra un inicio de sesión exitoso en la bitácora
+     * @param login Nombre de usuario
+     * @param ip Dirección IP del cliente
+     */
+    void registerSuccessfulLogin(String login, String ip);
 }

@@ -18,7 +18,7 @@ import java.util.List;
 @Repository
 public class CombustibleControlDao implements ICombustibleControl {
 
-    private static final Logger logger = LoggerFactory.getLogger(DepositoChequeDao.class);
+    private static final Logger logger = LoggerFactory.getLogger(CombustibleControl.class);
 
     private static final String SQL_STORED_PROCEDURE =
             "execute p_abm_tgas_CombustibleControl " +

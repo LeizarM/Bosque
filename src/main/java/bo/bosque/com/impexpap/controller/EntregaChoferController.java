@@ -86,6 +86,7 @@ public class EntregaChoferController {
 
         List<EntregaChofer> lstTemp = this.entregaChoferDao.listarEntregasXChofer( mb.getFechaEntrega(), mb.getCodEmpleado() );
 
+
         if( lstTemp.size() == 0 ) return new ArrayList<>();
 
         return lstTemp;
@@ -121,8 +122,6 @@ public class EntregaChoferController {
     @PostMapping("/choferes")
     public List<EntregaChofer> lstChoferes(){
 
-
-
         List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferes();
 
         if( lstTemp.size() == 0 ) return new ArrayList<>();
@@ -139,6 +138,8 @@ public class EntregaChoferController {
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/extracto")
     public List<EntregaChofer> lstChoferExtracto(  @RequestBody EntregaChofer mb  ){
+
+        System.out.println( mb.toString() );
 
         List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferesExtracto( mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursal(), mb.getCodEmpleado() );
 

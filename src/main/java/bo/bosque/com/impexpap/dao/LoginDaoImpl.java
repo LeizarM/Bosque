@@ -69,45 +69,120 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
     }
 
     /**
-     * Prccedimiento para obtener el usuario
-     * @param login
-     * @param password2
-     * @return
+     * Procedimiento para verificar usuario usando el procedimiento almacenado
+     * @param login Nombre de usuario
+     * @param password2 Contraseña
+     * @param ip Dirección IP del cliente
+     * @return Objeto Login con información del usuario
      */
     public Login verifyUser(String login, String password2, String ip) {
-
-
         Login temp = new Login();
         try {
-              temp =  this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @password2=?, @ip=? ,@ACCION=?",
-                      new Object[] { login, password2, ip ,"C" },
-                      new int[] { Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR, Types.VARCHAR }
-                    ,(rs, rowNum) -> {
+            // Llamamos al procedimiento almacenado que solo verifica si el usuario existe
+            // La verificación de contraseña se hará en el controlador con Spring Security
+            temp = this.jdbcTemplate.queryForObject(
+                    "execute p_list_Usuario @login=?, @password2=?, @ip=?, @ACCION=?",
+                    new Object[] { login, password2, ip, "C" },
+                    new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR },
+                    (rs, rowNum) -> {
                         Login login1 = new Login();
-
-                        login1.setCodUsuario(rs.getInt(1 ));
+                        login1.setCodUsuario(rs.getInt(1));
                         login1.setCodEmpleado(rs.getInt(2));
-                        login1.getEmpleado().getPersona().setDatoPersona(rs.getString(3 ));
-                        login1.setCodSucursal(rs.getInt(4 ));
-                        login1.setNombreSucursal(rs.getString(5 ));
-                        login1.setCodCiudad(rs.getInt(6 ));
-                        login1.setNombreCiudad(rs.getString(7 ));
-                        login1.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(8 ));
-                        login1.setTipoUsuario( rs.getString(9) );
-                        login1.setCodEmpresa(rs.getInt(10 ));
-                        login1.setNombreEmpresa(rs.getString(11 ));
-                        login1.setElTemaSelecionado(rs.getString(12 ));
-                        login1.setVersionApp(rs.getString(13 ));
-                        return login1;
-                    });
 
-        }  catch (BadSqlGrammarException e) {
-            System.out.println("Error: LoginDaoImpl en verifyUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+                        // Si el codUsuario es positivo, cargamos todos los datos
+                        if (login1.getCodUsuario() > 0) {
+                            try {
+                                login1.getEmpleado().getPersona().setDatoPersona(rs.getString(3));
+                                login1.setCodSucursal(rs.getInt(4));
+                                login1.setNombreSucursal(rs.getString(5));
+                                login1.setCodCiudad(rs.getInt(6));
+                                login1.setNombreCiudad(rs.getString(7));
+                                login1.getEmpleado().getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(8));
+                                login1.setTipoUsuario(rs.getString(9));
+                                login1.setCodEmpresa(rs.getInt(10));
+                                login1.setNombreEmpresa(rs.getString(11));
+                                login1.setElTemaSelecionado(rs.getString(12));
+                                login1.setVersionApp(rs.getString(13));
+                            } catch (Exception e) {
+                                System.out.println("Error al mapear datos del usuario: " + e.getMessage());
+                            }
+                        }
+
+                        // Obtener el número de intentos fallidos
+                        try {
+                            login1.setIntentosFallidos(rs.getInt(14));
+                        } catch (Exception e) {
+                            System.out.println("Error al obtener intentos fallidos: " + e.getMessage());
+                            login1.setIntentosFallidos(0);
+                        }
+
+                        return login1;
+                    }
+            );
+        } catch (BadSqlGrammarException e) {
+            System.out.println("Error en verifyUser: " + e.getMessage() +
+                    ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             temp = new Login();
             this.jdbcTemplate = null;
+        } catch (Exception e) {
+            System.out.println("Error en verifyUser: " + e.getMessage());
+            temp = new Login();
         }
-        return temp;
 
+        return temp;
+    }
+
+    /**
+     * Registra un intento fallido de login y verifica si la cuenta debe ser bloqueada
+     * @param login Nombre de usuario
+     * @param ip Dirección IP del cliente
+     * @return Login actualizado con información de intentos fallidos y estado
+     */
+    public Login registerFailedAttempt(String login, String ip) {
+        Login temp = new Login();
+        try {
+            // Llamamos al procedimiento almacenado con acción 'F'
+            this.jdbcTemplate.queryForObject(
+                    "execute p_list_Usuario @login=?, @ip=?, @ACCION=?",
+                    new Object[] { login, ip, "F" },
+                    new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        // Obtenemos los resultados del procedimiento
+                        temp.setCodUsuario(rs.getInt("codUsuario"));
+                        temp.setIntentosFallidos(rs.getInt("intentosFallidos"));
+                        return temp;
+                    }
+            );
+
+            return temp;
+        } catch (Exception e) {
+            System.out.println("Error al registrar intento fallido: " + e.getMessage());
+            return temp;
+        }
+    }
+
+    /**
+     * Registra un inicio de sesión exitoso en la bitácora
+     * utilizando el procedimiento almacenado con acción 'S'
+     *
+     * @param login Nombre de usuario
+     * @param ip Dirección IP del cliente
+     */
+    public void registerSuccessfulLogin(String login, String ip) {
+        try {
+            // Llamamos al procedimiento almacenado con acción 'S'
+            this.jdbcTemplate.queryForObject(
+                    "execute p_list_Usuario @login=?, @ip=?, @ACCION=?",
+                    new Object[] { login, ip, "S" },
+                    new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        // No necesitamos procesar el resultado
+                        return null;
+                    }
+            );
+        } catch (Exception e) {
+            System.out.println("Error al registrar login exitoso: " + e.getMessage());
+        }
     }
 
     /**
@@ -182,4 +257,6 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
         return lstTemp;
 
     }
+
+
 }

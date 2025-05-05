@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.time.LocalDateTime;
@@ -56,18 +58,20 @@ public class Utiles implements Serializable{
      * @return sqlDate 
      */
     public java.sql.Date fechaJ_a_Sql(java.util.Date fecJava) {
-        java.sql.Date sqlDate = null;
+        //java.sql.Date sqlDate = null;
         
         if( fecJava != null  ) {
             try {
-                sqlDate = new java.sql.Date(fecJava.getTime());
+                LocalDate localDate = fecJava.toInstant().atZone(ZoneId.of("America/La_Paz")).toLocalDate();
+                return java.sql.Date.valueOf(localDate);
+                //sqlDate = new java.sql.Date(fecJava.getTime());
             } catch (Exception e) {
                 System.out.println( " Error en la conversion fechaJ_a_Sql = " + e.getMessage());
             }
         }
-        return sqlDate;
+        return null;
     }
-    
+
     /*
      * @Funcion  a la que se le ingresa fecha en formato SQL y retorna  en formato fecha de JAVA
      */

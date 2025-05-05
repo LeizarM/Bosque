@@ -39,7 +39,7 @@ public class Login implements Serializable, UserDetails {
    private String nombreEmpresa;
    private String nombreCompleto;
    private int fila;
-
+   private int intentosFallidos = 0;
 
     /**
      * Variables Auxiliares
