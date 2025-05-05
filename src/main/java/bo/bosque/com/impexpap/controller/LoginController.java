@@ -105,6 +105,7 @@ public class LoginController {
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
 
+
             // Paso 3: El usuario existe, verificar la contraseña con Spring Security
             try {
                 // Intentamos autenticar con Spring Security
