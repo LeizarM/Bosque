@@ -55,53 +55,8 @@ public class DepositoChequeController {
     }
 
 
-    /**
-     * Para el registro de un nuevo deposito
-
-     */
-    /*@PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/registro")
-    public ResponseEntity<ApiResponse<?>> registrarDepositoCheque( @RequestParam("file") MultipartFile file, @RequestParam("depositoCheque") String depositoChequeJson) {
-
-        try {
-            ObjectMapper mapper = JsonMapper.builder()
-                    .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-                    .build();
-            DepositoCheque mb = mapper.readValue(depositoChequeJson, DepositoCheque.class);
-
-                // Registrar el depósito
-                String accion = mb.getIdDeposito() == 0 ? "I" : "U";
-                boolean operationSuccess = depositoChequeDao.registrarDepositoCheque(mb, accion);
-
-                if (!operationSuccess) {
-                    return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
-                }
-
-                // Obtener el ID del último registro y guardar la imagen
-                int lastId = depositoChequeDao.obtenerUltimoId( mb.getAudUsuario() );
-
-                String fileName = fileStorageService.saveFile(file, (long) lastId);
-
-                // Actualizar el registro con el nombre del archivo
-                mb.setFotoPath(fileName);
-
-
-                HttpStatus status = accion.equals("I") ? HttpStatus.CREATED : HttpStatus.OK;
-                return buildSuccessResponse(status, SUCCESS_MESSAGE);
-
-
-
-
-        } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }*/
-
-    @PostMapping("/registro")
-    public ResponseEntity<ApiResponse<?>> registrarDepositoCheque(
-            @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam("depositoCheque") String depositoChequeJson) {
-
+    public ResponseEntity<ApiResponse<?>> registrarDepositoCheque( @RequestParam(value = "file", required = false) MultipartFile file, @RequestParam("depositoCheque") String depositoChequeJson) {
         try {
             ObjectMapper mapper = JsonMapper.builder()
                     .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
@@ -280,7 +235,7 @@ public class DepositoChequeController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-        @PostMapping("/listar")
+    @PostMapping("/listar")
     public ResponseEntity<ApiResponse<?>> listarDepositos( @RequestBody DepositoCheque mb ) {
 
 
@@ -352,8 +307,6 @@ public class DepositoChequeController {
         try {
 
             String acc = "A";
-
-
 
             boolean operationSuccess = this.depositoChequeDao.registrarDepositoCheque( mb, acc );
 

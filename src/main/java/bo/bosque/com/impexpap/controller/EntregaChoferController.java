@@ -57,7 +57,7 @@ public class EntregaChoferController {
     @PostMapping("/registro-entrega-chofer")
     public ResponseEntity<?> registroEntregaChofer(@RequestBody EntregaChofer mb ) {
 
-        System.out.println(mb.toString());
+
 
         Map<String, Object> response = new HashMap<>();
         mb.setFechaEntrega( new Utiles().convertirAFormatoSQLServer( mb.getFechaEntrega() ));
@@ -139,7 +139,6 @@ public class EntregaChoferController {
     @PostMapping("/extracto")
     public List<EntregaChofer> lstChoferExtracto(  @RequestBody EntregaChofer mb  ){
 
-        System.out.println( mb.toString() );
 
         List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferesExtracto( mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursal(), mb.getCodEmpleado() );
 
