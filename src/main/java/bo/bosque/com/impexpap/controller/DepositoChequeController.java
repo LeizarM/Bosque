@@ -184,7 +184,6 @@ public class DepositoChequeController {
     @PostMapping("/registrar-nota-remision")
     public ResponseEntity<?> registrarNotaRemision( @RequestBody NotaRemision mb ){
 
-        System.out.println( "Nota Remision: " + mb.toString() );
 
         mb.setFecha( new Utiles().fechaJ_a_Sql( mb.getFecha() ));
 
@@ -364,8 +363,6 @@ public class DepositoChequeController {
 
         try {
             Resource resource = fileStorageService.obtenerArchivo(idDeposito);
-
-            System.out.println(resource);
 
             // Determinar el tipo de contenido
             String contentType = null;
