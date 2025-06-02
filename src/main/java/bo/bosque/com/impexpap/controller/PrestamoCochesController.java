@@ -2,21 +2,26 @@ package bo.bosque.com.impexpap.controller;
 
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET})
 @RequestMapping("/prestamo-coches")
 public class PrestamoCochesController {
+
+
+    private static final String SUCCESS_MESSAGE = "Operación realizada exitosamente";
+    private static final String ERROR_MESSAGE = "Error en la solicitud";
+
 
     private final ISolicitudChofer solicitudChoferDao;
     private final IEstadoChofer estadoChoferDao;
@@ -39,25 +44,34 @@ public class PrestamoCochesController {
      * @param mb
      * @return
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/registroSolicitud")
     public ResponseEntity<?> registrarSolicitud( @RequestBody SolicitudChofer mb ) {
 
-        Map<String, Object> response = new HashMap<>();
+        System.out.println(mb.toString());
 
-        String acc = "U";
-        if( mb.getIdSolicitud() == 0){
-            acc = "I";
+        try {
+
+            String acc = "U";
+            if( mb.getIdSolicitud() == 0){
+                acc = "I";
+            }
+
+            boolean operationSuccess = this.solicitudChoferDao.registrarSolicitudChofer( mb, acc );
+
+            if (!operationSuccess) {
+                return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
+            }
+
+            HttpStatus status = HttpStatus.CREATED;
+            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
-        if( !this.solicitudChoferDao.registrarSolicitudChofer( mb, acc ) ){
-            response.put("msg", "Error al Registrar El Registro de Solicitud de Chofer");
-            response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("msg", "Datos de Registro de Solicitud de Choferes Registrados Correctamente");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+
     }
 
 
@@ -67,274 +81,310 @@ public class PrestamoCochesController {
      * @param mb
      * @return
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/solicitudes")
-    public List<SolicitudChofer> obtenerSolicitudesPorEmpleado(@RequestBody SolicitudChofer mb ){
+    public ResponseEntity<ApiResponse<?>> obtenerSolicitudesPorEmpleado( @RequestBody SolicitudChofer mb ){
 
 
-        List<SolicitudChofer> lstTemp = this.solicitudChoferDao.lstSolicitudesXEmpleado(  mb.getCodEmpSoli() );
+        try {
+            List<SolicitudChofer> lstTemp = solicitudChoferDao.lstSolicitudesXEmpleado(mb.getCodEmpSoli());
 
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
+            if (lstTemp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron solicitudes");
+            }
 
-        return lstTemp;
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, lstTemp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
 
     }
 
     /**
-     * Obtiene la lista de coches para el prestamo de los coches
-     * @param mb
+     * Obtiene la lista de coches para el préstamo
      * @return
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/coches")
-    public List<SolicitudChofer> obtenerCoche(){
+    public ResponseEntity<ApiResponse<?>> obtenerCoche() {
+        try {
+            List<SolicitudChofer> lstTemp = solicitudChoferDao.lstCoches();
 
-        List<SolicitudChofer> lstTemp = this.solicitudChoferDao.lstCoches();
+            if (lstTemp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron coches disponibles");
+            }
 
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, lstTemp, HttpStatus.OK.value()));
 
-        return lstTemp;
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     /**
      * Obtiene los estados de los coches
      * @return
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/estados")
-    public List<EstadoChofer> obtenerEstados(){
+    public ResponseEntity<ApiResponse<?>> obtenerEstados() {
+        try {
+            List<EstadoChofer> lstTemp = estadoChoferDao.listarEstadoChofer();
 
-        List<EstadoChofer> lstTemp = this.estadoChoferDao.listarEstadoChofer();
+            if (lstTemp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron estados");
+            }
 
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, lstTemp, HttpStatus.OK.value()));
 
-        return lstTemp;
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
 
     /**
-     * Para registar los prestamos de los coches
+     * Para registrar los préstamos de los coches
      * @param mb
      * @return
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/registroPrestamo")
-    public ResponseEntity<?> registrarPrestamo( @RequestBody PrestamoChofer mb ) {
+    public ResponseEntity<ApiResponse<?>> registrarPrestamo(@RequestBody PrestamoChofer mb) {
 
-        PrestamoEstado prestamoEstado = new PrestamoEstado();
+        try {
+            PrestamoEstado prestamoEstado = new PrestamoEstado();
 
-        Map<String, Object> response = new HashMap<>();
+            String acc = "A";
+            if (mb.getIdPrestamo() == 0) {
+                acc = "I";
+            }
 
-        String acc = "A";
-        if( mb.getIdPrestamo() == 0 ){
-            acc = "I";
+            if (mb.getIdPrestamo() == 0) {
+                mb.setEstadoLateralesEntrega(1); //Key 1
+                mb.setEstadoInteriorEntrega(2);
+                mb.setEstadoDelanteraEntrega(3);
+                mb.setEstadoTraseraEntrega(4);
+                mb.setEstadoCapoteEntrega(5);
+            } else {
+                mb.setEstadoLateralRecepcion(1); //Key 1
+                mb.setEstadoInteriorRecepcion(2);
+                mb.setEstadoDelanteraRecepcion(3);
+                mb.setEstadoTraseraRecepcion(4);
+                mb.setEstadoCapoteRecepcion(5);
+            }
 
+            if (!prestamoChoferDao.registrarPrestamoChofer(mb, acc)) {
+                return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error al Registrar El Registro de Prestamo de Chofer");
+            }
+
+            if (mb.getIdPrestamo() == 0) {
+                List<Integer> numeros = Utiles.extraerNumeros(mb.getEstadoLateralesEntregaAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoLateralesEntrega());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "A");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoInteriorEntregaAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoInteriorEntrega());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "A");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoDelanteraEntregaAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoDelanteraEntrega());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "A");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoTraseraEntregaAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoTraseraEntrega());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "A");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoCapoteEntregaAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoCapoteEntrega());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "A");
+                }
+
+            } else {
+
+                List<Integer> numeros = Utiles.extraerNumeros(mb.getEstadoLateralRecepcionAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoLateralRecepcion());
+                    prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoInteriorRecepcionAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoInteriorRecepcion());
+                    prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoDelanteraRecepcionAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoDelanteraRecepcion());
+                    prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoTraseraRecepcionAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoTraseraRecepcion());
+                    prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B");
+                }
+
+                numeros = Utiles.extraerNumeros(mb.getEstadoCapoteRecepcionAux());
+
+                for (int numero : numeros) {
+                    prestamoEstado.setIdPE(mb.getEstadoCapoteRecepcion());
+                    prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
+                    prestamoEstado.setIdEst(numero);
+                    prestamoEstado.setAudUsuario(mb.getAudUsuario());
+
+                    this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B");
+                }
+            }
+
+            HttpStatus status = acc.equals("I") ? HttpStatus.CREATED : HttpStatus.OK;
+            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
-
-        if( mb.getIdPrestamo() == 0 ){
-            mb.setEstadoLateralesEntrega(1); //Key 1
-            mb.setEstadoInteriorEntrega(2);
-            mb.setEstadoDelanteraEntrega(3);
-            mb.setEstadoTraseraEntrega(4);
-            mb.setEstadoCapoteEntrega(5);
-
-        }else{
-            mb.setEstadoLateralRecepcion(1); //Key 1
-            mb.setEstadoInteriorRecepcion(2);
-            mb.setEstadoDelanteraRecepcion(3);
-            mb.setEstadoTraseraRecepcion(4);
-            mb.setEstadoCapoteRecepcion(5);
-        }
-
-
-        if( !this.prestamoChoferDao.registrarPrestamoChofer( mb, acc ) ){
-            response.put("msg", "Error al Registrar El Registro de Prestamo de Chofer");
-            response.put("ok", "error");
-
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-
-
-        if( mb.getIdPrestamo() == 0 ){
-
-
-            List<Integer> numeros = Utiles.extraerNumeros( mb.getEstadoLateralesEntregaAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoLateralesEntrega());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "A" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoInteriorEntregaAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoInteriorEntrega());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "A" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoDelanteraEntregaAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoDelanteraEntrega());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "A" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoTraseraEntregaAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoTraseraEntrega());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "A" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoCapoteEntregaAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoCapoteEntrega());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "A" );
-            }
-
-
-        }else{
-
-
-            List<Integer> numeros = Utiles.extraerNumeros( mb.getEstadoLateralRecepcionAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoLateralRecepcion());
-                prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "B" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoInteriorRecepcionAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoInteriorRecepcion());
-                prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado( prestamoEstado, "B" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoDelanteraRecepcionAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoDelanteraRecepcion());
-                prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B" );
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoTraseraRecepcionAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoTraseraRecepcion());
-                prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B" );
-
-            }
-
-            numeros = Utiles.extraerNumeros( mb.getEstadoCapoteRecepcionAux() );
-
-            for (int numero : numeros) {
-                prestamoEstado.setIdPE(mb.getEstadoCapoteRecepcion());
-                prestamoEstado.setIdPrestamo(mb.getIdPrestamo());
-                prestamoEstado.setIdEst(numero);
-                prestamoEstado.setAudUsuario( mb.getAudUsuario() );
-
-                this.prestamoEstadoDao.registrarPrestamoEstado(prestamoEstado, "B" );
-            }
-
-
-        }
-
-
-
-        response.put("msg", "Datos de Registro de Solicitud de Choferes Registrados Correctamente");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 
     /**
-     * Obtiene las solicitudes por sucursal para el prestamo de los coches
-     * @return
-     */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/solicitudesPrestamo")
-    public List<PrestamoChofer> obtenerSolicitudesPrestamo( @RequestBody PrestamoChofer mb  ){
-
-        List<PrestamoChofer> lstTemp = this.prestamoChoferDao.lstSolicitudes( mb.getCodSucursal(), mb.getCodEmpEntregadoPor() );
-
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
-
-        return lstTemp;
-    }
-
-    /**
-     * Para actualizar el estado del de la solicitud de prestamo de los coches
+     * Obtiene las solicitudes de préstamo por sucursal
      * @param mb
      * @return
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/actualizarSolicitud")
-    public ResponseEntity<?> actualizarSolicitud( @RequestBody SolicitudChofer mb ) {
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/solicitudesPrestamo")
+    public ResponseEntity<ApiResponse<?>> obtenerSolicitudesPrestamo(@RequestBody PrestamoChofer mb) {
+        try {
+            List<PrestamoChofer> lstTemp = prestamoChoferDao.lstSolicitudes( mb.getCodSucursal(), mb.getCodEmpEntregadoPor());
 
-        Map<String, Object> response = new HashMap<>();
+            if (lstTemp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron solicitudes de préstamo");
+            }
 
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, lstTemp, HttpStatus.OK.value()));
 
-
-        if( !this.solicitudChoferDao.registrarSolicitudChofer( mb, "A" ) ){
-            response.put("msg", "Error al Actualizar el estado del la solicitud");
-            response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
-        response.put("msg", "Datos de Actualizados de la Solicitud Correctamente");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    /**
+     * Para actualizar el estado de la solicitud de préstamo
+     * @param mb
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/actualizarSolicitud")
+    public ResponseEntity<ApiResponse<?>> actualizarSolicitud(@RequestBody SolicitudChofer mb) {
+        try {
+            boolean operationSuccess = solicitudChoferDao.registrarSolicitudChofer(mb, "A");
+
+            if (!operationSuccess) {
+                return buildErrorResponse(HttpStatus.BAD_REQUEST, "Error al actualizar el estado de la solicitud");
+            }
+
+            return buildSuccessResponse(HttpStatus.OK, SUCCESS_MESSAGE);
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     /**
-     * Para obtener el detalle de la solicitud de prestamo de los coches
+     * Para obtener los tipos de solicitud
      * @return
      */
-
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/tipoSolicitudes")
-    public List<TipoSolicitud> obtenerTipoSolicitud(){
+    public ResponseEntity<ApiResponse<?>> obtenerTipoSolicitud() {
+        try {
+            List<TipoSolicitud> lstTemp = tipoSolicitudDao.obtenerTipoSolicitudes();
 
+            if (lstTemp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron tipos de solicitud");
+            }
 
-        List<TipoSolicitud> lstTemp = this.tipoSolicitudDao.obtenerTipoSolicitudes();
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, lstTemp, HttpStatus.OK.value()));
 
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
-
-        return lstTemp;
-
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
 
+
+
+
+    private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {
+        String errorMsg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();
+        return ResponseEntity.badRequest()
+                .body(new ApiResponse<>(ERROR_MESSAGE, errorMsg, HttpStatus.BAD_REQUEST.value()));
+    }
+
+    private ResponseEntity<ApiResponse<?>> buildErrorResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(message, null, status.value()));
+    }
+
+    private ResponseEntity<ApiResponse<?>> buildSuccessResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(message, null, status.value()));
+    }
 }

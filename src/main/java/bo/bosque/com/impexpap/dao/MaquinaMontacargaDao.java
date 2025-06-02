@@ -54,13 +54,15 @@ public class MaquinaMontacargaDao implements IMaquinaMontacarga{
                         MaquinaMontacarga temp = new MaquinaMontacarga();
 
                         temp.setIdMaquina(rs.getInt(1));
-                        temp.setCodigo(rs.getString(2));
-                        temp.setNombreSucursal(rs.getString(3));
+                        temp.setCodSucursal(rs.getInt(2));
+                        temp.setMaquinaOVehiculo(rs.getString(3));
+                        temp.setCodigo(rs.getString(4));
+                        temp.setNombreSucursal(rs.getString(5));
 
                         return temp;
                     });
         } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
-            logDataAccessException(ex, "Error al listar en listMaquinaMontacargas"); // Usamos el método auxiliar
+            logDataAccessException(ex, "Error al listar en listMaquinaMontacargas o Vehiculos"); // Usamos el método auxiliar
             lstTemp = new ArrayList<>(); // Inicializamos lista vacía
         }
 

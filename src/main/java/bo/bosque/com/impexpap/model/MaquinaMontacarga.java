@@ -22,5 +22,6 @@ public class MaquinaMontacarga implements Serializable {
     private int audUsuario;
 
     private String nombreSucursal;
+    private String maquinaOVehiculo;
 
 }

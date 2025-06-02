@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.ControCombustibleMaquinaMontacarga;
 
+import java.util.Date;
 import java.util.List;
 
 public interface IControCombustibleMaquinaMontacarga {
@@ -10,5 +11,10 @@ public interface IControCombustibleMaquinaMontacarga {
 
     List<ControCombustibleMaquinaMontacarga> lstAlmacenes();
 
-    List<ControCombustibleMaquinaMontacarga> lstBidonesXMaquina( int idMaquina );
+    List<ControCombustibleMaquinaMontacarga> lstRptMovBidonesXTipoTransaccion( Date fechaInicio, Date fechaFin );
+
+    List<ControCombustibleMaquinaMontacarga> saldoActualCombustinbleXSucursal();
+
+    List<ControCombustibleMaquinaMontacarga> lstUltimosMovBidones( );
+
 }

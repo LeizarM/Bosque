@@ -14,16 +14,20 @@ public class ControCombustibleMaquinaMontacarga implements Serializable {
 
 
     private long idCM;
-    private int idMaquina;
+    private int idMaquinaVehiculoOrigen;
+    private int idMaquinaVehiculoDestino;
+    private int codSucursalMaqVehiOrigen;
+    private int codSucursalMaqVehiDestino;
+    private String codigoOrigen;
+    private String codigoDestino;
     private Date fecha;
     private float litrosIngreso;
     private float litrosSalida;
     private float saldoLitros;
-    private float horasUso;
-    private float horometro;
     private int codEmpleado;
     private String codAlmacen;
     private String obs;
+    private String tipoTransaccion;
     private int audUsuario;
 
 
@@ -35,4 +39,10 @@ public class ControCombustibleMaquinaMontacarga implements Serializable {
     private String whsName; // nombre de almacen
     private String maquina;
     private String nombreCompleto;
+    private String nombreMaquinaOrigen;
+    private String nombreMaquinaDestino;
+    private String nombreSucursal;
+    private Date fechaInicio;
+    private Date fechaFin;
+
 }

@@ -89,38 +89,18 @@ public class ControlCombustibleMaquinaMontacargaController {
     }
 
 
-    /**
-     * Obtener los almacenes registrados
-     * @return
-     */
-    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/lst-bidonesxMaquina")
-    public ResponseEntity<?> obtenerBidonesXMaquina( @RequestBody ControCombustibleMaquinaMontacarga mb ) {
-        try {
-            List<ControCombustibleMaquinaMontacarga> ccmm = this.combustibleMaquinaMontacargaDao.lstBidonesXMaquina( mb.getIdMaquina() );
 
-            if (ccmm.isEmpty()) {
-                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron los bidones en la maquina seleccionada.");
-            }
-
-            return ResponseEntity.ok()
-                    .body(new ApiResponse<>(SUCCESS_MESSAGE, ccmm, HttpStatus.OK.value()));
-
-        } catch (Exception e) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
 
 
     /**
-     * Obtener los almacenes registrados
+     * Obtener los maquinas o montacargas registradas
      * @return
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/lst-maqmontacarga")
     public ResponseEntity<?> obtenerMaquinaMontacarga() {
         try {
-            List<MaquinaMontacarga> mm = this.maquinaMontacargaDao.listMaquinaMontacargas();
+            List<MaquinaMontacarga> mm = this.maquinaMontacargaDao.listMaquinaMontacargas(); //Listado de vehiculos, bidones, montacargas
 
             if (mm.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron las maquinas o montacargas encontrados.");
@@ -135,8 +115,70 @@ public class ControlCombustibleMaquinaMontacargaController {
     }
 
 
+    /**
+     * Obtener los registros de bidones por tipo de transacción
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstMovBidones")
+    public ResponseEntity<?> listMovimientosBidones( @RequestBody ControCombustibleMaquinaMontacarga mb  ) {
+        try {
+            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.lstRptMovBidonesXTipoTransaccion( mb.getFechaInicio(), mb.getFechaFin() ); //Listado de vehiculos, bidones, montacargas
 
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron el reporte de bidones entre fechas.");
+            }
 
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Obtener los ultimos movimientos de bidones ( ingresos )
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstUltimoMovBidones")
+    public ResponseEntity<?> listSaldosBidonesUltimosMov( ) {
+        try {
+            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.lstUltimosMovBidones( ); //Listado de vehiculos, bidones, montacargas
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron el el reporte de bidones los ultimos movimientos.");
+            }
+
+            return ResponseEntity.ok().body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Obtener los almacenes registrados
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstSaldosBidones")
+    public ResponseEntity<?> listSaldosBidones( ) {
+        try {
+            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.saldoActualCombustinbleXSucursal( ); //Listado de vehiculos, bidones, montacargas
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron el reporte de saldo por litros por sucursales.");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
 
 
 
