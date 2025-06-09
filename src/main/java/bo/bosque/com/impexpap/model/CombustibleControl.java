@@ -25,6 +25,7 @@ public class CombustibleControl implements Serializable {
     private String obs;
     private float litros;
     private String tipoCombustible;
+    private int idCM;
     private int audUsuario;
 
 
@@ -33,6 +34,7 @@ public class CombustibleControl implements Serializable {
      */
     private String coche;
     private float kilometrajeAnterior;
+    private int esMenor;
 
 
 }

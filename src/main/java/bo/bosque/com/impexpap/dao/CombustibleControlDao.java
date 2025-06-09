@@ -35,6 +35,7 @@ public class CombustibleControlDao implements ICombustibleControl {
                     "@obs = ?,"+
                     "@litros = ?,"+
                     "@tipoCombustible = ?,"+
+                    "@idCM = ?,"+
                     "@audUsuario = ?, " +
                     "@ACCION = ?";
 
@@ -70,14 +71,15 @@ public class CombustibleControlDao implements ICombustibleControl {
                 ps.setString(11, mb.getObs());
                 ps.setFloat(12, mb.getLitros());
                 ps.setString(13, mb.getTipoCombustible() );
-                ps.setInt(14, mb.getAudUsuario());
-                ps.setString(15, acc);
+                ps.setInt(14, mb.getIdCM());
+                ps.setInt(15, mb.getAudUsuario());
+                ps.setString(16, acc);
             });
 
             return affectedRows > 0;
 
         } catch (DataAccessException ex) {
-            logDataAccessException(ex, "Error al registrar depósito de cheque");
+            logDataAccessException(ex, "Error al registrar Control de Combustible");
             return false;
         }
 
@@ -101,6 +103,7 @@ public class CombustibleControlDao implements ICombustibleControl {
 
                         temp.setIdCoche(rs.getInt(1));
                         temp.setCoche(rs.getString(2));
+                        temp.setCodSucursalCoche(rs.getInt(3));
 
                         return temp;
                     });
@@ -135,6 +138,8 @@ public class CombustibleControlDao implements ICombustibleControl {
                         temp.setKilometrajeAnterior(rs.getFloat(8));
                         temp.setDiferencia(rs.getFloat(9));
                         temp.setTipoCombustible(rs.getString(10));
+                        temp.setObs(rs.getString(11));
+                        temp.setIdCM((int) rs.getLong(12));
 
 
                         return temp;
@@ -147,6 +152,32 @@ public class CombustibleControlDao implements ICombustibleControl {
         return lstTemp;
 
 
+    }
+
+    @Override
+    public List<CombustibleControl> esConsumoBajo( float kilometraje, int idCoche ) {
+
+        List<CombustibleControl> lstTemp = new ArrayList<>();
+
+        try {
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_tgas_CombustibleControl @kilometraje=?, @idCoche=?, @ACCION = ?",
+                    new Object[] { kilometraje, idCoche, "C" },
+                    new int[] {Types.FLOAT, Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        CombustibleControl temp = new CombustibleControl();
+
+                        temp.setEsMenor(rs.getInt(1));
+                        temp.setDiferencia(rs.getFloat(2));
+
+                        return temp;
+                    });
+        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+            logDataAccessException(ex, "Error al listar en esConsumoBajo"); // Usamos el método auxiliar
+            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+        }
+
+        return lstTemp;
     }
 
 

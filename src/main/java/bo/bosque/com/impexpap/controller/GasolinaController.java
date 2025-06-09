@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.controller;
 
 import bo.bosque.com.impexpap.dao.ICombustibleControl;
 import bo.bosque.com.impexpap.model.CombustibleControl;
+import bo.bosque.com.impexpap.model.ControCombustibleMaquinaMontacarga;
 import bo.bosque.com.impexpap.model.Empresa;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Utiles;
@@ -110,6 +111,31 @@ public class GasolinaController {
         }
     }
 
+    /**
+     * Obtener el consumo de gasolina por coche de acuerdo a su kilometraje
+     * @param mb
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/obtenerConsumo")
+    public ResponseEntity<?> listConsumo( @RequestBody CombustibleControl mb ) {
+
+
+
+        try {
+            List<CombustibleControl> temp = this.combustibleControlDao.esConsumoBajo( mb.getKilometraje(), mb.getIdCoche() ); //Listado de vehiculos, bidones, montacargas
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontro el consumo por coche.");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
 
 
 

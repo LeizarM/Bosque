@@ -28,6 +28,7 @@ public class ControCombustibleMaquinaMontacarga implements Serializable {
     private String codAlmacen;
     private String obs;
     private String tipoTransaccion;
+    private int estado;
     private int audUsuario;
 
 

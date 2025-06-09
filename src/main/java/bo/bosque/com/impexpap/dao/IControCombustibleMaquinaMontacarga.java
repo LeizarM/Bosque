@@ -17,4 +17,8 @@ public interface IControCombustibleMaquinaMontacarga {
 
     List<ControCombustibleMaquinaMontacarga> lstUltimosMovBidones( );
 
+    List<ControCombustibleMaquinaMontacarga> ontenerBidonesXSucursal( int codSucursalMaqVehiDestino );
+
+    List<ControCombustibleMaquinaMontacarga> obtenerDetalleBidon( long idCM );
+
 }

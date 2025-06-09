@@ -159,7 +159,7 @@ public class ControlCombustibleMaquinaMontacargaController {
     }
 
     /**
-     * Obtener los almacenes registrados
+     * Obtener la lista de bidones
      * @return
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
@@ -179,6 +179,53 @@ public class ControlCombustibleMaquinaMontacargaController {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+
+    /**
+     * Obtener los bidones pendientes por sucursal
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstBidonesPendientes")
+    public ResponseEntity<?> listBidonesPendientes( @RequestBody ControCombustibleMaquinaMontacarga mb ) {
+        try {
+            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.ontenerBidonesXSucursal( mb.getCodSucursalMaqVehiDestino() ); //Listado de vehiculos, bidones, montacargas
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron bidones pendientes con la sucursal seleccionada.");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Obtener el detalle por bidon
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstDetalleBidon")
+    public ResponseEntity<?> listBidonDetalle( @RequestBody ControCombustibleMaquinaMontacarga mb ) {
+        try {
+            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.obtenerDetalleBidon( mb.getIdCM() ); //Listado de vehiculos, bidones, montacargas
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraro informacion del detalle bidon");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+
 
 
 

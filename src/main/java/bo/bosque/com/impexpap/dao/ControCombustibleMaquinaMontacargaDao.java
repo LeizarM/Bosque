@@ -37,6 +37,7 @@ public class ControCombustibleMaquinaMontacargaDao implements IControCombustible
                     "@codAlmacen = ?,"+
                     "@obs = ?,"+
                     "@tipoTransaccion = ?,"+
+                    "@estado = ?,"+
                     "@audUsuario = ?, " +
                     "@ACCION = ?";
 
@@ -68,8 +69,9 @@ public class ControCombustibleMaquinaMontacargaDao implements IControCombustible
                 ps.setString(13, mb.getCodAlmacen());
                 ps.setString(14, mb.getObs());
                 ps.setString(15, mb.getTipoTransaccion());
-                ps.setInt(16, mb.getAudUsuario());
-                ps.setString(17, acc);
+                ps.setInt(16, mb.getEstado());
+                ps.setInt(17, mb.getAudUsuario());
+                ps.setString(18, acc);
             });
 
             return affectedRows > 0;
@@ -204,7 +206,68 @@ public class ControCombustibleMaquinaMontacargaDao implements IControCombustible
 
     }
 
+    @Override
+    public List<ControCombustibleMaquinaMontacarga> ontenerBidonesXSucursal( int codSucursalMaqVehiDestino ) {
 
+        List<ControCombustibleMaquinaMontacarga> lstTemp = new ArrayList<>();
+
+        try {
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_tgas_ControlCombustibleMaquinaMontacarga @codSucursalMaqVehiDestino= ?, @ACCION = ?",
+                    new Object[] { codSucursalMaqVehiDestino ,"E" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        ControCombustibleMaquinaMontacarga temp = new ControCombustibleMaquinaMontacarga();
+
+                        temp.setIdCM(rs.getLong(1));
+                        temp.setNombreSucursal(rs.getString(2));
+                        temp.setNombreMaquinaOrigen(rs.getString(3));
+                        temp.setCodigoDestino(rs.getString(4)  );
+                        temp.setFecha(rs.getDate(5));
+                        temp.setLitrosIngreso(rs.getFloat(6));
+
+
+                        return temp;
+                    });
+        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+            logDataAccessException(ex, "Error al listar en ontenerBidonesXSucursal"); // Usamos el método auxiliar
+            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+        }
+
+        return lstTemp;
+
+
+    }
+
+    @Override
+    public List<ControCombustibleMaquinaMontacarga> obtenerDetalleBidon(long idCM) {
+        List<ControCombustibleMaquinaMontacarga> lstTemp = new ArrayList<>();
+
+        try {
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_tgas_ControlCombustibleMaquinaMontacarga @idCM= ?, @ACCION = ?",
+                    new Object[] { idCM ,"F" },
+                    new int[] { Types.LONGVARCHAR, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        ControCombustibleMaquinaMontacarga temp = new ControCombustibleMaquinaMontacarga();
+
+                        temp.setIdCM(rs.getLong(1));
+                        temp.setNombreSucursal(rs.getString(2));
+                        temp.setNombreMaquinaOrigen(rs.getString(3));
+                        temp.setCodigoDestino(rs.getString(4)  );
+                        temp.setFecha(rs.getDate(5));
+                        temp.setLitrosIngreso(rs.getFloat(6));
+
+
+                        return temp;
+                    });
+        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+            logDataAccessException(ex, "Error al listar en obtenerDetalleBidon"); // Usamos el método auxiliar
+            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+        }
+
+        return lstTemp;
+    }
 
 
     /**

@@ -15,4 +15,6 @@ public interface ICombustibleControl {
 
 
     List<CombustibleControl> listarCochesKilometraje( int idCoche );
+
+    List<CombustibleControl> esConsumoBajo( float kilometraje, int idCoche );
 }
