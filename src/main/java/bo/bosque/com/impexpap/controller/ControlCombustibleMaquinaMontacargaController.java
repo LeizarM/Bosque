@@ -4,8 +4,10 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.dao.IControCombustibleMaquinaMontacarga;
 
 import bo.bosque.com.impexpap.dao.IMaquinaMontacarga;
+import bo.bosque.com.impexpap.dao.ISucursal;
 import bo.bosque.com.impexpap.model.ControCombustibleMaquinaMontacarga;
 import bo.bosque.com.impexpap.model.MaquinaMontacarga;
+import bo.bosque.com.impexpap.model.Sucursal;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
@@ -27,11 +29,13 @@ public class ControlCombustibleMaquinaMontacargaController {
 
     private final IControCombustibleMaquinaMontacarga combustibleMaquinaMontacargaDao;
     private final IMaquinaMontacarga maquinaMontacargaDao;
+    private final ISucursal sucursalDao;
 
 
-    public ControlCombustibleMaquinaMontacargaController(IControCombustibleMaquinaMontacarga combustibleMaquinaMontacargaDao, IMaquinaMontacarga maquinaMontacargaDao) {
+    public ControlCombustibleMaquinaMontacargaController(IControCombustibleMaquinaMontacarga combustibleMaquinaMontacargaDao, IMaquinaMontacarga maquinaMontacargaDao, ISucursal sucursalDao) {
         this.combustibleMaquinaMontacargaDao = combustibleMaquinaMontacargaDao;
         this.maquinaMontacargaDao = maquinaMontacargaDao;
+        this.sucursalDao = sucursalDao;
     }
 
 
@@ -122,8 +126,11 @@ public class ControlCombustibleMaquinaMontacargaController {
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/lstMovBidones")
     public ResponseEntity<?> listMovimientosBidones( @RequestBody ControCombustibleMaquinaMontacarga mb  ) {
+
+
+
         try {
-            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.lstRptMovBidonesXTipoTransaccion( mb.getFechaInicio(), mb.getFechaFin() ); //Listado de vehiculos, bidones, montacargas
+            List<ControCombustibleMaquinaMontacarga> temp = this.combustibleMaquinaMontacargaDao.lstRptMovBidonesXTipoTransaccion( mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursalMaqVehiDestino() ); //Listado de vehiculos, bidones, montacargas
 
             if (temp.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron el reporte de bidones entre fechas.");
@@ -181,6 +188,10 @@ public class ControlCombustibleMaquinaMontacargaController {
     }
 
 
+
+
+
+
     /**
      * Obtener los bidones pendientes por sucursal
      * @return
@@ -226,7 +237,27 @@ public class ControlCombustibleMaquinaMontacargaController {
     }
 
 
+    /**
+     * Obtener el detalle por bidon
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstSucursal")
+    public ResponseEntity<?> listSucursal(  ) {
+        try {
+            List<Sucursal> temp = this.sucursalDao.obtenerSucursalesXEmpresa( 6 ); // por defecto la empresa 6 ( GENERAL )
 
+            if (temp.isEmpty()) {
+                    return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron las sucursales.");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
 
 
     private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {

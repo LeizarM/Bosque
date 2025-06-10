@@ -11,7 +11,7 @@ public interface IControCombustibleMaquinaMontacarga {
 
     List<ControCombustibleMaquinaMontacarga> lstAlmacenes();
 
-    List<ControCombustibleMaquinaMontacarga> lstRptMovBidonesXTipoTransaccion( Date fechaInicio, Date fechaFin );
+    List<ControCombustibleMaquinaMontacarga> lstRptMovBidonesXTipoTransaccion( Date fechaInicio, Date fechaFin, int codSucursal );
 
     List<ControCombustibleMaquinaMontacarga> saldoActualCombustinbleXSucursal();
 

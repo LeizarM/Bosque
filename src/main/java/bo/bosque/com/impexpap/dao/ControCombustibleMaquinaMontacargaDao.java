@@ -113,14 +113,14 @@ public class ControCombustibleMaquinaMontacargaDao implements IControCombustible
 
 
     @Override
-    public List<ControCombustibleMaquinaMontacarga> lstRptMovBidonesXTipoTransaccion(java.util.Date fechaInicio, java.util.Date fechaFin) {
+    public List<ControCombustibleMaquinaMontacarga> lstRptMovBidonesXTipoTransaccion(java.util.Date fechaInicio, java.util.Date fechaFin, int codSucursal ) {
         List<ControCombustibleMaquinaMontacarga> lstTemp = new ArrayList<>();
 
         try {
             lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tgas_ControlCombustibleMaquinaMontacarga @fechaInicio=?, @fechaFin=?, @ACCION=?",
-                    new Object[] { fechaInicio, fechaFin, "B" },
-                    new int[] {  Types.DATE, Types.DATE,  Types.VARCHAR },
+                    "execute p_list_tgas_ControlCombustibleMaquinaMontacarga @fechaInicio=?, @fechaFin=?, @codSucursalMaqVehiDestino=? ,@ACCION=?",
+                    new Object[] { fechaInicio, fechaFin, codSucursal ,"B" },
+                    new int[] {  Types.DATE, Types.DATE, Types.INTEGER ,Types.VARCHAR },
                     (rs, rowNum) -> {
                         ControCombustibleMaquinaMontacarga temp = new ControCombustibleMaquinaMontacarga();
 
