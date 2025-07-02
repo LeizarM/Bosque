@@ -35,6 +35,7 @@ public class CombustibleControl implements Serializable {
     private String coche;
     private float kilometrajeAnterior;
     private int esMenor;
+    private String nombreCompleto;
 
 
 }

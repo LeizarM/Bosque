@@ -140,7 +140,9 @@ public class CombustibleControlDao implements ICombustibleControl {
                         temp.setTipoCombustible(rs.getString(10));
                         temp.setObs(rs.getString(11));
                         temp.setIdCM((int) rs.getLong(12));
-
+                        temp.setNroFactura(rs.getString(13));
+                        temp.setEstacionServicio(rs.getString(14));
+                        temp.setNombreCompleto(rs.getString(15));
 
                         return temp;
                     });
