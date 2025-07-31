@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import lombok.*;
@@ -16,7 +17,7 @@ public class DepositoCheque implements Serializable {
     private String codCliente;
     private int codEmpresa;
     private int idBxC;
-    private float importe;
+    private double importe;
     private String moneda;
     private int estado;
     private String fotoPath;

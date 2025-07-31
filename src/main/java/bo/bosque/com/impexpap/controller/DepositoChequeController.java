@@ -384,6 +384,10 @@ public class DepositoChequeController {
     public ResponseEntity<?> generarPdf(
             @PathVariable int idDeposito,
             @RequestBody DepositoCheque deposito) {
+
+        System.out.println(deposito.toString());
+
+
         try {
             byte[] pdfBytes = pdfGeneratorService.generarPdfDeposito(deposito);
 

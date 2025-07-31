@@ -24,6 +24,9 @@ import bo.bosque.com.impexpap.model.DepositoCheque;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 @Service
 public class PdfGeneratorService {
@@ -34,12 +37,13 @@ public class PdfGeneratorService {
 
     public byte[] generarPdfDeposito(DepositoCheque deposito) {
 
+        System.out.println(deposito.toString());
+
+
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf, PageSize.LETTER);
-
-
 
             document.setMargins(15, 15, 15, 15);
 
@@ -163,12 +167,28 @@ public class PdfGeneratorService {
         return value.toString();
     }
 
-    // Método para formatear el importe
+    // Método para formatear el importe sin redondeo
     private String formatImporte(Double importe, String moneda) {
         if (importe == null) {
             return "0.00 " + moneda;
         }
-        return String.format("%,.2f %s", importe, moneda);
+
+        // Opción 1: Mostrar el valor exacto sin formato
+        // return importe + " " + moneda;
+
+        // Opción 2: Usar DecimalFormat para mantener todos los decimales necesarios
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        symbols.setGroupingSeparator(',');
+        symbols.setDecimalSeparator('.');
+
+        // Este patrón muestra hasta 10 decimales, eliminando ceros a la derecha
+        DecimalFormat df = new DecimalFormat("#,##0.##########", symbols);
+        df.setGroupingUsed(true);
+
+        return df.format(importe) + " " + moneda;
+
+        // Opción 3: Mostrar exactamente como está almacenado (sin formato de miles)
+        // return String.valueOf(importe) + " " + moneda;
     }
 
     private void addSectionHeader(Table table, String headerText, Style headerStyle, int colspan) {

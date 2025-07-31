@@ -64,7 +64,7 @@ public class DepositoChequeDao implements IDepositoCheque {
                 ps.setString(2, mb.getCodCliente());
                 ps.setInt(3, mb.getCodEmpresa());
                 ps.setInt(4, mb.getIdBxC());
-                ps.setFloat(5, mb.getImporte());
+                ps.setDouble(5, mb.getImporte());
                 ps.setString(6, mb.getMoneda());
                 ps.setInt(7, mb.getEstado());
                 ps.setString(8, mb.getFotoPath());
@@ -144,43 +144,43 @@ public class DepositoChequeDao implements IDepositoCheque {
      * Listar todos los depósitos cheque solo los ultimos X registros
      *
      */
-    public List<DepositoCheque> listarDepositosChequeReconciliado(int codEmpresa, int idBxC, Date fechaInicio, Date fechaFin, String codCliente, String estadoFiltro){
-        List<DepositoCheque> lstTemp = new ArrayList<>();
+        public List<DepositoCheque> listarDepositosChequeReconciliado(int codEmpresa, int idBxC, Date fechaInicio, Date fechaFin, String codCliente, String estadoFiltro){
+            List<DepositoCheque> lstTemp = new ArrayList<>();
 
-        try {
-            lstTemp = this.jdbcTemplate.query(
-                    "execute p_list_tdep_DepositoCheques @codEmpresa=?, @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @estadoFiltro=? , @ACCION=?",
-                    new Object[] { codEmpresa, idBxC, fechaInicio, fechaFin, codCliente, estadoFiltro ,"C" },
-                    new int[] {Types.INTEGER, Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
-                    (rs, rowNum) -> {
-                        DepositoCheque temp = new DepositoCheque();
+            try {
+                lstTemp = this.jdbcTemplate.query(
+                        "execute p_list_tdep_DepositoCheques @codEmpresa=?, @idBxC=?, @fechaInicio=?, @fechaFin=?, @codCliente=?, @estadoFiltro=? , @ACCION=?",
+                        new Object[] { codEmpresa, idBxC, fechaInicio, fechaFin, codCliente, estadoFiltro ,"C" },
+                        new int[] {Types.INTEGER, Types.INTEGER, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR, Types.VARCHAR ,Types.VARCHAR },
+                        (rs, rowNum) -> {
+                            DepositoCheque temp = new DepositoCheque();
 
-                        temp.setIdDeposito(rs.getInt(1));
-                        temp.setCodCliente(rs.getString(2));
-                        temp.setNombreBanco(rs.getString(3));
-                        temp.setNombreEmpresa(rs.getString(4));
-                        temp.setImporte(rs.getFloat(5));
-                        temp.setMoneda(rs.getString(6));
-                        temp.setACuenta(rs.getFloat(7));
-                        temp.setNumeroDeDocumentos(rs.getString(8));
-                        temp.setFechasDeDepositos(rs.getString(9));
-                        temp.setNumeroDeFacturas(rs.getString(10));
-                        temp.setTotalMontos(rs.getString(11));
-                        temp.setEsPendiente(rs.getString(12));
-                        temp.setFechaI(rs.getDate(13));
-                        temp.setNroTransaccion(rs.getString(14));
-                        temp.setCodEmpresa( rs.getInt(15) );
-                        temp.setIdBxC( rs.getInt(16) );
+                            temp.setIdDeposito(rs.getInt(1));
+                            temp.setCodCliente(rs.getString(2));
+                            temp.setNombreBanco(rs.getString(3));
+                            temp.setNombreEmpresa(rs.getString(4));
+                            temp.setImporte(rs.getDouble(5));
+                            temp.setMoneda(rs.getString(6));
+                            temp.setACuenta(rs.getFloat(7));
+                            temp.setNumeroDeDocumentos(rs.getString(8));
+                            temp.setFechasDeDepositos(rs.getString(9));
+                            temp.setNumeroDeFacturas(rs.getString(10));
+                            temp.setTotalMontos(rs.getString(11));
+                            temp.setEsPendiente(rs.getString(12));
+                            temp.setFechaI(rs.getDate(13));
+                            temp.setNroTransaccion(rs.getString(14));
+                            temp.setCodEmpresa( rs.getInt(15) );
+                            temp.setIdBxC( rs.getInt(16) );
 
-                        return temp;
-                    });
-        } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
-            logDataAccessException(ex, "Error al listar depósitos que fueron o no reconciliados"); // Usamos el método auxiliar
-            lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+                            return temp;
+                        });
+            } catch (DataAccessException ex) {  // Cambiamos a DataAccessException
+                logDataAccessException(ex, "Error al listar depósitos que fueron o no reconciliados"); // Usamos el método auxiliar
+                lstTemp = new ArrayList<>(); // Inicializamos lista vacía
+            }
+
+            return lstTemp;
         }
-
-        return lstTemp;
-    }
 
     /**
      * Listar todos los depósitos cheque por identificar con el idBxC, fecha inicio, fecha fin y código de cliente
