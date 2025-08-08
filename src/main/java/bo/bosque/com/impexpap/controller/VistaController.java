@@ -9,7 +9,8 @@ import bo.bosque.com.impexpap.model.Vista;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.text.Collator;
+import java.util.*;
 
 @RestController
 @CrossOrigin("*")
@@ -30,33 +31,48 @@ public class VistaController {
      * @param obj
      * @return JWT
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" }) //que un usuario admin o limitado si tiene acceso para consumir este recurso
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/vistaDinamica")
-    public List<Vista> obtenerMenuDinamico( @RequestBody Login obj ) {
+    public List<Vista> obtenerMenuDinamico(@RequestBody Login obj) {
+        List<Vista> flat = this.vdao.obtainMenuXUser(obj.getCodUsuario());
 
-        /**
-         * Nota: la lista recursiva tiene que devolverlo  ordenado de forma ascendente
-         * desde el nivel mas profundo hasta el nivel mas externo
-         */
-        List<Vista>  lstMenu = this.vdao.obtainMenuXUser( obj.getCodUsuario() );
-        // Generando el menu en forma de arbol
-        for ( int i = 0; i < lstMenu.size(); i++ ) {
-            while (lstMenu.get(i).getCodVistaPadre() > 0) {
-                for (int j = 0; j < lstMenu.size(); j++) {
-                    if ( lstMenu.get(j).getCodVista() == lstMenu.get(i).getCodVistaPadre() ) {
-                        if( lstMenu.get(i).getTieneHijo() == -1 ){
-                            lstMenu.get(i).setItems(null)
-                                    .setRouterLink( lstMenu.get(i).getDireccion() )
-                                    .setIcon( "pi pi-circle" );
-                        }
-                        lstMenu.get(j).getItems().add(lstMenu.get(i));
-                        lstMenu.remove(lstMenu.get(i));//Eliminamos el hijo una vez agregado al padre, para evitar duplicidad
-                        break;
-                    }
-                }
+        // Index por id
+        Map<Integer, Vista> byId = new HashMap<>();
+        for (Vista v : flat) {
+            byId.put(v.getCodVista(), v);
+            if (v.getItems() == null && v.getTieneHijo() != -1) {
+                v.setItems(new ArrayList<>());
             }
         }
-        return lstMenu;
+
+        // Construir árbol
+        List<Vista> roots = new ArrayList<>();
+        for (Vista v : flat) {
+            if (v.getCodVistaPadre() > 0) {
+                Vista parent = byId.get(v.getCodVistaPadre());
+                if (parent != null) {
+                    if (v.getTieneHijo() == -1) {
+                        v.setItems(null)
+                                .setRouterLink(v.getDireccion())
+                                .setIcon("pi pi-circle");
+                    } else if (v.getItems() == null) {
+                        v.setItems(new ArrayList<>());
+                    }
+                    if (parent.getItems() == null) parent.setItems(new ArrayList<>());
+                    parent.getItems().add(v);
+                } else {
+                    // si por algún motivo el padre no viene, lo tratamos como raíz
+                    roots.add(v);
+                }
+            } else {
+                roots.add(v);
+            }
+        }
+
+        // Ordenar recursivamente por título (hijos primero, luego el nivel actual)
+        sortTreeByTitle(roots);
+
+        return roots;
     }
 
 
@@ -89,4 +105,24 @@ public class VistaController {
     public List<Vista> obtenerRutas( @RequestBody Login obj ) {
         return this.vdao.obtainRoutes( obj.getCodUsuario() );
     }
+
+
+    private void sortTreeByTitle(List<Vista> nodes) {
+        if (nodes == null) return;
+        Collator coll = Collator.getInstance(new Locale("es"));
+        coll.setStrength(Collator.PRIMARY);
+        for (Vista v : nodes) sortTreeByTitle(v.getItems());
+        nodes.sort((a, b) -> coll.compare(titleOf(a), titleOf(b)));
+    }
+
+    private String titleOf(Vista v) {
+        String t;
+        try {
+            t = v.getTitulo(); // cambia por getTitulo() si corresponde
+        } catch (Exception e) {
+            t = null;
+        }
+        return t == null ? "" : t;
+    }
+
 }
