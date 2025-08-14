@@ -19,6 +19,8 @@ public class Resmado implements Serializable {
     private float total;
     private String hraInicio;
     private String hraFin;
+    private int codEmpresa;
+    private int docNumOrdFab;
     private int audUsuario;
 
 
