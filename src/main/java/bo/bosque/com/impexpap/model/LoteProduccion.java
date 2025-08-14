@@ -36,6 +36,9 @@ public class LoteProduccion implements Serializable {
     private String obs;
     private int numCorte;
     private int anioCorte;
+    private int docNumOrdFab;
+    private int codEmpresa;
+
 
     private int audUsuario;
 
@@ -44,5 +47,9 @@ public class LoteProduccion implements Serializable {
     private String datoArt;
     private String articulo;
     private float utm;
+
+    private String codArtEntrada;
+    private String codArtSalida;
+    private String db;
 
 }

@@ -27,4 +27,6 @@ public interface ILoteProduccion {
      */
     List<LoteProduccion> obtenerArticulos();
 
+    List<LoteProduccion> obtenerDocNumXEmpresa( int codEmpresa );
+
 }

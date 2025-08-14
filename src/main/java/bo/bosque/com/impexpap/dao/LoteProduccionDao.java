@@ -37,9 +37,8 @@ public class LoteProduccionDao implements ILoteProduccion {
         try{
             resp = this.jdbcTemplate.update("execute p_abm_tprod_loteProduccion @idLp=?, @idMa=? ,@numLote=?, @anio=?, @fecha=?, @hraInicioCorte=? , @hraInicio=? , @hraFin=? " +
                                                 ", @cantBobinasIngresoTotal=?, @pesoKilosTotalIngreso=? , @pesoTotalSalida=? , @pesoPaletaSalida=? , @pesoMaterialSalida=? , @cantResmaSalida=?" +
-                                                ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=?, @diferenciaProdResma = ?, @cantEstimadaResma = ?, @pesoBalanzaTotal = ? , @estado = ? ,@obs=?, @numCorte=?, @anioCorte=? , @audUsuario=? ,  @ACCION=?",
+                                                ", @cantHojasSalida=? , @mermaTotal=? , @diferenciaProduccion=?, @diferenciaProdResma = ?, @cantEstimadaResma = ?, @pesoBalanzaTotal = ? , @estado = ? ,@obs=?, @numCorte=?, @anioCorte=?, @docNumOrdFab=?, @codEmpresa=? , @audUsuario=? ,  @ACCION=?",
                     ps -> {
-
                         ps.setEscapeProcessing( true );
                         ps.setInt(1, loProd.getIdLp());
                         ps.setInt(2, loProd.getIdMa());
@@ -65,8 +64,10 @@ public class LoteProduccionDao implements ILoteProduccion {
                         ps.setString(22, loProd.getObs());
                         ps.setInt(23, loProd.getNumCorte());
                         ps.setInt(24, loProd.getAnioCorte());
-                        ps.setInt(25, loProd.getAudUsuario());
-                        ps.setString(26, acc);
+                        ps.setInt(25, loProd.getDocNumOrdFab());
+                        ps.setInt(26, loProd.getCodEmpresa());
+                        ps.setInt(27, loProd.getAudUsuario());
+                        ps.setString(28, acc);
 
                     });
 
@@ -156,6 +157,39 @@ public class LoteProduccionDao implements ILoteProduccion {
             this.jdbcTemplate = null;
         }
         return lstTemp;
+
+    }
+
+    @Override
+    public List<LoteProduccion> obtenerDocNumXEmpresa( int codEmpresa ) {
+
+        List<LoteProduccion> lstTemp = new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_loteProduccion @codEmpresa=?, @ACCION=?",
+                    new Object[] { codEmpresa, "H" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount)->{
+
+                        LoteProduccion temp = new LoteProduccion();
+
+                        temp.setDocNumOrdFab(rs.getInt(1));
+                        temp.setCodArtEntrada(rs.getString(2));
+                        temp.setCodArtSalida(rs.getString(3));
+                        temp.setCodEmpresa(rs.getInt(4));
+                        temp.setDb(rs.getString(5));
+
+                        return temp;
+
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: LoteProduccionDao en obtenerDocNumXEmpresa, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+
+
 
     }
 }

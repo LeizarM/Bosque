@@ -7,10 +7,12 @@ import java.util.Map;
 
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,6 +27,7 @@ public class LoteProduccionController {
     private final IMaterialSalida materialSalidaDao;
     private final IMerma mermaDao;
     private final IMaquinaProduccion maquinaProduccionDao;
+    private final IEmpresa empresaDao;
 
     /**
      * Constructor de la clase
@@ -33,13 +36,15 @@ public class LoteProduccionController {
      * @param materialSalidaDao
      * @param mermaDao
      * @param maquinaProduccionDao
+     * @param empresaDao
      */
-    public LoteProduccionController(ILoteProduccion loteProducionDao, IMaterialIngreso materialIngresoDao, IMaterialSalida materialSalidaDao, IMerma mermaDao, IMaquinaProduccion maquinaProduccionDao) {
+    public LoteProduccionController(ILoteProduccion loteProducionDao, IMaterialIngreso materialIngresoDao, IMaterialSalida materialSalidaDao, IMerma mermaDao, IMaquinaProduccion maquinaProduccionDao, IEmpresa empresaDao) {
         this.loteProducionDao = loteProducionDao;
         this.materialIngresoDao = materialIngresoDao;
         this.materialSalidaDao = materialSalidaDao;
         this.mermaDao = mermaDao;
         this.maquinaProduccionDao = maquinaProduccionDao;
+        this.empresaDao = empresaDao;
     }
 
     /**
@@ -210,5 +215,40 @@ public class LoteProduccionController {
         return lstTemp;
 
     }
+
+
+    /**
+     * Obtiene todos las empresas registradas en el sistema.
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lst-empresas")
+    public List<Empresa> obtenerEmpresas() {
+
+        List<Empresa> empresas = empresaDao.obtenerEmpresas();
+
+        if( empresas.size() == 0 ) return new ArrayList<>();
+
+        return empresas;
+
+    }
+
+
+    /**
+     * Obtiene los docNum por orden de fabricación para una empresa.
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstDocNumOrdFabXEmpresa")
+    public List<LoteProduccion> obtenerDocNumOrdFabXEmpresa( @RequestBody LoteProduccion mb ) {
+
+        List<LoteProduccion> temp = loteProducionDao.obtenerDocNumXEmpresa( mb.getCodEmpresa() );
+
+        if( temp.size() == 0 ) return new ArrayList<>();
+
+        return temp;
+
+    }
+
 
 }
