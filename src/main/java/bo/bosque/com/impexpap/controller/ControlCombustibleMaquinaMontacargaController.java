@@ -1,13 +1,9 @@
 package bo.bosque.com.impexpap.controller;
 
 
-import bo.bosque.com.impexpap.dao.IControCombustibleMaquinaMontacarga;
+import bo.bosque.com.impexpap.dao.*;
 
-import bo.bosque.com.impexpap.dao.IMaquinaMontacarga;
-import bo.bosque.com.impexpap.dao.ISucursal;
-import bo.bosque.com.impexpap.model.ControCombustibleMaquinaMontacarga;
-import bo.bosque.com.impexpap.model.MaquinaMontacarga;
-import bo.bosque.com.impexpap.model.Sucursal;
+import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
@@ -31,16 +27,26 @@ public class ControlCombustibleMaquinaMontacargaController {
     private final IMaquinaMontacarga maquinaMontacargaDao;
     private final ISucursal sucursalDao;
 
+    private final IContenedor contenedorDao;
+    private final IMovimiento movimientoDao;
 
-    public ControlCombustibleMaquinaMontacargaController(IControCombustibleMaquinaMontacarga combustibleMaquinaMontacargaDao, IMaquinaMontacarga maquinaMontacargaDao, ISucursal sucursalDao) {
+
+
+    public ControlCombustibleMaquinaMontacargaController(IControCombustibleMaquinaMontacarga combustibleMaquinaMontacargaDao, IMaquinaMontacarga maquinaMontacargaDao, ISucursal sucursalDao, IContenedor contenedorDao, IMovimiento movimientoDao) {
         this.combustibleMaquinaMontacargaDao = combustibleMaquinaMontacargaDao;
         this.maquinaMontacargaDao = maquinaMontacargaDao;
         this.sucursalDao = sucursalDao;
+
+        this.contenedorDao = contenedorDao;
+        this.movimientoDao = movimientoDao;
     }
 
 
-
-
+    /**
+     * Deprecated: Este método es antiguo
+     * @param mb
+     * @return
+     */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/registrarMaquina")
     public ResponseEntity<?> registrarGasolina(@RequestBody ControCombustibleMaquinaMontacarga mb) {
@@ -71,7 +77,7 @@ public class ControlCombustibleMaquinaMontacargaController {
 
 
     /**
-     * Obtener los almacenes registrados
+     * Deprecated: Obtener los almacenes registrados
      * @return
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
@@ -120,7 +126,7 @@ public class ControlCombustibleMaquinaMontacargaController {
 
 
     /**
-     * Obtener los registros de bidones por tipo de transacción
+     * Deprecated: ****Obtener los registros de bidones por tipo de transacción
      * @return
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
@@ -186,7 +192,6 @@ public class ControlCombustibleMaquinaMontacargaController {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
-
 
 
 
@@ -259,8 +264,70 @@ public class ControlCombustibleMaquinaMontacargaController {
         }
     }
 
+    /**
+     * = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+     * = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+     * = = = = = = = = NUEVOS METODOS PARA EL REGISTRO DE CONTROL DE BIDONES (GASOLINA, DIESEL, GARRAFAS ) = =
+     * = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+     * = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+     */
 
-    private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {
+    /**
+     * Listara los contenedores para el registro de control de bidones (ya sea bidon o  garrafas)
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstContenedores")
+    public ResponseEntity<?> listContenedores() {
+
+        try {
+            List<Contenedor> temp = this.contenedorDao.listContenedor( ); // por defecto la empresa 6 ( GENERAL )
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron los contenedores.");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+    }
+
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/registrarMovimiento")
+    public ResponseEntity<?> registrarMovimiento( @RequestBody Movimiento mb ) {
+        try {
+
+            // Manejar otros campos que podrían ser null
+            if (mb.getFechaMovimiento() != null) {
+                mb.setFechaMovimiento(new Utiles().fechaJ_a_Sql(mb.getFechaMovimiento()));
+            }
+
+            String acc = mb.getIdMovimiento() == 0 ? "I" : "U";
+
+            boolean operationSuccess = this.movimientoDao.registrarMovimiento( mb, acc );
+
+            if (!operationSuccess) {
+                return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
+            }
+
+            HttpStatus status = HttpStatus.CREATED;
+            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Esto ayudará a identificar el error exacto
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+
+
+        private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {
         String errorMsg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();
         return ResponseEntity.badRequest()
                 .body(new ApiResponse<>(ERROR_MESSAGE, errorMsg, HttpStatus.BAD_REQUEST.value()));
