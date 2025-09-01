@@ -645,5 +645,8 @@ public class FichaTrabajadorController {
 
         return new ResponseEntity<>(recurso, header, HttpStatus.OK);
     }
+
+
+    //comentario test (borrar si ya no se necesita)
 }
 
