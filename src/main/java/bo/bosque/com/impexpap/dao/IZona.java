@@ -12,5 +12,13 @@ public interface IZona {
      * @return
      */
     List<Zona> obtenerZonaXCiudad(int codCiudad );
+    /**
+     * Procedimiento para registrar zona
+     * @param
+     * @param
+     * @return
+     */
+    boolean registrarZona(Zona zona, String acc);
+
 
 }

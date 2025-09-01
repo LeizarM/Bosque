@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import bo.bosque.com.impexpap.utils.Tipos;
+import org.exolab.castor.mapping.xml.Sql;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,6 +33,7 @@ public class DependienteDao implements IDependiente {
     public List<Dependiente> obtenerDependientes( int codEmpleado ) {
         List<Dependiente> lstTemp = new ArrayList<>();
         try {
+           // System.out.println("Valor de codEmpleado: " + codEmpleado);
             lstTemp = this.jdbcTemplate.query("execute p_list_Dependiente @codEmpleado=?, @ACCION=?",
                     new Object[] { codEmpleado, "A" },
                     new int[] { Types.INTEGER, Types.VARCHAR },
@@ -37,12 +41,12 @@ public class DependienteDao implements IDependiente {
                         Dependiente dep = new Dependiente();
                         dep.setCodDependiente(rs.getInt(1));
                         dep.setCodPersona(rs.getInt(2));
-                        dep.setEsActivo(rs.getString(3));
-                        dep.setNombreCompleto(rs.getString(4));
-                        dep.setDescripcion(rs.getString(5));
-                        dep.setEdad(rs.getInt(6));
+                       dep.setCodEmpleado(rs.getInt(3));
+                        dep.setEsActivo(rs.getString(4));
+                        dep.setNombreCompleto(rs.getString(5));
+                        dep.setParentesco(rs.getString(6));
+                        dep.setEdad(rs.getInt(7));
                         return dep;
-
                     });
         }catch (BadSqlGrammarException e) {
             System.out.println("Error: DependienteDao en obtenerDependientes, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
@@ -59,7 +63,7 @@ public class DependienteDao implements IDependiente {
      * @return true si lo hizo correctamente
      */
     public boolean registrarDependiente( Dependiente dep, String acc ) {
-
+        System.out.println(dep.toString());
         int resp;
         try{
             resp = this.jdbcTemplate.update("execute p_abm_Dependiente @codDependiente=?, @codPersona=?, @codEmpleado=?, @parentesco=?, @esActivo=?, @audUsuarioI=?, @ACCION=?",
@@ -79,4 +83,54 @@ public class DependienteDao implements IDependiente {
         }
         return resp!=0;
     }
+
+
+
+    /**
+     * Procedimiento para mostrar si los dependientes son empleados
+     * @return
+     */
+
+    public List<Dependiente>obtenerDepEmp(int codEmpleado){
+    List<Dependiente>lstTemp= new ArrayList<>();
+    try{
+        lstTemp = this.jdbcTemplate.query("execute p_list_Empleado @codEmpleado=?, @ACCION=?",
+                new Object[] { codEmpleado, "Q" },
+                new int[] { Types.INTEGER, Types.VARCHAR },
+                (rs, rowCount)-> {
+                    Dependiente dep= new Dependiente();
+                    dep.setCodDependiente(rs.getInt("codDependiente"));
+                    dep.setCodPersona(rs.getInt("codPersona"));
+                    dep.setCodEmpleado(rs.getInt("codEmpleado"));
+                    dep.setAudUsuario(rs.getInt("audUsuarioI"));
+                    dep.setNombreCompleto(rs.getString("NombreCompleto"));
+                    return dep;
+                });
+
+        }
+    catch (BadSqlGrammarException e){
+        System.out.println("Error: DependienteDao en obtenerDepEmp, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+        lstTemp = new ArrayList<>();
+        this.jdbcTemplate = null;
+    }
+        return lstTemp;
+
+    }
+    /**
+     * Obtendra una lista de tipos de parentesco
+     * @return
+     */
+    public List<Tipos> lstTipoDependiente() {
+        return new Tipos().lstTipoDependiente();
+    }
+    /**
+     * Obtendra una lista de tipos de activo
+     * @return
+     */
+    public List<Tipos> lstTipoActivo() {
+        return new Tipos().lstTipoActivo();
+    }
+
 }
+
+

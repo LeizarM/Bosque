@@ -21,6 +21,11 @@ public class Dependiente implements Serializable {
     /**
      * Variables de Apoyo
      */
+    // 🔹 Constructor específico para eliminar por codEmail
+    public Dependiente(int codDependiente) {
+        this.codDependiente = codDependiente;
+    }
+
 
     private String nombreCompleto;
     private String descripcion;

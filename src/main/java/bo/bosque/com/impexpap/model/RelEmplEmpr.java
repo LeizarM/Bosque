@@ -19,8 +19,13 @@ public class RelEmplEmpr implements Serializable {
     private Date fechaIni;
     private Date fechaFin;
     private String motivoFin;
+    private String Sucursal;
+    private String EmpresaInterna;
+    private String EmpresaFiscal;
     private int audUsuario;
 
+    //private EmpleadoCargo empleadoCargo = new EmpleadoCargo();
+    //private Sucursal sucursal= new Sucursal();
 
     private Date fechaInicioBeneficio;
     private Date fechaInicioPlanilla;
@@ -29,4 +34,6 @@ public class RelEmplEmpr implements Serializable {
      * Variables de apoyo
      */
     private String datoFechasBeneficio;
+    private String cargo;
+
 }

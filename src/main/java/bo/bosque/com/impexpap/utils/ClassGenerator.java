@@ -14,7 +14,7 @@ import java.util.List;
 public class ClassGenerator {
 
     //private static final String DATABASE_URL = "jdbc:sqlserver://192.168.3.116:1433;databaseName=BOSQUE-2_0;?useSSL=false";
-    private static final String DATABASE_URL = "jdbc:sqlserver://192.168.3.116:1433;databaseName=BOSQUE-2_0;?useSSL=false";
+    private static final String DATABASE_URL = "jdbc:sqlserver://192.168.3.116:1433;databaseName=BOSQUE2PRUEBA2;?useSSL=false";
     private static final String DATABASE_USER = "sa";
     private static final String DATABASE_PASSWORD = "sapbus1n3ss";
     private static final String OUTPUT_DIRECTORY = "src/main/java/bo/bosque/com/impexpap/model/";
@@ -25,8 +25,8 @@ public class ClassGenerator {
             return;
         }*/
 
-        String className ="BancoXCuenta";
-        String tableName = "tdep_BancoXCuenta";
+        String className ="Movimiento";
+        String tableName = "tgas_Movimiento";
 
         ClassGenerator classGenerator = new ClassGenerator();
         classGenerator.generateClass(className, tableName);

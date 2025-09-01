@@ -11,6 +11,9 @@ public class Email {
     private int codPersona;
     private String email;
     private int audUsuario;
-
+    // 🔹 Constructor específico para eliminar por codEmail
+    public Email(int codEmail) {
+        this.codEmail = codEmail;
+    }
 
 }

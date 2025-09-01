@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.Email;
 import bo.bosque.com.impexpap.model.Persona;
 import bo.bosque.com.impexpap.model.Telefono;
+import bo.bosque.com.impexpap.model.TipoTelefono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,6 +41,7 @@ public class TelefonoDao implements ITelefono {
                             temp.setCodTelefono(rs.getInt(1));
                             temp.setCodPersona(rs.getInt(2));
                             temp.setCodTipoTel(rs.getInt(3));
+                            temp.setTipo(rs.getString(4));
                             temp.setTelefono(rs.getString(5));
                             temp.setAudUsuario(rs.getInt(6));
                          return temp;
@@ -51,6 +53,35 @@ public class TelefonoDao implements ITelefono {
              lstTemp = new ArrayList<>();
              this.jdbcTemplate = null;
          }
+
+        return lstTemp;
+    }
+    /**
+     * Procedimiento para obtener el tipo de telefono
+     * @param
+     * @return
+     */
+    public List<TipoTelefono> obtenerTipoTelefono() {
+        List<TipoTelefono> lstTemp = new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query(" execute p_list_TipoTelefono @ACCION=?",
+                    new Object[] { "L" },
+                    new int[] {Types.VARCHAR },
+                    (rs, rowCount)->{
+                        TipoTelefono temp = new TipoTelefono();
+                        temp.setCodTipoTel(rs.getInt(1));
+                        temp.setTipo(rs.getString(2));
+                        temp.setAudUsuario(rs.getInt(3));
+                        return temp;
+                    }
+            );
+
+        }catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmailDao en obtenerCorreos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
 
         return lstTemp;
     }

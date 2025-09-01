@@ -35,9 +35,21 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
                     new int[]{ Types.INTEGER, Types.VARCHAR },
                     (rs, rowCount) ->{
                         RelEmplEmpr temp = new RelEmplEmpr();
-
                         temp.setCodRelEmplEmpr(rs.getInt(1));
-                        temp.setDatoFechasBeneficio(rs.getString(2));
+                        temp.setCodEmpleado(rs.getInt(2));
+                        temp.setEsActivo(rs.getInt(3));
+                        temp.setTipoRel(rs.getString(4));
+                        temp.setNombreFileContrato(rs.getString(5));
+                        temp.setFechaIni(rs.getDate(6));
+                        temp.setFechaFin(rs.getDate(7));
+                        temp.setMotivoFin(rs.getString(8));
+                        //temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(9));
+                        temp.setCargo(rs.getString(9));
+                        temp.setSucursal(rs.getString(10));
+                        temp.setEmpresaInterna(rs.getString(11));
+                        temp.setEmpresaFiscal(rs.getString(12));
+
+                        //temp.setDatoFechasBeneficio(rs.getString(2));
                         return temp;
                     });
         }catch ( BadSqlGrammarException e ){
@@ -81,4 +93,10 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
 
         return resp!=0;
     }
+
+    @Override
+    public boolean obtenerRelEmpEmpr() {
+        return false;
+    }
+
 }

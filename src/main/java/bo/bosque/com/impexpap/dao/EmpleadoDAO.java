@@ -1,8 +1,8 @@
 package bo.bosque.com.impexpap.dao;
-import bo.bosque.com.impexpap.model.Cargo;
-import bo.bosque.com.impexpap.model.Dependiente;
-import bo.bosque.com.impexpap.model.Empleado;
-import bo.bosque.com.impexpap.model.Persona;
+import bo.bosque.com.impexpap.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.exolab.castor.mapping.xml.Sql;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -177,11 +177,11 @@ public class EmpleadoDAO implements IEmpleado{
      }
 
     /**
-     * Procedimiento para obtener Empleados y Dependientes
-     * @return List<Empleado>
+     *
+     * Procedimiento para obtener emplado y dependientes
+     * @return
      */
-
-    /*public List<Empleado> obtenerListaEmpleadoyDependientes() {
+    public List<Empleado> obtenerListaEmpleadoyDependientes() {
         List<Empleado> lstTemp;
         try{
         lstTemp = this.jdbcTemplate.query(
@@ -190,24 +190,79 @@ public class EmpleadoDAO implements IEmpleado{
                 new int[]{Types.VARCHAR},
                 (rs, rowNum) -> {
                     Empleado temp = new Empleado();
-                    temp.setCodEmpleado(rs.getInt("CodigoEmpleado"));
-                    temp.getEmpleado().getPersona().setApPaterno(rs.getString("ApellidoPaterno"));
-                    temp.getEmpleado().getPersona().setApMaterno(rs.getString("ApellidoMaterno"));
-                    temp.getEmpleado().getPersona().setNombres(rs.getString("Nombres"));
+                    temp.setCodEmpleado(rs.getInt("codEmpleado"));
+                    temp.getPersona().setDatoPersona(rs.getString("NombreCompleto"));
                     temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString("CargoActual"));
-                    temp.getEmpleado().getDependiente().setCodEmpleado(rs.getInt("Dependiente"));
-                    temp.getEmpleado().getDependiente().setCodPersona(rs.getInt("DependientesEmpleados"));
-                    temp.getEmpleado().getRelEmpEmpr().setEsActivo(rs.getInt("Estado"));
+                    temp.getDependiente().setCodEmpleado(rs.getInt("Dependientes"));
+                    temp.getEmpresa().setNombre(rs.getString("Empresa"));
+                    temp.getSucursal().setNombre(rs.getString("Sucursal"));
+                    temp.getRelEmpEmpr().setEsActivo(rs.getInt("esActivo"));
                     return temp;
-
                 });
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerListaEmpleadoyDependientes,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
             this.jdbcTemplate = null;
-
         }
         return lstTemp;
-    }*/
+    }
+
+//PARA OBTENER DATOS PERSONALES DEL EMPLEADO
+    public List<Empleado>obtenerDatosPerEmp(int codEmpleado){
+        List<Empleado>lstTemp;
+        try{
+            lstTemp = this.jdbcTemplate.query(" execute p_list_Empleado @codEmpleado=?, @ACCION=?",
+                    new Object[]{codEmpleado,"V"},
+                    new int[]{Types.INTEGER,Types.VARCHAR},
+                    (rs, rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt("codEmpleado"));
+                        temp.setCodPersona(rs.getInt("codPersona"));
+                        temp.setCodZona(rs.getInt("codZona"));
+                        temp.getPersona().setDatoPersona(rs.getString("NombreCompleto"));
+                        temp.getPersona().setCiExpedido(rs.getString("ciExpedido"));
+                        temp.getPersona().setCiFechaVencimiento(rs.getDate("ciFechaVencimiento"));
+                        temp.getPersona().setCiNumero(rs.getString("ciNumero"));
+                        temp.getPersona().setDireccion(rs.getString("direccion"));
+                        temp.getPersona().setEstadoCivil(rs.getString("estadoCivil"));
+                        temp.getPersona().setFechaNacimiento(rs.getDate("fechaNacimiento"));
+                        temp.getPersona().setLugarNacimiento(rs.getString("lugarNacimiento"));
+                        temp.getPersona().setNacionalidad(rs.getInt("nacionalidad"));
+                        temp.getPersona().setSexo(rs.getString("sexo"));
+                        temp.getPersona().setLat(rs.getInt("lat"));
+                        temp.getPersona().setLng(rs.getInt("lng"));
+                        temp.getPersona().setAudUsuarioI(rs.getInt("AudUsuarioI"));
+                        return temp;
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerDatosPerEmp,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+    //OBTIENE UNA LISTA DE EMPLEADOS CON LA FECHA DE CUMPLEA;OS
+    public List<Empleado>listaCumpleEmpleado(){
+        List<Empleado>lstTemp;
+        try{
+            lstTemp = this.jdbcTemplate.query(" execute p_list_Empleado  @ACCION=?",
+                    new Object[]{"W"},
+                    new int[]{Types.VARCHAR},
+                    (rs, rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setCodPersona(rs.getInt(2));
+                        temp.getPersona().setDatoPersona(rs.getString(3));
+                        temp.getPersona().setFechaNacimiento(rs.getDate(4));
+                        temp.getSucursal().setNombre(rs.getString(5));
+                        return temp;
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en listaCumpleEmpleado,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
 
 }

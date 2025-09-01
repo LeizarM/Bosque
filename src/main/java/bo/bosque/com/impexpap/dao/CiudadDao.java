@@ -47,4 +47,32 @@ public class CiudadDao implements  ICiudad{
         }
         return lstTemp;
     }
+    /**
+     * Procedimiento para registrar ciudad
+     * @param
+     * @param
+     * @return
+     */
+    public boolean registrarCiudad(Ciudad ciudad, String acc ){
+
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Ciudad @codCiudad=?, @codPais=?, @ciudad=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, ciudad.getCodCiudad() );
+                        ps.setInt(2, ciudad.getCodPais() );
+                        ps.setString(3, ciudad.getCiudad() );
+                        ps.setInt(4, ciudad.getAudUsuario() );
+                        ps.setString(5, acc);
+                        //ps.executeUpdate();
+                    });
+
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: PaisDao en registrarPais, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
+    }
 }

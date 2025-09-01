@@ -11,4 +11,11 @@ public interface IPais {
      * @return
      */
     List<Pais> obtenerPais();
+    /**
+     * Procedimiento para registrar pais
+     * @param
+     * @param
+     * @return
+     */
+    boolean registrarPais(Pais pais, String acc);
 }

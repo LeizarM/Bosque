@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.model;
 
 import lombok.*;
 
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,7 +11,10 @@ import java.util.Date;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+
+
 public class Persona implements Serializable {
+
 
     private int codPersona;
     private int codZona;
@@ -29,6 +33,7 @@ public class Persona implements Serializable {
     private float lat; // latitud
     private float lng; // longitud
     private int audUsuarioI;
+
 
     /**
      * Variable de apoyo

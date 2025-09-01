@@ -32,7 +32,7 @@ public class ZonaDao implements  IZona {
         List<Zona> lstTemp = new ArrayList<>();
         try{
             lstTemp = this.jdbcTemplate.query("execute p_list_Zona @codCiudad=?, @ACCION=?",
-                    new Object[]{ codCiudad, "L" },
+                    new Object[]{ codCiudad>0?codCiudad:null, "L" },
                     new int[]{Types.INTEGER, Types.VARCHAR },
                     (rs, rowCount)->{
                         Zona temp = new Zona();
@@ -48,5 +48,33 @@ public class ZonaDao implements  IZona {
             this.jdbcTemplate = null;
         }
         return lstTemp;
+    }
+    /**
+     * Procedimiento para registrar zona
+     * @param
+     * @param
+     * @return
+     */
+    public boolean registrarZona(Zona zona, String acc ){
+
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Zona @codZona=?, @codCiudad=?, @zona=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, zona.getCodZona() );
+                        ps.setInt(2, zona.getCodCiudad() );
+                        ps.setString(3, zona.getZona() );
+                        ps.setInt(4, zona.getAudUsuario() );
+                        ps.setString(5, acc);
+                        //ps.executeUpdate();
+                    });
+
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: PaisDao en registrarPais, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
     }
 }

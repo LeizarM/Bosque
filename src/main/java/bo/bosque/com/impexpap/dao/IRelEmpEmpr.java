@@ -22,4 +22,12 @@ public interface IRelEmpEmpr {
      * @return
      */
     boolean registrarRelEmpEmpr (RelEmplEmpr empCar, String acc);
+    /**
+     * Procedimiento para el abm
+     * @param RelEmp
+     * @param acc
+     * @return
+     */
+
+    boolean obtenerRelEmpEmpr();
 }

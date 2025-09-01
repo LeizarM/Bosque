@@ -12,4 +12,11 @@ public interface ICiudad {
      * @return
      */
     List<Ciudad> obtenerCiudadesXPais ( int codPais );
+    /**
+     * Procedimiento para registrar pais
+     * @param
+     * @param
+     * @return
+     */
+    boolean registrarCiudad(Ciudad ciudad, String acc);
 }

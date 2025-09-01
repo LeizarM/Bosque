@@ -36,5 +36,21 @@ public interface IEmpleado {
      * Procedimiento para mostrar lista de empleados y dependientes
      * @return
      */
-    //List <Empleado>obtenerListaEmpleadoyDependientes ();
+    List <Empleado>obtenerListaEmpleadoyDependientes ();
+    /**
+     * Procedimiento para mostrar lista de empleados y dependientes
+     * @return
+     */
+    //List <Empleado>obtenerInfoEmp();
+    /**
+     * Procedimiento para mostrar datos personales de empleado
+     * @return
+     */
+    List<Empleado>obtenerDatosPerEmp(int codEmpleado);
+    /**
+     * Procedimiento para mostrar lista de empleados y dependientes
+     * @return
+     */
+    List <Empleado>listaCumpleEmpleado();
+
 }

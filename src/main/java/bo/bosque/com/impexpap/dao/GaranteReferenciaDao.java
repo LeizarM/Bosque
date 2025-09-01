@@ -3,6 +3,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import bo.bosque.com.impexpap.utils.Tipos;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,7 +23,7 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
 
 
     /**
-     * Metodo para listar los garantes o referencias de un empleado
+     * Metodo para listar los garantes o referencias de un Empleado
      * @param codEmpleado
      * @return
      */
@@ -43,6 +45,7 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
                         garRef.setTipo(rs.getString(7));
                         garRef.setObservacion( rs.getString(8));
                         garRef.setEsEmpleado( rs.getString(9));
+                        garRef.setTelefonos(rs.getString(10));
 
                         return garRef;
 
@@ -65,6 +68,8 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
      */
     public boolean registrarGaranteReferencia(GaranteReferencia garRef, String acc) {
         int resp;
+        System.out.println(garRef);
+        System.out.println(acc);
         try{
             resp = this.jdbcTemplate.update("execute p_abm_GaranteReferencia @codGarante=?, @codPersona=?, @codEmpleado=?, @direccionTrabajo=? ,@empresaTrabajo=?, @tipo=?, @observacion=?, @audUsuarioI=?, @ACCION=?",
                     ps -> {
@@ -84,6 +89,55 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
             resp = 0;
         }
         return resp!=0;
+    }
+
+    /**
+     * Obtendra una lista de garante-referencia
+     * @return
+     */
+    public List<Tipos> lstTipoGarRef() {
+        return new Tipos().lstTipoGarRef();
+    }
+    /**
+     * Obtendra una lista de garantes ref
+     * @return
+     */
+    public List<GaranteReferencia>obtenerListaGarantes(){
+        List<GaranteReferencia>lstTemp;
+        try{
+            lstTemp = this.jdbcTemplate.query(" execute p_list_GaranteReferencia @ACCION=?",
+                    new Object[]{"L"},
+                    new int[]{Types.VARCHAR},
+                    (rs, rowNum)->{
+                        GaranteReferencia temp= new GaranteReferencia();
+                        temp.setCodGarante(rs.getInt(1));
+                        temp.setCodPersona(rs.getInt(2));
+                        temp.setCodEmpleado(rs.getInt(3));
+                        temp.setNombreCompleto(rs.getString(4));
+                        temp.setDireccionTrabajo(rs.getString(5));
+                        temp.setEmpresaTrabajo(rs.getString(6));
+                        temp.setTipo(rs.getString(7));
+                        temp.setObservacion(rs.getString(8));
+                        temp.setAudUsuario(rs.getInt(9));
+
+                        return temp;
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerListaGarantes,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+
+    public int contarGarantesPorPersona(int codPersona) {
+        String sql = "SELECT COUNT(*) FROM trh_garanteReferencia WHERE codPersona = ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{codPersona}, Integer.class);
+    }
+
+    public boolean existeGarante(int codPersona, int codEmpleado) {
+        String sql = "SELECT COUNT(*) FROM trh_garanteReferencia WHERE codPersona = ? AND codEmpleado = ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{codPersona, codEmpleado}, Integer.class) > 0;
     }
 
 

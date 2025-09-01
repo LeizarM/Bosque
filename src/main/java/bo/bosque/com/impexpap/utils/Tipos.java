@@ -102,6 +102,107 @@ public class Tipos {
         //listaTemp.add(new Tipos("3", "En Espera", 38));
         return listaTemp;
     }
+    /**
+     * Devolvera una lista de tipos de genero
+     * @return
+     */
+    public List<Tipos>lstSexo(){
+        List<Tipos>listaTemp = new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("F","Femenino",1));
+        listaTemp.add(new Tipos("M","Masculino",1));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista de tipos de estado civil
+     * @return
+     */
+    public List <Tipos>lstEstadoCivil(){
+        List<Tipos>listaTemp = new ArrayList<Tipos>();
+        listaTemp.add (new Tipos("sol","soltero(a)",2));
+        listaTemp.add (new Tipos("cas","Casado(a)",2));
+        listaTemp.add (new Tipos("con","Concubino(a)",2));
+        listaTemp.add (new Tipos("div","Divorciado(a)",2));
+        listaTemp.add (new Tipos("viu","Viudo(a)",2));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista de tipos de ci expedido
+     * @return
+     */
+    public List<Tipos>lstCiExp(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("lp","LP",9));
+        listaTemp.add(new Tipos("sc","SC",9));
+        listaTemp.add(new Tipos("or","OR",9));
+        listaTemp.add(new Tipos("tj","TJ",9));
+        listaTemp.add(new Tipos("cbba","CBBA",9));
+        listaTemp.add(new Tipos("be","BE",9));
+        listaTemp.add(new Tipos("pt","PT",9));
+        listaTemp.add(new Tipos("pd","PD",9));
+        listaTemp.add(new Tipos("ch","CH",9));
+        listaTemp.add(new Tipos("nn","Sin Carnet",9));
+        listaTemp.add(new Tipos("ext","Extranjero",9));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista de tipos de formacion
+     * @return
+     */
+    public List<Tipos>lstTipoFormacion(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("cur","Curso",4));
+        listaTemp.add(new Tipos("dip","Diplomado",4));
+        listaTemp.add(new Tipos("esp","Especializacion",4));
+        listaTemp.add(new Tipos("mae","Maestria",4));
+        listaTemp.add(new Tipos("doc","Doctorado",4));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista de tipos de duracionformacion
+     * @return
+     */
+    public List<Tipos>lstTipoDuracionFormacion(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("hrs","Horas",7));
+        listaTemp.add(new Tipos("dia","Dias",7));
+        listaTemp.add(new Tipos("mes","Meses",7));
+        listaTemp.add(new Tipos("sem","Semanas",7));
+        listaTemp.add(new Tipos("ani","Años",7));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista de garante-referencia
+     * @return
+     */
+    public List<Tipos>lstTipoGarRef(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("gar","Garante",12));
+        listaTemp.add(new Tipos("ref","Referencia",12));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista de tipos parentesco
+     * @return
+     */
+    public List<Tipos>lstTipoDependiente(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("hij","Hijo(a)",5));
+        listaTemp.add(new Tipos("pad","Padre",5));
+        listaTemp.add(new Tipos("mad","Madre",5));
+        listaTemp.add(new Tipos("ben","Beneficiario(a)",5));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista para  esActivo SI/NO
+     * @return
+     */
+    public List<Tipos>lstTipoActivo(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("1","SI",10));
+        listaTemp.add(new Tipos("0","NO",10));
+
+        return listaTemp;
+    }
 
 
 }

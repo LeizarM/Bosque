@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.Tipos;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -119,6 +120,20 @@ public class RrhhController {
         return lstTelefono;
 
     }
+    /**
+     * Procedimiento que obtendra los telefonos de una persona
+     * @param tel
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tipoTelefono")
+    public List<TipoTelefono> obtenerTipoTelefonos(){
+
+        List<TipoTelefono> lstTelefono = this.telfDao.obtenerTipoTelefono();
+        if( lstTelefono.size() == 0 ) return new ArrayList<>();
+        return lstTelefono;
+
+    }
 
 
     /**
@@ -187,12 +202,15 @@ public class RrhhController {
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/zonas")
-    public List<Zona> obtenerZona( @RequestBody Ciudad ciu  ){
+    public List<Zona> obtenerZona(@RequestBody Ciudad ciu) {
 
-        List<Zona> lstZona = this.zonaDao.obtenerZonaXCiudad( ciu.getCodCiudad() );
-        if( lstZona.size() == 0 ) return new ArrayList<>();
+        int codCiudad = (ciu != null && ciu.getCodCiudad() > 0) ? ciu.getCodCiudad() : 0; // Si no hay código, usamos 0
+        List<Zona> lstZona = this.zonaDao.obtenerZonaXCiudad(codCiudad);
+
+        if (lstZona.size() == 0) return new ArrayList<>();
         return lstZona;
     }
+
 
     /**
      * Procedimiento para obtener los paises registrados
@@ -223,17 +241,16 @@ public class RrhhController {
         if( per.getCodPersona() == 0 ){
             acc = "I";
         }
-        if( !this.perDao.registrarPersona(per, acc) ){
-            response.put("msg", "Error al Actualizar los Datos de la Persona");
+        Integer resultado=this.perDao.registrarPersona(per,acc);
+        if (resultado == null || resultado == 0) {
+            response.put("msg", "Error al registrar persona");
             response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         response.put("msg", "Datos Actualizados de la Persona");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-
     /**
      * Procedimiento para obtener las sucursales por empresa
      * @param suc
@@ -361,8 +378,6 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-
     /**
      * Procedimiento para el registro de Email
      * @param
@@ -399,20 +414,26 @@ public class RrhhController {
      * @param
      * @return
      */
-    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
-    @PostMapping("/eliminarEmail")
-    public ResponseEntity<?> eliminarEmail( @RequestBody Email e ){
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @DeleteMapping("/correo/{codEmail}")
+    public ResponseEntity<Map<String, Object>> eliminarEmail(@PathVariable int codEmail) {
         Map<String, Object> response = new HashMap<>();
 
-        if( !this.emailDao.registrarEmail( e, "D" ) ){
-            response.put("msg", "Error al Eliminar el Email del Empleado");
-            response.put("error", "ok");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        System.out.println("📩 Eliminando correo con codEmail: " + codEmail);
+
+        boolean eliminado = this.emailDao.registrarEmail(new Email(codEmail), "D");
+
+        if (!eliminado) {
+            System.out.println("❌ Error al eliminar el correo: " + codEmail);
+            response.put("msg", "Error al eliminar el correo.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        response.put("msg", "Datos de Email Eliminados");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        System.out.println("✅ Correo eliminado correctamente: " + codEmail);
+        response.put("msg", "Correo eliminado correctamente.");
+        return ResponseEntity.ok(response);
     }
+
 
     /**
      * Procedimiento para el registro de Telefono
@@ -437,6 +458,7 @@ public class RrhhController {
         String acc = "U";
         if( tel.getCodTelefono() == 0){
             acc = "I";
+
         }
 
         if( !this.telfDao.registrarTelefono( tel,acc ) ){
@@ -450,23 +472,28 @@ public class RrhhController {
     }
 
         /**
-         * Procedimiento para eliminar un Email
+         * Procedimiento para eliminar un telefono
          * @param
          * @return
          */
-        @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
-        @PostMapping("/eliminarTelefono")
-        public ResponseEntity<?> eliminarTelefono( @RequestBody Telefono tel ){
+        @Secured({ "ROLE_ADM", "ROLE_LIM" })
+        @DeleteMapping("/telefono/{codTelefono}")
+        public ResponseEntity<Map<String, Object>> eliminarTelefono(@PathVariable int codTelefono) {
             Map<String, Object> response = new HashMap<>();
 
-            if( !this.telfDao.registrarTelefono( tel, "D" ) ){
-                response.put("msg", "Error al Eliminar el Telefono del Empleado");
-                response.put("error", "ok");
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println("📩 Eliminando telefono con codTelefono: " + codTelefono);
+
+            boolean eliminado = this.telfDao.registrarTelefono(new Telefono(codTelefono), "D");
+
+            if (!eliminado) {
+                System.out.println("❌ Error al eliminar el telf: " + codTelefono);
+                response.put("msg", "Error al eliminar el telf.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
-            response.put("msg", "Datos de Telefono Eliminados");
-            response.put("ok", "ok");
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+            System.out.println("✅ telf eliminado correctamente: " + codTelefono);
+            response.put("msg", "telf eliminado correctamente.");
+            return ResponseEntity.ok(response);
         }
 
     /**
@@ -496,6 +523,30 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    /**
+     * Procedimiento para eliminar experiencia laboral
+     * @param
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @DeleteMapping("/expLaboral/{codExperienciaLaboral}")
+    public ResponseEntity<Map<String, Object>> eliminarExperienciaLaboral(@PathVariable int codExperienciaLaboral) {
+        Map<String, Object> response = new HashMap<>();
+
+        System.out.println("📩 Eliminando explab con codExperienciaLaboral: " + codExperienciaLaboral);
+
+        boolean eliminado = this.expLabDao.registrarExpLaboral(new ExperienciaLaboral(codExperienciaLaboral), "D");
+
+        if (!eliminado) {
+            System.out.println("❌ Error al eliminar el explab: " + codExperienciaLaboral);
+            response.put("msg", "Error al eliminar el explab.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        System.out.println("✅ explab eliminado correctamente: " + codExperienciaLaboral);
+        response.put("msg", "explab eliminado correctamente.");
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * Procedimiento para registrar o actualizar la formacion de un empleado
@@ -522,6 +573,30 @@ public class RrhhController {
         response.put("msg", "Datos de Formacion Actualizados");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    /**
+     * Procedimiento para eliminar formacion
+     * @param
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @DeleteMapping("/formacion/{codFormacion}")
+    public ResponseEntity<Map<String, Object>> eliminarFormacion(@PathVariable int codFormacion) {
+        Map<String, Object> response = new HashMap<>();
+
+        System.out.println("📩 Eliminando correo con codFormacion: " + codFormacion);
+
+        boolean eliminado = this.formDao.registrarFormacion(new Formacion(codFormacion), "D");
+
+        if (!eliminado) {
+            System.out.println("❌ Error al eliminar el formacion: " + codFormacion);
+            response.put("msg", "Error al eliminar el formacion.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        System.out.println("✅ Correo eliminado correctamente: " + codFormacion);
+        response.put("msg", "Correo eliminado correctamente.");
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -576,5 +651,135 @@ public class RrhhController {
         if(temp.getCodPersona() <= 0 ) return new Persona();
         return temp;
     }
+    /**
+     * Devolera una lista de los tipos de sexo
+     * @return
+     */
+     @Secured({ "ROLE_ADM", "ROLE_LIM" })
+     @PostMapping("/tiposSexo")
+     public List<Tipos> lstSexo(){
+     return this.perDao.lstSexo();
+     }
 
+    /**
+     * Devolera una lista de los tipos de ciExp
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tiposCiExp")
+    public List<Tipos> lstCiExp(){
+        return this.perDao.lstCiExp();
+    }
+    /**
+     * Devolera una lista de los tipos de sexo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tiposEstCivil")
+    public List<Tipos> lstEstadoCivil(){
+        return this.perDao.lstEstadoCivil();
+    }
+    /**
+     * Devolera una lista de los tipos de FORMACION
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tiposFormacion")
+    public List<Tipos> lstTipoFormacion(){
+        return this.perDao.lstTipoFormacion();
+    }
+    /**
+     * Obtendra una lista de los tipos de duracion para formacion
+     */
+    @Secured({"ROLE_ADM","ROLE_LIM"})
+    @PostMapping("/tiposDuracionFor")
+    public List<Tipos>lstTipoDuracionFormacion(){return this.perDao.lstTipoDuracionFormacion();}
+
+    /**
+     * Obtendra una lista de personas
+     */
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerListaPersonas")
+    public List<Persona>obtenerListaPersonas(){
+        List<Persona>lstTemp=this.perDao.obtenerListaPersonas();
+        if (lstTemp.size()==0)return new ArrayList<>();
+        return lstTemp;
+
+    }
+    /**
+     * Procedimiento para el registrar un pais
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroPais")
+    public ResponseEntity<?> registrarPais( @RequestBody Pais p ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( p.getCodPais() == 0){
+            acc = "I";
+        }
+
+        if( !this.paisDao.registrarPais( p, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos del Email del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    /**
+     * Procedimiento para el registrar una zona
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroZona")
+    public ResponseEntity<?> registrarZona( @RequestBody Zona z ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( z.getCodZona() == 0){
+            acc = "I";
+        }
+
+        if( !this.zonaDao.registrarZona( z, acc ) ){
+            response.put("msg", "Error al Actualizar la zona del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    /**
+     * Procedimiento para el registrar una zona
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroCiudad")
+    public ResponseEntity<?> registrarCiudad( @RequestBody Ciudad c ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( c.getCodCiudad() == 0){
+            acc = "I";
+        }
+
+        if( !this.ciudadDao.registrarCiudad( c, acc ) ){
+            response.put("msg", "Error al Actualizar la zona del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 }

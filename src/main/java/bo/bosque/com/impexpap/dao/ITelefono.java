@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 import java.util.List;
 import bo.bosque.com.impexpap.model.Telefono;
+import bo.bosque.com.impexpap.model.TipoTelefono;
 
 public interface ITelefono {
 
@@ -26,4 +27,10 @@ public interface ITelefono {
      * @return
      */
     int obtenerUltimoCodPersona( int audUsuario );
+    /**
+     * Procedimiento para listar los tipo de telefono
+     * @param
+     * @return
+     */
+    List<TipoTelefono> obtenerTipoTelefono();
 }

@@ -45,4 +45,31 @@ public class PaisDao implements IPais {
         }
         return lstTemp;
     }
+    /**
+     * Procedimiento para registrar pais
+     * @param
+     * @param
+     * @return
+     */
+    public boolean registrarPais(Pais pais, String acc ){
+
+        int resp;
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_Pais @codPais=?, @pais=?, @audUsuarioI=?, @ACCION=?",
+                    ps -> {
+                        ps.setInt(1, pais.getCodPais() );
+                        ps.setString(2, pais.getPais() );
+                        ps.setInt(3, pais.getAudUsuario() );
+                        ps.setString(4, acc);
+                        //ps.executeUpdate();
+                    });
+
+
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: PaisDao en registrarPais, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+        return resp != 0;
+    }
 }

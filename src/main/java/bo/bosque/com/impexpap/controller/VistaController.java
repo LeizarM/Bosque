@@ -31,10 +31,12 @@ public class VistaController {
      * @param obj
      * @return JWT
      */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/vistaDinamica")
+        @Secured({ "ROLE_ADM", "ROLE_LIM" })
+        @PostMapping("/vistaDinamica")
     public List<Vista> obtenerMenuDinamico(@RequestBody Login obj) {
         List<Vista> flat = this.vdao.obtainMenuXUser(obj.getCodUsuario());
+
+
 
         // Index por id
         Map<Integer, Vista> byId = new HashMap<>();
@@ -68,6 +70,8 @@ public class VistaController {
                 roots.add(v);
             }
         }
+
+        
 
         // Ordenar recursivamente por título (hijos primero, luego el nivel actual)
         sortTreeByTitle(roots);

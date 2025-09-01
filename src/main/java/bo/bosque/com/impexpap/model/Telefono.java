@@ -12,6 +12,11 @@ public class Telefono {
     private int codPersona;
     private int codTipoTel;
     private String telefono;
+    private String tipo;
     private int audUsuario;
+    // 🔹 Constructor específico para eliminar por codTelefono
+    public Telefono(int codTelefono) {
+        this.codTelefono = codTelefono;
+    }
 
 }

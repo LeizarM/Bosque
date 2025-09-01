@@ -20,13 +20,18 @@ public class GaranteReferencia {
 
     private int audUsuario;
 
+    // 🔹 Constructor específico para eliminar por codGarante
+    public GaranteReferencia(int codGarante) {
+        this.codGarante = codGarante;
+    }
     /**
      * Variables de apoyo
      */
-
+    //private Persona persona = new Persona();
     private String esEmpleado;
     private String nombreCompleto;
     private String direccionDomicilio;
+    private String telefonos;
 
 
 }
