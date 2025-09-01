@@ -135,14 +135,9 @@ public class GaranteReferenciaDao implements IGaranteReferencia {
         return jdbcTemplate.queryForObject(sql, new Object[]{codPersona}, Integer.class);
     }
 
-    @Override
     public boolean existeGaranteTipo(int codPersona, int codEmpleado, String tipo) {
-        return false;
-    }
-
-    public boolean existeGaranteTipo(int codPersona, int codEmpleado) {
-        String sql = "SELECT COUNT(*) FROM trh_garanteReferencia WHERE codPersona = ? AND codEmpleado = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[]{codPersona, codEmpleado}, Integer.class) > 0;
+        String sql = "SELECT COUNT(*) FROM trh_garanteReferencia WHERE codPersona = ? AND codEmpleado = ? AND tipo = ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{codPersona, codEmpleado, tipo}, Integer.class) > 0;
     }
 
 
