@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bo.bosque.com.impexpap.utils.Tipos;
-import org.exolab.castor.mapping.xml.Sql;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
