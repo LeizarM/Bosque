@@ -1,17 +1,9 @@
 package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.exolab.castor.mapping.xml.Sql;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.relational.core.sql.SQL;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.object.SqlQuery;
 import org.springframework.stereotype.Repository;
-
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
