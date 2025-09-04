@@ -301,29 +301,23 @@ public class FichaTrabajadorController {
      * @return
      */
     @PostMapping("/pdf")
-    public ResponseEntity<?> exportPDF(@RequestBody Empleado emp)  {
-
+    public ResponseEntity<?> exportPDF(@RequestBody Empleado emp) {
         String nombreReporte = "RptFichaTrabajador";
-
-
-        try{
+        try {
             Map<String, Object> params = new HashMap<>();
-            params.put("codEmpleado", emp.getCodEmpleado()  );
-            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDF( nombreReporte, params);
-
+            params.put("codEmpleado", emp.getCodEmpleado());
+            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic(nombreReporte, params);
 
             HttpHeaders headers = new HttpHeaders();
-            //set the PDF format
             headers.setContentLength(reportBytes.length);
             headers.setContentType(MediaType.APPLICATION_PDF);
 
-            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
-        } catch(Exception e) {
-            System.out.println(e.getCause()+" msg:  "+e.getMessage());
+            return new ResponseEntity<>(reportBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-
     }
     /**
      * Procedimiento para obtener lista de empleados y cantidad de dependientes
@@ -356,15 +350,7 @@ public class FichaTrabajadorController {
         return lstTemp;
 
     }
-    /*
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/obtenerInfoEmp")
-    public List<Empleado>obtenerInfoEmpleado(){
-        List<Empleado>lstTemp=this.empleadoDao.obtenerInfoEmp();
-        if (lstTemp.size()==0)return new ArrayList<>();
-        return lstTemp;
 
-    }*/
 
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/obtenerDatosEmp")
