@@ -64,6 +64,7 @@ public class ContenedorDao implements IContenedor{
                         temp.setIdTipo(rs.getInt(7));
                         temp.setNombreSucursal(rs.getString(8));
                         temp.setSaldoActualCombustible(rs.getFloat(9));
+                        temp.setCodCiudad(rs.getInt(10));
 
 
                         return temp;

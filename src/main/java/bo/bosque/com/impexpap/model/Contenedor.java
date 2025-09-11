@@ -26,4 +26,5 @@ public class Contenedor implements Serializable {
     private String clase;
     private float saldoActualCombustible;
     private String nombreSucursal;
+    private int codCiudad;
 }
