@@ -33,4 +33,17 @@ public class Movimiento implements Serializable {
     private int idCompraGarrafa;
     private int audUsuario;
 
+
+    private String fechaMovimientoString;
+    private String origen;
+    private String destino;
+    private String nombreCompleto;
+
+    private Date fechaInicio;
+    private Date fechaFin;
+    private int idTipo;
+    private String nombreSucursal;
+    private String tipo;
+    private String nombreCoche;
+
 }

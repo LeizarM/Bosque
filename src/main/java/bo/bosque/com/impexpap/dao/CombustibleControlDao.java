@@ -35,7 +35,7 @@ public class CombustibleControlDao implements ICombustibleControl {
                     "@obs = ?,"+
                     "@litros = ?,"+
                     "@tipoCombustible = ?,"+
-                    "@idCM = ?,"+
+                    "@idMovimiento = ?,"+
                     "@audUsuario = ?, " +
                     "@ACCION = ?";
 
@@ -71,7 +71,7 @@ public class CombustibleControlDao implements ICombustibleControl {
                 ps.setString(11, mb.getObs());
                 ps.setFloat(12, mb.getLitros());
                 ps.setString(13, mb.getTipoCombustible() );
-                ps.setInt(14, mb.getIdCM());
+                ps.setInt(14, mb.getIdMovimiento());
                 ps.setInt(15, mb.getAudUsuario());
                 ps.setString(16, acc);
             });
@@ -139,7 +139,7 @@ public class CombustibleControlDao implements ICombustibleControl {
                         temp.setDiferencia(rs.getFloat(9));
                         temp.setTipoCombustible(rs.getString(10));
                         temp.setObs(rs.getString(11));
-                        temp.setIdCM((int) rs.getLong(12));
+                        temp.setIdMovimiento((int) rs.getLong(12));
                         temp.setNroFactura(rs.getString(13));
                         temp.setEstacionServicio(rs.getString(14));
                         temp.setNombreCompleto(rs.getString(15));

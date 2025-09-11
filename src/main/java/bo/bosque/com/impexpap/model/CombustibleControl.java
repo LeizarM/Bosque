@@ -25,7 +25,7 @@ public class CombustibleControl implements Serializable {
     private String obs;
     private float litros;
     private String tipoCombustible;
-    private int idCM;
+    private int idMovimiento;
     private int audUsuario;
 
 
