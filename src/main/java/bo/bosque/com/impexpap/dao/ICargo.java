@@ -10,5 +10,12 @@ public interface ICargo {
      * @param codEmpresa
      * @return
      */
-    List<Cargo> obtenerCargoXEmpresa(int codEmpresa );
+    List<Cargo> obtenerCargoXEmpresa( int codEmpresa );
+
+    /**
+     * Obtendra los cargos por empresa pero de forma mas informativa
+     * @param codEmpresa
+     * @return
+     */
+    List<Cargo> obtenerCargoXEmpresaNew ( int codEmpresa );
 }
