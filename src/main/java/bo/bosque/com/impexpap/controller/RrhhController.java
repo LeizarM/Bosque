@@ -1,23 +1,33 @@
 package bo.bosque.com.impexpap.controller;
+import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Tipos;
 import bo.bosque.com.impexpap.utils.Utiles;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/rrhh")
 public class RrhhController {
+
+    private static final String SUCCESS_MESSAGE = "Operación realizada exitosamente";
+    private static final String ERROR_MESSAGE = "Error en la solicitud";
+
+    private JdbcTemplate jdbcTemplate;
+
 
     private final IEmpleado empDao;
     private final IPersona perDao;
@@ -35,7 +45,12 @@ public class RrhhController {
     private final IRelEmpEmpr reeDao;
 
 
-    public RrhhController(IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao) {
+    private final IEmpresa empresaDao;
+    private final ICargo cargoDao;
+
+    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao,  IEmpresa empresaDao, ICargo cargoDao) {
+        this.jdbcTemplate = jdbcTemplate;
+
         this.emailDao   = emailDao;
         this.telfDao    = telfDao;
         this.empDao     = empDao;
@@ -50,6 +65,8 @@ public class RrhhController {
         this.zonaDao     = zonaDao;
         this.sucDao      = sucDao;
         this.cagoSucDao  = cagoSucDao;
+        this.empresaDao = empresaDao;
+        this.cargoDao = cargoDao;
     }
 
 
@@ -782,4 +799,201 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    @PostMapping("/pdfDependientes")
+    public ResponseEntity<?> exportPDFDependientesEdad()  {
+
+        String nombreReporte = "RptDependientesPorEdad";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+    /**
+     * PARA GENERAR REPORTES DEPENDIENTES SOLO HIJOS
+     */
+    /**
+     * Procedimiento para exportar PDF de dependientes menores a 12 años
+     * @param emp
+     * @return
+     */
+    @PostMapping("/pdfDependientesHijos")
+    public ResponseEntity<?> exportPDFDependientesHijos()  {
+
+        String nombreReporte = "RptDependientesGeneral";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
+    /**
+     * =====================================================================
+     * Sub Modulo para la Estructura Orzanizacional y Creacion de Empresas
+     * =====================================================================
+     * */
+
+
+    /**
+     * Obtiene todos las empresas registradas en el sistema.
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lst-empresas")
+    public ResponseEntity<?> obtenerEmpresas() {
+        try {
+            List<Empresa> empresas = empresaDao.obtenerEmpresas();
+
+            if (empresas.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron empresas");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, empresas, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Obtendra la estructura organigrama de una empresa con variables de informacion personalizada.
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstOrganigramaNew")
+    public ResponseEntity<?> obtenerOrganigramaXEmpresa( @RequestBody Empresa empresa ) {
+
+        try {
+            List<Cargo> cargos = cargoDao.obtenerCargoXEmpresaNew(empresa.getCodEmpresa());
+
+            if (cargos == null || cargos.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT,
+                        "No se encontraron cargos para la empresa seleccionada");
+            }
+
+            // 1. Crear mapa para acceso rápido a TODOS los cargos
+            Map<Integer, Cargo> mapaCargos = new HashMap<>();
+            for (Cargo cargo : cargos) {
+                mapaCargos.put(cargo.getCodCargo(), cargo);
+            }
+
+            // 2. Ordenar TODOS los cargos por nivel y posición
+            cargos.sort((c1, c2) -> {
+                int cmpNivel = Integer.compare(c1.getNivel(), c2.getNivel());
+                return cmpNivel != 0 ? cmpNivel : Integer.compare(c1.getPosicion(), c2.getPosicion());
+            });
+
+            // 3. Construir jerarquía COMPLETA - TODOS los cargos se conectan
+            for (Cargo cargo : cargos) {
+                if (cargo.getCodCargoPadre() != 0) {
+                    Cargo padre = mapaCargos.get(cargo.getCodCargoPadre());
+                    if (padre != null) {
+                        // Inicializar lista si es necesario
+                        if (padre.getItems() == null) {
+                            padre.setItems(new ArrayList<>());
+                        }
+                        // Agregar hijo INDEPENDIENTE de su estado o visibilidad
+                        padre.getItems().add(cargo);
+                    }
+                }
+            }
+
+            // 4. Obtener TODAS las raíces (codCargoPadre = 0)
+            List<Cargo> raices = new ArrayList<>();
+            for (Cargo cargo : cargos) {
+                if (cargo.getCodCargoPadre() == 0) {
+                    raices.add(cargo);
+                }
+            }
+
+            // 5. Ordenar raíces por posición
+            raices.sort((c1, c2) -> Integer.compare(c1.getPosicion(), c2.getPosicion()));
+
+            // 6. Ordenar recursivamente TODOS los hijos
+            for (Cargo raiz : raices) {
+                ordenarHijos(raiz);
+            }
+
+            if (raices.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT,
+                        "No se encontraron cargos raíz para la empresa seleccionada");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, raices, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            System.out.println("Error obteniendo organigrama: " + e.getMessage());
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+    }
+
+    /**
+     * Método auxiliar para ordenar TODOS los hijos recursivamente
+     */
+    private void ordenarHijos(Cargo cargo) {
+        if (cargo.getItems() != null && !cargo.getItems().isEmpty()) {
+            // Ordenar TODOS los hijos por posición
+            cargo.getItems().sort((c1, c2) -> Integer.compare(c1.getPosicion(), c2.getPosicion()));
+
+            // Recursivamente ordenar hijos de los hijos
+            for (Cargo hijo : cargo.getItems()) {
+                ordenarHijos(hijo);
+            }
+        }
+    }
+
+
+    private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {
+        String errorMsg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();
+        return ResponseEntity.badRequest()
+                .body(new ApiResponse<>(ERROR_MESSAGE, errorMsg, HttpStatus.BAD_REQUEST.value()));
+    }
+
+    private ResponseEntity<ApiResponse<?>> buildErrorResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(message, null, status.value()));
+    }
+
+    private ResponseEntity<ApiResponse<?>> buildSuccessResponse(HttpStatus status, String message) {
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(message, null, status.value()));
+    }
+
+
 }

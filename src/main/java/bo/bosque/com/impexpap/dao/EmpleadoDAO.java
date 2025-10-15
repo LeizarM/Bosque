@@ -173,24 +173,24 @@ public class EmpleadoDAO implements IEmpleado{
      * Procedimiento para obtener emplado y dependientes
      * @return
      */
-    public List<Empleado> obtenerListaEmpleadoyDependientes() {
+    public List<Empleado> obtenerListaEmpleadoyDependientes(int codEmpleado) {
         List<Empleado> lstTemp;
         try{
-        lstTemp = this.jdbcTemplate.query(
-                "execute p_list_Empleado @ACCION=?",
-                new Object[]{"P"},
-                new int[]{Types.VARCHAR},
-                (rs, rowNum) -> {
-                    Empleado temp = new Empleado();
-                    temp.setCodEmpleado(rs.getInt("codEmpleado"));
-                    temp.getPersona().setDatoPersona(rs.getString("NombreCompleto"));
-                    temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString("CargoActual"));
-                    temp.getDependiente().setCodEmpleado(rs.getInt("Dependientes"));
-                    temp.getEmpresa().setNombre(rs.getString("Empresa"));
-                    temp.getSucursal().setNombre(rs.getString("Sucursal"));
-                    temp.getRelEmpEmpr().setEsActivo(rs.getInt("esActivo"));
-                    return temp;
-                });
+            lstTemp = this.jdbcTemplate.query(
+                    "execute p_list_Empleado @codEmpleado=?, @ACCION=?",
+                    new Object[]{codEmpleado,"X"},
+                    new int[]{Types.INTEGER,Types.VARCHAR},
+                    (rs, rowNum) -> {
+                        Empleado temp = new Empleado();
+                        temp.setCodEmpleado(rs.getInt("codEmpleado"));
+                        temp.getPersona().setDatoPersona(rs.getString("NombreCompleto"));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString("CargoActual"));
+                        temp.getDependiente().setCodEmpleado(rs.getInt("Dependientes"));
+                        temp.getEmpresa().setNombre(rs.getString("Empresa"));
+                        temp.getSucursal().setNombre(rs.getString("Sucursal"));
+                        temp.getRelEmpEmpr().setEsActivo(rs.getInt("esActivo"));
+                        return temp;
+                    });
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerListaEmpleadoyDependientes,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();

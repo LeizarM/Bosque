@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subRptFormacion" pageWidth="570" pageHeight="200" columnWidth="570" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2a5baaac-e59b-46a9-a809-67b2c33fe0f2">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE2PRUEBA"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -17,15 +17,19 @@
 		<![CDATA[execute p_list_Formacion @codEmpleado = $P{codEmpleado}  , @ACCION='R']]>
 	</queryString>
 	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
 	</field>
 	<field name="duracionCompleta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="duracionCompleta"/>
 		<property name="com.jaspersoft.studio.field.label" value="duracionCompleta"/>
 	</field>
 	<field name="tipoFormacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipoFormacion"/>
 		<property name="com.jaspersoft.studio.field.label" value="tipoFormacion"/>
 	</field>
 	<field name="fechaFormacion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="fechaFormacion"/>
 		<property name="com.jaspersoft.studio.field.label" value="fechaFormacion"/>
 	</field>
 	<background>

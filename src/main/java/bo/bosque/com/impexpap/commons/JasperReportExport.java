@@ -63,9 +63,9 @@ public class JasperReportExport {
 
             // Compilando subreportes (con chequeo de null)
             logger.info("Compilando subreportes...");
-            InputStream subStream = getClass().getResourceAsStream("/reports/subRptDependientes.jrxml");  // Asegura path completo
+            InputStream subStream = getClass().getResourceAsStream("/reports/subRptDependiente.jrxml");  // Asegura path completo
             if (subStream == null) {
-                throw new RuntimeException("Subreporte no encontrado: /reports/subRptDependientes.jrxml");
+                throw new RuntimeException("Subreporte no encontrado: /reports/subRptDependiente.jrxml");
             }
             JasperReport subRptDependientes = JasperCompileManager.compileReport(subStream);
             params.put("subRptDependientes", subRptDependientes);

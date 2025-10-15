@@ -13,9 +13,7 @@ import java.util.stream.Stream;
 
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.*;
-import bo.bosque.com.impexpap.model.Email;
-import bo.bosque.com.impexpap.model.Empleado;
-import bo.bosque.com.impexpap.model.GaranteReferencia;
+import bo.bosque.com.impexpap.model.*;
 
 import bo.bosque.com.impexpap.utils.Tipos;
 import org.springframework.core.io.Resource;
@@ -29,7 +27,6 @@ import org.springframework.security.access.annotation.Secured;
 
 import org.springframework.web.bind.annotation.*;
 
-import bo.bosque.com.impexpap.model.Dependiente;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -179,38 +176,45 @@ public class FichaTrabajadorController {
      * @return
      */
     @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @RequestParam("codEmpleado") int codEmpleado ){
-
+    public ResponseEntity<Map<String, Object>> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("codEmpleado") int codEmpleado
+    ) {
         Map<String, Object> response = new HashMap<>();
-        //obtener datos de persona ??
-        if(!file.isEmpty()){
 
-            String nombreArchivo = file.getOriginalFilename().replace(file.getOriginalFilename(),  String.valueOf(codEmpleado) +".jpg");// y de paso renombramos el archivo
-
-            Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
-            File archivoFotoAnterior = rutaFotoAnterior.toFile();
-
-            if(archivoFotoAnterior.exists() || archivoFotoAnterior.canRead()) {
-                archivoFotoAnterior.delete();
-            }
-
-
-            Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
-
-            try {
-                Files.copy(file.getInputStream(), rutaArchivo);
-
-
-
-            } catch (IOException e) {
-                response.put("msg", "Error al subir la imagen "+e.getMessage());
-                response.put("ok", "error");
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-
+        if (file.isEmpty()) {
+            response.put("msg", "Debe seleccionar una imagen.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        // Configuración de la ruta de pendientes, reutilizando tu estructura:
+        final String TIPO_DOCUMENTO = "foto_perfil";
+        final String nombreArchivo = String.valueOf(codEmpleado) + ".jpg"; // Nombre final deseado
+
+        // RUTA COMPLETA DE PENDIENTES: uploads/pendientes/{codEmpleado}/foto_perfil/{codEmpleado}.jpg
+        Path rutaCarpetaBase = Paths.get("uploads", "pendientes", String.valueOf(codEmpleado), TIPO_DOCUMENTO);
+        Path rutaArchivoPendiente = rutaCarpetaBase.resolve(nombreArchivo).toAbsolutePath();
+
+        try {
+            // Crear las carpetas (uploads/pendientes/123/foto_perfil) si no existen
+            Files.createDirectories(rutaCarpetaBase);
+
+            // Guardar el archivo en la carpeta de PENDIENTES (reemplazando cualquier pendiente anterior)
+            Files.copy(
+                    file.getInputStream(),
+                    rutaArchivoPendiente,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+            response.put("msg", "Foto subida y pendiente de aprobación.");
+            response.put("ok", true);
+            return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+
+        } catch (IOException e) {
+            response.put("msg", "Error al subir la imagen a pendientes: " + e.getMessage());
+            response.put("ok", false);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -300,6 +304,11 @@ public class FichaTrabajadorController {
      * @param emp
      * @return
      */
+    /**
+     * Procedimiento para exportar a pdf
+     * @param emp
+     * @return
+     */
     @PostMapping("/pdf")
     public ResponseEntity<?> exportPDF(@RequestBody Empleado emp) {
         String nombreReporte = "RptFichaTrabajador";
@@ -327,10 +336,10 @@ public class FichaTrabajadorController {
 
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/obtenerDep")
-    public List<Empleado> obtenerDependientes(  ){
+    public List<Empleado> obtenerDependientes(@RequestBody Empleado empleado  ){
+        int emp = empleado.getCodEmpleado();
 
-
-        List<Empleado>lstTemp=this.empleadoDao.obtenerListaEmpleadoyDependientes();
+        List<Empleado>lstTemp=this.empleadoDao.obtenerListaEmpleadoyDependientes(emp);
 
 
         if (lstTemp.size()==0)return new ArrayList<>();
@@ -350,7 +359,15 @@ public class FichaTrabajadorController {
         return lstTemp;
 
     }
+    /*
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerInfoEmp")
+    public List<Empleado>obtenerInfoEmpleado(){
+        List<Empleado>lstTemp=this.empleadoDao.obtenerInfoEmp();
+        if (lstTemp.size()==0)return new ArrayList<>();
+        return lstTemp;
 
+    }*/
 
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/obtenerDatosEmp")
@@ -565,15 +582,39 @@ public class FichaTrabajadorController {
         String nombreArchivo = body.get("nombreArchivo");
 
         Path origen = Paths.get("uploads", "pendientes", codEmpleado, tipoDocumento, nombreArchivo);
-        Path destinoDir = Paths.get("uploads", "documentos", codEmpleado, tipoDocumento);
-        Path destino = destinoDir.resolve(nombreArchivo);
+        Path destinoDir;
+        Path destino;
+
+        // **LÓGICA DE MODIFICACIÓN CLAVE AQUÍ**
+        if ("foto_perfil".equalsIgnoreCase(tipoDocumento)) {
+            // Si es la foto de perfil, el destino es la raíz de 'uploads'
+            destinoDir = Paths.get("uploads");
+            destino = destinoDir.resolve(nombreArchivo); // -> uploads/{codEmpleado}.jpg
+        } else {
+            // Para cualquier otro documento, usa el destino original
+            destinoDir = Paths.get("uploads", "documentos", codEmpleado, tipoDocumento);
+            destino = destinoDir.resolve(nombreArchivo);
+        }
+        // **FIN DE LA LÓGICA DE MODIFICACIÓN**
 
         try {
-            Files.createDirectories(destinoDir);
+            // Solo creamos los directorios si no estamos guardando en la raíz de 'uploads'
+            if (!"foto_perfil".equalsIgnoreCase(tipoDocumento)) {
+                Files.createDirectories(destinoDir);
+            }
+
             Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
-            return ResponseEntity.ok().body("Imagen aprobada y movida correctamente");
+
+            // Si es foto de perfil, podríamos querer informar algo diferente
+            String mensaje = "Documento aprobado y movido correctamente";
+            if ("foto_perfil".equalsIgnoreCase(tipoDocumento)) {
+                mensaje = "Foto de perfil aprobada y activada correctamente";
+            }
+
+            return ResponseEntity.ok().body(mensaje);
+
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al mover la imagen: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al mover el archivo: " + e.getMessage());
         }
     }
     /**
@@ -631,8 +672,6 @@ public class FichaTrabajadorController {
 
         return new ResponseEntity<>(recurso, header, HttpStatus.OK);
     }
-
-
-    //comentario test (borrar si ya no se necesita)
+    
 }
 

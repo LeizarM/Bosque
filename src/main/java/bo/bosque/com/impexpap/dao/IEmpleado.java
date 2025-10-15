@@ -36,7 +36,7 @@ public interface IEmpleado {
      * Procedimiento para mostrar lista de empleados y dependientes
      * @return
      */
-    List <Empleado>obtenerListaEmpleadoyDependientes ();
+    List <Empleado>obtenerListaEmpleadoyDependientes (int codEmpleado);
     /**
      * Procedimiento para mostrar lista de empleados y dependientes
      * @return
