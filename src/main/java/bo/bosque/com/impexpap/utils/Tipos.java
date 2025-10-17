@@ -190,6 +190,7 @@ public class Tipos {
         listaTemp.add(new Tipos("pad","Padre",5));
         listaTemp.add(new Tipos("mad","Madre",5));
         listaTemp.add(new Tipos("ben","Beneficiario(a)",5));
+        listaTemp.add(new Tipos("cony","Cónyuge",5));
         return listaTemp;
     }
     /**
