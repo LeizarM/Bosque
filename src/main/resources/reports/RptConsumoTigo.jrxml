@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ConsumoTigoAgrupado" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8464a8a2-a7bb-4696-a073-17cf7b1d88f6">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="523"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="464"/>
+	<parameter name="periodoCobrado" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\proyecto\\backend\\src\\main\\resources\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[execute p_list_tTigo_ejecutado @periodoCobrado=$P{periodoCobrado}, @ACCION='B']]>
+	</queryString>
+	<field name="nombreCompleto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nombreCompleto"/>
+		<property name="com.jaspersoft.studio.field.label" value="nombreCompleto"/>
+	</field>
+	<field name="totalCobradoXCuenta" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="totalCobradoXCuenta"/>
+		<property name="com.jaspersoft.studio.field.label" value="totalCobradoXCuenta"/>
+	</field>
+	<group name="GrupoPorNombre">
+		<groupExpression><![CDATA[$F{nombreCompleto}]]></groupExpression>
+	</group>
+	<group name="Group1756">
+		<groupExpression><![CDATA[$F{totalCobradoXCuenta}]]></groupExpression>
+	</group>
+	<title>
+		<band height="56">
+			<staticText>
+				<reportElement x="110" y="0" width="370" height="56" uuid="7248301e-39f3-4938-a7c7-c1db01b43a73"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CONSUMO TIGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="480" y="28" width="90" height="28" uuid="dfa786b5-0d8d-4c81-9392-4944cbef4e22"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Version Nº 1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="110" height="56" uuid="a5efcf96-4760-4b50-b3fd-31a71a50ba7b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="480" y="0" width="90" height="28" uuid="ba0e270a-8293-4387-b626-1c31c57ff5d4"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="480" y="2" width="90" height="24" uuid="c60bf319-12d9-40ef-bacd-9a62571990ef"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{periodoCobrado}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageFooter>
+		<band height="40">
+			<textField>
+				<reportElement x="260" y="10" width="100" height="30" uuid="3f6a60b4-b310-41e0-af62-1228d63d8097"/>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="321">
+			<subreport overflowType="Stretch">
+				<reportElement x="0" y="30" width="550" height="80" uuid="aa234588-398f-4e77-803d-7f3253802408"/>
+				<subreportParameter name="periodoCobrado">
+					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RESUMENDETALLE.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport overflowType="Stretch">
+				<reportElement isPrintRepeatedValues="false" x="0" y="130" width="549" height="90" uuid="eedb4530-3dcd-4851-8cba-ff2908ba12c7"/>
+				<subreportParameter name="periodoCobrado">
+					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "TOTALCOBRADOXCUENTA.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="116" width="100" height="1" uuid="ec05ea43-4d46-4937-9226-15694d9bf606"/>
+			</break>
+			<subreport>
+				<reportElement x="0" y="230" width="549" height="80" uuid="79a510f1-4844-4605-aaff-29ec730d9014"/>
+				<subreportParameter name="periodoCobrado">
+					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptResumenDetallado.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="320" width="97" height="1" uuid="fff2200d-f4a4-4632-8048-0ea62b0a6149"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="46ea822b-9cbb-46cf-81d6-63f42764bab6"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="d380fa56-9792-40cb-853c-954f6d90d481"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="52f7c256-49c3-4bbb-8c8b-839e58c5085b"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="b57e93dc-3af8-4162-a512-a5ac0d0d1997"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="25be6a90-7785-43b5-91db-945e37956a0b"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="60b36f15-edd8-4a51-8984-f0d92f532ac9"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="b2f5a951-dc5e-4313-9520-d0334e6588fb"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="926f4535-4406-4d6f-9f94-f8dd32737e5f"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="a5d01baa-37be-476a-9ff6-dec2ad950ead"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="f3192752-829a-4d86-988c-6fecad08ee8b"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="35a62693-09dd-4735-94dd-bd95141286ce"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="25a219ea-1e5a-49c6-a9c2-02f1856f7d22"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="a999fd6d-546f-4bbb-b7f6-9bff2c38be8a"/>
+			</break>
+			<break>
+				<reportElement x="0" y="229" width="100" height="1" uuid="e7235e36-c993-46e4-8598-f3d5da937571"/>
+			</break>
+			<break>
+				<reportElement x="0" y="223" width="100" height="1" uuid="bb9700ea-aef8-474d-88a0-a97705a82743"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="cc942747-d108-4ebc-adeb-739c0a2acd39"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="fa42360d-1cbf-45ba-bdd5-59f5bc9e9809"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="cf0af045-2b4a-48eb-a080-eddb85012a59"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="4f79e790-4e1e-46d4-8f94-3dd38d15f883"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="23fd2e1d-b356-4b22-a2d1-7bdc2249e89b"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="b0b971e8-5917-4659-8eb7-ce8476d119b8"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="66b590e8-1dc6-44dd-a4ae-f6be49ae629e"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="7d173132-132c-48b0-abe1-9ee819387b36"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="1ac599fc-83c1-41b7-8ea6-463dea4f3872"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="e5718e65-3914-4134-aa66-7aa222336f69"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="9bbe89ae-6156-45c5-ba48-d1d8e2fb8a74"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="fa9a89f0-58b0-487b-bcc8-93c64fed21cd"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="fbaba894-3f60-4e0a-9dd6-e1a1b411fdf3"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="5c3a3f30-66eb-49c2-8e12-4d8b4b045f9e"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="77d702f9-5a9e-47ec-8510-3b08d0d06d66"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="66d5c033-c5ea-4a78-8a15-ddd967f28e5c"/>
+			</break>
+			<break>
+				<reportElement x="0" y="228" width="100" height="1" uuid="20e87897-22f0-4762-9359-bf48fb52cb1a"/>
+			</break>
+		</band>
+	</summary>
+</jasperReport>
