@@ -54,9 +54,10 @@ public class PersonaDao implements IPersona {
                         temp.getCiudad().setCiudad(rs.getString(18));
 
                         temp.getPais().setCodPais(rs.getInt(19));
-                        temp.setLat(rs.getFloat(20));
-                        temp.setLng(rs.getFloat(21));
-                        temp.setAudUsuarioI(rs.getInt(22));
+                        temp.getPais().setPais(rs.getString(20));
+                        temp.setLat(rs.getFloat(21));
+                        temp.setLng(rs.getFloat(22));
+                        temp.setAudUsuarioI(rs.getInt(23));
                         return temp;
                     });
 
