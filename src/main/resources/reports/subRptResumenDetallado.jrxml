@@ -86,7 +86,7 @@
 		<groupHeader>
 			<band height="20">
 				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="572" height="20" backcolor="#A69C9C" uuid="c5c45770-8a59-4345-a2e4-966279ac7428">
+					<reportElement mode="Opaque" x="0" y="0" width="568" height="20" backcolor="#A69C9C" uuid="c5c45770-8a59-4345-a2e4-966279ac7428">
 						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d23a1c5c-0172-48ce-a222-429413b9b459"/>
 					</reportElement>
 					<box>
@@ -102,7 +102,7 @@
 		<groupFooter>
 			<band height="20">
 				<textField pattern="#,##0.00">
-					<reportElement mode="Opaque" x="420" y="0" width="50" height="20" backcolor="#88CFAE" uuid="8c5639fd-fbdd-42bf-866a-841c1bbd378b"/>
+					<reportElement mode="Opaque" x="400" y="0" width="50" height="20" backcolor="#88CFAE" uuid="8c5639fd-fbdd-42bf-866a-841c1bbd378b"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -115,7 +115,7 @@
 					<textFieldExpression><![CDATA[$V{SUMA}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00">
-					<reportElement mode="Opaque" x="470" y="0" width="50" height="20" backcolor="#88CFAE" uuid="ce308a83-17b2-4eef-aaba-01fe83306680"/>
+					<reportElement mode="Opaque" x="450" y="0" width="60" height="20" backcolor="#88CFAE" uuid="ce308a83-17b2-4eef-aaba-01fe83306680"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -128,7 +128,7 @@
 					<textFieldExpression><![CDATA[$V{suma_montoEmpresa}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement mode="Opaque" x="140" y="0" width="280" height="20" backcolor="#88CFAE" uuid="249337c3-5d86-4a3a-bc52-f8746bebf527">
+					<reportElement mode="Opaque" x="140" y="0" width="260" height="20" backcolor="#88CFAE" uuid="249337c3-5d86-4a3a-bc52-f8746bebf527">
 						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="496fe3ea-3708-4e2f-8140-000749a06c07"/>
 					</reportElement>
 					<box>
@@ -143,7 +143,7 @@
 					<textFieldExpression><![CDATA["TOTAL  EMPRESA:  " +$F{empresa}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00">
-					<reportElement mode="Opaque" x="520" y="0" width="52" height="20" backcolor="#88CFAE" uuid="9d6d4abe-7fb8-48dc-9f4f-0b74172b23fd"/>
+					<reportElement mode="Opaque" x="510" y="0" width="58" height="20" backcolor="#88CFAE" uuid="9d6d4abe-7fb8-48dc-9f4f-0b74172b23fd"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -163,7 +163,7 @@
 		<groupFooter>
 			<band height="20">
 				<textField>
-					<reportElement mode="Opaque" x="140" y="0" width="280" height="20" backcolor="#FF5770" uuid="9fc8ab13-b6c6-421a-80fc-76eac29a4cf1">
+					<reportElement mode="Opaque" x="140" y="0" width="260" height="20" backcolor="#FF5770" uuid="9fc8ab13-b6c6-421a-80fc-76eac29a4cf1">
 						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="496fe3ea-3708-4e2f-8140-000749a06c07"/>
 					</reportElement>
 					<box>
@@ -178,7 +178,7 @@
 					<textFieldExpression><![CDATA["TOTAL  " +$F{nombreCompleto}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00">
-					<reportElement mode="Opaque" x="420" y="0" width="50" height="20" backcolor="#FF5770" uuid="086d1e69-9777-4880-b52f-a89a14cc2150"/>
+					<reportElement mode="Opaque" x="400" y="0" width="50" height="20" backcolor="#FF5770" uuid="086d1e69-9777-4880-b52f-a89a14cc2150"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -189,7 +189,7 @@
 					<textFieldExpression><![CDATA[$V{TOTAL X CUENTA}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00">
-					<reportElement mode="Opaque" x="520" y="0" width="52" height="20" backcolor="#FF5770" uuid="f5944d31-02ca-448b-8a69-2706f63fe940"/>
+					<reportElement mode="Opaque" x="510" y="0" width="58" height="20" backcolor="#FF5770" uuid="f5944d31-02ca-448b-8a69-2706f63fe940"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -200,7 +200,7 @@
 					<textFieldExpression><![CDATA[$V{MONTO X EMPLEADO}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00">
-					<reportElement mode="Opaque" x="470" y="0" width="50" height="20" backcolor="#FF5770" uuid="a430d870-8f3f-455f-b3ff-916e2857f39b"/>
+					<reportElement mode="Opaque" x="450" y="0" width="60" height="20" backcolor="#FF5770" uuid="a430d870-8f3f-455f-b3ff-916e2857f39b"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -260,7 +260,7 @@
 				<text><![CDATA[NOMBRE COMPLETO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="290" y="30" width="130" height="27" uuid="8686310a-bf4d-4595-9501-c39554ef02fd">
+				<reportElement x="290" y="30" width="110" height="27" uuid="8686310a-bf4d-4595-9501-c39554ef02fd">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dda09ebd-3b5f-42de-88df-3dddad7a532c"/>
 				</reportElement>
 				<box>
@@ -275,7 +275,7 @@
 				<text><![CDATA[DESCRIPCION]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="420" y="30" width="50" height="27" uuid="ae61ced2-031d-45f0-adea-a71a3f5428b3">
+				<reportElement x="400" y="30" width="50" height="27" uuid="ae61ced2-031d-45f0-adea-a71a3f5428b3">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1fea84a9-65c9-4b09-882a-8cfdff1ef9e8"/>
 				</reportElement>
 				<box>
@@ -290,7 +290,7 @@
 				<text><![CDATA[MONTO POR CUENTA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="470" y="30" width="50" height="27" uuid="a7ac7bf0-95c0-49de-87b0-9a6f446f50e0">
+				<reportElement x="450" y="30" width="60" height="27" uuid="a7ac7bf0-95c0-49de-87b0-9a6f446f50e0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1d575b74-fc9a-4d1d-8b7d-db0cfb6b6511"/>
 				</reportElement>
 				<box>
@@ -305,7 +305,7 @@
 				<text><![CDATA[MONTO POR EMPRESA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="520" y="30" width="52" height="27" uuid="6899abf5-596c-4e30-85a7-6798b86165b0">
+				<reportElement x="510" y="30" width="58" height="27" uuid="6899abf5-596c-4e30-85a7-6798b86165b0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="11925816-33a0-42f9-8bc4-65b5ce70fbbb"/>
 				</reportElement>
 				<box>
@@ -367,7 +367,7 @@
 				<textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="290" y="0" width="130" height="20" uuid="6f3951f3-593c-4c8d-8395-84ed049cc2cf">
+				<reportElement x="290" y="0" width="110" height="20" uuid="6f3951f3-593c-4c8d-8395-84ed049cc2cf">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9334bd0a-b199-4dfb-a8c0-f569ec57d8a7"/>
 				</reportElement>
 				<box>
@@ -380,7 +380,7 @@
 				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00">
-				<reportElement x="420" y="0" width="50" height="20" uuid="f907e90b-0854-4fe0-8673-93b3bca5a521">
+				<reportElement x="400" y="0" width="50" height="20" uuid="f907e90b-0854-4fe0-8673-93b3bca5a521">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="edd56319-9496-46b3-aa33-58b79926df0c"/>
 				</reportElement>
 				<box>
@@ -393,7 +393,7 @@
 				<textFieldExpression><![CDATA[$F{totalCobradoporCuenta}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00">
-				<reportElement x="470" y="0" width="50" height="20" uuid="713fd331-8c0f-426e-9074-6bbdb35ba0dd">
+				<reportElement x="450" y="0" width="60" height="20" uuid="713fd331-8c0f-426e-9074-6bbdb35ba0dd">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0d400414-b829-4175-9abe-21c3ebcc394f"/>
 				</reportElement>
 				<box>
@@ -406,7 +406,7 @@
 				<textFieldExpression><![CDATA[$F{montoCubiertoEmpresa}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00">
-				<reportElement x="517" y="0" width="52" height="20" uuid="087536e2-1282-4bde-bab2-00627e7d07f2">
+				<reportElement x="510" y="0" width="58" height="20" uuid="087536e2-1282-4bde-bab2-00627e7d07f2">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a02cbdd2-89d0-4cfd-bdae-6b723a2f3835"/>
 				</reportElement>
 				<box>
@@ -444,7 +444,7 @@
 	<summary>
 		<band height="20">
 			<staticText>
-				<reportElement mode="Opaque" x="140" y="0" width="280" height="20" backcolor="#2EB4F2" uuid="6d62255a-e937-4b38-9c47-3e1c365af342"/>
+				<reportElement mode="Opaque" x="140" y="0" width="260" height="20" backcolor="#2EB4F2" uuid="6d62255a-e937-4b38-9c47-3e1c365af342"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -455,7 +455,7 @@
 				<text><![CDATA[TOTAL GENERAL]]></text>
 			</staticText>
 			<textField pattern="#,##0.00">
-				<reportElement mode="Opaque" x="420" y="0" width="50" height="20" backcolor="#2EB4F2" uuid="d5bf04a6-cb8a-4a1b-85e8-f9c40a93d0e7"/>
+				<reportElement mode="Opaque" x="400" y="0" width="50" height="20" backcolor="#2EB4F2" uuid="d5bf04a6-cb8a-4a1b-85e8-f9c40a93d0e7"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -466,7 +466,7 @@
 				<textFieldExpression><![CDATA[$V{totalGeneral}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00">
-				<reportElement mode="Opaque" x="470" y="0" width="50" height="20" backcolor="#2EB4F2" uuid="6ff1cd9f-2fc6-4ee2-a1ab-b0f262ea9b29"/>
+				<reportElement mode="Opaque" x="450" y="0" width="60" height="20" backcolor="#2EB4F2" uuid="6ff1cd9f-2fc6-4ee2-a1ab-b0f262ea9b29"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -477,7 +477,7 @@
 				<textFieldExpression><![CDATA[$V{totalGeneralEmpresa}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00">
-				<reportElement mode="Opaque" x="520" y="0" width="52" height="20" backcolor="#2EB4F2" uuid="21f40d54-9bed-431c-a29c-9a00fc858ea9"/>
+				<reportElement mode="Opaque" x="510" y="0" width="58" height="20" backcolor="#2EB4F2" uuid="21f40d54-9bed-431c-a29c-9a00fc858ea9"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

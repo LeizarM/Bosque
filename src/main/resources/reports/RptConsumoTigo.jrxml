@@ -27,7 +27,7 @@
 		<groupExpression><![CDATA[$F{totalCobradoXCuenta}]]></groupExpression>
 	</group>
 	<title>
-		<band height="56">
+		<band height="77">
 			<staticText>
 				<reportElement x="110" y="0" width="370" height="56" uuid="7248301e-39f3-4938-a7c7-c1db01b43a73"/>
 				<box>
@@ -89,15 +89,15 @@
 	<pageFooter>
 		<band height="40">
 			<textField>
-				<reportElement x="260" y="10" width="100" height="30" uuid="3f6a60b4-b310-41e0-af62-1228d63d8097"/>
+				<reportElement x="270" y="10" width="100" height="30" uuid="3f6a60b4-b310-41e0-af62-1228d63d8097"/>
 				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="321">
+		<band height="331">
 			<subreport overflowType="Stretch">
-				<reportElement x="0" y="30" width="550" height="80" uuid="aa234588-398f-4e77-803d-7f3253802408"/>
+				<reportElement positionType="Float" x="0" y="30" width="550" height="80" uuid="aa234588-398f-4e77-803d-7f3253802408"/>
 				<subreportParameter name="periodoCobrado">
 					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -116,7 +116,7 @@
 				<reportElement x="0" y="116" width="100" height="1" uuid="ec05ea43-4d46-4937-9226-15694d9bf606"/>
 			</break>
 			<subreport>
-				<reportElement x="0" y="230" width="549" height="80" uuid="79a510f1-4844-4605-aaff-29ec730d9014"/>
+				<reportElement x="0" y="240" width="549" height="80" uuid="79a510f1-4844-4605-aaff-29ec730d9014"/>
 				<subreportParameter name="periodoCobrado">
 					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -124,7 +124,7 @@
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptResumenDetallado.jasper"]]></subreportExpression>
 			</subreport>
 			<break>
-				<reportElement x="0" y="320" width="97" height="1" uuid="fff2200d-f4a4-4632-8048-0ea62b0a6149"/>
+				<reportElement x="0" y="330" width="96" height="1" uuid="fff2200d-f4a4-4632-8048-0ea62b0a6149"/>
 			</break>
 			<break>
 				<reportElement x="0" y="229" width="100" height="1" uuid="46ea822b-9cbb-46cf-81d6-63f42764bab6"/>
@@ -222,6 +222,14 @@
 			<break>
 				<reportElement x="0" y="228" width="100" height="1" uuid="20e87897-22f0-4762-9359-bf48fb52cb1a"/>
 			</break>
+			<subreport>
+				<reportElement positionType="Float" x="0" y="3" width="550" height="17" uuid="469284e7-be6b-4710-926e-2d82ef3b10c9"/>
+				<subreportParameter name="periodoCobrado">
+					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} +"subRptResumenDetalleII.jasper"]]></subreportExpression>
+			</subreport>
 		</band>
 	</summary>
 </jasperReport>
