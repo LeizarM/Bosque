@@ -85,7 +85,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="9" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("MMMM yyyy", $P{REPORT_LOCALE}).format(
+				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("MMMM yyyy", new java.util.Locale("es", "ES")).format(
     new java.text.SimpleDateFormat("yyyy-MM").parse($P{periodoCobrado})
 ).toUpperCase()]]></textFieldExpression>
 			</textField>
