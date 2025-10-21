@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ConsumoTigoAgrupado" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8464a8a2-a7bb-4696-a073-17cf7b1d88f6">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ConsumoTigoAgrupado" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="8464a8a2-a7bb-4696-a073-17cf7b1d88f6">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="523"/>
@@ -20,6 +20,9 @@
 		<property name="com.jaspersoft.studio.field.name" value="totalCobradoXCuenta"/>
 		<property name="com.jaspersoft.studio.field.label" value="totalCobradoXCuenta"/>
 	</field>
+	<variable name="PAGINA_ACTUAL" class="java.lang.Integer" resetType="Page">
+		<variableExpression><![CDATA[$V{PAGE_NUMBER}]]></variableExpression>
+	</variable>
 	<group name="GrupoPorNombre">
 		<groupExpression><![CDATA[$F{nombreCompleto}]]></groupExpression>
 	</group>
@@ -27,7 +30,7 @@
 		<groupExpression><![CDATA[$F{totalCobradoXCuenta}]]></groupExpression>
 	</group>
 	<title>
-		<band height="77">
+		<band height="76">
 			<staticText>
 				<reportElement x="110" y="0" width="370" height="56" uuid="7248301e-39f3-4938-a7c7-c1db01b43a73"/>
 				<box>
@@ -78,26 +81,44 @@
 				<text><![CDATA[]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="480" y="2" width="90" height="24" uuid="c60bf319-12d9-40ef-bacd-9a62571990ef"/>
+				<reportElement x="480" y="2" width="90" height="24" uuid="ab7f4a15-a5a8-4ed0-bb50-3a8353b607d3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
+					<font size="9" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{periodoCobrado}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("MMMM yyyy", $P{REPORT_LOCALE}).format(
+    new java.text.SimpleDateFormat("yyyy-MM").parse($P{periodoCobrado})
+).toUpperCase()]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="12" y="5" width="87" height="47" uuid="49d37503-50cf-44ee-9158-b25b6184da23"/>
+				<imageExpression><![CDATA["D:/proyecto/backend/uploads/logoIPXESP.png"]]></imageExpression>
+			</image>
 		</band>
 	</title>
 	<pageFooter>
-		<band height="40">
+		<band height="45">
 			<textField>
-				<reportElement x="270" y="10" width="100" height="30" uuid="3f6a60b4-b310-41e0-af62-1228d63d8097"/>
-				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<reportElement x="250" y="10" width="57" height="30" uuid="3f6a60b4-b310-41e0-af62-1228d63d8097">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="307" y="10" width="20" height="30" uuid="53fde396-3807-4404-8141-40f025724d09"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
 	<summary>
 		<band height="331">
 			<subreport overflowType="Stretch">
-				<reportElement positionType="Float" x="0" y="30" width="550" height="80" uuid="aa234588-398f-4e77-803d-7f3253802408"/>
+				<reportElement positionType="Float" x="0" y="0" width="550" height="40" uuid="aa234588-398f-4e77-803d-7f3253802408"/>
 				<subreportParameter name="periodoCobrado">
 					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -223,7 +244,7 @@
 				<reportElement x="0" y="228" width="100" height="1" uuid="20e87897-22f0-4762-9359-bf48fb52cb1a"/>
 			</break>
 			<subreport>
-				<reportElement positionType="Float" x="0" y="3" width="550" height="17" uuid="469284e7-be6b-4710-926e-2d82ef3b10c9"/>
+				<reportElement positionType="Float" x="-1" y="50" width="550" height="17" uuid="469284e7-be6b-4710-926e-2d82ef3b10c9"/>
 				<subreportParameter name="periodoCobrado">
 					<subreportParameterExpression><![CDATA[$P{periodoCobrado}]]></subreportParameterExpression>
 				</subreportParameter>

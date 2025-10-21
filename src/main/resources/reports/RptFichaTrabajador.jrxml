@@ -717,7 +717,7 @@
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} +"subRptTelefono.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="57">
+		<band height="57" splitType="Prevent">
 			<subreport>
 				<reportElement x="1" y="3" width="571" height="50" isRemoveLineWhenBlank="true" uuid="46a037d0-a5d2-4469-a479-10dcc11bd14e"/>
 				<subreportParameter name="codEmpleado">

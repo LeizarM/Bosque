@@ -105,7 +105,7 @@
 					<text><![CDATA[ESTADO]]></text>
 				</staticText>
 				<textField>
-					<reportElement x="290" y="0" width="130" height="20" uuid="3118e054-a8d7-4aac-a35e-ed3a8a4cc6bf"/>
+					<reportElement mode="Opaque" x="290" y="0" width="130" height="20" backcolor="#57D46E" uuid="3118e054-a8d7-4aac-a35e-ed3a8a4cc6bf"/>
 					<box>
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
