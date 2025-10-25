@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ICargo {
     /**
-     * \Obtendra los cargos por empresa
+     * Obtendra los cargos por empresa
      * @param codEmpresa
      * @return
      */
@@ -18,4 +18,11 @@ public interface ICargo {
      * @return
      */
     List<Cargo> obtenerCargoXEmpresaNew ( int codEmpresa );
+
+    /**
+     * Registar / Actualizar un cargo
+     * @param cargo
+     * @return
+     */
+    boolean registrarCargo( Cargo cargo, String acc );
 }

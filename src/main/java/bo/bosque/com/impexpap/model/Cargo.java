@@ -51,6 +51,8 @@ public class Cargo implements Serializable {
 
     private int esVisible;
     private List<Cargo> items = new ArrayList<Cargo>();
+    private int codCargoPadreOriginal;
+
 
 
 }

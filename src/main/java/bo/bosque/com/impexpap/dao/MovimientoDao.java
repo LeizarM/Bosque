@@ -1,8 +1,6 @@
 package bo.bosque.com.impexpap.dao;
 
-import bo.bosque.com.impexpap.model.ControCombustibleMaquinaMontacarga;
 import bo.bosque.com.impexpap.model.Movimiento;
-import bo.bosque.com.impexpap.model.TipoContenedor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;

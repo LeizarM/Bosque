@@ -47,8 +47,9 @@ public class RrhhController {
 
     private final IEmpresa empresaDao;
     private final ICargo cargoDao;
+    private final INivelJerarquico nivelJerarquicoDao;
 
-    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao,  IEmpresa empresaDao, ICargo cargoDao) {
+    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao, IEmpresa empresaDao, ICargo cargoDao, INivelJerarquico nivelJerarquicoDao) {
         this.jdbcTemplate = jdbcTemplate;
 
         this.emailDao   = emailDao;
@@ -67,6 +68,7 @@ public class RrhhController {
         this.cagoSucDao  = cagoSucDao;
         this.empresaDao = empresaDao;
         this.cargoDao = cargoDao;
+        this.nivelJerarquicoDao = nivelJerarquicoDao;
     }
 
 
@@ -139,7 +141,6 @@ public class RrhhController {
     }
     /**
      * Procedimiento que obtendra los telefonos de una persona
-     * @param tel
      * @return
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
@@ -799,6 +800,7 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
     @PostMapping("/pdfDependientes")
     public ResponseEntity<?> exportPDFDependientesEdad()  {
 
@@ -830,7 +832,6 @@ public class RrhhController {
      */
     /**
      * Procedimiento para exportar PDF de dependientes menores a 12 años
-     * @param emp
      * @return
      */
     @PostMapping("/pdfDependientesHijos")
@@ -977,6 +978,57 @@ public class RrhhController {
             }
         }
     }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstNivelesJerarquicos")
+    public ResponseEntity<?> obtenerNivelesJerarquicos( ) {
+
+        try {
+            List<NivelJerarquico> niveles = nivelJerarquicoDao.getAllNiveles();
+
+            if (niveles.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron los niveles de Jerarquía");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, niveles, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+    }
+
+
+    /**
+     * Procedimiento para el registrar un cargo o actualizar
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroCargo")
+    public ResponseEntity<?> registrarCargo( @RequestBody Cargo c ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( c.getCodCargo() == 0){
+            acc = "I";
+        }
+
+        if( !this.cargoDao.registrarCargo( c, acc ) ){
+            response.put("msg", "Error al Actualizar el Cargo");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+
 
 
     private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {
