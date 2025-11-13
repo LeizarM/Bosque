@@ -47,10 +47,18 @@ public interface IEmpleado {
      * @return
      */
     List<Empleado>obtenerDatosPerEmp(int codEmpleado);
+
     /**
      * Procedimiento para mostrar lista de empleados y dependientes
      * @return
      */
     List <Empleado>listaCumpleEmpleado();
+
+    /**
+     * Procedimiento para mostrar lista de empleados
+     * @return
+     */
+    List <Empleado>lisEmpleados();
+
 
 }

@@ -257,4 +257,36 @@ public class EmpleadoDAO implements IEmpleado{
         return lstTemp;
     }
 
+    /**
+     * Procedimiento para mostrar lista de empleados
+     *
+     * @return
+     */
+    @Override
+    public List<Empleado> lisEmpleados() {
+
+        List<Empleado> lstTemp =  new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_Empleado @ACCION = ?",
+                    new Object[]{ "S" },
+                    new int[]{ Types.VARCHAR },
+                    (rs, rowCount) ->{
+                        Empleado temp = new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setCodPersona(rs.getInt(2));
+                        temp.setNombres(rs.getString(3));
+                        return temp;
+                    });
+
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en lisEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+
+
+    }
+
 }

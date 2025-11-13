@@ -2,7 +2,11 @@ package bo.bosque.com.impexpap.controller;
 
 
 
+import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.ILoginDao;
+import bo.bosque.com.impexpap.dao.IVistaUsuario;
+import bo.bosque.com.impexpap.model.Empleado;
+import bo.bosque.com.impexpap.model.VistaUsuario;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,12 +42,16 @@ public class LoginController {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final ILoginDao ldao;
+    private final IVistaUsuario vistaUsuarioDao;
+    private final IEmpleado empleadoDao;
 
-    public LoginController( PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao ){
+    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao){
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.ldao = ldao;
+        this.vistaUsuarioDao = vistaUsuarioDao;
+        this.empleadoDao = empleadoDao;
     }
 
 
@@ -281,7 +289,10 @@ public class LoginController {
         }
     }
 
-
+    /**
+     * Listara los usuarios
+     * @return
+     */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/lstUsers")
     public List<Login> lstUsers(){
@@ -291,5 +302,74 @@ public class LoginController {
         return lstTemp;
 
     }
+
+    /**
+     * Procedimiento para copiar los permisos de un usuario a otro
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroVistaUsuario")
+    public ResponseEntity<?> registrarVistaUsuario( @RequestBody VistaUsuario vu ){
+
+        Map<String, Object> response = new HashMap<>();
+
+
+        if( !this.vistaUsuarioDao.registrarVistaUsuario( vu, "E" ) ){
+            response.put("msg", "Error al Actualizar el Vista Usuario");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    /**
+     * Procedimiento para registrar/actualizar los datos de un usuario
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroUsuario")
+    public ResponseEntity<?> registrarUsuario( @RequestBody Login l ){
+
+        Map<String, Object> response = new HashMap<>();
+
+
+        String acc = "U";
+        if( l.getCodUsuario() == 0){
+            acc = "I";
+            l.setPassword2(passwordEncoder.encode( l.getPassword2() )); // Encriptamos la contraseña
+
+        }
+
+
+        if( !this.ldao.abmLogin( l, acc ) ){
+            response.put("msg", "Error al Actualizar el Usuario");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    /**
+     * Listara los usuarios
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/lstEmpleados")
+    public List<Empleado> lstEmpleados(){
+
+        List<Empleado> lstTemp = this.empleadoDao.lisEmpleados();
+        if( lstTemp.size() == 0 ) return new ArrayList<Empleado>();
+        return lstTemp;
+
+    }
+
 
 }
