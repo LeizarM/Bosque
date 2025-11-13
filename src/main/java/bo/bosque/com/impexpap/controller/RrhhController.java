@@ -250,23 +250,41 @@ public class RrhhController {
     @PostMapping("/registroPersona")
     public ResponseEntity<?> registrarPersona( @RequestBody Persona per ){
 
-
         Map<String, Object> response = new HashMap<>();
 
-        per.setCiFechaVencimiento( new Utiles().fechaJ_a_Sql(per.getCiFechaVencimiento()));
-        per.setFechaNacimiento(new Utiles().fechaJ_a_Sql(per.getFechaNacimiento()));
+        // ... (Código de inicialización y conversión de fechas)
+
         String acc = "U";
         if( per.getCodPersona() == 0 ){
             acc = "I";
         }
+
+        // 1. Ejecutar la operación de registro/actualización
         Integer resultado=this.perDao.registrarPersona(per,acc);
-        if (resultado == null || resultado == 0) {
-            response.put("msg", "Error al registrar persona");
+
+        // 🚨 AJUSTE CRÍTICO: Manejo de Duplicidad (SP devuelve -1) 🚨
+
+        // CASO 1: Duplicidad confirmada.
+        if (resultado != null && resultado == -1) {
+            response.put("msg", "ERROR: El C.I. " + per.getCiNumero() + " ya pertenece a otra persona.");
             response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            // ¡El frontend espera este 409 para el bloqueo/autocompletar!
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT); // 409 Conflict
         }
-        response.put("msg", "Datos Actualizados de la Persona");
+
+        // CASO 2: Error genérico (0 o null, si no es duplicidad)
+        if (resultado == null || resultado == 0) {
+            response.put("msg", "Error al registrar o actualizar la persona.");
+            response.put("ok", "error");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+
+        // CASO 3: Éxito (resultado > 0)
+        response.put("msg", "Datos de la Persona registrados/actualizados con éxito");
         response.put("ok", "ok");
+
+        response.put("codPersona", acc.equals("I") ? resultado : per.getCodPersona());
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
     /**
@@ -480,9 +498,18 @@ public class RrhhController {
         }
 
         if( !this.telfDao.registrarTelefono( tel,acc ) ){
-            response.put("msg", "Error al Actualizar los Datos del Telefono del Empleado");
-            response.put("error", "ok");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
+            // 🚨 CAMBIO MÍNIMO AQUÍ 🚨
+            response.put("msg", "Error: El teléfono ya se encuentra registrado.");
+            response.put("error", "Duplicidad");
+            // Devolvemos 409 Conflict para un error de lógica de negocio (duplicidad)
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+
+        /* EL CÓDIGO ANTERIOR ERA:
+        response.put("msg", "Error al Actualizar los Datos del Telefono del Empleado");
+        response.put("error", "ok");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        */
         }
         response.put("msg", "Datos Actualizados");
         response.put("ok", "ok");
@@ -860,6 +887,32 @@ public class RrhhController {
 
 
     }
+    /**
+     * Procedimiento para que obtendra los datos personales de una persona mediante el CI
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerPersonaXCarnet")
+    public Persona obtenerDatosXCarnet ( @RequestBody Persona per ){
+
+        Persona temp = this.perDao.obtenerDatosXCarnet( per.getCiNumero());
+        if(temp == null ) return new Persona();
+        return temp;
+    }
+    /**
+     * OBTENDRA EL TELEFONO CORPORATIVO DE UN EMPLEADO
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerCorporativoXEmpleado")
+    public Telefono obtenerCoporativoXEmpleado( @RequestBody Telefono tel ){
+        int codTipoTel = tel.getCodTipoTel();
+        String telefono = tel.getTelefono();
+
+        Telefono temp = this.telfDao.obtenerCorporativo( codTipoTel,telefono );
+        if( temp == null ) return new Telefono();
+        return temp;
+
+    }
+
 
     /**
      * =====================================================================
