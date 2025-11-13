@@ -58,6 +58,12 @@ public interface IPersona {
      * @return
      */
     List<Persona>obtenerListaPersonas();
+    /**
+     * Procedimiento para obtener datos personales de un empleado
+     * @param codPersona
+     * @return
+     */
+    Persona obtenerDatosXCarnet (String ciNumero );
 
 
 }

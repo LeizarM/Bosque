@@ -67,6 +67,7 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/fichaTrabajador/uploads/documentos/**").permitAll()
                 .antMatchers("/fichaTrabajador/uploads/pendientes/**").permitAll()
                 .antMatchers("/fichaTrabajador/resources/reports/**").permitAll()
+                .antMatchers("/tigo/uploads/facturasTigo/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

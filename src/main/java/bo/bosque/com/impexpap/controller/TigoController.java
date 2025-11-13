@@ -443,10 +443,37 @@ public class TigoController {
     @PostMapping("/ejecutarTigo")
     public ResponseEntity<?> registrarTigoEjecutado(@RequestBody TigoEjecutado te) {
         Map<String, Object> response = new HashMap<>();
+        try {
+            // Ejecutar SP vía DAO
+            if (!this.eTigoDao.registrarTigoEjecutado(te, "G")) {
+                response.put("msg", "Error al registrar la factura Tigo (Fallo DAO)");
+                response.put("ok", "error");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
+            response.put("msg", "Factura Tigo ejecutada correctamente");
+            response.put("ok", "ok");
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        } catch (RuntimeException ex) { // <-- NUEVO CATCH para el error del SP
+            String spMessage = ex.getMessage();
+            if (spMessage != null) {
+                // Devolver 400 (Bad Request) con el mensaje extraído
+                response.put("msg", spMessage);
+                response.put("ok", "error_sp");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); // <-- CLAVE: HTTP 400
+            }
+            throw ex;
+
+        } catch (Exception e) {
+            // Capturar otros errores no previstos
+            response.put("msg", "Error interno del servidor.");
+            response.put("ok", "error_interno");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         // Ejecutar SP vía DAO
-        if (!this.eTigoDao.registrarTigoEjecutado(te, "G")) {
+        /*if (!this.eTigoDao.registrarTigoEjecutado(te, "G")) {
             response.put("msg", "Error al registrar la factura Tigo");
             response.put("ok", "error");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -454,7 +481,7 @@ public class TigoController {
 
         response.put("msg", "Factura Tigo registrada correctamente");
         response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);*/
     }
     /**
      * obtener lista tigo ejectuado

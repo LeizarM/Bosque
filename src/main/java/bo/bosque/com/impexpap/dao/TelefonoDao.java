@@ -5,6 +5,7 @@ import bo.bosque.com.impexpap.model.Persona;
 import bo.bosque.com.impexpap.model.Telefono;
 import bo.bosque.com.impexpap.model.TipoTelefono;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -111,7 +112,9 @@ public class TelefonoDao implements ITelefono {
             this.jdbcTemplate = null;
             resp = 0;
         }
-        return resp != 0;
+        // Ahora solo devuelve true si se afectó al menos 1 fila.
+        // Si es 0 (falla silenciosa) o -1 (resultado genérico de JDBC por falla/cero filas), devuelve false.
+        return resp > 0; // Cambiado de '!= 0' a '> 0'
     }
 
     /**
@@ -136,6 +139,40 @@ public class TelefonoDao implements ITelefono {
             temp = new Telefono();
         }
         return temp.getCodPersona();
+    }
+    /**
+     * Procedimiento para obtener el listade de telefonos por persona
+     * @param codTipotel, corporativo
+     * @return
+     */
+    public Telefono obtenerCorporativo( int codTipotel,String corporativo ) {
+        Telefono Temp ;
+
+        try{
+            Temp = this.jdbcTemplate.queryForObject(" execute p_list_Telefono @codTipoTel=?, @telefono=?,@ACCION=?",
+                    new Object[] { codTipotel,corporativo, "L" },
+                    new int[] { Types.INTEGER,Types.VARCHAR, Types.VARCHAR },
+                    (rs, rowCount)->{
+                        Telefono temp = new Telefono();
+                        temp.setCodTelefono(rs.getInt(1));
+                        temp.setCodPersona(rs.getInt(2));
+                        temp.setCodTipoTel(rs.getInt(3));
+                        temp.setTipo(rs.getString(4));
+                        temp.setTelefono(rs.getString(5));
+                        temp.setAudUsuario(rs.getInt(6));
+                        return temp;
+                    }
+            );
+
+        }catch (EmptyResultDataAccessException e) {
+            // No existe el teléfono, retorna null o un objeto vacío
+            Temp = null;
+        } catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmailDao en obtenerCorreos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            Temp = null;
+            this.jdbcTemplate = null;
+        }
+        return Temp;
     }
 
 }

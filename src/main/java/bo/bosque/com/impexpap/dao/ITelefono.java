@@ -33,4 +33,10 @@ public interface ITelefono {
      * @return
      */
     List<TipoTelefono> obtenerTipoTelefono();
+    /**
+     * Procedimiento para listar los telefonos por persona
+     * @param codPersona
+     * @return
+     */
+    Telefono obtenerCorporativo(int codTipoTel, String telefono );
 }

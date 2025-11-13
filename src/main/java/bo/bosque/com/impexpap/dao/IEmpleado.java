@@ -53,6 +53,16 @@ public interface IEmpleado {
      * @return
      */
     List <Empleado>listaCumpleEmpleado();
+    /**
+     * Procedimiento para mostrar datos personales de empleado
+     * @return
+     */
+    Empleado obtenerDatosEmpleado(int codEmpleado);
+    /**
+     * Procedimiento para mostrar datos personales de un empleado segun jerarquia
+     * @return
+     */
+    Empleado obtenerInfoEmpleado(int codEmpleado,int codEmpleadoConsultado);
 
     /**
      * Procedimiento para mostrar lista de empleados

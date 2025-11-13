@@ -256,6 +256,75 @@ public class EmpleadoDAO implements IEmpleado{
         }
         return lstTemp;
     }
+    //PARA OBTENER DATOS PERSONALES DEL EMPLEADO
+    public Empleado obtenerDatosEmpleado(int codEmpleado){
+         Empleado Temp;
+        try{
+            Temp = this.jdbcTemplate.queryForObject(" execute p_list_Empleado @codEmpleado=?, @ACCION=?",
+                    new Object[]{codEmpleado,"V"},
+                    new int[]{Types.INTEGER,Types.VARCHAR},
+                    (rs, rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt("codEmpleado"));
+                        temp.setCodPersona(rs.getInt("codPersona"));
+                        temp.setCodZona(rs.getInt("codZona"));
+                        temp.getPersona().setDatoPersona(rs.getString("NombreCompleto"));
+                        temp.getPersona().setCiExpedido(rs.getString("ciExpedido"));
+                        temp.getPersona().setCiFechaVencimiento(rs.getDate("ciFechaVencimiento"));
+                        temp.getPersona().setCiNumero(rs.getString("ciNumero"));
+                        temp.getPersona().setDireccion(rs.getString("direccion"));
+                        temp.getPersona().setEstadoCivil(rs.getString("estadoCivil"));
+                        temp.getPersona().setFechaNacimiento(rs.getDate("fechaNacimiento"));
+                        temp.getPersona().setLugarNacimiento(rs.getString("lugarNacimiento"));
+                        temp.getPersona().setNacionalidad(rs.getInt("nacionalidad"));
+                        temp.getPersona().setSexo(rs.getString("sexo"));
+                        temp.getPersona().setLat(rs.getInt("lat"));
+                        temp.getPersona().setLng(rs.getInt("lng"));
+                        temp.getPersona().setAudUsuarioI(rs.getInt("AudUsuarioI"));
+                        return temp;
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerDatosPerEmp,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            Temp = new Empleado();
+            this.jdbcTemplate = null;
+        }
+        return Temp;
+    }
+    //RESTRINGIR INFORMACION SEGUN JERARQUIA
+    public Empleado obtenerInfoEmpleado(int codEmpleado,int codEmpleadoConsultado){
+        Empleado Temp;
+        try{
+            Temp = this.jdbcTemplate.queryForObject(" execute p_list_Empleado @codEmpleado=?,@codEmpleadoConsultado=?, @ACCION=?",
+                    new Object[]{codEmpleado,codEmpleadoConsultado,"Z"},
+                    new int[]{Types.INTEGER,Types.INTEGER,Types.VARCHAR},
+                    (rs, rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt("codEmpleado"));
+                        temp.setCodPersona(rs.getInt("codPersona"));
+                        temp.setCodZona(rs.getInt("codZona"));
+                        temp.getPersona().setDatoPersona(rs.getString("NombreCompleto"));
+                        temp.getPersona().setCiExpedido(rs.getString("ciExpedido"));
+                        temp.getPersona().setCiFechaVencimiento(rs.getDate("ciFechaVencimiento"));
+                        temp.getPersona().setCiNumero(rs.getString("ciNumero"));
+                        temp.getPersona().setDireccion(rs.getString("direccion"));
+                        temp.getPersona().setEstadoCivil(rs.getString("estadoCivil"));
+                        temp.getPersona().setFechaNacimiento(rs.getDate("fechaNacimiento"));
+                        temp.getPersona().setLugarNacimiento(rs.getString("lugarNacimiento"));
+                        temp.getPersona().setNacionalidad(rs.getInt("nacionalidad"));
+                        temp.getPersona().setSexo(rs.getString("sexo"));
+                        temp.getZona().setZona(rs.getString("zona"));
+                        temp.getPersona().setLat(rs.getFloat("lat"));
+                        temp.getPersona().setLng(rs.getFloat("lng"));
+                        temp.getPersona().setAudUsuarioI(rs.getInt("AudUsuarioI"));
+                        return temp;
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerDatosPerEmp,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            Temp = new Empleado();
+            this.jdbcTemplate = null;
+        }
+        return Temp;
+    }
 
     /**
      * Procedimiento para mostrar lista de empleados

@@ -41,9 +41,10 @@ public class DependienteDao implements IDependiente {
                         dep.setCodPersona(rs.getInt(2));
                        dep.setCodEmpleado(rs.getInt(3));
                         dep.setEsActivo(rs.getString(4));
-                        dep.setNombreCompleto(rs.getString(5));
-                        dep.setParentesco(rs.getString(6));
-                        dep.setEdad(rs.getInt(7));
+                        dep.setEmpActivo(rs.getInt(5));
+                        dep.setNombreCompleto(rs.getString(6));
+                        dep.setParentesco(rs.getString(7));
+                        dep.setEdad(rs.getInt(8));
                         return dep;
                     });
         }catch (BadSqlGrammarException e) {

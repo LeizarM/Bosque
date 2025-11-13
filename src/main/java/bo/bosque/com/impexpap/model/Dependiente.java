@@ -17,6 +17,8 @@ public class Dependiente implements Serializable {
     private String esActivo;
     private int audUsuario;
 
+    private int empActivo; // si el dependiente es un empleado activo
+
 
     /**
      * Variables de Apoyo

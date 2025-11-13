@@ -3,6 +3,7 @@ import bo.bosque.com.impexpap.model.FacturaTigo;
 import bo.bosque.com.impexpap.model.SociosTigo;
 import bo.bosque.com.impexpap.model.TigoEjecutado;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -193,6 +194,19 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
                     ", SQL Code -> " + ((SQLException) e.getCause()).getErrorCode());
             this.jdbcTemplate = null;
             resp = 0;
+        }catch (DataAccessException e) { // <-- NUEVO CATCH
+            // Intercepta cualquier excepción de acceso a datos
+            Throwable rootCause = e.getRootCause();
+            if (rootCause instanceof java.sql.SQLException) {
+                java.sql.SQLException sqlEx = (java.sql.SQLException) rootCause;
+                // El código 50000 es el que SQL Server usa para RAISERROR (severidad 16)
+                if (sqlEx.getErrorCode() == 50000) {
+                    // LANZAMOS EL MENSAJE CLARO COMO UNA EXCEPCIÓN DE EJECUCIÓN
+                    throw new RuntimeException(sqlEx.getMessage());
+                }
+            }
+            // Si no es el error 50000, relanzamos la excepción original
+            throw e;
         }
         return resp != 0;
     }

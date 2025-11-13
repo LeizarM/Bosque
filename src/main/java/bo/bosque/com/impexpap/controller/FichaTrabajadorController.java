@@ -98,14 +98,21 @@ public class FichaTrabajadorController {
     public ResponseEntity<?> registrarDependiente( @RequestBody Dependiente dep ){
 
 
-
         Map<String, Object> response = new HashMap<>();
 
         String acc = "U";
         if( dep.getCodDependiente() == 0){
             acc = "I";
-            int codPersona =  this.personaDao.obtenerUltimoPersona();
-            dep.setCodPersona(codPersona);
+            // 🚨 MODIFICACIÓN CRÍTICA 3: ELIMINAR ESTA LÍNEA DE CÓDIGO INSEGURA.
+            // int codPersona =  this.personaDao.obtenerUltimoPersona();
+            // dep.setCodPersona(codPersona);
+
+            // Si dep.getCodPersona() sigue siendo 0 aquí, es un fallo de lógica del frontend.
+            if(dep.getCodPersona() == 0){
+                response.put("msg", "Error interno: Falta el código de la persona para el dependiente.");
+                response.put("ok", "error");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
         }
 
         if( !this.dependienteDao.registrarDependiente( dep, acc ) ){
@@ -672,6 +679,26 @@ public class FichaTrabajadorController {
 
         return new ResponseEntity<>(recurso, header, HttpStatus.OK);
     }
-    
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerDatosEmpleado")
+    public Empleado obtenerDatosEmpleado(@RequestBody Empleado dp){
+        Empleado Temp=this.empleadoDao.obtenerDatosEmpleado(dp.getCodEmpleado());
+        if (Temp == null)return new Empleado();
+        return Temp;
+
+    }
+    //PARA MOSTRAR INFORMACION DE UN EMPLEADO SEGUN JERARQUIA
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/datosXJerarquia")
+    public Empleado obtenerInfoEmpleado(@RequestBody Empleado dp){
+        int codEmpleado=dp.getCodEmpleado();
+        int codEmpleadoConsultado=dp.getCodEmpleadoConsultado();
+        Empleado Temp=this.empleadoDao.obtenerInfoEmpleado(codEmpleado,codEmpleadoConsultado);
+        if (Temp==null)return new Empleado();
+        return Temp;
+
+    }
+
 }
 

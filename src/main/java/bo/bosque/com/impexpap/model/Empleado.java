@@ -21,7 +21,7 @@ public class Empleado extends Persona implements Serializable {
     private int audUsuarioI;
     private int codDependiente;
 
-
+    private int codEmpleadoConsultado;
     /**
      * Variables de apoyo
      */

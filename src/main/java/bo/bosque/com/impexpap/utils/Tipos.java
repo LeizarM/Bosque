@@ -155,6 +155,8 @@ public class Tipos {
         listaTemp.add(new Tipos("esp","Especializacion",4));
         listaTemp.add(new Tipos("mae","Maestria",4));
         listaTemp.add(new Tipos("doc","Doctorado",4));
+        listaTemp.add(new Tipos("licen","Licenciatura",4));
+        listaTemp.add(new Tipos("tecSup","Técnico Superior",4));
         return listaTemp;
     }
     /**

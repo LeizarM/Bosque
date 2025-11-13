@@ -234,14 +234,6 @@
 			</textField>
 		</band>
 	</detail>
-	<pageFooter>
-		<band height="40">
-			<textField>
-				<reportElement x="270" y="10" width="100" height="30" uuid="12b7c931-b865-4bf7-b93e-e314fc79c9b2"/>
-				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-		</band>
-	</pageFooter>
 	<summary>
 		<band height="50">
 			<staticText>
