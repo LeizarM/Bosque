@@ -60,4 +60,41 @@ public class UsuarioBtnDao implements  IUsuarioBtn {
 
 
     }
+
+    /**
+     * Para registrar un botón en la base de datos
+     *
+     * @param usuarioBtn
+     * @param acc
+     * @return
+     */
+    @Override
+    public boolean registroBoton(UsuarioBtn usuarioBtn, String acc) {
+
+
+
+        int resp;
+
+        try{
+            resp = this.jdbcTemplate.update("execute p_abm_UsuarioBtn  @codUsuario = ?, @codBtn = ?, @nivelAcceso = ?, @audUsuario = ?, @ACCION = ?",
+                    ps -> {
+
+                        ps.setInt(1, usuarioBtn.getCodUsuario());
+                        ps.setInt(2, usuarioBtn.getCodBtn());
+                        ps.setInt(3, usuarioBtn.getNivelAcceso());
+                        ps.setInt(4, usuarioBtn.getAudUsuario());
+                        ps.setString(5, acc);
+
+                    });
+
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: UsuarioBtnDao en registroBoton, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            this.jdbcTemplate = null;
+            resp = 0;
+        }
+
+        return resp!=0;
+
+
+    }
 }

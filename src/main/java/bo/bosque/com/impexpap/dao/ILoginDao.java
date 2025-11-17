@@ -48,4 +48,11 @@ public interface ILoginDao {
      * @param ip Dirección IP del cliente
      */
     void registerSuccessfulLogin(String login, String ip);
+
+    /**
+     * Verifica si el nombre de usuario ya existe por empleado
+     * @param login
+     * @return
+     */
+    int verifDuplicidad( Login login, String oper );
 }

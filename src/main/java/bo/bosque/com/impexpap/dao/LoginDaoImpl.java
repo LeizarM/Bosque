@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
 import bo.bosque.com.impexpap.model.Precio;
+import bo.bosque.com.impexpap.model.SociosTigo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -20,6 +21,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 //@Repository
@@ -186,6 +188,39 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
     }
 
     /**
+     * Verifica si el nombre de usuario ya existe por empleado
+     *
+     * @param login
+     * @return
+     */
+    @Override
+    public int verifDuplicidad(Login login, String oper) {
+        int existeDuplicado = 0;
+
+        try {
+            // Usar queryForList sin especificar tipo de columna
+            // Esto funciona independientemente de qué columnas devuelva el SP
+            List<Map<String, Object>> resultados = this.jdbcTemplate.queryForList(
+                    "EXEC p_list_Usuario @codUsuario=?, @codEmpleado=?, @login=?, @ACCION=?",
+                    new Object[]{login.getCodUsuario(), login.getCodEmpleado(), login.getLogin(), oper},
+                    new int[]{Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR}
+            );
+
+            existeDuplicado = resultados.size();
+
+        } catch (EmptyResultDataAccessException e) {
+            existeDuplicado = 0;
+        } catch (BadSqlGrammarException e) {
+            System.out.println("Error: LoginDaoImpl en verifDuplicidad, DataAccessException->" +
+                    e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            existeDuplicado = 0;
+        }
+
+        return existeDuplicado;
+    }
+
+
+    /**
      * Procedimiento para verificar si existe el usuario en la BD
      * @param login
      * @return Userdetails
@@ -250,7 +285,7 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
                         return temp;
                     });
         }catch ( BadSqlGrammarException e){
-            System.out.println("Error: listPrecioToneladasActuales en PrecioDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            System.out.println("Error: LoginDaoImpl en getAllUsers, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
             this.jdbcTemplate = null;
         }

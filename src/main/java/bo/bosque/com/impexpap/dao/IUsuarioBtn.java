@@ -8,4 +8,12 @@ public interface IUsuarioBtn {
 
 
     List<UsuarioBtn> botonesXUsuario( int codUsuario );
+
+    /**
+     * Para registrar un botón en la base de datos
+     * @param usuarioBtn
+     * @param acc
+     * @return
+     */
+    boolean registroBoton( UsuarioBtn usuarioBtn, String acc );
 }

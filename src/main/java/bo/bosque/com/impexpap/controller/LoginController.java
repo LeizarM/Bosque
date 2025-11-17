@@ -4,8 +4,10 @@ package bo.bosque.com.impexpap.controller;
 
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.ILoginDao;
+import bo.bosque.com.impexpap.dao.IUsuarioBtn;
 import bo.bosque.com.impexpap.dao.IVistaUsuario;
 import bo.bosque.com.impexpap.model.Empleado;
+import bo.bosque.com.impexpap.model.UsuarioBtn;
 import bo.bosque.com.impexpap.model.VistaUsuario;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,14 +46,16 @@ public class LoginController {
     private final ILoginDao ldao;
     private final IVistaUsuario vistaUsuarioDao;
     private final IEmpleado empleadoDao;
+    private final IUsuarioBtn usuarioBtnDao;
 
-    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao){
+    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao){
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.ldao = ldao;
         this.vistaUsuarioDao = vistaUsuarioDao;
         this.empleadoDao = empleadoDao;
+        this.usuarioBtnDao = usuarioBtnDao;
     }
 
 
@@ -341,6 +345,7 @@ public class LoginController {
         String acc = "U";
         if( l.getCodUsuario() == 0){
             acc = "I";
+            l.setPassword(l.getPassword2());
             l.setPassword2(passwordEncoder.encode( l.getPassword2() )); // Encriptamos la contraseña
 
         }
@@ -371,5 +376,224 @@ public class LoginController {
 
     }
 
+    /**
+     * Para verificar si un usuario existe o existe duplicidad
+     * @param l
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/verificarDuplicadoUsuario")
+    public int verificarDuplicado( @RequestBody Login l ){
+
+        int doble = 0;
+
+        if (ldao.verifDuplicidad(l, "R") > 0) {
+            doble = 1;
+        } else {
+            if (ldao.verifDuplicidad(l,"G") > 0) {
+                doble = 2;
+            }
+        }
+        return doble;
+
+    }
+
+
+    /**
+     * Devuelve la estructura de árbol jerárquica para permisos de usuario
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/lstUsuarioPermisosTree")
+    public Map<String, Object> lstUsuarioPermisosTree(@RequestBody VistaUsuario vu) {
+
+        List<VistaUsuario> lstPermisos = this.vistaUsuarioDao.lstPermisosVistasYBotones(vu.getCodUsuario());
+
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        if (lstPermisos.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "No se encontraron permisos para el usuario");
+            response.put("data", new ArrayList<>());
+            return response;
+        }
+
+
+        // Construir el árbol jerárquico
+        List<Map<String, Object>> arbolPermisos = construirArbolPermisos(lstPermisos);
+
+        response.put("success", true);
+        response.put("message", "Permisos cargados correctamente");
+
+        response.put("data", arbolPermisos);
+
+        return response;
+    }
+
+    /**
+     * Construye la estructura de árbol jerárquica recursivamente
+     * Los botones ahora se agregan correctamente usando codVistaPadre
+     */
+    private List<Map<String, Object>> construirArbolPermisos(List<VistaUsuario> lstPermisos) {
+
+        // Separar vistas/módulos de botones
+        Map<Integer, Map<String, Object>> nodosVistasMap = new LinkedHashMap<>();
+        List<Map<String, Object>> listaBotones = new ArrayList<>();
+
+        // PASO 1: Procesar todos los registros
+        for (VistaUsuario permiso : lstPermisos) {
+
+            Integer codVista = permiso.getCodVista();
+            Integer codBoton = permiso.getCodBoton();
+
+            // Si es un botón (codBoton > 0)
+            if (codBoton != null && codBoton > 0) {
+
+
+
+                // Crear nodo botón
+                Map<String, Object> nodoBoton = crearNodoPermiso(permiso, "Boton");
+                listaBotones.add(nodoBoton);
+
+            } else {
+                // Es módulo o vista - evitar duplicados
+                if (!nodosVistasMap.containsKey(codVista)) {
+
+                    String tipo = (permiso.getCodVistaPadre() == 0) ? "Modulo" : "Vista";
+
+                    Map<String, Object> nodoVista = crearNodoPermiso(permiso, tipo);
+                    nodoVista.put("children", new ArrayList<Map<String, Object>>());
+
+                    nodosVistasMap.put(codVista, nodoVista);
+                }
+            }
+        }
+
+        // PASO 2: Construir jerarquía de vistas primero (recursivo)
+        List<Map<String, Object>> nodosRaiz = new ArrayList<>();
+
+        for (Map<String, Object> nodo : nodosVistasMap.values()) {
+            Integer codVistaPadre = (Integer) nodo.get("codVistaPadre");
+
+            if (codVistaPadre == null || codVistaPadre == 0) {
+                // Es un nodo raíz (módulo principal)
+                nodosRaiz.add(nodo);
+            } else {
+                // Tiene padre - buscarlo y agregarlo como hijo
+                Map<String, Object> nodoPadre = nodosVistasMap.get(codVistaPadre);
+
+                if (nodoPadre != null) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> hijos = (List<Map<String, Object>>) nodoPadre.get("children");
+                    hijos.add(nodo);
+                } else {
+                    // Si no encuentra el padre, agregar como raíz (fallback)
+                    System.out.println("ADVERTENCIA: No se encontró padre codVistaPadre=" + codVistaPadre +
+                            " para codVista=" + nodo.get("codVista"));
+                    nodosRaiz.add(nodo);
+                }
+            }
+        }
+
+        // PASO 3: Agregar botones a sus vistas correspondientes usando codVistaPadre
+        int botonesAgregados = 0;
+        for (Map<String, Object> boton : listaBotones) {
+            Integer codVistaPadre = (Integer) boton.get("codVistaPadre");
+
+            // ✅ CORRECTO: Usar codVistaPadre para encontrar la vista padre del botón
+            Map<String, Object> vistaNode = nodosVistasMap.get(codVistaPadre);
+
+            if (vistaNode != null) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> children = (List<Map<String, Object>>) vistaNode.get("children");
+                children.add(boton);
+                botonesAgregados++;
+            } else {
+                System.out.println("ADVERTENCIA: No se encontró vista padre codVistaPadre=" + codVistaPadre +
+                        " para botón codVista=" + boton.get("codVista") +
+                        ", codBoton=" + boton.get("codBoton"));
+            }
+        }
+
+
+
+        // PASO 4: Ordenar nodos raíz por codVista
+        nodosRaiz.sort((a, b) -> {
+            Integer codA = (Integer) a.get("codVista");
+            Integer codB = (Integer) b.get("codVista");
+            return codA.compareTo(codB);
+        });
+
+        return nodosRaiz;
+    }
+
+    /**
+     * Crea un nodo individual del árbol de permisos
+     */
+    private Map<String, Object> crearNodoPermiso(VistaUsuario permiso, String tipo) {
+        Map<String, Object> nodo = new LinkedHashMap<>();
+
+        nodo.put("codVista", permiso.getCodVista());
+        nodo.put("codVistaPadre", permiso.getCodVistaPadre());
+        nodo.put("codBoton", permiso.getCodBoton() != 0 ? permiso.getCodBoton() : 0);
+        nodo.put("direccion", permiso.getDireccion());
+        nodo.put("nombreComponente", permiso.getNombreComponente());
+        nodo.put("descripcion", permiso.getDescripcion());
+        nodo.put("imagen", permiso.getImagen());
+        nodo.put("nivelAcceso", permiso.getNivelAcceso());
+        nodo.put("nivelAccesoBoton", permiso.getNivelAccesoBoton());
+        nodo.put("autorizador", permiso.getAutorizador());
+        nodo.put("codUsuario", permiso.getCodUsuario());
+        nodo.put("tipo", tipo);
+
+        // Los botones no tienen hijos
+        if ("Boton".equals(tipo)) {
+            nodo.put("children", new ArrayList<>());
+        }
+
+        return nodo;
+    }
+
+
+    /**
+     * Procedimiento para actualizar los permisos de un usuario
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/actualizarPermisos")
+    public ResponseEntity<?> actualizarPermisos( @RequestBody VistaUsuario vu ){
+
+        Map<String, Object> response = new HashMap<>();
+
+
+
+        if(vu.getTipo().equals("Modulo") || vu.getTipo().equals("Vista") ){
+
+            if( !this.vistaUsuarioDao.registrarVistaUsuario( vu, "U" ) ){
+                response.put("msg", "Error al Actualizar los Permisos del Usuario");
+                response.put("error", "ok");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        else if( vu.getTipo().equals("Boton") ){
+            UsuarioBtn temp = new UsuarioBtn();
+            temp.setNivelAcceso( vu.getNivelAcceso() );
+            temp.setAudUsuario(vu.getAudUsuarioI());
+            temp.setCodUsuario(vu.getCodUsuario() );
+            temp.setCodBtn( vu.getCodBoton() );
+
+            if(!this.usuarioBtnDao.registroBoton( temp, "U" ) ){
+                response.put("msg", "Error al Actualizar los Permisos del Botón");
+                response.put("error", "ok");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+
+
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 
 }
