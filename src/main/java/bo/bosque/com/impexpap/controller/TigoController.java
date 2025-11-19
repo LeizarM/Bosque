@@ -498,7 +498,7 @@ public class TigoController {
         // Recibe la LISTA PLANA, que contiene las filas de encabezado, detalle y el total.
         List<TigoEjecutado> flat = this.eTigoDao.obtenerTigoEjecutado(empresa,periodo);
 
-        System.out.println("→ Registros recibidos desde SQL: " + (flat != null ? flat.size() : 0));
+        //System.out.println("→ Registros recibidos desde SQL: " + (flat != null ? flat.size() : 0));
 
         if (flat == null || flat.isEmpty()) return new ArrayList<>();
 

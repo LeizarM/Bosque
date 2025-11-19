@@ -171,7 +171,7 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         int resp;
         try {
             resp = this.jdbcTemplate.update(
-                    "EXEC p_list_tTigo_ejecutado @codEmpleado = ?, @nombreCompleto = ?, @descripcion = ?, @ciNumero = ?, @corporativo = ?, @empresa = ?,@periodoCobrado=?,@estado=?, @totalCobradoXCuenta = ?,@montoCubiertoXEmpresa= ?,@montoEmpleado=?, @audUsuarioI = ?, @ACCION = ?",
+                    "execute p_list_tTigo_ejecutado @codEmpleado = ?, @nombreCompleto = ?, @descripcion = ?, @ciNumero = ?, @corporativo = ?, @empresa = ?,@periodoCobrado=?,@estado=?, @totalCobradoXCuenta = ?,@montoCubiertoXEmpresa= ?,@montoEmpleado=?, @audUsuarioI = ?, @ACCION = ?",
                     ps -> {
                         ps.setInt(1, te.getCodEmpleado() != null ? te.getCodEmpleado() : 0);
                         ps.setString(2, te.getNombreCompleto());
@@ -190,22 +190,34 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
                     }
             );
         } catch (BadSqlGrammarException e) {
-            System.out.println("Error: FacturaDao en registrarFacturaTigo, DataAccessException -> " + e.getMessage() +
-                    ", SQL Code -> " + ((SQLException) e.getCause()).getErrorCode());
+            // --- LOG PARA ERRORES DE SINTAXIS ---
+            SQLException sqlEx = (SQLException) e.getCause();
+            System.out.println("Error de sintaxis SQL (BadSqlGrammarException): ");
+            System.out.println("DAO -> registrarTigoEjecutado | Código SQL: " + sqlEx.getErrorCode() + " | Mensaje: " + e.getMessage());
             this.jdbcTemplate = null;
             resp = 0;
-        }catch (DataAccessException e) { // <-- NUEVO CATCH
-            // Intercepta cualquier excepción de acceso a datos
+        }catch (DataAccessException e) {
             Throwable rootCause = e.getRootCause();
             if (rootCause instanceof java.sql.SQLException) {
                 java.sql.SQLException sqlEx = (java.sql.SQLException) rootCause;
-                // El código 50000 es el que SQL Server usa para RAISERROR (severidad 16)
+
+                // --- LOG PARA CUALQUIER ERROR SQL (incluyendo Deadlock/Timeout) ---
+                System.out.println("--- ERROR SQL NO ESPERADO EN PRODUCCIÓN ---");
+                System.out.println("DAO -> registrarTigoEjecutado | Código SQL: " + sqlEx.getErrorCode());
+                System.out.println("DAO -> registrarTigoEjecutado | Mensaje DB: " + sqlEx.getMessage());
+                System.out.println("------------------------------------------");
+
+
                 if (sqlEx.getErrorCode() == 50000) {
-                    // LANZAMOS EL MENSAJE CLARO COMO UNA EXCEPCIÓN DE EJECUCIÓN
                     throw new RuntimeException(sqlEx.getMessage());
+                } else {
+                    // 🚨 SOLUCIÓN: Convertir el error inesperado en RuntimeException
+                    // para que el Controller lo capture y devuelva el 400.
+                    String msgErrorAmbiente = "Error de ambiente/concurrencia. Código SQL: " + sqlEx.getErrorCode() + ". Consulte logs.";
+                    throw new RuntimeException(msgErrorAmbiente);
                 }
             }
-            // Si no es el error 50000, relanzamos la excepción original
+            // Si no es un SQLException, relanzar el error original.
             throw e;
         }
         return resp != 0;
