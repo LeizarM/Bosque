@@ -318,6 +318,25 @@ public class RrhhController {
 
     }
 
+
+    /**
+     * Procedimiento para devovler una lista de los cargos por sucursal que pertenecea a una empresa
+     * @param cs
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/sucXCargo")
+    public List<CargoSucursal> obtenerCargoEnSurcursal ( @RequestBody CargoSucursal cs  ){
+
+        List<CargoSucursal> lstCs = this.cagoSucDao.obtenerCargoEnSucursales(  cs.getCodCargo() );
+
+        if( lstCs.size() == 0 ) return new ArrayList<>();
+
+        return lstCs;
+
+    }
+
+
     /**
      * Procedimiento para registrar Empleado
      * @param emp
@@ -1079,6 +1098,55 @@ public class RrhhController {
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+
+    /**
+     * Procedimiento para el registrar un cargo o actualizar
+     * @param
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroCargoSucursal")
+    public ResponseEntity<?> registrarCargoSucursal( @RequestBody CargoSucursal cs ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        String acc = "U";
+        if( cs.getCodCargoSucursal() == 0){
+            acc = "I";
+        }
+
+        if( !this.cagoSucDao.registrarCargoSucursal( cs, acc ) ){
+            response.put("msg", "Error al Actualizar el Cargo Sucursal");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Procedimiento para el eliminar un cargo de una sucursal
+     * @param cs
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/eliminarCargoSuc")
+    public ResponseEntity<?> eliminarCargoSucursal( @RequestBody CargoSucursal cs ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.cagoSucDao.registrarCargoSucursal( cs, "D" ) ){
+            response.put("msg", "Error al Eliminar el Cargo Sucursal");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 
 
 
