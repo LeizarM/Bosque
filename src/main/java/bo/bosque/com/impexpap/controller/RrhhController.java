@@ -1127,6 +1127,29 @@ public class RrhhController {
     }
 
     /**
+     * Obtiene los empleados asignados a un cargo que pertenece a una empresa
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
+    @PostMapping("/lstEmpleadosXCargo")
+    public ResponseEntity<?> obtenerEmpleadoXCargo( @RequestBody Cargo c ) {
+        try {
+            List<Cargo> temp = this.cargoDao.obtenerEmpleadosXCargo( c.getCodCargo()  );
+
+            if (temp.isEmpty()) {
+                return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron empleados para este cargo");
+            }
+
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>(SUCCESS_MESSAGE, temp, HttpStatus.OK.value()));
+
+        } catch (Exception e) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+
+    /**
      * Procedimiento para el eliminar un cargo de una sucursal
      * @param cs
      * @return

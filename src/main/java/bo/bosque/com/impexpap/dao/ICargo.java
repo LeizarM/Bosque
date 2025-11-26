@@ -25,4 +25,11 @@ public interface ICargo {
      * @return
      */
     boolean registrarCargo( Cargo cargo, String acc );
+
+    /**
+     * Obtendra los empleados por cargo
+     * @param codCargo
+     * @return
+     */
+    List<Cargo> obtenerEmpleadosXCargo( int codCargo );
 }

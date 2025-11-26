@@ -160,6 +160,39 @@ public class CargoDao implements ICargo {
     }
 
     /**
+     * Obtendra los empleados por cargo
+     *
+     * @param codCargo
+     * @return
+     */
+    @Override
+    public List<Cargo> obtenerEmpleadosXCargo(int codCargo) {
+        List<Cargo> lstTemp  = new ArrayList<>();
+
+        try{
+
+            lstTemp = this.jdbcTemplate.query("execute p_list_Cargo @codCargo=?, @ACCION = ?",
+                    new Object[]{ codCargo, "C" },
+                    new int[]{Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount) -> {
+                        Cargo temp  = new Cargo();
+                        temp.setCodEmpleado( rs.getInt(1) );
+                        temp.setNombreCompleto(rs.getString(2));
+                        temp.setDescripcion(rs.getString(3));
+                        temp.setNombreEmpresa(rs.getString(4));
+                        temp.setSucursal(rs.getString(5));
+                        temp.setEstado(rs.getInt(6));
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: CargoDao en obtenerEmpleadosXCargo, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+
+    /**
      * Método auxiliar para registrar errores de acceso a datos
      * @param ex Excepción ocurrida
      * @param mensaje Mensaje descriptivo del error

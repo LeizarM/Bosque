@@ -53,6 +53,8 @@ public class Cargo implements Serializable {
     private List<Cargo> items = new ArrayList<Cargo>();
     private int codCargoPadreOriginal;
 
+    private int codEmpleado;
+    private String nombreCompleto;
 
 
 }
