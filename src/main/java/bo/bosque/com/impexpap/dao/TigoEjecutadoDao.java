@@ -57,9 +57,9 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
      * @param acc
      * @return
      */
+    // --- MÉTODO 1: generarAnticiposTigo ---
     public boolean generarAnticiposTigo(String periodoCobrado) {
         int resultado = 0;
-
         try {
             resultado = this.jdbcTemplate.update(
                     "EXEC p_abm_tTigo_ejecutado @periodoCobrado=?, @ACCION=?",
@@ -67,12 +67,13 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
                     new int[] { Types.VARCHAR, Types.VARCHAR }
             );
         } catch (BadSqlGrammarException e) {
-            System.out.println("Error: TigoEjecutadoDao en generarAnticiposTigo, DataAccessException->"
-                    + e.getMessage() + ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            // Logueamos el error pero NO ponemos el jdbcTemplate en null
+            System.out.println("Error de Gramática SQL en generarAnticiposTigo: " + e.getMessage());
             resultado = 0;
-            this.jdbcTemplate = null;
+        } catch (DataAccessException e) {
+            System.out.println("Error de acceso a datos en generarAnticiposTigo: " + e.getMessage());
+            resultado = 0;
         }
-
         return resultado != 0;
     }
 
@@ -167,11 +168,12 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
     /**
      * TTIGOEJECUTADO
      */
+    // --- MÉTODO 2: registrarTigoEjecutado ---
     public boolean registrarTigoEjecutado(TigoEjecutado te, String acc) {
-        int resp;
+        int resp = 0;
         try {
             resp = this.jdbcTemplate.update(
-                    "execute p_list_tTigo_ejecutado @codEmpleado = ?, @nombreCompleto = ?, @descripcion = ?, @ciNumero = ?, @corporativo = ?, @empresa = ?,@periodoCobrado=?,@estado=?, @totalCobradoXCuenta = ?,@montoCubiertoXEmpresa= ?,@montoEmpleado=?, @audUsuarioI = ?, @ACCION = ?",
+                    "execute p_list_tTigo_ejecutado @codEmpleado = ?, @nombreCompleto = ?, @descripcion = ?, @ciNumero = ?, @corporativo = ?, @empresa = ?, @periodoCobrado = ?, @estado = ?, @totalCobradoXCuenta = ?, @montoCubiertoXEmpresa = ?, @montoEmpleado = ?, @audUsuarioI = ?, @ACCION = ?",
                     ps -> {
                         ps.setInt(1, te.getCodEmpleado() != null ? te.getCodEmpleado() : 0);
                         ps.setString(2, te.getNombreCompleto());
@@ -180,44 +182,35 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
                         ps.setString(5, te.getCorporativo());
                         ps.setString(6, te.getEmpresa());
                         ps.setString(7, te.getPeriodoCobrado());
-                        ps.setString(8,te.getEstado());
-                        ps.setFloat(9,te.getTotalCobradoXCuenta());
-                        ps.setFloat(10,te.getMontoCubiertoXEmpresa());
-                        ps.setFloat(11,te.getMontoEmpleado());
+                        ps.setString(8, te.getEstado());
+                        ps.setFloat(9, te.getTotalCobradoXCuenta());
+                        ps.setFloat(10, te.getMontoCubiertoXEmpresa());
+                        ps.setFloat(11, te.getMontoEmpleado());
                         ps.setInt(12, te.getAudUsuario());
-                        //ps.setTimestamp(13, new Timestamp(System.currentTimeMillis()));
                         ps.setString(13, acc);
                     }
             );
         } catch (BadSqlGrammarException e) {
-            // --- LOG PARA ERRORES DE SINTAXIS ---
+            // ERROR: Result Set o Sintaxis
             SQLException sqlEx = (SQLException) e.getCause();
-            System.out.println("Error de sintaxis SQL (BadSqlGrammarException): ");
-            System.out.println("DAO -> registrarTigoEjecutado | Código SQL: " + sqlEx.getErrorCode() + " | Mensaje: " + e.getMessage());
-            this.jdbcTemplate = null;
+            System.out.println("!!! ERROR DE ESTRUCTURA SQL !!!");
+            System.out.println("Mensaje: " + sqlEx.getMessage());
+            // IMPORTANTE: Ya no hay "this.jdbcTemplate = null"
             resp = 0;
-        }catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             Throwable rootCause = e.getRootCause();
             if (rootCause instanceof java.sql.SQLException) {
                 java.sql.SQLException sqlEx = (java.sql.SQLException) rootCause;
 
-                // --- LOG PARA CUALQUIER ERROR SQL (incluyendo Deadlock/Timeout) ---
-                System.out.println("--- ERROR SQL NO ESPERADO EN PRODUCCIÓN ---");
-                System.out.println("DAO -> registrarTigoEjecutado | Código SQL: " + sqlEx.getErrorCode());
-                System.out.println("DAO -> registrarTigoEjecutado | Mensaje DB: " + sqlEx.getMessage());
-                System.out.println("------------------------------------------");
-
-
+                // Si el error es el 50000 (el que lanzamos con RAISERROR en el SP)
                 if (sqlEx.getErrorCode() == 50000) {
                     throw new RuntimeException(sqlEx.getMessage());
                 } else {
-                    // 🚨 SOLUCIÓN: Convertir el error inesperado en RuntimeException
-                    // para que el Controller lo capture y devuelva el 400.
-                    String msgErrorAmbiente = "Error de ambiente/concurrencia. Código SQL: " + sqlEx.getErrorCode() + ". Consulte logs.";
-                    throw new RuntimeException(msgErrorAmbiente);
+                    // Otros errores (Timeout, Red, Llaves duplicadas)
+                    System.out.println("Error SQL Inesperado: " + sqlEx.getMessage());
+                    throw new RuntimeException("Error en Base de Datos: " + sqlEx.getMessage());
                 }
             }
-            // Si no es un SQLException, relanzar el error original.
             throw e;
         }
         return resp != 0;

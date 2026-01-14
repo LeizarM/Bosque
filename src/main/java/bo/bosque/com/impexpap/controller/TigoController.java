@@ -337,17 +337,28 @@ public class TigoController {
     public ResponseEntity<?> generarAnticiposTigo(@RequestBody TigoEjecutado eTigo ) {
         Map<String, Object> response = new HashMap<>();
         String periodo = eTigo.getPeriodoCobrado();
-        String accion = "A";
 
-        if (!this.eTigoDao.generarAnticiposTigo(periodo)) {
-            response.put("msg", "Error al generar anticipos Tigo");
-            response.put("error", "true");
+        try {
+            if (!this.eTigoDao.generarAnticiposTigo(periodo)) {
+                response.put("msg", "Error al generar anticipos Tigo (El SP devolvió 0 filas)");
+                response.put("ok", "error");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            response.put("msg", "Anticipos generados correctamente");
+            response.put("ok", "true");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (RuntimeException ex) {
+            // Captura errores personalizados (RAISERROR) o de ambiente
+            response.put("msg", ex.getMessage());
+            response.put("ok", "error_sp");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            response.put("msg", "Error interno al procesar anticipos.");
+            response.put("ok", "error_interno");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        response.put("msg", "Anticipos generados correctamente");
-        response.put("ok", "true");
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     /**
      * OBTENER RESUMEN CUENTAS CONSUMO TIGO
@@ -537,7 +548,7 @@ public class TigoController {
                 // Indexar por el ID del jefe/grupo (e.g., -6, 172)
                 parentsById.put(codEmpleado, t);
                 roots.add(t);
-                System.out.println("→ Nodo Raíz indexado: " + t.getNombreCompleto());
+                //System.out.println("→ Nodo Raíz indexado: " + t.getNombreCompleto());
             } else {
                 // Los DETALLES/SOCIOS (HIJOS) tienen codEmpleado = 0 y codEmpleadoPadre != 0
                 children.add(t);
@@ -554,11 +565,11 @@ public class TigoController {
 
             if (parent != null) {
                 parent.getItems().add(child);
-                System.out.println("→ Agregado hijo: " + child.getCorporativo() + " → Padre: " + parent.getNombreCompleto());
+                //System.out.println("→ Agregado hijo: " + child.getCorporativo() + " → Padre: " + parent.getNombreCompleto());
             } else {
                 // Caso de datos huérfanos
                 roots.add(child);
-                System.out.println("→ ADVERTENCIA: Padre " + padreId + " no encontrado, tratado como raíz: " + child.getNombreCompleto());
+               // System.out.println("→ ADVERTENCIA: Padre " + padreId + " no encontrado, tratado como raíz: " + child.getNombreCompleto());
             }
         }
 
