@@ -583,7 +583,7 @@ public class TigoController {
             roots.add(resumen);
         }
 
-        System.out.println("→ Total nodos raíz devueltos: " + roots.size());
+        //System.out.println("→ Total nodos raíz devueltos: " + roots.size());
         return roots;
     }
     /**
@@ -723,6 +723,37 @@ public class TigoController {
             String nombreB = b.getNombreCompleto() != null ? b.getNombreCompleto() : "";
             return nombreA.compareToIgnoreCase(nombreB);
         });
+    }
+    /**
+     * Procedimiento para exportar rpt cambios tigo a pdf
+     * @param emp
+     * @return
+     */
+    @PostMapping("/RptCambiosTigo")
+    public ResponseEntity<?> descargarRptLineasCorporativas(@RequestBody TigoEjecutado eTigo)  {
+
+        String nombreReporte = "RptLineasCorporativas";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+            params.put("periodoCobrado", eTigo.getPeriodoCobrado() );
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
     }
 
 
