@@ -37,8 +37,6 @@ public class PdfGeneratorService {
 
     public byte[] generarPdfDeposito(DepositoCheque deposito) {
 
-        System.out.println(deposito.toString());
-
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(baos);
