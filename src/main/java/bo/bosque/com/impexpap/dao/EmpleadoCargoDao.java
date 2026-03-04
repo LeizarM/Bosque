@@ -31,14 +31,19 @@ public class EmpleadoCargoDao implements IEmpleadoCargo{
         int resp;
 
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_EmpleadoCargo @codEmpleado=?, @codCargoSucursal=?, @codCargoSucPlanilla=?, @fechaInicio=?, @audUsuarioI=?, @ACCION=?",
+            resp = this.jdbcTemplate.update("execute p_abm_EmpleadoCargo @codEmpleado=?, @codCargoSucursal=?, @codCargoSucPlanilla=?, @fechaInicio=?,@fechaInicioOriginal=?, @audUsuarioI=?, @ACCION=?",
                     ps->{
                         ps.setInt( 1, empCar.getCodEmpleado() );
                         ps.setInt( 2, empCar.getCodCargoSucursal());
                         ps.setInt( 3, empCar.getCodCargoSucPlanilla());
-                        ps.setDate( 4, (Date) empCar.getFechaInicio());
-                        ps.setInt( 5, empCar.getAudUsuario());
-                        ps.setString(6, acc);
+                        ps.setDate(4, new java.sql.Date(empCar.getFechaInicio().getTime()));
+                        if (acc.equals("U") && empCar.getFechaInicioOriginal() != null) {
+                            ps.setDate(5, new java.sql.Date(empCar.getFechaInicioOriginal().getTime()));
+                        } else {
+                            ps.setNull(5, java.sql.Types.DATE);
+                        }
+                        ps.setInt( 6, empCar.getAudUsuario());
+                        ps.setString(7, acc);
 
                     });
             
@@ -50,4 +55,5 @@ public class EmpleadoCargoDao implements IEmpleadoCargo{
 
         return resp!=0;
     }
+
 }

@@ -38,5 +38,5 @@ public interface ITelefono {
      * @param codPersona
      * @return
      */
-    Telefono obtenerCorporativo(int codTipoTel, String telefono );
+    Telefono obtenerCorporativo( String telefono );
 }

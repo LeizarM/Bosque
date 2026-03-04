@@ -248,6 +248,59 @@ public class PersonaDao implements IPersona {
 
     }
 
+    /**
+     * MODULO EMPLEADOS RRHH
+     */
+
+    /**
+     * OBTENDRA UNA LISTA DE PERSONAS QUE NO SON EMPLEADOS Y >=18 AÑOS
+     */
+    public List<Persona>getLstPersonaNoEmpleado(String buscarPersona){
+        List<Persona>lstTemp;
+        try{
+            lstTemp = this.jdbcTemplate.query(" execute p_list_Persona @buscarPersona=?, @ACCION=?",
+                    new Object[]{buscarPersona,"D"},
+                    new int[]{Types.VARCHAR,Types.VARCHAR},
+                    (rs, rowNum)->{
+                        Persona temp= new Persona();
+                        temp.setCodPersona(rs.getInt(1));
+                        temp.setDatoPersona(rs.getString(2));
+                        temp.setCiNumero(rs.getString(3));
+                        temp.setCiExpedido(rs.getString(4));
+                        return temp;
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerListaPersonas,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+    /**
+     * Obtendra una lista de tipos de sexo
+     * @return
+     */
+    public List<Tipos> lstEducacion() {
+        return new Tipos().lstEducacion();
+    }
+    /**
+     * Obtendra una lista de tipo de relacion laboral
+     * @return
+     */
+    public List<Tipos> lstTipoRelacion() {
+        return new Tipos().lstTipoRelacion();
+    }
+    /**
+     * Obtendra una lista de tipo de licencia
+     * @return
+     */
+    public List<Tipos> listTipoLicencia() {
+        return new Tipos().listTipoLicencia();
+    }
+
+
+
+
 
 
 }

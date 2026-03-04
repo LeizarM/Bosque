@@ -20,4 +20,6 @@ public class EmpleadoCargo {
 
     private String cargoPlanilla;
     private int existe;
+
+    private Date fechaInicioOriginal;
 }

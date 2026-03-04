@@ -1,6 +1,8 @@
 package bo.bosque.com.impexpap.dao;
+import java.util.Date;
 import java.util.List;
 
+import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
 
@@ -30,4 +32,14 @@ public interface IRelEmpEmpr {
      */
 
     boolean obtenerRelEmpEmpr();
+    /**
+     * Obtendra la relacion laboral activa de un empleado
+     * @param codEmpleado
+     * @return
+     */
+    List<RelEmplEmpr> obtenerRelLab(int codEmpleado );
+    /**
+     * Procedimiento para obtener el ultimo codRelEmplEmpr (relacion laboral registrada)
+     */
+    RelEmplEmpr obtenerUltimoCodRelEmplEmpr (int codEmpleado);
 }

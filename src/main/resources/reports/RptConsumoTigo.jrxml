@@ -190,9 +190,6 @@
 				<reportElement x="0" y="229" width="100" height="1" uuid="e7235e36-c993-46e4-8598-f3d5da937571"/>
 			</break>
 			<break>
-				<reportElement x="0" y="223" width="100" height="1" uuid="bb9700ea-aef8-474d-88a0-a97705a82743"/>
-			</break>
-			<break>
 				<reportElement x="0" y="228" width="100" height="1" uuid="cc942747-d108-4ebc-adeb-739c0a2acd39"/>
 			</break>
 			<break>
@@ -239,9 +236,6 @@
 			</break>
 			<break>
 				<reportElement x="0" y="228" width="100" height="1" uuid="66d5c033-c5ea-4a78-8a15-ddd967f28e5c"/>
-			</break>
-			<break>
-				<reportElement x="0" y="228" width="100" height="1" uuid="20e87897-22f0-4762-9359-bf48fb52cb1a"/>
 			</break>
 			<subreport>
 				<reportElement positionType="Float" x="-1" y="50" width="550" height="17" uuid="469284e7-be6b-4710-926e-2d82ef3b10c9"/>

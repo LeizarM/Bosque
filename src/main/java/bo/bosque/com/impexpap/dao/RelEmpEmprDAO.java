@@ -1,7 +1,9 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -44,11 +46,6 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
                         temp.setFechaFin(rs.getDate(7));
                         temp.setMotivoFin(rs.getString(8));
                         //temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(9));
-                        temp.setCargo(rs.getString(9));
-                        temp.setSucursal(rs.getString(10));
-                        temp.setEmpresaInterna(rs.getString(11));
-                        temp.setEmpresaFiscal(rs.getString(12));
-
                         //temp.setDatoFechasBeneficio(rs.getString(2));
                         return temp;
                     });
@@ -92,6 +89,64 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
         }
 
         return resp!=0;
+    }
+    /**
+     * Procedimiento para obtener la relacion laboral activa del empleado
+     * @param codEmpleado
+     * @return
+     */
+    public List<RelEmplEmpr> obtenerRelLab( int codEmpleado ) {
+
+        List<RelEmplEmpr> lstTemp = new ArrayList<>();
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_RelEmplEmpr @codEmpleado=?, @ACCION=?",
+                    new Object[]{ codEmpleado, "D" },
+                    new int[]{ Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount) ->{
+                        RelEmplEmpr temp = new RelEmplEmpr();
+                        temp.setCodRelEmplEmpr(rs.getInt(1));
+                        temp.setCodEmpleado(rs.getInt(2));
+                        temp.setEsActivo(rs.getInt(3));
+                        temp.setTipoRel(rs.getString(4));
+                        temp.setNombreFileContrato(rs.getString(5));
+                        temp.setFechaIni(rs.getDate(6));
+                        temp.setFechaFin(rs.getDate(7));
+                        temp.setMotivoFin(rs.getString(8));
+                        temp.setCargo(rs.getString(9));
+                        temp.setSucursal(rs.getString(10));
+                        temp.setEmpresaInterna(rs.getString(11));
+                        temp.setEmpresaFiscal(rs.getString(12));
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: RelEmpEmprDao en obtenerRelacionesLaborales, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
+    }
+    /**
+     *  Procedimiento para obtener la fechainicio del cargo mas reciente
+     */
+    public RelEmplEmpr obtenerUltimoCodRelEmplEmpr (int codEmpleado){
+        RelEmplEmpr relEmplEmpr= null;
+        try{
+            relEmplEmpr = this.jdbcTemplate.queryForObject("execute p_list_RelEmplEmpr @codEmpleado=?, @ACCION=?",
+                    new Object []{codEmpleado,"E"},
+                    new int [] {Types.INTEGER,Types.VARCHAR},
+                    (rs,rowNum)->{
+                        RelEmplEmpr temp= new RelEmplEmpr();
+                        temp.setCodRelEmplEmpr(rs.getInt(1));
+                        return temp;
+                    });
+        }catch (EmptyResultDataAccessException e) {
+            System.out.println("Info: No se encontró cargo para codEmpleado=" + codEmpleado);
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error en obtenerFechaInicioUltimoCargo: " + e.getMessage());
+            return null;
+        }
+        return relEmplEmpr;
     }
 
     @Override

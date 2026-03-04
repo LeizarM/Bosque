@@ -1,7 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 
-import bo.bosque.com.impexpap.model.Persona;
+import  bo.bosque.com.impexpap.model.Persona;
 import bo.bosque.com.impexpap.utils.Tipos;
 
 import java.util.List;
@@ -64,6 +64,27 @@ public interface IPersona {
      * @return
      */
     Persona obtenerDatosXCarnet (String ciNumero );
+    /**
+     * Procedimiento para obtener una lista de personas
+     * @return
+     */
+    List<Persona>getLstPersonaNoEmpleado(String buscarPersona);
+    /**
+     * Procedimiento para obtener el tipo de sexo
+     * @return
+     */
+    List<Tipos>lstEducacion();
+    /**
+     * Procedimiento para obtener el tipo de sexo
+     * @return
+     */
+    List<Tipos>lstTipoRelacion();
+    /**
+     * Procedimiento para obtener el tipo de licencia
+     * @return
+     */
+    List<Tipos>listTipoLicencia();
+
 
 
 }

@@ -25,6 +25,9 @@ public class Sucursal implements Serializable {
     private Empresa empresa  = new Empresa();
     private String nombreCiudad;
 
+    private int codSucursalPlanilla;
+    private String nombrePlanilla;
+
     /**
      * Constructores
      */

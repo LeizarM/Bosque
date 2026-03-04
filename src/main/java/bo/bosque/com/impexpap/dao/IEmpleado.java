@@ -1,7 +1,9 @@
 package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.Empleado;
+import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.Persona;
 
+import java.util.Date;
 import java.util.List;
 
 public interface IEmpleado {
@@ -69,6 +71,38 @@ public interface IEmpleado {
      * @return
      */
     List <Empleado>lisEmpleados();
+    /**
+     * MODULO EMPLEADOS RRHH - OBTENDRA UNA LISTA DE EMPLEADOS
+     */
+    List<Empleado> obtenerLstEmpleados (String search, Integer esActivo,int pageNumber,int pageSize,Integer codEmpresa );
+    /**
+     * Obtendra el ultimo cargo de un empleado
+     */
+    Empleado obtenerEmpleadoCargo (int codEmpleado);
+    /**
+     * Obtendra el ultimo cargo de un empleado
+     */
+    List<Empleado> obtenerCargosEmpleado (int codEmpleado);
+    /**
+     * procedimiento para verificar el cargo duplicado al editar
+     */
+    Empleado verificarCargoDuplicado (int codEmpleado, Date fechaInicio);
+    /**
+     * procedimiento para verificar el cargo duplicado al editar
+     */
+    Empleado obtenerFechaInicioUltimoCargo (int codEmpleado, Date fechaInicio);
+    /**
+     * MODULO EMPLEADOS RRHH - OBTENDRA UNA LISTA DE CARGOS X EMPRESA
+     */
+    List<Empleado> obtenerCargosXEmpresa (String search,Integer codEmpresaPlanilla );
+
+    /**
+     * obtendra el haber basico de un empleado
+     * @param codEmpleado
+     * @return
+     */
+    Empleado obtenerHaberBasico (int codEmpleado);
+
 
 
 }

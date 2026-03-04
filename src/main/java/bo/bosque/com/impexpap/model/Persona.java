@@ -34,11 +34,13 @@ public class Persona implements Serializable {
     private float lng; // longitud
     private int audUsuarioI;
 
+    private String buscarPersona;
+
 
     /**
      * Variable de apoyo
      */
-    private String datoPersona;
+    private String      datoPersona;
     private Zona zona = new Zona();
     private Pais pais  = new Pais();
     private Ciudad ciudad = new Ciudad();

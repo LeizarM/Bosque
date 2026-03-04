@@ -142,16 +142,16 @@ public class TelefonoDao implements ITelefono {
     }
     /**
      * Procedimiento para obtener el listade de telefonos por persona
-     * @param codTipotel, corporativo
+     * @param  corporativo
      * @return
      */
-    public Telefono obtenerCorporativo( int codTipotel,String corporativo ) {
+    public Telefono obtenerCorporativo(String corporativo ) {
         Telefono Temp ;
 
         try{
-            Temp = this.jdbcTemplate.queryForObject(" execute p_list_Telefono @codTipoTel=?, @telefono=?,@ACCION=?",
-                    new Object[] { codTipotel,corporativo, "L" },
-                    new int[] { Types.INTEGER,Types.VARCHAR, Types.VARCHAR },
+            Temp = this.jdbcTemplate.queryForObject(" execute p_list_Telefono  @telefono=?,@ACCION=?",
+                    new Object[] {corporativo, "L" },
+                    new int[] {Types.VARCHAR, Types.VARCHAR },
                     (rs, rowCount)->{
                         Telefono temp = new Telefono();
                         temp.setCodTelefono(rs.getInt(1));

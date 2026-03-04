@@ -1,12 +1,14 @@
 package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -81,8 +83,8 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.getRelEmpEmpr().setMotivoFin(rs.getString(13));
                         temp.getRelEmpEmpr().setTipoRel(rs.getString(14));
 
-                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(15));
-                        temp.getEmpleadoCargo().setCodCargoSucPlanilla(rs.getInt(16));
+                        temp.getEmpleadoCargo().getCargoSucursal().setCodCargo(rs.getInt(15));
+                        temp.getEmpleadoCargo().getCargoSucursal().setCodCargoSucursal(rs.getInt(16));
 
                         temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargo(rs.getInt(17));
                         temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(18));
@@ -99,6 +101,7 @@ public class EmpleadoDAO implements IEmpleado{
                         temp.getEmpleadoCargo().getCargoSucursal().getCargo().setSucursalPlanilla(rs.getString(28));
 
                         temp.getEmpleadoCargo().setFechaInicio(rs.getDate(29));
+                        temp.setHaberBasico(rs.getFloat(30));
 
                     return temp;
                     });
@@ -121,7 +124,7 @@ public class EmpleadoDAO implements IEmpleado{
     public boolean registroEmpleado(Empleado emp, String acc) {
          int resp;
          try{
-             resp = this.jdbcTemplate.update("execute p_abm_empleado  @codEmpleado=?, @codPersona=?, @numCuenta=?, @codRelBeneficios=?, @codRelPlanilla=?, @audUsuarioI=?, @ACCION=?",
+             resp = this.jdbcTemplate.update("execute p_abm_empleado  @codEmpleado=?, @codPersona=?, @numCuenta=?, @codRelBeneficios=?, @codRelPlanilla=?, @audUsuarioI=?,@RETORNA=?,@haberBasico=?, @ACCION=?",
                      ps->{
                         ps.setInt (1, emp.getCodEmpleado() );
                         ps.setInt( 2, emp.getCodPersona() );
@@ -129,17 +132,21 @@ public class EmpleadoDAO implements IEmpleado{
                         ps.setInt( 4, emp.getCodRelBeneficios() );
                         ps.setInt( 5, emp.getCodRelPlanilla() );
                         ps.setInt( 6, emp.getAudUsuarioI());
-                        ps.setString( 7, acc  );
+                        ps.setNull(7, java.sql.Types.INTEGER);
+                        ps.setFloat(8,emp.getHaberBasico());
+                        ps.setString( 9, acc  );
 
                      });
-
-         }catch ( BadSqlGrammarException e ){
-             System.out.println("Error: EmpleadoDAO en registroEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-             this.jdbcTemplate = null;
-             resp = 0;
+             return true;
+         }catch (Exception e) {
+             // Capturamos el mensaje del RAISERROR que viene de SQL
+             String mensajeSql = e.getMessage();
+             if (e.getCause() != null && e.getCause() instanceof SQLException) {
+                 mensajeSql = e.getCause().getMessage();
+             }
+             // Lanzamos una RuntimeException con el mensaje de SQL para que el Controller la atrape
+             throw new RuntimeException(mensajeSql);
          }
-
-        return resp!=0;
     }
 
 
@@ -357,5 +364,225 @@ public class EmpleadoDAO implements IEmpleado{
 
 
     }
+    /**
+     * MODULO EMPLEADOS RRHH
+     */
+    /**
+     * Procedimiento para obtener los Empleados
+     * @return List<Empleado>
+     */
+    public List<Empleado> obtenerLstEmpleados( String search,Integer esActivo, int pageNumber,int pageSize, Integer codEmpresa ) {
+        List<Empleado>lstTemp;
+        try {
+            lstTemp =  this.jdbcTemplate.query("execute p_list_Empleado @search=?,@esActivo=?,@pageNumber=?,@pageSize=?,@codEmpresa=?, @ACCION=?",
+                    new Object[] { search,esActivo,pageNumber,pageSize,codEmpresa, "Y" },
+                    new int[] { Types.VARCHAR ,Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Empleado temp = new Empleado();
+                        temp.setFila(rs.getInt(1));
+                        temp.setCodEmpleado( rs.getInt(2) );
+                        temp.setCodPersona( rs.getInt(3) );
+                        temp.getPersona().setDatoPersona( rs.getString(4) );
+                        temp.getRelEmpEmpr().setEsActivo( rs.getInt(5) );
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(6));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcionPlanilla(rs.getString(7));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresa(rs.getString(8));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresaPlanilla(rs.getInt(9));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresaPlanilla(rs.getString(10));
+
+
+                        return temp;
+                    });
+
+        }  catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmpleadoDAO en obtenerEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+
+        return  lstTemp;
+    }
+    /**
+     * obtendra el ultimo cargo de un empleado
+     */
+    public Empleado obtenerEmpleadoCargo (int codEmpleado){
+        Empleado eCargo;
+        try{
+            eCargo = this.jdbcTemplate.queryForObject("execute p_list_EmpleadoCargo @codEmpleado=?,@ACCION=?",
+                    new Object []{codEmpleado,"C"},
+                    new int [] {Types.INTEGER,Types.VARCHAR},
+                    (rs,rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.getPersona().setDatoPersona(rs.getString(2));
+                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(3));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargo(rs.getInt(4));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(5));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(6));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(7));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().getEmpresa().setCodEmpresa(rs.getInt(8));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(9));
+                        temp.getEmpleadoCargo().setCodCargoSucPlanilla(rs.getInt(10));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargoPlanilla(rs.getInt(11));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcionPlanilla(rs.getString(12));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursalPlanilla(rs.getInt(13));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombrePlanilla(rs.getString(14));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresaPlanilla(rs.getInt(15));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresaPlanilla(rs.getString(16));
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(17));
+                        return temp;
+
+
+                    });
+        }catch (BadSqlGrammarException e) {
+            System.out.println("Error: PersonaDao en obtenerEmpleadoCargo, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            eCargo = new Empleado();
+            this.jdbcTemplate = null;
+        }
+
+        return eCargo;
+    }
+    public List<Empleado> obtenerCargosEmpleado( int codEmpleado ) {
+        List<Empleado>lstTemp;
+        try {
+            lstTemp =  this.jdbcTemplate.query("execute p_list_EmpleadoCargo @codEmpleado=?, @ACCION=?",
+                    new Object[] { codEmpleado, "D" },
+                    new int[] {Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.getPersona().setDatoPersona(rs.getString(2));
+                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(3));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargo(rs.getInt(4));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(5));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursal(rs.getInt(6));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombre(rs.getString(7));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().getEmpresa().setCodEmpresa(rs.getInt(8));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().getEmpresa().setNombre(rs.getString(9));
+                        temp.getEmpleadoCargo().setCodCargoSucPlanilla(rs.getInt(10));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodCargoPlanilla(rs.getInt(11));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcionPlanilla(rs.getString(12));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setCodSucursalPlanilla(rs.getInt(13));
+                        temp.getEmpleadoCargo().getCargoSucursal().getSucursal().setNombrePlanilla(rs.getString(14));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresaPlanilla(rs.getInt(15));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresaPlanilla(rs.getString(16));
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(17));
+                        return temp;
+                    });
+
+        }  catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmpleadoDAO en obtenerCargosEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+
+        return  lstTemp;
+    }
+    /**
+     * Procedimiento para verificar si existe un cargo duplicado al momento de editar
+     */
+    public Empleado verificarCargoDuplicado (int codEmpleado, Date fechaInicio){
+        Empleado eCargo= null;
+        try{
+            eCargo = this.jdbcTemplate.queryForObject("execute p_list_EmpleadoCargo @codEmpleado=?, @fechaInicio=?,@ACCION=?",
+                    new Object []{codEmpleado,fechaInicio,"L"},
+                    new int [] {Types.INTEGER,Types.DATE,Types.VARCHAR},
+                    (rs,rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(2));
+                        temp.getEmpleadoCargo().setCodCargoSucPlanilla(rs.getInt(3));
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(4));
+                        return temp;
+
+
+                    });
+        }catch (Exception e) {
+            //System.out.println("Error: PersonaDao en verificarCargoDuplicado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            //eCargo = new Empleado();
+            //this.jdbcTemplate = null;
+            // Cualquier excepción (incluyendo EmptyResultDataAccessException): devolver null
+            System.out.println("Info: No se encontró cargo para codEmpleado=" + codEmpleado + ", fechaInicio=" + fechaInicio);
+            eCargo = null;
+        }
+
+        return eCargo;
+    }
+    /**
+     *  Procedimiento para obtener la fechainicio del cargo mas reciente
+     */
+    public Empleado obtenerFechaInicioUltimoCargo (int codEmpleado, Date fechaInicio){
+        Empleado eCargo= null;
+        try{
+            eCargo = this.jdbcTemplate.queryForObject("execute p_list_EmpleadoCargo @codEmpleado=?, @fechaInicioOriginal=?,@ACCION=?",
+                    new Object []{codEmpleado,fechaInicio,"E"},
+                    new int [] {Types.INTEGER,Types.DATE,Types.VARCHAR},
+                    (rs,rowNum)->{
+                        Empleado temp= new Empleado();
+                        temp.getEmpleadoCargo().setFechaInicio(rs.getDate(1));
+                        return temp;
+                    });
+        }catch (EmptyResultDataAccessException e) {
+            System.out.println("Info: No se encontró cargo para codEmpleado=" + codEmpleado);
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error en obtenerFechaInicioUltimoCargo: " + e.getMessage());
+            return null;
+        }
+        return eCargo;
+    }
+    /**
+     * Procedimiento para obtener los Empleados
+     * @return List<Empleado>
+     */
+    public List<Empleado> obtenerCargosXEmpresa( String search,Integer codEmpresa ) {
+        List<Empleado>lstTemp;
+        try {
+            lstTemp =  this.jdbcTemplate.query("execute p_list_EmpleadoCargo @search=?,@codEmpresa=?, @ACCION=?",
+                    new Object[] { search,codEmpresa, "F" },
+                    new int[] { Types.VARCHAR ,Types.INTEGER,Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        Empleado temp = new Empleado();
+                        temp.getEmpleadoCargo().getCargoSucursal().setCodCargoSucursal(rs.getInt(1));
+                        temp.getEmpleadoCargo().getCargoSucursal().setCodCargo(rs.getInt(2));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setDescripcion(rs.getString(3));
+                        temp.getEmpleadoCargo().setCodCargoSucursal(rs.getInt(4));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setSucursal(rs.getString(5));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setCodEmpresa(rs.getInt(6));
+                        temp.getEmpleadoCargo().getCargoSucursal().getCargo().setNombreEmpresa(rs.getString(7));
+
+
+                        return temp;
+                    });
+
+        }  catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmpleadoDAO en obtenerEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null;
+        }
+
+        return  lstTemp;
+    }
+    public Empleado obtenerHaberBasico (int codEmpleado){
+        Empleado emp= new Empleado();
+        try{
+            emp=this.jdbcTemplate.queryForObject("execute p_list_empleado @codEmpleado=?,@ACCION=?",
+                    new Object[]{codEmpleado,"F"},
+                    new int []{Types.INTEGER,Types.VARCHAR},
+                    (rs, rowNum) -> {
+                        Empleado temp= new Empleado();
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setCodPersona(rs.getInt(2));
+                        temp.setHaberBasico(rs.getFloat(3));
+                        temp.setEsActivo(rs.getInt(4));
+                        return temp;
+                    });
+        }catch(BadSqlGrammarException e){
+            System.out.println("Error: EmpleadoDAO en obtenerHaberBasico, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            emp= new Empleado();
+        }
+        return emp;
+    }
+
 
 }

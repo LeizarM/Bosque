@@ -5,6 +5,7 @@ import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Tipos;
 import bo.bosque.com.impexpap.utils.Utiles;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +17,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @RestController
@@ -43,13 +47,18 @@ public class RrhhController {
     private final ICargoSucursal cagoSucDao;
     private final IEmpleadoCargo empCargoDao;
     private final IRelEmpEmpr reeDao;
+    private final IEducacion eduDao;
+    private final INroCuentaBancaria cuentaDao;
+
+    private final ISeguro segDao;
+    private final IAfiliacionSeguro afiSegDao;
 
 
     private final IEmpresa empresaDao;
     private final ICargo cargoDao;
     private final INivelJerarquico nivelJerarquicoDao;
 
-    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao, IEmpresa empresaDao, ICargo cargoDao, INivelJerarquico nivelJerarquicoDao) {
+    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao, IEmpresa empresaDao, ICargo cargoDao, INivelJerarquico nivelJerarquicoDao, IEducacion eduDao,INroCuentaBancaria cuentaDao,ISeguro segDao,IAfiliacionSeguro afiSegDao) {
         this.jdbcTemplate = jdbcTemplate;
 
         this.emailDao   = emailDao;
@@ -69,6 +78,10 @@ public class RrhhController {
         this.empresaDao = empresaDao;
         this.cargoDao = cargoDao;
         this.nivelJerarquicoDao = nivelJerarquicoDao;
+        this.eduDao = eduDao;
+        this.cuentaDao = cuentaDao;
+        this.segDao= segDao;
+        this.afiSegDao=afiSegDao;
     }
 
 
@@ -342,25 +355,24 @@ public class RrhhController {
      * @param emp
      * @return
      */
-    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/registroEmpleado")
-    public ResponseEntity<?> registrarEmpleado( @RequestBody Empleado emp ){
+    public ResponseEntity<?> registrarEmpleado(@RequestBody Empleado emp) {
         Map<String, Object> response = new HashMap<>();
+        String acc = (emp.getCodEmpleado() == 0) ? "I" : "U";
 
-
-        String acc = "U";
-        if( emp.getCodEmpleado() == 0 ){
-            acc = "I";
-        }
-
-        if( !this.empDao.registroEmpleado( emp, acc ) ){
-            response.put("msg", "Error al Actualizar los Datos del Empleado");
+        try {
+            this.empDao.registroEmpleado(emp, acc);
+            response.put("msg", "Datos Actualizados");
+            response.put("ok", "ok");
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            // Aquí capturamos el mensaje del RAISERROR
+            response.put("msg", e.getMessage()); // Este mensaje será: "El sueldo es menor al mínimo nacional."
             response.put("error", "ok");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            // Usamos BAD_REQUEST (400) para que Flutter lo detecte como un error de validación
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        response.put("msg", "Datos Actualizados");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     /**
@@ -368,27 +380,75 @@ public class RrhhController {
      * @param empCar
      * @return
      */
-    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/registroEmpleadoCargo")
-    public ResponseEntity<?> registrarEmpleado( @RequestBody EmpleadoCargo empCar ){
+    public ResponseEntity<?> registrarEmpleado(@RequestBody EmpleadoCargo empCar) {
 
+        // 1. Estandarizar fechas (Java a SQL)
+        prepararFechas(empCar);
 
-        Map<String, Object> response = new HashMap<>();
-        empCar.setFechaInicio( new Utiles().fechaJ_a_Sql(empCar.getFechaInicio()));
-        System.out.println(empCar.toString());
-
-        String acc = "U";
-        if(empCar.getExiste() == 0)  acc = "I";
-
-        if( !this.empCargoDao.registrarEmpleadoCargo( empCar, acc ) ){
-            response.put("msg", "Error al Actualizar los Datos del Empleado Cargo");
-            response.put("error", "ok");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        // 2. Validación de Duplicados: ¿La fecha ya está ocupada?
+        Empleado existente = empDao.verificarCargoDuplicado(empCar.getCodEmpleado(), empCar.getFechaInicio());
+        if (esRegistroInvalidoPorDuplicado(empCar, existente)) {
+            return buildResponse("La fecha seleccionada ya está ocupada por otro registro.", HttpStatus.BAD_REQUEST);
         }
-        response.put("msg", "Datos Actualizados");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        // 3. Validación Cronológica: ¿Estamos intentando insertar en el pasado?
+        String errorCronologico = chequearCronologia(empCar);
+        if (errorCronologico != null) {
+            return buildResponse(errorCronologico, HttpStatus.BAD_REQUEST);
+        }
+
+        // 4. Ejecución del proceso de guardado
+        String accion = (empCar.getExiste() == 0) ? "I" : "U";
+        if (!this.empCargoDao.registrarEmpleadoCargo(empCar, accion)) {
+            return buildResponse("Error crítico al procesar en la base de datos.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return buildResponse("Operación exitosa", HttpStatus.CREATED);
     }
+    //inicio metodos de apoyo registro empleado cargo
+    private void prepararFechas(EmpleadoCargo empCar) {
+        Utiles utiles = new Utiles();
+        empCar.setFechaInicio(utiles.fechaJ_a_Sql(empCar.getFechaInicio()));
+        if (empCar.getFechaInicioOriginal() != null) {
+            empCar.setFechaInicioOriginal(utiles.fechaJ_a_Sql(empCar.getFechaInicioOriginal()));
+        }
+    }
+
+    private boolean esRegistroInvalidoPorDuplicado(EmpleadoCargo empCar, Empleado existente) {
+        if (existente == null) return false; // No hay duplicado, es válido.
+
+        // Si es nuevo (existe == 0) y ya hay alguien en esa fecha -> Inválido.
+        if (empCar.getExiste() == 0) return true;
+
+        // Si es edición, solo es inválido si cambió la fecha y la nueva ya está ocupada.
+        return !empCar.getFechaInicio().equals(empCar.getFechaInicioOriginal());
+    }
+
+    private String chequearCronologia(EmpleadoCargo empCar) {
+        // Si edito, busco cargos anteriores al original. Si soy nuevo, busco anteriores al nuevo.
+        Date ref = (empCar.getExiste() == 1) ? empCar.getFechaInicioOriginal() : null;
+        Empleado frontera = this.empDao.obtenerFechaInicioUltimoCargo(empCar.getCodEmpleado(), ref);
+
+        if (frontera != null && frontera.getEmpleadoCargo().getFechaInicio() != null) {
+            Date limite = frontera.getEmpleadoCargo().getFechaInicio();
+
+            // Regla: Nueva fecha debe ser mayor al límite encontrado.
+            if (!empCar.getFechaInicio().after(limite)) {
+                String tipo = (empCar.getExiste() == 1) ? "anterior" : "actual";
+                return "La fecha debe ser mayor a la del cargo " + tipo + " (" + limite + ")";
+            }
+        }
+        return null; // Todo en orden.
+    }
+
+    private ResponseEntity<Map<String, Object>> buildResponse(String msg, HttpStatus status) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("msg", msg);
+        return new ResponseEntity<>(map, status);
+    }
+    //fin metodos de apoyo registro empleado cargo
 
     /**
      * Procedimiento para listar las fechas de beneficio interno y para planilla
@@ -412,26 +472,67 @@ public class RrhhController {
      * @param
      * @return
      */
-    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/registroRelEmp")
-    public ResponseEntity<?> registrarRelEmpEmpr( @RequestBody RelEmplEmpr ree ){
+    public ResponseEntity<?> registrarRelEmpEmpr(
+            @RequestBody RelEmplEmpr ree,
+            @RequestParam(value = "validar", defaultValue = "false") boolean validar,
+            @RequestParam(value = "esHistorico", defaultValue = "false") boolean esHistorico  // ← NUEVO
+    ) {
         Map<String, Object> response = new HashMap<>();
-        ree.setFechaIni( new Utiles().fechaJ_a_Sql(ree.getFechaIni()));
-        ree.setFechaFin( new Utiles().fechaJ_a_Sql(ree.getFechaFin()));
+        Utiles utiles = new Utiles();
 
-        String acc = "U";
-        if( ree.getCodRelEmplEmpr() == 0){
-            acc = "I";
+        // 1. Estandarizar fechas
+        ree.setFechaIni(utiles.fechaJ_a_Sql(ree.getFechaIni()));
+        ree.setFechaFin(utiles.fechaJ_a_Sql(ree.getFechaFin()));
+
+        // 2. Validación Cronológica (Solo si NO es histórico)
+        if (validar && !esHistorico) {  // ← CAMBIO: agregar !esHistorico
+            String error = chequearCronologiaRelacion(ree);
+            if (error != null) {
+                response.put("msg", error);
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
         }
 
-        if( !this.reeDao.registrarRelEmpEmpr( ree, acc ) ){
-            response.put("msg", "Error al Actualizar los Datos del Empleado Relacion Empresa");
-            response.put("error", "ok");
+        // 3. Persistencia
+        String acc = (ree.getCodRelEmplEmpr() == 0) ? "I" : "U";
+        if (!this.reeDao.registrarRelEmpEmpr(ree, acc)) {
+            response.put("msg", "Error al procesar la Relación Empresa");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        response.put("msg", "Datos Actualizados");
+
+        // 4. Respuesta con el ID generado para el copyWith de Flutter
+        response.put("msg", "Operación exitosa");
         response.put("ok", "ok");
+        response.put("codRelEmplEmpr", ree.getCodRelEmplEmpr());
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    private String chequearCronologiaRelacion(RelEmplEmpr ree) {
+        // A. Validación contra último CARGO
+        Empleado frontera = this.empDao.obtenerFechaInicioUltimoCargo(ree.getCodEmpleado(), null);
+        if (frontera != null && frontera.getEmpleadoCargo().getFechaInicio() != null) {
+            Date fechaUltimoCargo = frontera.getEmpleadoCargo().getFechaInicio();
+            if (ree.getFechaIni().before(fechaUltimoCargo)) {
+                return "La fecha de inicio (" + ree.getFechaIni() + ") no puede ser anterior al último cargo (" + fechaUltimoCargo + ").";
+            }
+        }
+
+        // B. Validación contra relación laboral ANTERIOR
+        List<RelEmplEmpr> historial = this.reeDao.obtenerRelacionesLaborales(ree.getCodEmpleado());
+        if (historial != null && !historial.isEmpty()) {
+            historial.sort(Comparator.comparing(RelEmplEmpr::getFechaIni));
+            RelEmplEmpr ultima = historial.get(historial.size() - 1);
+
+            if (ultima.getFechaFin() != null && !ree.getFechaIni().after(ultima.getFechaFin())) {
+                return "La relación debe iniciar después del fin de la anterior (" + ultima.getFechaFin() + ").";
+            } else if (ultima.getFechaFin() == null && ree.getCodRelEmplEmpr() == 0) {
+                return "Existe una relación activa. Debe finalizarla antes de crear una nueva.";
+            }
+        }
+        return null;
     }
     /**
      * Procedimiento para el registro de Email
@@ -923,10 +1024,10 @@ public class RrhhController {
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/obtenerCorporativoXEmpleado")
     public Telefono obtenerCoporativoXEmpleado( @RequestBody Telefono tel ){
-        int codTipoTel = tel.getCodTipoTel();
+        //int codTipoTel = tel.getCodTipoTel();
         String telefono = tel.getTelefono();
 
-        Telefono temp = this.telfDao.obtenerCorporativo( codTipoTel,telefono );
+        Telefono temp = this.telfDao.obtenerCorporativo( telefono );
         if( temp == null ) return new Telefono();
         return temp;
 
@@ -1190,6 +1291,578 @@ public class RrhhController {
         return ResponseEntity.status(status)
                 .body(new ApiResponse<>(message, null, status.value()));
     }
+/**
+ * =====================================================================
+ * Modulo para la el registro de empleados RRHH
+ * =====================================================================
+ * */
+    /**
+     * Procedimiento para obtener la lista de empleados
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerLstEmpleados")
+    public List<Empleado> obtenerLstEmpleados(@RequestBody Empleado emp){
+        Integer esActivo=emp.getEsActivo();
+        String search=emp.getSearch();
+        int pageNumber= emp.getPageNumber();
+        int pageSize=emp.getPageSize();
+        Integer codEmpresa=emp.getCodEmpresa();
+
+        List <Empleado> lstTemp = this.empDao.obtenerLstEmpleados( search,esActivo,pageNumber,pageSize,codEmpresa );
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+    }
+    /**
+     * OBTENDRA UNA LISTA DE PERSONAS QUE NO SON EMPLEADOS >=18 AÑOS
+     */
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerLstPersonaNoEmpleado")
+    public List<Persona>getLstPersonaNoEmpleado(@RequestBody Persona per){
+        String buscarPersona=per.getBuscarPersona();
+        List<Persona>lstTemp=this.perDao.getLstPersonaNoEmpleado(buscarPersona);
+        if (lstTemp.size()==0)return new ArrayList<>();
+        return lstTemp;
+
+    }
+    /**
+     * Devolera una lista de los tipos de educacion
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tiposEducacion")
+    public List<Tipos> lstEducacion(){
+        return this.perDao.lstEducacion();
+    }
+
+    /**
+     * PROCEDIMIENTO PARA INSERTAR EDUCACION
+     * @param ed
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroEducacion")
+    public ResponseEntity<?> registroEducacion( @RequestBody Educacion ed ){
+
+        Map<String, Object> response = new HashMap<>();
+        ed.setFecha( new Utiles().fechaJ_a_Sql(ed.getFecha()) );  // ✅ AGREGAR ESTO
+
+        String acc = "U";
+        if( ed.getCodEducacion() == 0){
+            acc = "I";
+        }
+
+        if( !this.eduDao.registrarEducacion( ed, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos de Educacion del Empleado");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * ELIMINAR EDUCACION
+     * @param codEducacion
+     * @return
+     */
+    @Secured({"ROLE_ADM","ROLE_LIM"})
+    @DeleteMapping("/eliminarEducacion/{codEducacion}")
+    public ResponseEntity<Map<String, Object>>eliminarEducacion(@PathVariable int codEducacion){
+        Map<String,Object>response = new HashMap<>();
+        Educacion temp= new Educacion();
+        temp.setCodEducacion(codEducacion);
+
+        boolean eliminado =  this.eduDao.registrarEducacion(temp,"D");
+
+        if (!eliminado){
+            System.out.println("Error al eliminar educacion"+codEducacion);
+            response.put("msg","Error al eliminar esta educacion");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        System.out.println("Educacion eliminada correctamente:"+codEducacion);
+        response.put("msg","Educacion eliminada correctamente.");
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * PROCEDIMIENTO PARA OBTENER UNA LISTA DE EDUCACION
+     * @param educacion
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/obtenerEducacion")
+    public List<Educacion> obtenerEducacion ( @RequestBody Educacion educacion ){
+
+        List<Educacion> lstEducacion = this.eduDao.obtenerEducacion( educacion.getCodEmpleado() );
+        if(lstEducacion.size() == 0) return new ArrayList<>();
+        return lstEducacion;
+    }
+
+    /**
+     *OBTENDRA UNA LISTA DE NROS DE CUENTA DE LOS EMPLEADOS
+     * @param cuenta
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/obtenerNroCuentaBanco")
+    public List<NroCuentaBancaria> obtenerCuentaBanco ( @RequestBody NroCuentaBancaria cuenta ){
+
+        List<NroCuentaBancaria> lstCuentas = this.cuentaDao.obtenerCuentasBanco( cuenta.getCodEmpleado() );
+        if(lstCuentas.size() == 0) return new ArrayList<>();
+        return lstCuentas;
+    }
+
+    /**
+     * PROCEDIMIENTO PARA REGISTRAR UN NUMERO DE CUENTA BANCARIA
+     * @param cb
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroCuentaBanco")
+    public ResponseEntity<?> registrarCuentaBancaria( @RequestBody NroCuentaBancaria cb ){
+
+        Map<String, Object> response = new HashMap<>();
+
+
+
+        String acc = "U";
+        if( cb.getCodCuenta() == 0){
+            acc = "I";
+        }
+
+        if( !this.cuentaDao.registrarCuentaBancaria( cb, acc ) ){
+            response.put("msg", "Error al Actualizar el nro de cuenta");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    /**
+     * ELIMINAR CUENTA BANCARIA
+     * @param codCuenta
+     * @return
+     */
+    @Secured({"ROLE_ADM","ROLE_LIM"})
+    @DeleteMapping("/eliminarCuentaBancaria/{codCuenta}")
+    public ResponseEntity<Map<String, Object>>eliminarCuentaBancaria(@PathVariable int codCuenta){
+        Map<String,Object>response = new HashMap<>();
+        NroCuentaBancaria temp= new NroCuentaBancaria();
+        temp.setCodCuenta(codCuenta);
+
+        boolean eliminado =  this.cuentaDao.registrarCuentaBancaria(temp,"D");
+
+        if (!eliminado){
+            System.out.println("Error al eliminar cuenta bancaria"+codCuenta);
+            response.put("msg","Error al eliminar esta cuenta");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        System.out.println("Cuenta bancaria eliminada correctamente:"+codCuenta);
+        response.put("msg","Cuenta bancaria eliminada correctamente.");
+        return ResponseEntity.ok(response);
+    }
+    /**
+     * Devolera una lista de los tipos de educacion
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tipoRelacionLaboral")
+    public List<Tipos> lstTipoRelacion(){
+        return this.perDao.lstTipoRelacion();
+    }
+    /**
+     * PARA GENERAR EL RPT NOMINA EMPLEADOS
+     * @return
+     */
+    @PostMapping("/pdfNominaEmpleados")
+    public ResponseEntity<?> exportPDFNominaEmpleados()  {
+
+        String nombreReporte = "RptNominaEmpleados";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+    /**
+     * Procedimiento para mostrar la relacion laboral activa del empleado
+     * @param ree
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/obtenerRelacionLaboral")
+    public List<RelEmplEmpr> obtenerRelLab ( @RequestBody RelEmplEmpr ree  ){
+
+        List<RelEmplEmpr> lstRee = this.reeDao.obtenerRelLab(  ree.getCodEmpleado() );
+
+        if( lstRee.size() == 0 ) return new ArrayList<>();
+
+        return lstRee;
+
+    }
+    /**
+     * ELIMINAR RELACION LABORAL
+     * @param codRelEmp
+     * @return
+     */
+    @Secured({"ROLE_ADM","ROLE_LIM"})
+    @DeleteMapping("/eliminarRelacionLaboral/{codRelEmp}")
+    public ResponseEntity<Map<String, Object>>eliminarRelacionLaboral(@PathVariable int codRelEmp){
+        Map<String,Object>response = new HashMap<>();
+        RelEmplEmpr temp= new RelEmplEmpr();
+        temp.setCodRelEmplEmpr(codRelEmp);
+
+        boolean eliminado =  this.reeDao.registrarRelEmpEmpr(temp,"D");
+
+        if (!eliminado){
+            System.out.println("Error al eliminar relacion laboral"+codRelEmp);
+            response.put("msg","Error al eliminar esta relacion");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        System.out.println("relacion laboral eliminada correctamente:"+codRelEmp);
+        response.put("msg","relacion laboral eliminada correctamente.");
+        return ResponseEntity.ok(response);
+    }
+    /**
+     * Procedimiento que obtendra el ultimo cargo de un empleado
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/ultimoCargoEmpleado")
+    public Empleado ultimoCargoEmpleado ( @RequestBody  Empleado eCargo ){
+
+
+        Empleado temp = this.empDao.obtenerEmpleadoCargo( eCargo.getCodEmpleado() );
+        if(temp == null) return new Empleado();
+        //System.out.println(temp.toString());
+        return temp;
+    }
+    /**
+     *OBTENDRA EL HISTORIAL DE CARGOS DEL EMPLEADO
+     * @param emp
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/obtenerCargosEmpleado")
+    public List<Empleado> obtenerEmpleadoCargo ( @RequestBody Empleado emp ){
+
+        List<Empleado> lstCargos = this.empDao.obtenerCargosEmpleado( emp.getCodEmpleado() );
+        if(lstCargos.size() == 0) return new ArrayList<>();
+        return lstCargos;
+    }
+    /**
+     * ELIMINAR CUENTA BANCARIA
+     * @param codEmpleado,codCargoSucursal,fechaInicio,codCargoSucPlanilla
+     * @return
+     */
+    @Secured({"ROLE_ADM","ROLE_LIM"})
+    @DeleteMapping("/eliminarCargoEmpleado/{codEmpleado}/{codCargoSucursal}/{fechaInicio}/{codCargoSucPlanilla}")
+    public ResponseEntity<Map<String, Object>>eliminarCargoEmpleado(@PathVariable int codEmpleado, @PathVariable int codCargoSucursal, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaInicio, @PathVariable int codCargoSucPlanilla){
+        Map<String,Object>response = new HashMap<>();
+        EmpleadoCargo temp= new EmpleadoCargo();
+        temp.setCodEmpleado(codEmpleado);
+        temp.setCodCargoSucursal(codCargoSucursal);
+        temp.setFechaInicio(fechaInicio);
+        temp.setCodCargoSucPlanilla(codCargoSucPlanilla);
+
+        boolean eliminado =  this.empCargoDao.registrarEmpleadoCargo(temp,"D");
+
+        if (!eliminado){
+            System.out.println("Error al eliminar cargo del empleado "+codEmpleado+codCargoSucursal+fechaInicio+codCargoSucPlanilla);
+            response.put("msg","Error al eliminar cargo empleado");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        System.out.println("Cargo empleado eliminado correctamente:"+codEmpleado+codCargoSucursal+fechaInicio+codCargoSucPlanilla);
+        response.put("msg","Cargo empleado eliminado correctamente.");
+        return ResponseEntity.ok(response);
+    }
+    /**
+     * Procedimiento para verificar si existe un cargo duplicado (se usara al momento de editar un cargo de un empleado)
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/verificarCargoDuplicado")
+    public Empleado verificarCargoDuplicado (@RequestBody EmpleadoCargo emp ){
+        //EmpleadoCargo empleadoCargo= new EmpleadoCargo();
+        //empleadoCargo.setCodEmpleado(codEmpleado);
+        //empleadoCargo.setFechaInicio(fechaInicio);
+
+        Empleado temp = this.empDao.verificarCargoDuplicado( emp.getCodEmpleado(), emp.getFechaInicio());
+        if(temp == null) return new Empleado();
+        //System.out.println(temp.toString());
+        return temp;
+    }
+    /**
+     * Procedimiento para obtener la fechainicio del cargo mas reciente
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerFechaInicioUltimoCargo")
+    public Empleado obtenerFechaInicioUltimoCargo (@RequestBody EmpleadoCargo emp ){
+
+
+        Empleado temp = this.empDao.obtenerFechaInicioUltimoCargo( emp.getCodEmpleado(), emp.getFechaInicio());
+        if(temp == null) return new Empleado();
+        //System.out.println(temp.toString());
+        return temp;
+    }
+    /**
+     * Procedimiento para obtener el ultimo codRelEmplEmpr (relacion laboral registrada)
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerUltimaRelacionLaboral")
+    public RelEmplEmpr obtenerUltimoCodRelEmplEmpr (@RequestBody RelEmplEmpr relEmplEmpr ){
+
+
+        RelEmplEmpr temp = this.reeDao.obtenerUltimoCodRelEmplEmpr( relEmplEmpr.getCodEmpleado());
+        if(temp == null) return new RelEmplEmpr();
+        //System.out.println(temp.toString());
+        return temp;
+    }
+    /**
+     * Procedimiento para el eliminar una licencia de conducir
+     * @param cs
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/eliminarLicenciaConducir")
+    public ResponseEntity<?> eliminarLicenciaConducir( @RequestBody Licencia lc ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.licenDao.registrarLicencia( lc, "D" ) ){
+            response.put("msg", "Error al Eliminar la licencia de conducir");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    /**
+     * Devolera una lista de los tipos de sexo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tipoLicencia")
+    public List<Tipos> lstLicencia(){
+        return this.perDao.listTipoLicencia();
+    }
+    /**
+     * procedimiento para eliminar imagen del servidor
+     */
+    @DeleteMapping("/eliminarFoto")
+    public ResponseEntity<Map<String, Object>> eliminarArchivo(
+            @RequestParam("codEmpleado") int codEmpleado,
+            @RequestParam("tipoDocumento") String tipoDocumento,
+            @RequestParam("nombreArchivo") String nombreArchivo
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        Path rutaFinal;
+
+        // Lógica para identificar el destino
+        if ("foto_perfil".equalsIgnoreCase(tipoDocumento)) {
+            // Caso Foto de Perfil: uploads/172.jpg
+            rutaFinal = Paths.get("uploads").resolve(nombreArchivo);
+        } else {
+            // Caso Documentos: uploads/documentos/172/carnet/archivo.jpg
+            rutaFinal = Paths.get("uploads", "documentos", String.valueOf(codEmpleado), tipoDocumento)
+                    .resolve(nombreArchivo);
+        }
+
+        File archivo = rutaFinal.toAbsolutePath().toFile();
+
+        if (archivo.exists()) {
+            if (archivo.delete()) {
+                response.put("ok", true);
+                response.put("msg", "Archivo eliminado correctamente.");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.put("ok", false);
+                response.put("msg", "Error al eliminar: el archivo puede estar en uso.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        response.put("ok", false);
+        response.put("msg", "No se encontró el archivo.");
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    /**
+     * Procedimiento para obtener la lista de empleados
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerCargosXEmpresa")
+    public List<Empleado> obtenerCargosXEmpresa(@RequestBody Empleado emp){
+        String search=emp.getSearch();
+        Integer codEmpresa=emp.getCodEmpresa();
+
+        List <Empleado> lstTemp = this.empDao.obtenerCargosXEmpresa( search,codEmpresa );
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+    }
+    /**
+     *Obtendra el listado de los seguros (CAJA)
+     * @param
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/obtenerSeguros")
+    public List<Seguro> obtenerSeguros ( ){
+
+        List<Seguro> lstSeguros = this.segDao.obtenerSeguros();
+        if(lstSeguros.size() == 0) return new ArrayList<>();
+        return lstSeguros;
+    }
+    /**
+     *Obtendra la afiliacion del seguro de un empleado
+     * @param
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/obtenerAfiliacionSeguro")
+    public AfiliacionSeguro obtenerAfiliacionSeguro ( @RequestBody AfiliacionSeguro afSeg){
+        int codEmpleado=afSeg.getCodEmpleado();
+        AfiliacionSeguro temp= this.afiSegDao.obtenerAfiliacionSeguro(codEmpleado);
+        if(temp==null)return new AfiliacionSeguro();
+        return temp;
+
+    }
+
+    /**
+     * Registrara una nueva afiliacion para un empleado
+     * @param afSeg
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroAfiliacionSeguro")
+    public ResponseEntity<?> registroAfiliacionSeguro( @RequestBody AfiliacionSeguro afSeg ){
+        Map<String, Object> response = new HashMap<>();
+
+
+        String acc = "U";
+        if( afSeg.getCodAfiliacion() == 0 ){
+            acc = "I";
+        }
+
+        if( !this.afiSegDao.afiliarSeguroEmpleado( afSeg, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos de afiliacion al seguro");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * eliminara una afilacion a la aseguradora
+     * @param afSeg
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/eliminarAfiliacionSeguro")
+    public ResponseEntity<?> eliminarAfiliacionSeguro( @RequestBody AfiliacionSeguro afSeg ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.afiSegDao.afiliarSeguroEmpleado( afSeg, "D" ) ){
+            response.put("msg", "Error al Eliminar la afiliacion al seguro");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     *
+     * @param seg
+     * @return
+     */
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/registroAseguradora")
+    public ResponseEntity<?> registroAseguradora( @RequestBody Seguro seg ){
+        Map<String, Object> response = new HashMap<>();
+
+
+        String acc = "U";
+        if( seg.getCodSeguro() == 0 ){
+            acc = "I";
+        }
+
+        if( !this.segDao.registroAseguradora( seg, acc ) ){
+            response.put("msg", "Error al Actualizar los Datos la aseguradora");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
+    @PostMapping("/eliminarAseguradora")
+    public ResponseEntity<?> eliminarAseguradora( @RequestBody Seguro seg ){
+
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.segDao.registroAseguradora( seg, "D" ) ){
+            response.put("msg", "Error al Eliminar la aseguradora");
+            response.put("error", "ok");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        response.put("msg", "Datos Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    /**
+     * Devolera una lista de los tipos de seguro
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tipoSeguro")
+    public List<Tipos> lstSeguro(){
+        return this.segDao.listTipoSeguro();
+    }
+    /**
+     *Obtendra la afiliacion del seguro de un empleado
+     * @param
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/obtenerHaberBasico")
+    public Empleado obtenerHaberBasico ( @RequestBody Empleado emp){
+        int codEmpleado=emp.getCodEmpleado();
+        Empleado temp= this.empDao.obtenerHaberBasico(codEmpleado);
+        if(temp==null)return new Empleado();
+        return temp;
+
+    }
+
+
 
 
 }

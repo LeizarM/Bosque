@@ -28,6 +28,8 @@ public class Formacion {
     @JsonDeserialize(using = DateDeserializers.DateDeserializer.class) // Especifica el deserializador
     private Date fechaFormacion;
     private int audUsuario;
+
+    private String institucion;
     // 🔹 Constructor específico para eliminar por codFormacion
     public Formacion(int codFormacion) {
         this.codFormacion = codFormacion;

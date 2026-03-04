@@ -21,7 +21,15 @@ public class Empleado extends Persona implements Serializable {
     private int audUsuarioI;
     private int codDependiente;
 
+    private int fila;
+    private String search;
+    private Integer esActivo;
     private int codEmpleadoConsultado;
+    private int pageNumber;
+    private int pageSize;
+    private Integer codEmpresa;
+    private float haberBasico;
+
     /**
      * Variables de apoyo
      */
@@ -29,6 +37,9 @@ public class Empleado extends Persona implements Serializable {
     private EmpleadoCargo empleadoCargo = new EmpleadoCargo();
     private RelEmplEmpr relEmpEmpr = new RelEmplEmpr();
     private Dependiente dependiente= new Dependiente();
+
+    //sistemas jg 20251229
+    private Cargo cargo = new Cargo();
 
     private String esActivoString;
 

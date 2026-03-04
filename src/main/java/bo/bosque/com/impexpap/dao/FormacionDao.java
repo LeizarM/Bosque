@@ -46,6 +46,7 @@ public class FormacionDao implements  IFormacion {
                 temp.setTipoFormacion(rs.getString(6));
                 temp.setFechaFormacion(rs.getDate(7));
                 temp.setAudUsuario(rs.getInt(8));
+                temp.setInstitucion(rs.getString(10));
                 return temp;
 
             });
@@ -66,7 +67,7 @@ public class FormacionDao implements  IFormacion {
     public boolean registrarFormacion(Formacion fr, String acc) {
         int resp;
         try{
-            resp = this.jdbcTemplate.update("execute p_abm_Formacion @codFormacion  = ?,@codEmpleado = ?,@descripcion  = ?,@duracion = ?,@tipoDuracion= ?,@tipoFormacion = ?,@fechaFormacion= ? ,@audUsuarioI = ?, @ACCION = ?",
+            resp = this.jdbcTemplate.update("execute p_abm_Formacion @codFormacion  = ?,@codEmpleado = ?,@descripcion  = ?,@duracion = ?,@tipoDuracion= ?,@tipoFormacion = ?,@fechaFormacion= ? ,@audUsuarioI = ?,@institucion=?, @ACCION = ?",
                     ps -> {
                         ps.setInt(1, fr.getCodFormacion() );
                         ps.setInt(2, fr.getCodEmpleado() );
@@ -76,7 +77,8 @@ public class FormacionDao implements  IFormacion {
                         ps.setString( 6, fr.getTipoFormacion() );
                         ps.setDate( 7, (Date) fr.getFechaFormacion());
                         ps.setInt(8, fr.getAudUsuario());
-                        ps.setString(9, acc);
+                        ps.setString(9,fr.getInstitucion());
+                        ps.setString(10, acc);
                     });
 
         }catch ( BadSqlGrammarException e ){

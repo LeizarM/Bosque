@@ -206,6 +206,63 @@ public class Tipos {
 
         return listaTemp;
     }
+    /***************************MODULO EMPLEADOS RRHH**********************/
+    /**
+     * Devolvera una lista para  esActivo SI/NO
+     * @return
+     */
+    public List<Tipos>lstEducacion(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("nin","Ninguno",3));
+        listaTemp.add(new Tipos("pri","Primaria",3));
+        listaTemp.add(new Tipos("sec","Secundaria",3));
+        listaTemp.add(new Tipos("bac","Bachiller",3));
+        listaTemp.add(new Tipos("tmed","Técnico Medio",3));
+        listaTemp.add(new Tipos("tsup","Técnico Superior",3));
+        listaTemp.add(new Tipos("uni","Universitario",3));
+        listaTemp.add(new Tipos("egr","Universitario/Egresado",3));
+        listaTemp.add(new Tipos("lic","Licenciatura",3));
+
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista para  tipo de relacion
+     * @return
+     */
+    public List<Tipos>lstTipoRelacion(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("inde","Indefinido",6));
+        listaTemp.add(new Tipos("pFijo","Plazo Fijo",6));
+        listaTemp.add(new Tipos("pasa","Pasante",6));
+
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista para  tipo de licencia
+     * @return
+     */
+    public List<Tipos>listTipoLicencia(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("M","M - Motociclista;  Motocicletas, triciclos y cuadriciclos (cuadra tracks)",17));
+        listaTemp.add(new Tipos("P","P - Particular ;  Automóviles, camionetas, jeeps y vagonetas de uso particular, hasta 7 ocupantes ",17));
+        listaTemp.add(new Tipos("A","A - Profesional ; Incluye Cat. P. Vehiculos de carga con capacidad de hasta de 2 1/2 toneladas.",17));
+        listaTemp.add(new Tipos("B","B - Profesional ; Incluye Cat. Prof. A. Vehículos de carga con capacidad de hasta 6 toneladas. Hasta 22 pasajeros",17));
+        listaTemp.add(new Tipos("C","C - Profesional ; Incluye Cat. Prof. B. Vehiculos de carga superior a 6 toneladas, con y sin acople, volquetas y cisternas. Sup. a 22 pasajeros",17));
+        listaTemp.add(new Tipos("CI","C Indefinido - Profesional ; Incluye Cat. P, Profesionales A, B y C.",17));
+        listaTemp.add(new Tipos("T","T - Motorista ; Maquinaria motorizada pesada, como montacargas, tractores, moto-niveladoras, retro-excavadoras, grúas y otras similares",17));
+        return listaTemp;
+    }
+    /**
+     * Devolvera una lista para  tipo de seguro
+     * @return
+     */
+    public List<Tipos>listTipoSeguro(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("acc","Accidentes",8));
+        listaTemp.add(new Tipos("sal","Salud",8));
+        return listaTemp;
+    }
+
 
 
 }
