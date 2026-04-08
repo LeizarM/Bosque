@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.SociosTigo;
 import bo.bosque.com.impexpap.model.TigoEjecutado;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
 
 import java.util.List;
 
@@ -35,5 +36,21 @@ public interface ITigoEjecutado {
      * Procecimiento para obtener EL ARBOL DETALLADO
      */
     List<TigoEjecutado> obtenerArbolDetallado(String empresa,String periodoCobrado);
+
+    /**
+     * Procedimiento para ejecutar por lotes
+     * @param te
+     * @return
+     */
+    boolean actualizarEmpresaLote(TigoEjecutado te);
+    /**
+     * NUEVO — Ejecutar periodo completo (ACCION='E')
+     * Unifica ACCION='B' (anticipos) + ACCION='G' (tTigo_ejecutado)
+     * en una sola transaccion con validaciones y mensajes estructurados.
+     *
+     * @param te Objeto con periodoCobrado y audUsuarioI obligatorios
+     * @return RespuestaSp con error, errormsg e idGenerado (total registros procesados)
+     */
+    RespuestaSp ejecutarPeriodo(TigoEjecutado te);
 
 }

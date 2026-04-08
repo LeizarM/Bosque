@@ -29,6 +29,12 @@ public interface ISolicitudPago {
     List<SolicitudPago> obtenerSolicitudPago(long idSolicitud);
 
     /**
+     * Carga UNA solicitud por su ID exacto (para load-before-update).
+     * Solo envía @idSolicitud al SP; los demás params quedan en DEFAULT NULL.
+     */
+    SolicitudPago obtenerSolicitudPagoPorId(long idSolicitud);
+
+    /**
      * Procedimiento para obtener las Solicitudes de Pago entre fechas
      *
      * @param fechaInicio

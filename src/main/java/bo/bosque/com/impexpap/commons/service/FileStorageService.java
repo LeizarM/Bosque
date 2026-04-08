@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.commons.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -8,15 +9,16 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class FileStorageService {
 
@@ -85,6 +87,59 @@ public class FileStorageService {
             }
         } catch (Exception e) {
             throw new RuntimeException("Error: " + e.getMessage());
+        }
+    }
+
+    // ── Métodos para vouchers de pagos al exterior ─────────────────────────
+
+    /**
+     * Guarda un archivo voucher en la ruta relativa indicada (bajo uploads/).
+     * Crea los directorios intermedios si no existen.
+     * No convierte el archivo; lo guarda tal cual (soporta PDF, JPG, JPEG, PNG).
+     *
+     * @param archivo      archivo multipart a guardar
+     * @param rutaRelativa ruta relativa, ej: "pagos-extranjeros/vouchers/5_1234567890.pdf"
+     * @return             la misma rutaRelativa si el guardado fue exitoso
+     */
+    public String guardarVoucher(MultipartFile archivo, String rutaRelativa) throws IOException {
+        Path targetPath = Paths.get("uploads").resolve(rutaRelativa);
+        Files.createDirectories(targetPath.getParent());
+        Files.copy(archivo.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        log.info("Voucher guardado en: {}", targetPath.toAbsolutePath());
+        return rutaRelativa;
+    }
+
+    /**
+     * Carga un archivo voucher a partir de su ruta relativa (bajo uploads/).
+     *
+     * @param rutaRelativa ruta relativa, ej: "pagos-extranjeros/vouchers/5_1234567890.pdf"
+     * @return             recurso listo para streaming
+     */
+    public Resource obtenerVoucher(String rutaRelativa) throws IOException {
+        Path filePath = Paths.get("uploads").resolve(rutaRelativa);
+        Resource resource = new UrlResource(filePath.toUri());
+        if (resource.exists() && resource.isReadable()) {
+            return resource;
+        }
+        throw new RuntimeException("No se pudo leer el voucher: " + rutaRelativa);
+    }
+
+    /**
+     * Elimina un archivo voucher a partir de su ruta relativa (bajo uploads/).
+     * Se usa como rollback manual si la actualización en BD falla después de guardar.
+     * No lanza excepción si el archivo no existe.
+     *
+     * @param rutaRelativa ruta relativa del archivo a eliminar
+     */
+    public void eliminarVoucher(String rutaRelativa) {
+        try {
+            Path filePath = Paths.get("uploads").resolve(rutaRelativa);
+            boolean eliminado = Files.deleteIfExists(filePath);
+            if (eliminado) {
+                log.info("Voucher eliminado (rollback): {}", filePath.toAbsolutePath());
+            }
+        } catch (IOException e) {
+            log.warn("No se pudo eliminar el voucher en rollback: {}. Error: {}", rutaRelativa, e.getMessage());
         }
     }
 }

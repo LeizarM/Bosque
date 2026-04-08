@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +22,12 @@ public class TigoEjecutado {
     private float montoCubiertoXEmpresa;
     private float montoEmpleado;
     private String estado;
-    private int audUsuario;
+    private int audUsuarioI;
+    private Date audFechaI;
 
     private int fila;
     private Integer codEmpleadoPadre;
     private List<TigoEjecutado> items = new ArrayList<TigoEjecutado>();
+    private String listaCodEmpleado;
 
 }

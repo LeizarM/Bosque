@@ -2,6 +2,8 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.FacturaTigo;
 import bo.bosque.com.impexpap.model.SociosTigo;
 import bo.bosque.com.impexpap.model.TigoEjecutado;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
+import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -21,6 +23,23 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
      */
     @Autowired
     JdbcTemplate jdbcTemplate;
+    // NUEVO: SpHelper inyectado para ACCION='E' y futuras acciones
+    // Los métodos legacy siguen usando jdbcTemplate directamente
+    private final SpHelper spHelper;
+
+    public TigoEjecutadoDao(SpHelper spHelper) {
+        this.spHelper = spHelper;
+    }
+    // =========================================================
+    // NUEVO — ACCION='E': Ejecutar periodo completo
+    // Reemplaza la llamada combinada a ACCION='B' + ACCION='G'
+    // Usa SpHelper igual que CambiosTigoDao para mantener
+    // consistencia arquitectónica y manejo de OUTPUT params
+    // =========================================================
+    @Override
+    public RespuestaSp ejecutarPeriodo(TigoEjecutado te) {
+        return this.spHelper.ejecutarAbm("p_abm_tTigo_ejecutado", te, "E");
+    }
     /**
      * procedimiento para obtener la factura ejecutada TIGO
      */
@@ -186,7 +205,7 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
                         ps.setFloat(9, te.getTotalCobradoXCuenta());
                         ps.setFloat(10, te.getMontoCubiertoXEmpresa());
                         ps.setFloat(11, te.getMontoEmpleado());
-                        ps.setInt(12, te.getAudUsuario());
+                        ps.setInt(12, te.getAudUsuarioI());
                         ps.setString(13, acc);
                     }
             );
@@ -284,6 +303,32 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
             this.jdbcTemplate = null;
         }
         return lstTemp;
+    }
+    /**
+     * Procedimiento para actualizar empresa por lote (Acción C)
+     * @param te Objeto con empresa, periodoCobrado, listaCodEmpleado y audUsuario
+     * @return boolean
+     */
+    public boolean actualizarEmpresaLote(TigoEjecutado te) {
+        int resp = 0;
+        try {
+            // Usamos el SP p_abm_tTigo_ejecutado con la acción 'C'
+            // Nota: Pasamos la lista de IDs en el parámetro que el SP espera (en este caso usamos el campo empresa y periodo como filtros)
+            resp = this.jdbcTemplate.update(
+                    "execute p_abm_tTigo_ejecutado @periodoCobrado = ?, @empresa = ?, @listaCodEmpleado = ?, @audUsuarioI = ?, @ACCION = ?",
+                    ps -> {
+                        ps.setString(1, te.getPeriodoCobrado());
+                        ps.setString(2, te.getEmpresa());
+                        ps.setString(3, te.getListaCodEmpleado()); // El String "22,23,65"
+                        ps.setInt(4, te.getAudUsuarioI());
+                        ps.setString(5, "C");
+                    }
+            );
+        } catch (DataAccessException e) {
+            System.out.println("Error en actualizarEmpresaLote: " + e.getMessage());
+            resp = 0;
+        }
+        return resp != 0;
     }
 
 }

@@ -6,8 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,7 +31,39 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>("No tienes los permisos necesarios para realizar esta acción.", null, HttpStatus.FORBIDDEN.value()));
     }
 
-    // 3. Fallos Críticos No Controlados -> 500 Internal Server Error
+    // 3. Solicitud multipart malformada o sin Content-Type correcto -> 400 Bad Request
+    //    Ocurre cuando el cliente llama a un endpoint de subida de archivos sin enviar
+    //    Content-Type: multipart/form-data o sin incluir el campo 'file'.
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<?>> handleMultipartException(MultipartException ex) {
+        logger.warn("Solicitud multipart inválida: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(new ApiResponse<>(
+                        "La solicitud debe ser multipart/form-data. Asegúrate de enviar el archivo en el campo 'file'.",
+                        null, HttpStatus.BAD_REQUEST.value()));
+    }
+
+    // 4. Content-Type no soportado (ej: llamar endpoint multipart sin header Content-Type) -> 415
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<?>> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
+        logger.warn("Content-Type no soportado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(new ApiResponse<>(
+                        "Content-Type no soportado. Para subir archivos usa 'multipart/form-data' con los campos 'file' (File) y 'audUsuario' (Text).",
+                        null, HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()));
+    }
+
+    // 5. Parámetro de query requerido ausente -> 400 Bad Request
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<?>> handleMissingParam(MissingServletRequestParameterException ex) {
+        logger.warn("Parámetro requerido ausente: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(new ApiResponse<>(
+                        "Parámetro requerido ausente: '" + ex.getParameterName() + "'.",
+                        null, HttpStatus.BAD_REQUEST.value()));
+    }
+
+    // 6. Fallos Críticos No Controlados -> 500 Internal Server Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleAllUncaughtException(Exception ex) {
         logger.error("Error crítico no controlado: ", ex);

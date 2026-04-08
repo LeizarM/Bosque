@@ -1,22 +1,17 @@
-package bo.bosque.com.impexpap.model;
+package bo.bosque.com.impexpap.dto;
 
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.Date;
-
-import lombok.*;
 
 @Getter
 @Setter
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-public class DetalleSolicitud implements Serializable {
-
+public class DetalleSolicitudDto {
     private long idDetalle;
     private long idSolicitudProveedor;
-    private String tipoDocumento;  // Proforma, Factura, etc.
-    private String numeroDocumento; // el numero de factura o proforma ( si es que tiene )
-    private int facturaProvSap; // docNum SAP
+    private String tipoDocumento;
+    private String numeroDocumento;
+    private int facturaProvSap;
     private String codigoImportacion;
     private double montoFacturaUsd;      // decimal(18,2) en BD
     private double montoAmortizadoUsd;   // decimal(18,2) en BD
@@ -27,8 +22,5 @@ public class DetalleSolicitud implements Serializable {
     private String obs;
     private int esAprobado;
     private int audUsuario;
-
     private int codEmpresa;
-
-
 }

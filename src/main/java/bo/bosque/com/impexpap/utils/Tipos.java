@@ -262,6 +262,17 @@ public class Tipos {
         listaTemp.add(new Tipos("sal","Salud",8));
         return listaTemp;
     }
+    /**
+     * Devolvera una lista para tipo renovacion chip tigo
+     * @return
+     */
+    public List<Tipos>listTipoRenovacion(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("PERD","PERDIDA EQUIPO",62));
+        listaTemp.add(new Tipos("CDET","CHIP DETERIORADO",62));
+        listaTemp.add(new Tipos("CSIM","CAMBIO eSIM",62));
+        return listaTemp;
+    }
 
 
 

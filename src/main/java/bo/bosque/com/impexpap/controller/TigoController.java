@@ -2,6 +2,8 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.ApiResponse;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.Tipos;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.apache.poi.ss.usermodel.*;
@@ -33,14 +35,23 @@ public class TigoController {
     private final IFacturaTigo fTigoDao;
     private final ISociosTigo  sTigoDao;
     private final ITigoEjecutado eTigoDao;
+    private final ICambiosTigo cTigoDao;
+    private final IChipTigo ctTigoDao;
 
 
-    public TigoController(JdbcTemplate jdbcTemplate,IFacturaTigo fTigo,ISociosTigo sTigo,ITigoEjecutado eTigo) {
+    public TigoController(JdbcTemplate jdbcTemplate
+            ,IFacturaTigo fTigo
+            ,ISociosTigo sTigo
+            ,ITigoEjecutado eTigo
+            ,ICambiosTigo cTigo
+            ,IChipTigo ctTigo) {
         this.jdbcTemplate = jdbcTemplate;
 
         this.fTigoDao    = fTigo;
         this.sTigoDao    = sTigo;
         this.eTigoDao    = eTigo;
+        this.cTigoDao    = cTigo;
+        this.ctTigoDao   = ctTigo;
     }
     /**
      * Procedimiento para registrar o actualizar una factura Tigo
@@ -161,39 +172,48 @@ public class TigoController {
                         colIndex.put(colName, cell.getColumnIndex());
                     }
 
-                    // Procesa las filas (después del encabezado)
+                    // --- INICIO DEL CAMBIO: Agrupación en Java ---
+                    Map<Integer, FacturaTigo> facturasAgrupadas = new HashMap<>();
+
                     for (int fila = headerRowIndex + 1; fila <= sheet.getLastRowNum(); fila++) {
                         Row row = sheet.getRow(fila);
                         if (row == null) continue;
-                        //System.out.println("NroContrato leído: '" + getCellValue(row.getCell(colIndex.get("N° Contrato"))) + "'");
-                        //System.out.println("NroCuenta leído: '" + getCellValue(row.getCell(colIndex.get("N° Cuenta"))) + "'");
 
-                        // Lee el valor de la primera celda
                         String primerValor = getCellValue(row.getCell(colIndex.get("N° Factura")));
-                        // Si la fila está vacía o es la fila de "Total", ignora
                         if (primerValor == null || primerValor.trim().isEmpty() || primerValor.trim().equalsIgnoreCase("Total")) continue;
-                        // 🔍 Filtrar por N° Cuenta
+
                         Integer nroContrato = parseIntCell(row, colIndex.get("N° Contrato"));
                         if (nroContrato == null || nroContrato != 9268908) continue;
 
-                        // Puedes agregar más validaciones si hay otras filas de resumen
-                        // Ejemplo: si la columna de "Total cobrado por Cuenta Bs." no es numérica, ignora
+                        Integer nroCuenta = parseIntCell(row, colIndex.get("N° Cuenta"));
+                        float montoFila = parseFloatCell(row, colIndex.get("Total cobrado por Cuenta Bs."));
 
-                        FacturaTigo factura = new FacturaTigo();
-                        factura.setNroFactura(primerValor);
-                        factura.setTipoServicio(getCellValue(row.getCell(colIndex.get("Tipo Servicio"))));
-                        factura.setNroContrato(parseIntCell(row, colIndex.get("N° Contrato")));
-                        factura.setNroCuenta(parseIntCell(row, colIndex.get("N° Cuenta")));
-                        // En vez de parsePeriodoCobrado(row, colIndex.get("Período Cobrado"))
-                        factura.setPeriodoCobrado(getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", "")); // "2025-08"
-                        factura.setDescripcionPlan(getCellValue(row.getCell(colIndex.get("Descripción del Plan"))));
-                        factura.setTotalCobradoXCuenta(parseFloatCell(row, colIndex.get("Total cobrado por Cuenta Bs.")));
-                        factura.setAudUsuario(audUsuario);
-                        factura.setEstado("No ejecutado");
+                        if (facturasAgrupadas.containsKey(nroCuenta)) {
+                            // Si la cuenta ya existe en el mapa, sumamos el monto
+                            FacturaTigo fExistente = facturasAgrupadas.get(nroCuenta);
+                            fExistente.setTotalCobradoXCuenta(fExistente.getTotalCobradoXCuenta() + montoFila);
+                        } else {
+                            // Si es nueva, creamos el objeto completo
+                            FacturaTigo nuevaFactura = new FacturaTigo();
+                            nuevaFactura.setNroFactura(primerValor);
+                            nuevaFactura.setTipoServicio(getCellValue(row.getCell(colIndex.get("Tipo Servicio"))));
+                            nuevaFactura.setNroContrato(nroContrato);
+                            nuevaFactura.setNroCuenta(nroCuenta);
+                            nuevaFactura.setPeriodoCobrado(getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", ""));
+                            nuevaFactura.setDescripcionPlan(getCellValue(row.getCell(colIndex.get("Descripción del Plan"))));
+                            nuevaFactura.setTotalCobradoXCuenta(montoFila);
+                            nuevaFactura.setAudUsuario(audUsuario);
+                            nuevaFactura.setEstado("No ejecutado");
 
+                            facturasAgrupadas.put(nroCuenta, nuevaFactura);
+                        }
+                    }
 
+                    // --- GUARDADO FINAL: Una sola llamada por número de cuenta ---
+                    for (FacturaTigo factura : facturasAgrupadas.values()) {
                         fTigoDao.registrarFacturaTigo(factura, "A");
                     }
+                    // --- FIN DEL CAMBIO ---
                 }
 
                 response.put("msg", "Archivo Excel subido y datos guardados correctamente");
@@ -754,6 +774,358 @@ public class TigoController {
         }
 
 
+    }
+    /**
+     * Endpoint para actualizar empresa en lotes
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/actualizarEmpresaLote")
+    public ResponseEntity<?> actualizarEmpresaLote(@RequestBody TigoEjecutado te) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Validamos que llegue la lista de IDs
+            if (te.getListaCodEmpleado() == null || te.getListaCodEmpleado().isEmpty()) {
+                response.put("msg", "Debe seleccionar al menos un empleado");
+                response.put("ok", "error");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            if (this.eTigoDao.actualizarEmpresaLote(te)) {
+                response.put("msg", "Empresas actualizadas correctamente");
+                response.put("ok", "ok");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.put("msg", "No se realizaron cambios en la base de datos");
+                response.put("ok", "warn");
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            response.put("msg", "Error interno: " + e.getMessage());
+            response.put("ok", "error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    /**
+     * NUEVOS ENDPOINTS USANDO EL SP HELPER
+     */
+    private static final String SUCCESS_MESSAGE = "Operación realizada exitosamente";
+
+    // -----------------------------------------------------------------
+    // CAMBIOS DE LINEAS CORPORATIVAS TIGO
+    // -----------------------------------------------------------------
+
+    /**
+     * Registrar o actualizar un cambio de linea.
+     * Si codCambio == 0 → INSERT, si codCambio > 0 → UPDATE
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/registrarCambioLinea")
+    public ResponseEntity<ApiResponse<?>> registrarCambioLinea(@RequestBody CambiosTigo mb) {
+        RespuestaSp res = cTigoDao.abmCambioLinea(mb, mb.getCodCambio() == 0 ? "I" : "U");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.CREATED.value()));
+    }
+
+    /**
+     * Eliminar un cambio pendiente.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/eliminarCambioLinea")
+    public ResponseEntity<ApiResponse<?>> eliminarCambioLinea(@RequestBody CambiosTigo mb) {
+        RespuestaSp res = cTigoDao.abmCambioLinea(mb, "D");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * Aplicar todos los cambios pendientes de un periodo.
+     * Se llama antes de ejecutar la factura del periodo.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/aplicarCambiosLinea")
+    public ResponseEntity<ApiResponse<?>> aplicarCambiosLinea(@RequestBody CambiosTigo mb) {
+        RespuestaSp res = cTigoDao.abmCambioLinea(mb, "A");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * Lista unificada de numeros asignados (empleados + externos).
+     * Filtrable por tipoSocio y search.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarNumerosAsignados")
+    public ResponseEntity<ApiResponse<?>> listarNumerosAsignados(@RequestBody CambiosTigo mb) {
+        return procesarListaCambios(cTigoDao.listarNumeros(mb));
+    }
+
+    /**
+     * Lista de cambios registrados.
+     * Filtrable por periodoCobrado, estado, codEmpleado o codCambio.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarCambiosLinea")
+    public ResponseEntity<ApiResponse<?>> listarCambiosLinea(@RequestBody CambiosTigo mb) {
+        return procesarListaCambios(cTigoDao.listarCambios(mb));
+    }
+
+    /**
+     * Lista de destinos posibles para el dropdown de reasignacion.
+     * Incluye externos + empleados con corporativo + empleados sin corporativo.
+     * Filtrable por tipoSocio y search.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarDestinosLinea")
+    public ResponseEntity<ApiResponse<?>> listarDestinosLinea(@RequestBody CambiosTigo mb) {
+        return procesarListaCambios(cTigoDao.listarDestinos(mb));
+    }
+    /**
+     * Reasignar numeros SIN ASIGNAR DEPENDIENDO SI ES EXTERNO O EMPLEADO.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/reasignarNumeroSinAsignar")
+    public ResponseEntity<ApiResponse<?>> reasignarNumero(@RequestBody CambiosTigo mb) {
+        RespuestaSp res = cTigoDao.abmCambioLinea(mb, "B");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * REGISTRAR CHIP PERDIDO TIGO
+     * @param ct
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/registrarPerdidaChip")
+    public ResponseEntity<ApiResponse<?>> registrarPerdida(@RequestBody ChipTigo ct) {
+        RespuestaSp res = ctTigoDao.abmChipTigo(ct, ct.getCodLinea() == 0 ? "I" : "U");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.CREATED.value()));
+    }
+
+    /**
+     * LISTAR PERDIDAS CHIP TIGO
+     * @param ct
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarPerdidas")
+    public ResponseEntity<ApiResponse<?>> listarPerdidas(@RequestBody ChipTigo ct) {
+        return procesarListaCambios(ctTigoDao.listarPerdidas(ct));
+    }
+
+    /**
+     * eliminar registro de perdida chip tigo
+     * @param ct
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/eliminarRegistroPerdida")
+    public ResponseEntity<ApiResponse<?>> eliminarRegistroPerdida(@RequestBody ChipTigo ct) {
+        RespuestaSp res = ctTigoDao.abmChipTigo(ct, "D");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * LISTAR PERIODOS PARA EL DROPDOWN chips tigo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarPeriodos")
+    public ResponseEntity<ApiResponse<?>> listarPeriodos() {
+        return procesarListaCambios(ctTigoDao.listarPeriodos());
+    }
+    /**
+     * Devolera una lista de los tipos del motivo de renovacion chip tigo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/tipoRenovacion")
+    public List<Tipos> listTipoRenovacion(){
+        return this.ctTigoDao.listTipoRenovacion();
+    }
+
+    /**
+     * REPORTE REGISTRO PERDIDA LINEA
+     * @param ct
+     * @return
+     */
+    @PostMapping("/RptPerdidaLineas")
+    public ResponseEntity<?> RptPerdidaLineas(@RequestBody ChipTigo ct)  {
+
+        String nombreReporte = "RptPerdidaEquipos";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+            params.put("periodo", ct.getPeriodo() );
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+    /**
+     * LISTAR PERIODOS PARA EL DROPDOWN cambios linea tigo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarPeriodosCambio")
+    public ResponseEntity<ApiResponse<?>> listarPeriodosCambio() {
+        return procesarListaCambios(cTigoDao.listarPeriodosCambio());
+    }
+
+    /**
+     * reporte cambios linea tigo
+     * @param ct
+     * @return
+     */
+    @PostMapping("/RptCambiosLineaTigo")
+    public ResponseEntity<?> RptCambiosLineaTigo(@RequestBody CambiosTigo ct)  {
+
+        String nombreReporte = "RptCambiosLineaTigo";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+            params.put("periodoCobrado", ct.getPeriodoCobrado() );
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+    /**
+     * Ejecutar periodo Tigo completo (ACCION='E').
+     *
+     * Unifica en una sola llamada lo que antes requerían dos endpoints:
+     *   - /ejecutarTigo      → ACCION='G' → INSERT en tTigo_ejecutado
+     *   - /generarAnticiposTigo → ACCION='B' → INSERT en [BOSQUE].dbo.Anticipo_2
+     *
+     * Ahora el SP maneja ambos INSERTs en una sola transacción con:
+     *   - Validaciones estructuradas (@error, @errormsg)
+     *   - Rollback total si algo falla
+     *   - @idGenerado = total de registros procesados
+     *
+     * Devuelve HTTP 200 con el mensaje del SP (éxito o error descriptivo).
+     * Devuelve HTTP 400 si el SP reporta un error de negocio (@error > 0).
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/ejecutarPeriodoTigo")
+    public ResponseEntity<ApiResponse<?>> ejecutarPeriodoTigo(@RequestBody TigoEjecutado te) {
+        RespuestaSp res = eTigoDao.ejecutarPeriodo(te);
+
+        if (res.getError() != 0) {
+            // Error de negocio devuelto por el SP (validaciones, cuadre, etc.)
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(res.getErrormsg(), null, HttpStatus.BAD_REQUEST.value()));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.OK.value()));
+    }
+    /**
+     * REPORTE DE LINEAS CORPORATIVAS DEL PERSONAL - SERA ENVIADO CADA MES A TODO EL PERSONAL.
+     * @param te
+     * @return
+     */
+    @PostMapping("/RptCorporativosPersonal")
+    public ResponseEntity<?> RptCorporativosPersonal(@RequestBody TigoEjecutado te)  {
+
+        String nombreReporte = "RptCorporativosPersonal";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+            params.put("periodoCobrado", te.getPeriodoCobrado() );
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
+    /**
+     * REPORTE COMPARACION DE EMPRESAS BOSQUE CLIENTE Y BOSQUE WEB -- PREVIO A EJECUTAR LA FACTURA DE TIGO
+     * @return
+     */
+    @PostMapping("/RptComparacionEmpresas")
+    public ResponseEntity<?> RptComparacionEmpresas()  {
+
+        String nombreReporte = "RptComparacionEmpresas";
+
+
+        try{
+            Map<String, Object> params = new HashMap<>();
+
+            byte[] reportBytes = new JasperReportExport( this.jdbcTemplate).exportPDFStatic( nombreReporte, params);
+
+
+            HttpHeaders headers = new HttpHeaders();
+            //set the PDF format
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
+        } catch(Exception e) {
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
+            System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
+
+    /**
+     * Metodo auxiliar para procesar listas de cambios.
+     * Devuelve 204 si no hay registros, 200 si hay.
+     */
+    private <T> ResponseEntity<ApiResponse<?>> procesarListaCambios(List<T> lista) {
+        if (lista == null || lista.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ApiResponse<>("No se encontraron registros.", null,
+                            HttpStatus.NO_CONTENT.value()));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
     }
 
 
