@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptComparacionEmpresas" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f458f282-f84c-4864-8ac9-dc226c3f6ff0">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptComparacionEmpresas" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="f458f282-f84c-4864-8ac9-dc226c3f6ff0">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<style name="EstadoColorStyle" mode="Opaque">
@@ -55,7 +55,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Version Nº 1]]></text>
 			</staticText>
@@ -67,6 +67,9 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
+				<textElement>
+					<font fontName="&#xD;&#xA;SansSerif"/>
+				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
@@ -78,7 +81,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="18" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[COMPARACION EMPRESAS]]></text>
 			</staticText>
@@ -97,7 +100,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[BOSQUE]]></text>
 			</staticText>
@@ -113,7 +116,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[NOMBRE COMPLETO]]></text>
 			</staticText>
@@ -129,7 +132,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[CARNET]]></text>
 			</staticText>
@@ -145,7 +148,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[#]]></text>
 			</staticText>
@@ -160,7 +163,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[BOSQUE WEB]]></text>
 			</staticText>
@@ -175,7 +178,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ESTADO]]></text>
 			</staticText>
@@ -194,7 +197,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BOSQUE}]]></textFieldExpression>
 			</textField>
@@ -210,7 +213,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CI}]]></textFieldExpression>
 			</textField>
@@ -226,7 +229,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{fila}]]></textFieldExpression>
 			</textField>
@@ -243,7 +246,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font size="8"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
 					<paragraph leftIndent="5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Empleado}]]></textFieldExpression>
@@ -259,7 +262,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BOSQUE_WEB}]]></textFieldExpression>
 			</textField>
@@ -274,13 +277,51 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7"/>
+					<font fontName="&#xD;&#xA;SansSerif" size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Estado}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="21" splitType="Stretch"/>
+		<band height="29" splitType="Stretch">
+			<textField>
+				<reportElement x="395" y="15" width="175" height="11" uuid="a7570d08-46d9-4e2f-9b29-44ca50224a7f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fecha de impresión: " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="140" y="15" width="150" height="11" uuid="e090acc7-a414-48d8-b45b-dbd61212f74c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de  "]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="300" y="15" width="80" height="11" uuid="86ec7298-714b-42a4-afa0-76defd9bb641"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
 	</pageFooter>
+	<summary>
+		<band height="100">
+			<staticText>
+				<reportElement x="450" y="80" width="110" height="20" uuid="50cdb87b-9443-4db9-bb2e-42ea6ab6ab7a"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xD;&#xA;SansSerif" size="8"/>
+				</textElement>
+				<text><![CDATA[Firma del responsable]]></text>
+			</staticText>
+		</band>
+	</summary>
 </jasperReport>

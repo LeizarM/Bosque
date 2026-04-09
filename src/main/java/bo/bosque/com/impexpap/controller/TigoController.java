@@ -171,6 +171,34 @@ public class TigoController {
                         String colName = getCellValue(cell);
                         colIndex.put(colName, cell.getColumnIndex());
                     }
+                    // --- NUEVO: PASO 1 - ENCONTRAR EL PERIODO MÁS RECIENTE ---
+                    String periodoMasReciente = "";
+                    for (int fila = headerRowIndex + 1; fila <= sheet.getLastRowNum(); fila++) {
+                        Row row = sheet.getRow(fila);
+                        if (row == null) continue;
+
+                        // Filtro inicial: Evitar filas vacías o de totales
+                        String primerValor = getCellValue(row.getCell(colIndex.get("N° Factura")));
+                        if (primerValor == null || primerValor.trim().isEmpty() || primerValor.trim().equalsIgnoreCase("Total")) continue;
+
+                        // Filtro de Contrato: Solo buscamos el periodo para este contrato
+                        Integer nroContrato = parseIntCell(row, colIndex.get("N° Contrato"));
+                        if (nroContrato == null || nroContrato != 9268908) continue;
+
+                        String periodo = getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", "");
+
+                        // Comparamos para encontrar el periodo mayor (YYYY-MM)
+                        if (periodo.compareTo(periodoMasReciente) > 0) {
+                            periodoMasReciente = periodo;
+                        }
+                    }
+
+                    // Validación: Si el contrato no existe en el Excel, devolvemos error
+                    if (periodoMasReciente.isEmpty()) {
+                        response.put("msg", "No se encontraron periodos válidos para el contrato 9268908");
+                        response.put("ok", "error");
+                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+                    }
 
                     // --- INICIO DEL CAMBIO: Agrupación en Java ---
                     Map<Integer, FacturaTigo> facturasAgrupadas = new HashMap<>();
@@ -184,6 +212,11 @@ public class TigoController {
 
                         Integer nroContrato = parseIntCell(row, colIndex.get("N° Contrato"));
                         if (nroContrato == null || nroContrato != 9268908) continue;
+                        // Extraer periodo de la fila actual
+                        String periodoFila = getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", "");
+
+                        // 🔍 FILTRO CLAVE: Si la fila es de un mes antiguo, se ignora
+                        if (!periodoFila.equals(periodoMasReciente)) continue;
 
                         Integer nroCuenta = parseIntCell(row, colIndex.get("N° Cuenta"));
                         float montoFila = parseFloatCell(row, colIndex.get("Total cobrado por Cuenta Bs."));
