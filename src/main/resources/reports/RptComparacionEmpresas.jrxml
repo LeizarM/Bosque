@@ -29,6 +29,10 @@
 		<property name="com.jaspersoft.studio.field.name" value="Empleado"/>
 		<property name="com.jaspersoft.studio.field.label" value="Empleado"/>
 	</field>
+	<field name="Corporativo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="Corporativo"/>
+		<property name="com.jaspersoft.studio.field.label" value="Corporativo"/>
+	</field>
 	<field name="BOSQUE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="BOSQUE"/>
 		<property name="com.jaspersoft.studio.field.label" value="BOSQUE"/>
@@ -40,6 +44,10 @@
 	<field name="Estado" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="Estado"/>
 		<property name="com.jaspersoft.studio.field.label" value="Estado"/>
+	</field>
+	<field name="fechaImpresion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fechaImpresion"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaImpresion"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -284,16 +292,7 @@
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="29" splitType="Stretch">
-			<textField>
-				<reportElement x="395" y="15" width="175" height="11" uuid="a7570d08-46d9-4e2f-9b29-44ca50224a7f">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="SansSerif" size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Fecha de impresión: " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date())]]></textFieldExpression>
-			</textField>
+		<band height="26" splitType="Stretch">
 			<textField>
 				<reportElement x="140" y="15" width="150" height="11" uuid="e090acc7-a414-48d8-b45b-dbd61212f74c"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -307,6 +306,13 @@
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="408" y="15" width="162" height="11" uuid="cadb230c-ada0-41e8-b189-85b078db7f55"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fecha de impresión: " + $F{fechaImpresion}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
