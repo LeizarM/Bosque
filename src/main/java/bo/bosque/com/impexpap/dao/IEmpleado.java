@@ -1,4 +1,5 @@
 package bo.bosque.com.impexpap.dao;
+import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.Persona;
@@ -103,6 +104,13 @@ public interface IEmpleado {
      */
     Empleado obtenerHaberBasico (int codEmpleado);
 
-
+    /**
+     * Procedimiento para obtener los prestamos, anticipos y multas de un empleado
+     * @param mes
+     * @param anio
+     * @param codEmpleado
+     * @return
+     */
+    List<DescuentoEmpleadoDTO> obtenerPrestamosAnticiposYMultasEmpleado(int mes, int anio, int codEmpleado );
 
 }

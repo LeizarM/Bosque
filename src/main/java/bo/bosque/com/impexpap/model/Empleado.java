@@ -52,6 +52,27 @@ public class Empleado extends Persona implements Serializable {
     private Formacion formacion= new Formacion();
     private ExperienciaLaboral experienciaLaboral= new ExperienciaLaboral();
     private GaranteReferencia garanteReferencia= new GaranteReferencia();
+
+    // ========== Variables de apoyo para ver los prestamos, multas y anticipos ==============
+
+    private int mes;
+    private int anio;
+
+    private String descripcion;
+    private String moneda;
+    private float montoTotal;
+    private int totalCuotas;
+    private String periodo;
+    private String tipoDescuento;
+    private String estadoDescuento;
+    private int primeraCuotaMes;
+    private int ultimaCuotaMes;
+    private float montoDescuento;
+    private float saldoRestante;
+
+
+
+
     /**
      * Constructores
      */

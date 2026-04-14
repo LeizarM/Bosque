@@ -1,4 +1,5 @@
 package bo.bosque.com.impexpap.dao;
+import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
 import bo.bosque.com.impexpap.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -582,6 +584,52 @@ public class EmpleadoDAO implements IEmpleado{
             emp= new Empleado();
         }
         return emp;
+    }
+
+
+
+
+    /**
+     * Procedimiento para obtener los prestamos, anticipos y multas de un empleado
+     *
+     * @param mes
+     * @param anio
+     * @param codEmpleado
+     * @return List<DescuentoEmpleadoDTO>
+     */
+    public List<DescuentoEmpleadoDTO> obtenerPrestamosAnticiposYMultasEmpleado(int mes, int anio, int codEmpleado ) {
+
+        List<DescuentoEmpleadoDTO> lstTemp = new ArrayList<>();
+        try {
+            lstTemp =  this.jdbcTemplate.query("exec p_list_Empleado @codEmpleado = ?, @mes = ?, @anio = ?, @ACCION = ?",
+                    new Object[] { codEmpleado, mes, anio, "A1" },
+                    new int[] { Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        DescuentoEmpleadoDTO temp = new DescuentoEmpleadoDTO();
+
+                        temp.setCodEmpleado(rs.getInt(1));
+                        temp.setDescripcion(rs.getString(2));
+                        temp.setMoneda(rs.getString(3));
+                        temp.setMontoTotal(rs.getFloat(4));
+                        temp.setTotalCuotas(rs.getInt(5));
+                        temp.setPeriodo(rs.getString(6));
+                        temp.setTipoDescuento(rs.getString(7));
+                        temp.setEstadoDescuento(rs.getString(8));
+                        temp.setPrimeraCuotaMes(rs.getInt(9));
+                        temp.setUltimaCuotaMes(rs.getInt(10));
+                        temp.setMontoDescuento(rs.getFloat(11));
+                        temp.setSaldoRestante(rs.getFloat(12));
+
+                        return temp;
+                    });
+
+        }  catch (BadSqlGrammarException e) {
+            System.out.println("Error: EmpleadoDAO en obtenerPrestamosAnticiposYMultasEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+            this.jdbcTemplate = null; // Cuidado con esto, anular el jdbcTemplate puede romper futuros llamados a este DAO
+        }
+
+        return lstTemp;
     }
 
 

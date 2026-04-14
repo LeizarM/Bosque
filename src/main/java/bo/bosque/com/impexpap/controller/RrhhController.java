@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.*;
+import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
 import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.Tipos;
@@ -1640,7 +1641,7 @@ public class RrhhController {
     }
     /**
      * Procedimiento para el eliminar una licencia de conducir
-     * @param cs
+     * @param lc
      * @return
      */
     @Secured ( { "ROLE_ADM", "ROLE_LIM" }  )
@@ -1863,6 +1864,23 @@ public class RrhhController {
     }
 
 
+    /**
+     * Obtendra los prestamos, anticipos, multas por empleado y periodo
+     * @return List
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM"})
+    @PostMapping("/prestamos-multas")
+    public List<DescuentoEmpleadoDTO> obtenerPrestamosAnticiposYMultasEmpleado (@RequestBody Empleado mb ){
+
+        List<DescuentoEmpleadoDTO> lstTemp = new ArrayList<>() ;
+
+        lstTemp = this.empDao.obtenerPrestamosAnticiposYMultasEmpleado( mb.getMes(), mb.getAnio(),  mb.getCodEmpleado() );
+
+        if ( lstTemp.isEmpty() ) return new ArrayList<>();
+
+        return lstTemp;
+
+    }
 
 
 }
