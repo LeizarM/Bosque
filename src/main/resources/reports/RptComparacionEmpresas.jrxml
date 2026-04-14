@@ -49,6 +49,28 @@
 		<property name="com.jaspersoft.studio.field.name" value="fechaImpresion"/>
 		<property name="com.jaspersoft.studio.field.label" value="fechaImpresion"/>
 	</field>
+	<group name="grupoEmpresa">
+		<groupExpression><![CDATA[$F{BOSQUE}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="0" y="5" width="80" height="15" backcolor="#1195ED" uuid="e97cee0b-5ec5-4822-9616-7ad47ce4cd8f">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="42c0ccd4-5f98-43fd-9621-ba320b911d1b"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{BOSQUE}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -308,11 +330,11 @@
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="408" y="15" width="162" height="11" uuid="cadb230c-ada0-41e8-b189-85b078db7f55"/>
+				<reportElement x="416" y="15" width="154" height="11" uuid="cadb230c-ada0-41e8-b189-85b078db7f55"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Fecha de impresión: " + $F{fechaImpresion}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[ $F{fechaImpresion}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
