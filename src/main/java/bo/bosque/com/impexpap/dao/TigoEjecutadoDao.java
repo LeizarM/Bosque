@@ -1,4 +1,5 @@
 package bo.bosque.com.impexpap.dao;
+import bo.bosque.com.impexpap.model.CambiosTigo;
 import bo.bosque.com.impexpap.model.FacturaTigo;
 import bo.bosque.com.impexpap.model.SociosTigo;
 import bo.bosque.com.impexpap.model.TigoEjecutado;
@@ -237,13 +238,13 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
     /**
      * procedimiento para obtener la factura ejecutada TIGO
      */
-    public List<TigoEjecutado> obtenerTigoEjecutado(String empresa,String periodoCobrado) {
+    public List<TigoEjecutado> obtenerTigoEjecutado(String empresa,String periodoCobrado,String search) {
         List<TigoEjecutado> lstTemp = new ArrayList<>();
 
         try{
-            lstTemp = this.jdbcTemplate.query("execute p_list_tTigo_ejecutado @empresa=?, @periodoCobrado=?, @ACCION=?",
-                    new Object[] {empresa,periodoCobrado,  "K" },
-                    new int[] {Types.VARCHAR,Types.VARCHAR,Types.VARCHAR },
+            lstTemp = this.jdbcTemplate.query("execute p_list_tTigo_ejecutado @empresa=?, @periodoCobrado=?,@search=?, @ACCION=?",
+                    new Object[] {empresa,periodoCobrado,search , "K" },
+                    new int[] {Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR },
                     (rs, rowCount)->{
 
                         TigoEjecutado temp = new TigoEjecutado();
@@ -273,13 +274,13 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
     /**
      * procedimiento para obtener la factura ejecutada TIGO
      */
-    public List<TigoEjecutado> obtenerArbolDetallado(String empresa, String periodoCobrado) {
+    public List<TigoEjecutado> obtenerArbolDetallado(String empresa, String periodoCobrado,String search) {
         List<TigoEjecutado> lstTemp;
         try {
             lstTemp = this.jdbcTemplate.query(
-                    "EXEC p_list_tTigo_ejecutado @empresa=?, @periodoCobrado=?, @ACCION=?",
-                    new Object[] { empresa, periodoCobrado, "N" },
-                    new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR },
+                    "EXEC p_list_tTigo_ejecutado @empresa=?, @periodoCobrado=?,@search=?, @ACCION=?",
+                    new Object[] { empresa, periodoCobrado,search, "N" },
+                    new int[] { Types.VARCHAR, Types.VARCHAR,Types.VARCHAR, Types.VARCHAR },
                     (rs, rowNum) -> {
                         TigoEjecutado temp = new TigoEjecutado();
                         //temp.setFila(rs.getInt(1));
@@ -330,5 +331,20 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         }
         return resp != 0;
     }
+    /**
+     * LISTAR EMPRESAS
+     * @return
+     */
+    @Override
+    public List<TigoEjecutado> listarEmpresas() {
+        // Usamos un objeto vacío solo para disparar la acción 'A'
+        return spHelper.ejecutarListado(
+                "p_list_tTigo_ejecutado",
+                new TigoEjecutado(),
+                "H1",
+                TigoEjecutado.class
+        );
+    }
+
 
 }

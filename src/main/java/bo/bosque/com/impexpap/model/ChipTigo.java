@@ -27,4 +27,5 @@ public class ChipTigo implements Serializable {
     private int pagina;
     private int tamanoPagina;
     private String periodo;
+    private Integer totalPaginas;
 }

@@ -2,6 +2,8 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.FacturaTigo;
 import bo.bosque.com.impexpap.model.Formacion;
+import bo.bosque.com.impexpap.model.TigoEjecutado;
+import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +22,10 @@ public class FacturaTigoDao implements IFacturaTigo {
      */
     @Autowired
     JdbcTemplate jdbcTemplate;
+    private final SpHelper spHelper;
+    public FacturaTigoDao(SpHelper spHelper) {
+        this.spHelper = spHelper;
+    }
     /**
      * Procedimiento para obtener el detalle deuda TIGO
      * @param codFactura
@@ -69,7 +75,7 @@ public class FacturaTigoDao implements IFacturaTigo {
                         ps.setString(6, ft.getDescripcionPlan());
                         ps.setFloat(7, ft.getTotalCobradoXCuenta());
                         ps.setString(8,ft.getEstado());
-                        ps.setInt(9, ft.getAudUsuario());
+                        ps.setInt(9, ft.getAudUsuarioI());
                         ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
                         ps.setString(11, acc);
                     }
@@ -81,6 +87,20 @@ public class FacturaTigoDao implements IFacturaTigo {
             resp = 0;
         }
         return resp != 0;
+    }
+    /**
+     * LISTAR PERIODO NO EJECUTADO PARA EL DROPDOWN DE CAMBIOS
+     * @return
+     */
+    @Override
+    public List<FacturaTigo> listarPeriodoFactura() {
+        // Usamos un objeto vacío solo para disparar la acción 'H1'
+        return spHelper.ejecutarListado(
+                "p_list_tTigoFactura",
+                new FacturaTigo(),
+                "H1",
+                FacturaTigo.class
+        );
     }
 
 

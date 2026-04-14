@@ -235,7 +235,7 @@ public class TigoController {
                             nuevaFactura.setPeriodoCobrado(getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", ""));
                             nuevaFactura.setDescripcionPlan(getCellValue(row.getCell(colIndex.get("Descripción del Plan"))));
                             nuevaFactura.setTotalCobradoXCuenta(montoFila);
-                            nuevaFactura.setAudUsuario(audUsuario);
+                            nuevaFactura.setAudUsuarioI(audUsuario);
                             nuevaFactura.setEstado("No ejecutado");
 
                             facturasAgrupadas.put(nroCuenta, nuevaFactura);
@@ -556,11 +556,12 @@ public class TigoController {
 
         String periodo = eTigo.getPeriodoCobrado();
         String empresa = eTigo.getEmpresa();
+        String search = eTigo.getSearch();
 
         System.out.println("→ Parámetros recibidos: empresa=" + empresa + ", periodo=" + periodo);
 
         // Recibe la LISTA PLANA, que contiene las filas de encabezado, detalle y el total.
-        List<TigoEjecutado> flat = this.eTigoDao.obtenerTigoEjecutado(empresa,periodo);
+        List<TigoEjecutado> flat = this.eTigoDao.obtenerTigoEjecutado(empresa,periodo,search);
 
         //System.out.println("→ Registros recibidos desde SQL: " + (flat != null ? flat.size() : 0));
 
@@ -660,11 +661,12 @@ public class TigoController {
 
         String periodo = eTigo.getPeriodoCobrado();
         String empresa = eTigo.getEmpresa();
+        String search = eTigo.getSearch();
 
         System.out.println("→ Parámetros recibidos: empresa=" + empresa + ", periodo=" + periodo);
 
         // La consulta SQL ya devuelve los datos ordenados correctamente (Encabezado, Detalle, Socio)
-        List<TigoEjecutado> flat = this.eTigoDao.obtenerArbolDetallado(empresa, periodo);
+        List<TigoEjecutado> flat = this.eTigoDao.obtenerArbolDetallado(empresa, periodo,search);
         System.out.println("→ Registros recibidos desde SQL: " + (flat != null ? flat.size() : 0));
 
         if (flat == null || flat.isEmpty()) return new ArrayList<>();
@@ -1144,6 +1146,24 @@ public class TigoController {
         }
 
 
+    }
+    /**
+     * LISTAR PERIODOS PARA EL DROPDOWN cambios linea tigo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarPeriodoFactura")
+    public ResponseEntity<ApiResponse<?>> listarPeriodoFactura() {
+        return procesarListaCambios(fTigoDao.listarPeriodoFactura());
+    }
+    /**
+     * LISTAR PERIODOS PARA EL DROPDOWN cambios linea tigo
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listarEmpresas")
+    public ResponseEntity<ApiResponse<?>> listarEmpresas() {
+        return procesarListaCambios(eTigoDao.listarEmpresas());
     }
 
 

@@ -29,5 +29,6 @@ public class TigoEjecutado {
     private Integer codEmpleadoPadre;
     private List<TigoEjecutado> items = new ArrayList<TigoEjecutado>();
     private String listaCodEmpleado;
-
+    private String search;
+    private String periodoAnterior;
 }

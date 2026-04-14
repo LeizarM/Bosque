@@ -29,6 +29,7 @@ public class CambiosTigo implements Serializable {
     private int fila;
     private int pagina;
     private int tamanoPagina;
+    private Integer totalPaginas;
 
 
 }

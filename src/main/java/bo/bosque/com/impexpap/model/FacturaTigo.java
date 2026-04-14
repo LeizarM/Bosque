@@ -16,6 +16,7 @@ public class FacturaTigo {
     private String descripcionPlan;
     private Float totalCobradoXCuenta;
     private String estado;
-    private int audUsuario;
+    private int audUsuarioI;
+    private Date audFechaI;
 
 }

@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.model.CambiosTigo;
 import bo.bosque.com.impexpap.model.SociosTigo;
 import bo.bosque.com.impexpap.model.TigoEjecutado;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
@@ -31,11 +32,11 @@ public interface ITigoEjecutado {
     /**
      * Procecimiento para obtener tigo ejecutado
      */
-    List<TigoEjecutado> obtenerTigoEjecutado(String empresa, String periodoCobrado);
+    List<TigoEjecutado> obtenerTigoEjecutado(String empresa, String periodoCobrado,String search);
     /**
      * Procecimiento para obtener EL ARBOL DETALLADO
      */
-    List<TigoEjecutado> obtenerArbolDetallado(String empresa,String periodoCobrado);
+    List<TigoEjecutado> obtenerArbolDetallado(String empresa,String periodoCobrado,String search);
 
     /**
      * Procedimiento para ejecutar por lotes
@@ -52,5 +53,11 @@ public interface ITigoEjecutado {
      * @return RespuestaSp con error, errormsg e idGenerado (total registros procesados)
      */
     RespuestaSp ejecutarPeriodo(TigoEjecutado te);
+    /**
+     * PARA EL DROPDOWN DE EMPRESAS : INCLUYE TODAS LAS EMPRESAS EXCEPTO PAPIRUS UNIFICADO A SOCIOS TOMANDO EL NOMBRECOMPLETO COMO EMPRESA.
+     */
+    List <TigoEjecutado> listarEmpresas();
+
+
 
 }
