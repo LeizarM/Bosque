@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.controller;
 
 
 import bo.bosque.com.impexpap.dao.IEntregaChofer;
+import bo.bosque.com.impexpap.dto.PedidoPendienteEntregaDTO;
 import bo.bosque.com.impexpap.model.EntregaChofer;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpStatus;
@@ -143,6 +144,23 @@ public class EntregaChoferController {
         List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferesExtracto( mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursal(), mb.getCodEmpleado() );
 
         if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
+    }
+
+    /**
+     * Obtiene los pedidos pendientes de entrega
+     * @return List<PedidoPendienteEntregaDTO>
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/pendientes-entrega")
+    public List<PedidoPendienteEntregaDTO> pendientesEntrega(){
+
+
+        List<PedidoPendienteEntregaDTO> lstTemp = this.entregaChoferDao.lstPedidosPendientesEntrega( );
+
+        if(lstTemp.isEmpty()) return new ArrayList<>();
 
         return lstTemp;
 

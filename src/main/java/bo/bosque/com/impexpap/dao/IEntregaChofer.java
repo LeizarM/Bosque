@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 
+import bo.bosque.com.impexpap.dto.PedidoPendienteEntregaDTO;
 import bo.bosque.com.impexpap.model.EntregaChofer;
 
 import java.util.Date;
@@ -25,10 +26,11 @@ public interface IEntregaChofer {
 
     /**
      * Listar entregas por chofer
-     * @param docDate
+     * @param fechaEntrega
+     * @param codEmpleado
      * @return
      */
-    List<EntregaChofer> listarEntregasXChofer(  String fechaEntrega, int codEmpleado);
+    List<EntregaChofer> listarEntregasXChofer(  String fechaEntrega, int codEmpleado );
 
     /**
      * Listar choferes
@@ -43,4 +45,10 @@ public interface IEntregaChofer {
      * @return
      */
     List<EntregaChofer> lstChoferesExtracto( Date fechaIni, Date fechaFin, int codSucursal, int codEmpleado);
+
+    /**
+     * Listar pedidos pendientes de entrega del SAP
+     * @return
+     */
+    List<PedidoPendienteEntregaDTO> lstPedidosPendientesEntrega( );
 }

@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.dto.PedidoPendienteEntregaDTO;
 import bo.bosque.com.impexpap.model.EntregaChofer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -255,6 +257,47 @@ public class EntregaChoferDao implements IEntregaChofer {
         return lstTemp;
 
 
+    }
+
+    /**
+     * Listar pedidos pendientes de entrega del SAP
+     *
+     * @return
+     */
+    @Override
+    public List<PedidoPendienteEntregaDTO> lstPedidosPendientesEntrega() {
+        List<PedidoPendienteEntregaDTO> lstTemp = new ArrayList<>();
+
+        try {
+            lstTemp =  this.jdbcTemplate.query("exec p_list_trch_Entregas  @ACCION = ?",
+                    new Object[] { "F" },
+                    new int[] { Types.VARCHAR },
+                    (rs, rowNum) -> {
+                        PedidoPendienteEntregaDTO temp = new PedidoPendienteEntregaDTO();
+
+                        temp.setEmpresa( rs.getString(1 ) );
+                        temp.setDocEntry( rs.getLong(2 ) );
+                        temp.setCardName( rs.getString(3 ) );
+                        temp.setDocDate( rs.getDate(4) );
+                        temp.setHoraCreacion( rs.getString(5 ) );
+                        temp.setWeight( rs.getBigDecimal(6 ) );
+                        temp.setCantidad( rs.getBigDecimal(7 ) );
+                        temp.setComments( rs.getString(8 ) );
+                        temp.setDireccionEntrega( rs.getString(9 ) );
+                        temp.setVendedor( rs.getString(10 ) );
+                        temp.setSistema( rs.getString(11 ) );
+                        temp.setDocNum( rs.getString(12 ) );
+                        temp.setSeriesName( rs.getString(13 ) );
+                        temp.setTipoEntrega( rs.getString(14 ) );
+
+                        return temp;
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: EntregaChoferDao en lstPedidosPendientesEntrega, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<PedidoPendienteEntregaDTO>();
+            this.jdbcTemplate = null;
+        }
+        return lstTemp;
     }
 
 
