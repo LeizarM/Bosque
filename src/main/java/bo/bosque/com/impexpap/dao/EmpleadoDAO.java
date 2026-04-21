@@ -360,7 +360,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en lisEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 
