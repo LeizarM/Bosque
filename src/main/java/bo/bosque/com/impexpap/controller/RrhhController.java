@@ -4,6 +4,7 @@ import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
 import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.ApiResponse;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.Tipos;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -58,8 +59,9 @@ public class RrhhController {
     private final IEmpresa empresaDao;
     private final ICargo cargoDao;
     private final INivelJerarquico nivelJerarquicoDao;
+    private final IArea areaDao;
 
-    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao, IEmpresa empresaDao, ICargo cargoDao, INivelJerarquico nivelJerarquicoDao, IEducacion eduDao,INroCuentaBancaria cuentaDao,ISeguro segDao,IAfiliacionSeguro afiSegDao) {
+    public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao, IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao, ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao, ICargoSucursal cagoSucDao, IEmpresa empresaDao, ICargo cargoDao, INivelJerarquico nivelJerarquicoDao, IEducacion eduDao,INroCuentaBancaria cuentaDao,ISeguro segDao,IAfiliacionSeguro afiSegDao,IArea areaDao) {
         this.jdbcTemplate = jdbcTemplate;
 
         this.emailDao   = emailDao;
@@ -83,6 +85,7 @@ public class RrhhController {
         this.cuentaDao = cuentaDao;
         this.segDao= segDao;
         this.afiSegDao=afiSegDao;
+        this.areaDao = areaDao;
     }
 
 
@@ -1880,6 +1883,31 @@ public class RrhhController {
 
         return lstTemp;
 
+    }
+    /**
+     * Procedimiento para que obtendra los correos por persona
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtenerArea")
+    public ResponseEntity<ApiResponse<?>> obtenerArea(@RequestBody Area a) {
+        return procesarListaCambios(areaDao.obtenerArea(a));
+    }
+    @PostMapping("/registrarArea")
+    public ResponseEntity<ApiResponse<?>>registrarArea(@RequestBody Area a){
+        RespuestaSp res = areaDao.registrarArea(a,a.getCodArea()==0?"I":"U");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(res.getErrormsg(),res.getIdGenerado(),HttpStatus.CREATED.value()));
+    }
+    /**
+     * Metodo auxiliar para procesar listas de cambios.
+     * Devuelve 204 si no hay registros, 200 si hay.
+     */
+    private <T> ResponseEntity<ApiResponse<?>> procesarListaCambios(List<T> lista) {
+        if (lista == null || lista.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ApiResponse<>("No se encontraron registros.", null,
+                            HttpStatus.NO_CONTENT.value()));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
     }
 
 

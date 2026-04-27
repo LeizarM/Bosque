@@ -35,6 +35,7 @@ public class CargoDao implements ICargo {
                     "@posicion = ?, " +
                     "@estado = ?, " +
                     "@audUsuarioI = ?, " +
+                    "@codArea = ?, " +
                     "@ACCION = ?";
 
 
@@ -114,6 +115,7 @@ public class CargoDao implements ICargo {
                         temp.setEstadoPadre( rs.getString(20) );
                         temp.setPosicion( rs.getInt(21) );
                         temp.setEsVisible( rs.getInt(22) );
+                        temp.setCodArea( rs.getInt(23) ); // 🆕 AGREGAR
 
                         return temp;
                     });
@@ -146,7 +148,8 @@ public class CargoDao implements ICargo {
                 ps.setInt(6, mb.getPosicion());
                 ps.setInt(7, mb.getEstado());
                 ps.setInt(8, mb.getAudUsuario());
-                ps.setString(9, acc);
+                ps.setInt(9,mb.getCodArea());
+                ps.setString(10, acc);
             });
 
             return affectedRows > 0;

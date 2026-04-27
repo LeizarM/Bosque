@@ -56,5 +56,7 @@ public class Cargo implements Serializable {
     private int codEmpleado;
     private String nombreCompleto;
 
+    private Integer codArea;
+
 
 }
