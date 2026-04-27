@@ -1,6 +1,6 @@
 package bo.bosque.com.impexpap.dao;
 
-import bo.bosque.com.impexpap.model.Anticipo;
+
 import bo.bosque.com.impexpap.model.Area;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
