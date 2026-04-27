@@ -1,25 +1,37 @@
 package bo.bosque.com.impexpap.controller;
 
-
 import bo.bosque.com.impexpap.dao.IEntregaChofer;
 import bo.bosque.com.impexpap.dto.PedidoPendienteEntregaDTO;
 import bo.bosque.com.impexpap.model.EntregaChofer;
 import bo.bosque.com.impexpap.utils.Utiles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controlador REST para gestión de entregas de choferes.
+ */
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/entregas")
 public class EntregaChoferController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EntregaChoferController.class);
+    private static final Utiles UTILES = new Utiles();
+    
+    private static final String MSG_REGISTRO_OK = "Datos de la entrega actualizados";
+    private static final String MSG_REGISTRO_INICIO_OK = "Datos de la entrega de inicio o fin actualizados";
+    private static final String MSG_ERROR = "Error en el servidor";
+    private static final String STATUS_OK = "ok";
+    private static final String STATUS_ERROR = "error";
 
     private final IEntregaChofer entregaChoferDao;
 
@@ -27,143 +39,87 @@ public class EntregaChoferController {
         this.entregaChoferDao = entregaChoferDao;
     }
 
-    // Implementación de endpoints para la gestión de entregas de choferes
-
-    /**
-     * Obtiene las entregas de choferes para un lote de producción
-     * @param mb
-     * @return
-     */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/chofer-entrega")
-    public List<EntregaChofer> obtenerEntregasXEmpleado(@RequestBody EntregaChofer mb ){
-
-        List<EntregaChofer> lstTemp = this.entregaChoferDao.listarEntregasXEmpleado( mb.getUChofer() );
-
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
-
-        return lstTemp;
-
-
-
-
+    public List<EntregaChofer> obtenerEntregasXEmpleado(@RequestBody EntregaChofer mb) {
+        List<EntregaChofer> lstTemp = this.entregaChoferDao.listarEntregasXEmpleado(mb.getUChofer());
+        return lstTemp.isEmpty() ? Collections.emptyList() : lstTemp;
     }
 
-    /**+
-     * Registra las entregas de choferes su geolocalizacion
-     * @param mb
-     * @return
-     */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/registro-entrega-chofer")
-    public ResponseEntity<?> registroEntregaChofer(@RequestBody EntregaChofer mb ) {
-
-
-
+    public ResponseEntity<Map<String, Object>> registroEntregaChofer(@RequestBody EntregaChofer mb) {
         Map<String, Object> response = new HashMap<>();
-        mb.setFechaEntrega( new Utiles().convertirAFormatoSQLServer( mb.getFechaEntrega() ));
-
-
-        if( !this.entregaChoferDao.registrarEntregaChofer( mb, "B" ) ){
-            response.put("msg", "Error al Registrar Las Entregas");
-            response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            mb.setFechaEntrega(UTILES.convertirAFormatoSQLServer(mb.getFechaEntrega()));
+            if (!this.entregaChoferDao.registrarEntregaChofer(mb, "B")) {
+                return buildErrorResponse(response, "Error al Registrar Las Entregas");
+            }
+            return buildSuccessResponse(response, MSG_REGISTRO_OK);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(response, "Formato de fecha inválido: " + e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Error en registroEntregaChofer: {}", e.getMessage(), e);
+            return buildErrorResponse(response, MSG_ERROR);
         }
-        response.put("msg", "Datos de De la entrega actualizados");
-        response.put("ok", "ok");
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-
-    /**
-     * Obtiene las entregas de choferes para una determinada fecha
-     * @param mb
-     * @return
-     */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/entregas-fecha")
-    public List<EntregaChofer> obtenerEntregasChoferesXFecha(@RequestBody EntregaChofer mb ){
-
-
-        List<EntregaChofer> lstTemp = this.entregaChoferDao.listarEntregasXChofer( mb.getFechaEntrega(), mb.getCodEmpleado() );
-
-
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
-
-        return lstTemp;
-
+    public List<EntregaChofer> obtenerEntregasChoferesXFecha(@RequestBody EntregaChofer mb) {
+        List<EntregaChofer> lstTemp = this.entregaChoferDao.listarEntregasXChofer(mb.getFechaEntrega(), mb.getCodEmpleado());
+        return lstTemp.isEmpty() ? Collections.emptyList() : lstTemp;
     }
 
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/registro-inicio-fin-entrega")
-    public ResponseEntity<?> regitroInicioFinEntrega(@RequestBody EntregaChofer mb ) {
-
-        mb.setUChofer(mb.getCodEmpleado());
-
+    public ResponseEntity<Map<String, Object>> regitroInicioFinEntrega(@RequestBody EntregaChofer mb) {
         Map<String, Object> response = new HashMap<>();
-        //mb.setFechaEntrega( new Utiles().convertirAFormatoSQLServer( mb.getFechaEntrega() ));
-
-
-        if( !this.entregaChoferDao.registrarEntregaChofer( mb, "I" ) ){
-            response.put("msg", "Error al Registrar El Inicio o Fin de las entregas");
-            response.put("ok", "error");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            mb.setUChofer(mb.getCodEmpleado());
+            if (!this.entregaChoferDao.registrarEntregaChofer(mb, "I")) {
+                return buildErrorResponse(response, "Error al Registrar El Inicio o Fin de las entregas");
+            }
+            return buildSuccessResponse(response, MSG_REGISTRO_INICIO_OK);
+        } catch (Exception e) {
+            LOG.error("Error en regitroInicioFinEntrega: {}", e.getMessage(), e);
+            return buildErrorResponse(response, MSG_ERROR);
         }
-        response.put("msg", "Datos de De la entrega de inicio o fin  actualizados");
-        response.put("ok", "ok");
+    }
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/choferes")
+    public List<EntregaChofer> lstChoferes() {
+        List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferes();
+        return lstTemp.isEmpty() ? Collections.emptyList() : lstTemp;
+    }
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/extracto")
+    public List<EntregaChofer> lstChoferExtracto(@RequestBody EntregaChofer mb) {
+        List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferesExtracto(
+            mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursal(), mb.getCodEmpleado());
+        return lstTemp.isEmpty() ? Collections.emptyList() : lstTemp;
+    }
+
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/pendientes-entrega")
+    public List<PedidoPendienteEntregaDTO> pendientesEntrega() {
+        List<PedidoPendienteEntregaDTO> lstTemp = this.entregaChoferDao.lstPedidosPendientesEntrega();
+        return lstTemp.isEmpty() ? Collections.emptyList() : lstTemp;
+    }
+
+    // ==================== MÉTODOS AUXILIARES ====================
+    
+    private ResponseEntity<Map<String, Object>> buildSuccessResponse(Map<String, Object> response, String msg) {
+        response.put("msg", msg);
+        response.put("ok", STATUS_OK);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-
-    /**
-     * Obtiene las entregas de choferes para un lote de producción
-     * @return
-     */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/choferes")
-    public List<EntregaChofer> lstChoferes(){
-
-        List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferes();
-
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
-
-        return lstTemp;
-
+    private ResponseEntity<Map<String, Object>> buildErrorResponse(Map<String, Object> response, String msg) {
+        response.put("msg", msg);
+        response.put("ok", STATUS_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    /**
-     * Obtiene las entregas de choferes para un lote de producción en un rango de fechas y por sucursal
-     * @param mb
-     * @return
-     */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/extracto")
-    public List<EntregaChofer> lstChoferExtracto(  @RequestBody EntregaChofer mb  ){
-
-
-        List<EntregaChofer> lstTemp = this.entregaChoferDao.lstChoferesExtracto( mb.getFechaInicio(), mb.getFechaFin(), mb.getCodSucursal(), mb.getCodEmpleado() );
-
-        if( lstTemp.size() == 0 ) return new ArrayList<>();
-
-        return lstTemp;
-
-    }
-
-    /**
-     * Obtiene los pedidos pendientes de entrega
-     * @return List<PedidoPendienteEntregaDTO>
-     */
-    @Secured({ "ROLE_ADM", "ROLE_LIM" })
-    @PostMapping("/pendientes-entrega")
-    public List<PedidoPendienteEntregaDTO> pendientesEntrega(){
-
-
-        List<PedidoPendienteEntregaDTO> lstTemp = this.entregaChoferDao.lstPedidosPendientesEntrega( );
-
-        if(lstTemp.isEmpty()) return new ArrayList<>();
-
-        return lstTemp;
-
-    }
-
 }
