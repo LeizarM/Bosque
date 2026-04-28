@@ -29,7 +29,8 @@ public class DepositoCheque implements Serializable {
     private int audUsuario;
 
 
-    private String nombreCompleto;
+    private String nombreCompleto; // quien registro el deposito
+    private String nombreVendedor; // a que vendedor le corresponde la nota o venta del SAP
 
 
 
