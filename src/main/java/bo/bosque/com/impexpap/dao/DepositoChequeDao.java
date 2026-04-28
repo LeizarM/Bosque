@@ -171,6 +171,7 @@ public class DepositoChequeDao implements IDepositoCheque {
                             temp.setNroTransaccion(rs.getString(14));
                             temp.setCodEmpresa( rs.getInt(15) );
                             temp.setIdBxC( rs.getInt(16) );
+                            temp.setNombreCompleto(rs.getString(17));
 
                             return temp;
                         });

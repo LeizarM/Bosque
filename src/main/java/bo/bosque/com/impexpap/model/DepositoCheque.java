@@ -25,7 +25,11 @@ public class DepositoCheque implements Serializable {
     private Date fechaI;
     private String nroTransaccion;
     private String obs;
+    private long codEmpleado;
     private int audUsuario;
+
+
+    private String nombreCompleto;
 
 
 
