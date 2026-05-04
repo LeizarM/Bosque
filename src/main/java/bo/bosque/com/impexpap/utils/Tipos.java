@@ -271,7 +271,7 @@ public class Tipos {
         listaTemp.add(new Tipos("PERD","PERDIDA EQUIPO",62));
         listaTemp.add(new Tipos("CDET","CHIP DETERIORADO",62));
         listaTemp.add(new Tipos("CSIM","CAMBIO eSIM",62));
-        listaTemp.add(new Tipos("SP","SALIDA PERSONAL;",62));
+        listaTemp.add(new Tipos("SP","SALIDA PERSONAL",62));
         return listaTemp;
     }
     /**
