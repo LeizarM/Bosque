@@ -31,8 +31,8 @@ import java.util.Set;
  */
 @Slf4j
 @RestController
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET})
 @RequestMapping("/pagos-extranjeros")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
 public class PagosExtranjerosController {
 
