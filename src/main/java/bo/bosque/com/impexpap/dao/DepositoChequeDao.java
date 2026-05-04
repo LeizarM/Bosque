@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
-import java.sql.SQLOutput;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,31 +48,32 @@ public class DepositoChequeDao implements IDepositoCheque {
     }
 
     /**
-     * Registra un depósito de cheque utilizando un procedimiento almacenado.
+     * Registra o actualiza un depósito de cheque utilizando un procedimiento almacenado.
      *
-     * @param mb Objeto con los datos del depósito
-     * @param acc Acción a realizar en el procedimiento almacenado
+     * @param deposito Objeto con los datos del depósito
+     * @param accion   Acción a realizar: "I" insertar, "U" actualizar, "A" asignar nro. transacción, "B" rechazar
      * @return true si la operación fue exitosa, false en caso contrario
      */
     @Override
-    public boolean registrarDepositoCheque(DepositoCheque mb, String acc) {
+    public boolean registrarDepositoCheque(DepositoCheque deposito, String accion) {
         try {
             int affectedRows = jdbcTemplate.update(SQL_STORED_PROCEDURE, ps -> {
                 ps.setEscapeProcessing(true);
-                ps.setInt(1, mb.getIdDeposito());
-                ps.setString(2, mb.getCodCliente());
-                ps.setInt(3, mb.getCodEmpresa());
-                ps.setInt(4, mb.getIdBxC());
-                ps.setDouble(5, mb.getImporte());
-                ps.setString(6, mb.getMoneda());
-                ps.setInt(7, mb.getEstado());
-                ps.setString(8, mb.getFotoPath());
-                ps.setFloat(9, mb.getACuenta());
-                ps.setDate(10, (java.sql.Date) mb.getFechaI());
-                ps.setString(11, mb.getNroTransaccion());
-                ps.setString(12, mb.getObs());
-                ps.setInt(13, mb.getAudUsuario());
-                ps.setString(14, acc);
+                ps.setInt(1, deposito.getIdDeposito());
+                ps.setString(2, deposito.getCodCliente());
+                ps.setInt(3, deposito.getCodEmpresa());
+                ps.setInt(4, deposito.getIdBxC());
+                ps.setBigDecimal(5, deposito.getImporte());
+                ps.setString(6, deposito.getMoneda());
+                ps.setInt(7, deposito.getEstado());
+                ps.setString(8, deposito.getFotoPath());
+                ps.setBigDecimal(9, deposito.getACuenta());
+                ps.setDate(10, deposito.getFechaI() != null
+                        ? new java.sql.Date(deposito.getFechaI().getTime()) : null);
+                ps.setString(11, deposito.getNroTransaccion());
+                ps.setString(12, deposito.getObs());
+                ps.setInt(13, deposito.getAudUsuario());
+                ps.setString(14, accion);
             });
 
             return affectedRows > 0;
@@ -86,59 +86,38 @@ public class DepositoChequeDao implements IDepositoCheque {
 
 
     /**
-     * Obtiene el último ID registrado en la tabla
-     * @param audUsuario
-     * @return
+     * Obtiene el último ID de depósito registrado por el usuario indicado.
+     *
+     * @param audUsuario ID del usuario que registró el depósito
+     * @return el último ID registrado, o 0 si no existe ninguno
      */
+    @Override
     public int obtenerUltimoId(int audUsuario) {
-
         try {
-            return this.jdbcTemplate.queryForObject("EXEC p_list_tdep_DepositoCheques @audUsuario=?, @ACCION=?",
+            Integer result = this.jdbcTemplate.queryForObject(
+                    "EXEC p_list_tdep_DepositoCheques @audUsuario=?, @ACCION=?",
                     new Object[]{audUsuario, "A"},
                     new int[]{Types.INTEGER, Types.VARCHAR},
-                    Integer.class // Espera un entero como resultado
-            );
+                    Integer.class);
+            return result != null ? result : 0;
         } catch (EmptyResultDataAccessException e) {
-            // Si no hay resultados, retorna 0
+            logger.warn("No se encontró último ID para audUsuario={}", audUsuario);
             return 0;
         } catch (BadSqlGrammarException e) {
-            System.err.println("Error de SQL: " + e.getMessage());
+            logger.error("Error de SQL al obtener último ID: {}", e.getMessage());
             return 0;
         }
     }
 
     /**
-     * Listar todos los depósitos cheque solo los ultimos X registros
+     * Lista los últimos depósitos de cheque registrados.
      *
-     * @return
+     * @return lista de depósitos, o lista vacía si no hay resultados
      */
     @Override
     public List<DepositoCheque> listarDepositosCheque() {
-        return null;
+        return new ArrayList<>();
     }
-
-    /**
-     * Validar si existe un registro con los mismos datos
-     *
-     * @param mb
-     * @return
-     */
-    /*@Override
-    public int existeRegistro(DepositoCheque mb) {
-        try {
-            return this.jdbcTemplate.queryForObject("execute p_list_tdep_DepositoCheques @codEmpresa = ?, @numFact = ?, @codCliente = ?, @docNum = ?, @ACCION = ?",
-                    new Object[]{ mb.getCodEmpresa(), mb.getNumFact(), mb.getCodCliente(), mb.getDocNum()  , "B"},
-                    new int[]{ Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.VARCHAR } ,
-                    Integer.class // Espera un entero como resultado
-            );
-        } catch (EmptyResultDataAccessException e) {
-            // Si no hay resultados, retorna 0
-            return 0;
-        } catch (BadSqlGrammarException e) {
-            System.err.println("Error de SQL: " + e.getMessage());
-            return 0;
-        }
-    }*/
 
     /**
      * Listar todos los depósitos cheque solo los ultimos X registros
@@ -159,9 +138,9 @@ public class DepositoChequeDao implements IDepositoCheque {
                             temp.setCodCliente(rs.getString(2));
                             temp.setNombreBanco(rs.getString(3));
                             temp.setNombreEmpresa(rs.getString(4));
-                            temp.setImporte(rs.getDouble(5));
+                            temp.setImporte(rs.getBigDecimal(5));
                             temp.setMoneda(rs.getString(6));
-                            temp.setACuenta(rs.getFloat(7));
+                            temp.setACuenta(rs.getBigDecimal(7));
                             temp.setNumeroDeDocumentos(rs.getString(8));
                             temp.setFechasDeDepositos(rs.getString(9));
                             temp.setNumeroDeFacturas(rs.getString(10));
@@ -211,9 +190,9 @@ public class DepositoChequeDao implements IDepositoCheque {
                         temp.setNombreEmpresa(rs.getString(4));
                         temp.setIdBxC(rs.getInt(5));
                         temp.setNombreBanco(rs.getString(6));
-                        temp.setImporte(rs.getFloat(7));
-                        temp.setMoneda(rs.getString(8));
-                        temp.setACuenta(rs.getFloat(9));
+                            temp.setImporte(rs.getBigDecimal(7));
+                            temp.setMoneda(rs.getString(8));
+                            temp.setACuenta(rs.getBigDecimal(9));
                         temp.setObs(rs.getString(10));
                         temp.setFechaI(rs.getDate(11));
                         temp.setEsPendiente(rs.getString(12));

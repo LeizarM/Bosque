@@ -4,7 +4,6 @@ package bo.bosque.com.impexpap.controller;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 
 import bo.bosque.com.impexpap.commons.service.FileStorageService;
 import bo.bosque.com.impexpap.commons.service.PdfGeneratorService;
@@ -14,12 +13,13 @@ import bo.bosque.com.impexpap.utils.Utiles;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import bo.bosque.com.impexpap.utils.ApiResponse;
@@ -28,9 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/deposito-cheque")
-@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET})
 public class DepositoChequeController {
 
+    private static final Logger logger = LoggerFactory.getLogger(DepositoChequeController.class);
     private static final String SUCCESS_MESSAGE = "Operación realizada exitosamente";
     private static final String ERROR_MESSAGE = "Error en la solicitud";
 
@@ -78,28 +78,23 @@ public class DepositoChequeController {
                     String contentType = file.getContentType();
                     if (contentType != null && contentType.startsWith("image/")) {
                         // Obtener el ID del último registro y guardar la imagen
-                        int lastID;
-
-                        if("I".equals(accion) ) {
-                            mb.setIdDeposito(  depositoChequeDao.obtenerUltimoId(mb.getAudUsuario()));
+                        if ("I".equals(accion)) {
+                            mb.setIdDeposito(depositoChequeDao.obtenerUltimoId(mb.getAudUsuario()));
                         }
-                        lastID = mb.getIdDeposito();
+                        int lastID = mb.getIdDeposito();
                         String fileName = fileStorageService.saveFile(file, (long) lastID);
                         // Actualizar el registro con el nombre del archivo
                         mb.setFotoPath(fileName);
                     } else {
-                        // No es una imagen o no tiene tipo de contenido
-                        System.out.println("El archivo enviado no es una imagen válida: " +
-                                (contentType != null ? contentType : "tipo desconocido"));
+                        logger.warn("El archivo enviado no es una imagen válida: {}",
+                                contentType != null ? contentType : "tipo desconocido");
                     }
                 } catch (Exception e) {
                     // Capturar cualquier error al procesar el archivo, pero continuar con la operación
-                    System.err.println("Error al procesar el archivo: " + e.getMessage());
-                    // No interrumpimos la operación principal si hay un error con el archivo
+                    logger.error("Error al procesar el archivo: {}", e.getMessage());
                 }
             } else {
-                System.out.println("No se recibió ningún archivo o el archivo está vacío");
-                // Continuar con el proceso normal sin intentar guardar el archivo
+                logger.info("No se recibió ningún archivo o el archivo está vacío");
             }
 
             HttpStatus status = accion.equals("I") ? HttpStatus.CREATED : HttpStatus.OK;
@@ -112,11 +107,10 @@ public class DepositoChequeController {
 
 
     /**
-     * Obtiene todos las empresas registradas en el sistema.
-     * @return
+     * Obtiene todas las empresas registradas en el sistema.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/lst-empresas")
+    @GetMapping("/lst-empresas")
     public ResponseEntity<?> obtenerEmpresas() {
         try {
             List<Empresa> empresas = empresaDao.obtenerEmpresas();
@@ -134,14 +128,13 @@ public class DepositoChequeController {
     }
 
     /**
-     * Obtiene todos los bancos registradas en el sistema.
-     * @return
+     * Obtiene los bancos/cuentas registrados en el sistema por empresa.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/lst-banco")
-    public ResponseEntity<?> obtenerBanco( @RequestBody BancoXCuenta mb ) {
+    @GetMapping("/lst-banco")
+    public ResponseEntity<?> obtenerBanco(@RequestParam int codEmpresa) {
         try {
-            List<BancoXCuenta> bancos = bancoXCuentaDao.listarBancosXCuentas( mb.getCodEmpresa() );
+            List<BancoXCuenta> bancos = bancoXCuentaDao.listarBancosXCuentas(codEmpresa);
 
             if (bancos.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron Bancos");
@@ -158,8 +151,8 @@ public class DepositoChequeController {
 
 
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/lst-notaRemision")
-    public ResponseEntity<?> obtenerNotaRemision( @RequestBody NotaRemision mb ) {
+    @GetMapping("/lst-nota-remision")
+    public ResponseEntity<?> obtenerNotaRemision(@RequestBody NotaRemision mb) {
         try {
             List<NotaRemision> nr = notaRemisionDao.listarNotasRemisiones( mb );
 
@@ -176,16 +169,13 @@ public class DepositoChequeController {
     }
 
     /**
-     * Para el registro de una nueva Nota de Remision
-     * @param mb
-     * @return
+     * Registra o actualiza una nota de remisión.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/registrar-nota-remision")
-    public ResponseEntity<?> registrarNotaRemision( @RequestBody NotaRemision mb ){
+    public ResponseEntity<?> registrarNotaRemision(@RequestBody NotaRemision mb) {
 
-
-        mb.setFecha( new Utiles().fechaJ_a_Sql( mb.getFecha() ));
+        mb.setFecha(new Utiles().fechaJ_a_Sql(mb.getFecha()));
 
 
         try {
@@ -210,15 +200,13 @@ public class DepositoChequeController {
 
 
     /**
-     * Obtiene los socios de negocio registrados en el sistema por empresa
-     * @return
+     * Obtiene los socios de negocio registrados en el sistema por empresa.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/lst-socios-negocio")
-
-    public ResponseEntity<?> obtenerSocioNegocio( @RequestBody DepositoCheque mb) {
+    @GetMapping("/lst-socios-negocio")
+    public ResponseEntity<?> obtenerSocioNegocio(@RequestParam int codEmpresa) {
         try {
-            List<SocioNegocio> lstTemp = socioNegocioDao.obtenerSocioNegocio( mb.getCodEmpresa() );
+            List<SocioNegocio> lstTemp = socioNegocioDao.obtenerSocioNegocio(codEmpresa);
 
             if (lstTemp.isEmpty()) {
                 return buildSuccessResponse(HttpStatus.NO_CONTENT, "No se encontraron socios de negocio");
@@ -235,12 +223,10 @@ public class DepositoChequeController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/listar")
-    public ResponseEntity<ApiResponse<?>> listarDepositos( @RequestBody DepositoCheque mb ) {
+    public ResponseEntity<ApiResponse<?>> listarDepositos(@RequestBody DepositoCheque mb) {
 
-
-
-        mb.setFechaInicio( new Utiles().fechaJ_a_Sql( mb.getFechaInicio() ) );
-        mb.setFechaFin( new Utiles().fechaJ_a_Sql( mb.getFechaFin() ) );
+        mb.setFechaInicio(new Utiles().fechaJ_a_Sql(mb.getFechaInicio()));
+        mb.setFechaFin(new Utiles().fechaJ_a_Sql(mb.getFechaFin()));
 
 
 
@@ -260,18 +246,14 @@ public class DepositoChequeController {
     }
 
     /**
-     * Para listar los depositos para identificar
-     * @param mb
-     * @return
+     * Lista los depósitos pendientes de identificar.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/listar-dep-identificar")
-    public ResponseEntity<ApiResponse<?>> listarDepositosPorIdentificar( @RequestBody DepositoCheque mb ) {
+    public ResponseEntity<ApiResponse<?>> listarDepositosPorIdentificar(@RequestBody DepositoCheque mb) {
 
-
-
-        mb.setFechaInicio( new Utiles().fechaJ_a_Sql( mb.getFechaInicio() ) );
-        mb.setFechaFin( new Utiles().fechaJ_a_Sql( mb.getFechaFin() ) );
+        mb.setFechaInicio(new Utiles().fechaJ_a_Sql(mb.getFechaInicio()));
+        mb.setFechaFin(new Utiles().fechaJ_a_Sql(mb.getFechaFin()));
 
 
 
@@ -295,26 +277,20 @@ public class DepositoChequeController {
 
 
     /**
-     * Para el registro de una nueva Nota de Remision
-     * @param mb
-     * @return
+     * Asigna el número de transacción a un depósito existente.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
-    @PostMapping("/registrar-nroTransaccion")
-    public ResponseEntity<?> registrarNroTransaccion( @RequestBody DepositoCheque mb ){
+    @PostMapping("/registrar-nro-transaccion")
+    public ResponseEntity<?> registrarNroTransaccion(@RequestBody DepositoCheque mb) {
 
         try {
-
-            String acc = "A";
-
-            boolean operationSuccess = this.depositoChequeDao.registrarDepositoCheque( mb, acc );
+            boolean operationSuccess = this.depositoChequeDao.registrarDepositoCheque(mb, "A");
 
             if (!operationSuccess) {
                 return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
             }
 
-            HttpStatus status = HttpStatus.CREATED;
-            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+            return buildSuccessResponse(HttpStatus.OK, SUCCESS_MESSAGE);
 
         } catch (Exception e) {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -323,26 +299,20 @@ public class DepositoChequeController {
 
 
     /**
-     * Para el registro de una nueva Nota de Remision
-     * @param mb
-     * @return
+     * Rechaza un depósito existente.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @PostMapping("/rechazar-deposito")
-    public ResponseEntity<?> rechazarDeposito( @RequestBody DepositoCheque mb ){
+    public ResponseEntity<?> rechazarDeposito(@RequestBody DepositoCheque mb) {
 
         try {
-
-            String acc = "B";
-
-            boolean operationSuccess = this.depositoChequeDao.registrarDepositoCheque( mb, acc );
+            boolean operationSuccess = this.depositoChequeDao.registrarDepositoCheque(mb, "B");
 
             if (!operationSuccess) {
                 return buildErrorResponse(HttpStatus.BAD_REQUEST, ERROR_MESSAGE);
             }
 
-            HttpStatus status = HttpStatus.CREATED;
-            return buildSuccessResponse(status, SUCCESS_MESSAGE);
+            return buildSuccessResponse(HttpStatus.OK, SUCCESS_MESSAGE);
 
         } catch (Exception e) {
             return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -351,10 +321,7 @@ public class DepositoChequeController {
 
 
     /**
-     *
-     * Obtiene un solo registro de depósito por ID
-     * @param idDeposito
-     * @return
+     * Descarga la imagen asociada a un depósito por su ID.
      */
     @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
     @GetMapping("/descargar/{idDeposito}")
@@ -365,8 +332,7 @@ public class DepositoChequeController {
             Resource resource = fileStorageService.obtenerArchivo(idDeposito);
 
             // Determinar el tipo de contenido
-            String contentType = null;
-            contentType = Files.probeContentType(Paths.get(resource.getFile().getAbsolutePath()));
+            String contentType = Files.probeContentType(Paths.get(resource.getFile().getAbsolutePath()));
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -385,7 +351,7 @@ public class DepositoChequeController {
             @PathVariable int idDeposito,
             @RequestBody DepositoCheque deposito) {
 
-        System.out.println(deposito.toString());
+        logger.debug("Generando PDF para depósito ID: {}", idDeposito);
 
 
         try {
@@ -403,16 +369,6 @@ public class DepositoChequeController {
     }
 
 
-
-
-
-
-
-    private ResponseEntity<ApiResponse<?>> buildErrorResponse(BindingResult result) {
-        String errorMsg = Objects.requireNonNull(result.getFieldError()).getDefaultMessage();
-        return ResponseEntity.badRequest()
-                .body(new ApiResponse<>(ERROR_MESSAGE, errorMsg, HttpStatus.BAD_REQUEST.value()));
-    }
 
     private ResponseEntity<ApiResponse<?>> buildErrorResponse(HttpStatus status, String message) {
         return ResponseEntity.status(status)

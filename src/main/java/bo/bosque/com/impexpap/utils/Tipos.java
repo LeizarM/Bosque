@@ -271,6 +271,18 @@ public class Tipos {
         listaTemp.add(new Tipos("PERD","PERDIDA EQUIPO",62));
         listaTemp.add(new Tipos("CDET","CHIP DETERIORADO",62));
         listaTemp.add(new Tipos("CSIM","CAMBIO eSIM",62));
+        listaTemp.add(new Tipos("SP","SALIDA PERSONAL;",62));
+        return listaTemp;
+    }
+    /**
+     * tipos asignacion anticipos
+     * @return
+     */
+    public List<Tipos>listTipoAsignacion(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("ASIG","ASIGNADO",63));
+        listaTemp.add(new Tipos("NOASIG","NO ASIGNADO",63));
+        listaTemp.add(new Tipos("ANUL","ANULADO",63));
         return listaTemp;
     }
 

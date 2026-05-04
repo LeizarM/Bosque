@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import bo.bosque.com.impexpap.model.DepositoCheque;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -133,7 +134,7 @@ public class PdfGeneratorService {
             // Segunda sección
             addSectionHeader(table, "Detalle", headerStyle, 3);
             addTableRow(table, cellStyle,
-                    "Importe: " + formatImporte((double) deposito.getImporte(), nvl(deposito.getMoneda())),
+                    "Importe: " + formatImporte(deposito.getImporte(), nvl(deposito.getMoneda())),
                     "N° Factura(s): " + nvl(deposito.getNumeroDeFacturas()),
                     "Documento: " + nvl(deposito.getNumeroDeDocumentos()) + " / Montos: " + nvl(deposito.getTotalMontos())
             );
@@ -165,28 +166,20 @@ public class PdfGeneratorService {
         return value.toString();
     }
 
-    // Método para formatear el importe sin redondeo
-    private String formatImporte(Double importe, String moneda) {
+    /** Formatea el importe monetario con separador de miles y la moneda indicada */
+    private String formatImporte(BigDecimal importe, String moneda) {
         if (importe == null) {
             return "0.00 " + moneda;
         }
 
-        // Opción 1: Mostrar el valor exacto sin formato
-        // return importe + " " + moneda;
-
-        // Opción 2: Usar DecimalFormat para mantener todos los decimales necesarios
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         symbols.setGroupingSeparator(',');
         symbols.setDecimalSeparator('.');
 
-        // Este patrón muestra hasta 10 decimales, eliminando ceros a la derecha
         DecimalFormat df = new DecimalFormat("#,##0.##########", symbols);
         df.setGroupingUsed(true);
 
         return df.format(importe) + " " + moneda;
-
-        // Opción 3: Mostrar exactamente como está almacenado (sin formato de miles)
-        // return String.valueOf(importe) + " " + moneda;
     }
 
     private void addSectionHeader(Table table, String headerText, Style headerStyle, int colspan) {
