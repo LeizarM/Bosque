@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/deposito-cheque")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
+@PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
 public class DepositoChequeController {
 
     private static final Logger logger = LoggerFactory.getLogger(DepositoChequeController.class);
