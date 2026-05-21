@@ -40,7 +40,7 @@ public class DatabaseTaskScheduler {
         try {
             logger.info("Iniciando ejecución del procedimiento almacenado ::: p_abm_trch_Entregas");
             this.entregaChoferDao.registrarEntregaChofer(new EntregaChofer(), "C");
-            whatsAppService.enviarNotificacionAGrupos("Test BOT", "Procedimiento almacenado ejecutado exitosamente para cerrar entregas abiertas");
+            //whatsAppService.enviarNotificacionAGrupos("Test BOT", "Procedimiento almacenado ejecutado exitosamente para cerrar entregas abiertas");
             logger.info("Procedimiento almacenado ejecutado exitosamente ::: p_abm_trch_Entregas");
         } catch (Exception e) {
             logger.error("Error al ejecutar el procedimiento p_abm_trch_Entregas: {}", e.getMessage(), e);
@@ -48,11 +48,11 @@ public class DatabaseTaskScheduler {
     }
 
     /**
-     * Notifica los cumpleaños del día a las 07:30 am.
+     * Notifica los cumpleaños del día a las 08:00 am.
      * Obtiene la lista completa de empleados con fecha de cumpleaños y filtra
      * los que cumplen años hoy (mismo día y mes).
      */
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 0 8 * * *")
     public void notificarCumpleaniosDelDia() {
         logger.info("Iniciando verificación de cumpleaños del día");
         try {
@@ -80,8 +80,6 @@ public class DatabaseTaskScheduler {
 
             if (cumpleaneros.isEmpty()) {
                 logger.info("No hay empleados que cumplan años hoy ({})", hoy);
-                whatsAppService.enviarNotificacionAGrupos("Cumpleaños",
-                        "🎂 *Cumpleaños del día " + hoy + "*\n\nNo hay cumpleaños hoy.");
                 return;
             }
 

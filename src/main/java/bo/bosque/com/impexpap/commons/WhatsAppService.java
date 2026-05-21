@@ -29,7 +29,7 @@ public class WhatsAppService {
     private final String sessionId    = "58812227-7ca1-4205-b5c2-7dbc01870fc9";
     private final String apiKey       = "dev-admin-key";
     private final String defaultPhone = "59178888274@c.us";
-    private final String groupsConfig = "120363405945578837@g.us";   // Máximo 2 grupos
+    private final String groupsConfig = "59178888272-1422893975@g.us";   // Máximo 2 grupos
 
     /**
      * Envía mensaje de texto a un número o grupo
