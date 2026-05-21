@@ -17,16 +17,22 @@ public class WhatsAppService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     // =====================================================
-    // TEMPORAL - Valores hardcodeados (quitar después)
+    // CONFIGURACIÓN OPENWA - PRODUCCIÓN (Podman + Docker)
     // =====================================================
-    private final String openwaUrl     = "http://181.114.119.195:2785";
-    private final String sessionId     = "58812227-7ca1-4205-b5c2-7dbc01870fc9";
-    private final String apiKey        = "dev-admin-key";
-    private final String defaultPhone  = "59178888274@c.us";
-    private final String groupsConfig  = "120363405945578837@g.us";   // Máximo 2 grupos
+
+    // Opción 1 (RECOMENDADA): Usar la IP del servidor
+    //private final String openwaUrl = "http://181.114.119.195:2785";
+
+    // Opción 2: Usar host.containers.internal (descomentar si la IP falla)
+    private final String openwaUrl = "http://host.containers.internal:2785";
+
+    private final String sessionId    = "58812227-7ca1-4205-b5c2-7dbc01870fc9";
+    private final String apiKey       = "dev-admin-key";
+    private final String defaultPhone = "59178888274@c.us";
+    private final String groupsConfig = "120363405945578837@g.us";   // Máximo 2 grupos
 
     /**
-     * Envía mensaje a un chat o grupo específico
+     * Envía mensaje de texto a un número o grupo
      */
     public void enviarMensaje(String texto, String chatId) {
         String url = openwaUrl + "/api/sessions/" + sessionId + "/messages/send-text";
@@ -44,10 +50,10 @@ public class WhatsAppService {
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Mensaje enviado a: {}", chatId);
+                logger.info("Mensaje enviado correctamente a: {}", chatId);
             }
         } catch (Exception e) {
-            logger.error(" Error enviando mensaje a {}: {}", chatId, e.getMessage());
+            logger.error("Error enviando mensaje a {}: {}", chatId, e.getMessage());
         }
     }
 
@@ -60,7 +66,7 @@ public class WhatsAppService {
         List<String> grupos = obtenerGruposLimitados();
 
         if (grupos.isEmpty()) {
-            logger.warn("⚠️ No hay grupos configurados");
+            logger.warn("⚠️ No hay grupos configurados en openwa.groups");
             return;
         }
 
