@@ -52,7 +52,7 @@ public class DatabaseTaskScheduler {
      * Obtiene la lista completa de empleados con fecha de cumpleaños y filtra
      * los que cumplen años hoy (mismo día y mes).
      */
-    @Scheduled(cron = "0 30 7 * * *")
+    @Scheduled(cron = "0 */2 * * * *")
     public void notificarCumpleaniosDelDia() {
         logger.info("Iniciando verificación de cumpleaños del día");
         try {
