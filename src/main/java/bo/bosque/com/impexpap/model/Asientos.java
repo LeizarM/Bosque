@@ -15,7 +15,7 @@ public class Asientos implements Serializable {
     private long idAsiento;
     private long idTransaccion;
     private int numero;
-    private String tipoAsiento;      // PR / PE / MP
+    private String tipoAsiento;      // PR / PE
     private int codBancoRef;
     private String cuentaDebe;
     private String cuentaHaber;
