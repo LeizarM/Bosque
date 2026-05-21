@@ -84,18 +84,19 @@ public class DatabaseTaskScheduler {
             }
 
             StringBuilder mensaje = new StringBuilder();
-            mensaje.append("🎂 *Cumpleaños del día ").append(hoy).append("*\n\n");
+            mensaje.append("🥳 *Hoy es el cumpleaños de:*\n\n");
             for (Empleado emp : cumpleaneros) {
                 String nombre = emp.getPersona().getDatoPersona() != null
                         ? emp.getPersona().getDatoPersona() : "Sin nombre";
                 String sucursal = (emp.getSucursal() != null && emp.getSucursal().getNombre() != null)
                         ? emp.getSucursal().getNombre() : "";
-                mensaje.append("🎉 ").append(nombre);
+                mensaje.append("🎂 ").append(nombre);
                 if (!sucursal.isEmpty()) {
                     mensaje.append(" — ").append(sucursal);
                 }
                 mensaje.append("\n");
             }
+            mensaje.append("\nTe deseamos un excelente día y un año lleno de éxitos personales y profesionales. 🎁🎉");
 
             whatsAppService.enviarNotificacionAGrupos("Cumpleaños", mensaje.toString());
             logger.info("Notificación de cumpleaños enviada para {} empleado(s)", cumpleaneros.size());
