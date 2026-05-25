@@ -1,6 +1,8 @@
 package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
+import bo.bosque.com.impexpap.dto.DocsVencidosDTO;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -8,14 +10,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @Repository
 public class EmpleadoDAO implements IEmpleado{
+    private final SpHelper spHelper;
+
+    public EmpleadoDAO (SpHelper spHelper){this.spHelper = spHelper;}
 
     /**
      * El Datasource
@@ -629,6 +631,12 @@ public class EmpleadoDAO implements IEmpleado{
         }
 
         return lstTemp;
+    }
+    @Override
+    public List<DocsVencidosDTO> DocsVencidos(Empleado e) {
+        Map<String, Object> params = new HashMap<>();
+        // params.put("codEmpresa", e.getCodEmpresa());
+        return this.spHelper.ejecutarListado("p_list_Empleado", params, "R2", DocsVencidosDTO.class);
     }
 
 

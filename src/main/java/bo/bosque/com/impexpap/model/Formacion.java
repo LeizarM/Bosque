@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -25,7 +26,7 @@ public class Formacion {
     private int duracion;
     private String tipoDuracion;
     private String tipoFormacion;
-    @JsonDeserialize(using = DateDeserializers.DateDeserializer.class) // Especifica el deserializador
+    //@JsonDeserialize(using = DateDeserializers.DateDeserializer.class) // Especifica el deserializador
     private Date fechaFormacion;
     private int audUsuario;
 

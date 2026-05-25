@@ -75,7 +75,9 @@ public class FormacionDao implements  IFormacion {
                         ps.setInt(4, fr.getDuracion());
                         ps.setString(5, fr.getTipoDuracion());
                         ps.setString( 6, fr.getTipoFormacion() );
-                        ps.setDate( 7, (Date) fr.getFechaFormacion());
+                        //ps.setDate( 7, (Date) fr.getFechaFormacion());
+                        // Línea 96 de FormacionDao.java:
+                        ps.setDate(7, fr.getFechaFormacion() != null ? new java.sql.Date(fr.getFechaFormacion().getTime()) : null);
                         ps.setInt(8, fr.getAudUsuario());
                         ps.setString(9,fr.getInstitucion());
                         ps.setString(10, acc);

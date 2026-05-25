@@ -1892,10 +1892,27 @@ public class RrhhController {
     public ResponseEntity<ApiResponse<?>> obtenerArea(@RequestBody Area a) {
         return procesarListaCambios(areaDao.obtenerArea(a));
     }
+
+    /**
+     * REGISTRAR AREA
+     * @param a
+     * @return
+     */
     @PostMapping("/registrarArea")
     public ResponseEntity<ApiResponse<?>>registrarArea(@RequestBody Area a){
         RespuestaSp res = areaDao.registrarArea(a,a.getCodArea()==0?"I":"U");
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(res.getErrormsg(),res.getIdGenerado(),HttpStatus.CREATED.value()));
+    }
+
+    /**
+     * OBTENER DOCUMENTOS VENCIDOS
+     * @param e
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/docsVencidos")
+    public ResponseEntity<ApiResponse<?>> DocsVencidos(@RequestBody Empleado e) {
+        return procesarListaCambios(empDao.DocsVencidos(e));
     }
     /**
      * Metodo auxiliar para procesar listas de cambios.

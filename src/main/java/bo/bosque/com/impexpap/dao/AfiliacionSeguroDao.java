@@ -59,8 +59,8 @@ public class AfiliacionSeguroDao implements IAfiliacionSeguro {
                         ps.setInt(1,afSeg.getCodAfiliacion());
                         ps.setInt(2,afSeg.getCodEmpleado());
                         ps.setInt(3,afSeg.getCodSeguro());
-                        ps.setDate(4,afSeg.getFechaAfiliacion());
-                        ps.setDate(5,afSeg.getFechaBaja());
+                        ps.setDate(4, afSeg.getFechaAfiliacion() != null ? new java.sql.Date(afSeg.getFechaAfiliacion().getTime()) : null);
+                        ps.setDate(5, afSeg.getFechaBaja() != null ? new java.sql.Date(afSeg.getFechaBaja().getTime()) : null);
                         ps.setString(6,afSeg.getNroAfiliacion());
                         ps.setInt(7,afSeg.getAudUsuarioI());
                         ps.setString(8,acc);

@@ -1,5 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
+import bo.bosque.com.impexpap.dto.DocsVencidosDTO;
+import bo.bosque.com.impexpap.model.Area;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.Persona;
@@ -112,5 +114,13 @@ public interface IEmpleado {
      * @return
      */
     List<DescuentoEmpleadoDTO> obtenerPrestamosAnticiposYMultasEmpleado(int mes, int anio, int codEmpleado );
+
+    /**
+     * DOCUMENTOS VENCIDOS / POR VENCER
+     * @param e
+     * @return
+     */
+    List<DocsVencidosDTO> DocsVencidos(Empleado e);
+
 
 }
