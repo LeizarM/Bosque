@@ -1,12 +1,9 @@
 package bo.bosque.com.impexpap.controller;
 
 import bo.bosque.com.impexpap.dao.IMultas;
-import bo.bosque.com.impexpap.model.Anticipo;
-import bo.bosque.com.impexpap.model.AnticipoDetalle;
 import bo.bosque.com.impexpap.model.Multas;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
-import org.apache.bcel.generic.IMUL;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
