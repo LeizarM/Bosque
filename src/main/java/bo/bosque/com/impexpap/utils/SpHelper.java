@@ -245,4 +245,29 @@ public class SpHelper {
             throw new RuntimeException("Error al consultar los datos en la base de datos.", ex);
         }
     }
+
+    /**
+     * Ejecuta un SP que retorna columnas dinámicas como una lista de mapas clave-valor.
+     * Útil para SPs que no tienen un parámetro @ACCION y que devuelven resultados
+     * que no se pueden mapear a un DTO estático (Ej. Reportes cruzados o formatos bancarios).
+     */
+    public List<Map<String, Object>> ejecutarListadoDinamico(String spName, Map<String, Object> params) {
+        try {
+            StringBuilder sql = new StringBuilder("EXEC ").append(spName);
+            List<Object> values = new ArrayList<>(params.size());
+            boolean first = true;
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                sql.append(first ? " " : ", ")
+                   .append("@").append(entry.getKey()).append("=?");
+                values.add(entry.getValue());
+                first = false;
+            }
+
+            return jdbcTemplate.queryForList(sql.toString(), values.toArray());
+
+        } catch (DataAccessException ex) {
+            logger.error("Error de DB al ejecutar SP dinámico {}", spName, ex);
+            throw new RuntimeException("Error al consultar los datos dinámicos en la base de datos.", ex);
+        }
+    }
 }

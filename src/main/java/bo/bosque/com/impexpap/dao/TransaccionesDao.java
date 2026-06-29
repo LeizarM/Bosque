@@ -121,4 +121,21 @@ public class TransaccionesDao implements ITransacciones {
         params.put("audUsuario",    audUsuario);
         return spHelper.ejecutarAbmMap("p_abm_tpex_Transacciones", params, "U");
     }
+
+    // ── ACCION 'C': corregir comprobante (N° / fecha valor / voucher) ──────
+    // Permitido incluso en CONFIRMADO. Solo envía los campos del comprobante;
+    // el SP deja intactos montos, cotización y estado.
+    @Override
+    public RespuestaSp corregirComprobante(Transacciones mb) {
+        log.info("Corrigiendo comprobante de transacción ID={}", mb.getIdTransaccion());
+        Map<String, Object> params = new HashMap<>();
+        params.put("idTransaccion", mb.getIdTransaccion());
+        if (mb.getNumeroTransaccion() != null && !mb.getNumeroTransaccion().trim().isEmpty())
+            params.put("numeroTransaccion", mb.getNumeroTransaccion());
+        if (mb.getFechaValor() != null) params.put("fechaValor", mb.getFechaValor());
+        if (mb.getRutaVoucher() != null && !mb.getRutaVoucher().trim().isEmpty())
+            params.put("rutaVoucher", mb.getRutaVoucher());
+        params.put("audUsuario", mb.getAudUsuario());
+        return spHelper.ejecutarAbmMap("p_abm_tpex_Transacciones", params, "C");
+    }
 }

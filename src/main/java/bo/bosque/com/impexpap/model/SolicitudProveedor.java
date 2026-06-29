@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import lombok.*;
@@ -21,6 +22,12 @@ public class SolicitudProveedor implements Serializable {
     private double totalAPagarUsd;       // decimal(18,2) en BD
     private String obs;
     private int audUsuario;
+
+    // --- Estado de aprobación por proveedor (PENDIENTE / APROBADO / RECHAZADO) ---
+    private String estado;
+    private Date fechaAprobacion;
+    private Integer usuarioAprobador;
+    private String obsAprobacion;
 
     private int codEmpresa;
 

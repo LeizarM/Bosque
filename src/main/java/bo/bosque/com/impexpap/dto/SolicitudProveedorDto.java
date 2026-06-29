@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -19,6 +20,12 @@ public class SolicitudProveedorDto {
     private String obs;
     private Integer audUsuario;
     private Integer codEmpresa;
+
+    // --- Estado de aprobación por proveedor ---
+    private String estado;
+    private Date fechaAprobacion;
+    private Integer usuarioAprobador;
+    private String obsAprobacion;
 
     // CORRECCIÓN: Usar la lista del DTO, no del Modelo.
     // Inicializar la lista evita NullPointerExceptions al hacer .add() más adelante.

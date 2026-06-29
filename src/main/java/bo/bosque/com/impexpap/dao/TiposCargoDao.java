@@ -5,7 +5,9 @@ import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class TiposCargoDao implements ITiposCargo {
@@ -23,8 +25,10 @@ public class TiposCargoDao implements ITiposCargo {
 
     @Override
     public List<TiposCargo> obtenerTiposCargo(long idTipoCargo) {
-        TiposCargo filtro = new TiposCargo();
-        filtro.setIdTipoCargo(idTipoCargo);
+        // FIX: el overload de modelo enviaba nombre/esPorcentaje/audUsuario como
+        // parámetros que el SP no tiene (@ACCION/@idTipoCargo/@activo) → 500.
+        // La acción L solo filtra por @activo; con Map vacío devuelve todos.
+        Map<String, Object> filtro = new HashMap<>();
         return spHelper.ejecutarListado("p_list_tpex_TiposCargo", filtro, "L", TiposCargo.class);
     }
 }

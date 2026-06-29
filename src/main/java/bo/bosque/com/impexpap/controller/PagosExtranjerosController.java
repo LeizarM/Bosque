@@ -116,6 +116,9 @@ public class PagosExtranjerosController {
     /** DAO para los asientos contables de una transacción (tpex_Asientos). */
     private final IAsientos asientosDao;
 
+    /** DAO para los participantes del split de una transacción (tpex_TransaccionParticipantes). */
+    private final ITransaccionParticipantes transaccionParticipantesDao;
+
     /** Servicio para guardar/leer archivos de voucher en el filesystem. */
     private final FileStorageService fileStorageService;
 
@@ -126,7 +129,8 @@ public class PagosExtranjerosController {
             ITiposTransaccion tiposTransaccionDao, ITransacciones transaccionesDao,
             ILogEstados logEstadosDao, ICotizaciones cotizacionesDao,
             IConfigComisionesBanco configComisionesBancoDao, ICargoPago cargoPagoDao,
-            IAsientos asientosDao, FileStorageService fileStorageService) {
+            IAsientos asientosDao, ITransaccionParticipantes transaccionParticipantesDao,
+            FileStorageService fileStorageService) {
         this.solicitudPagoDao = solicitudPagoDao;
         this.solicitudProveedorDao = solicitudProveedorDao;
         this.detalleSolicitudDao = detalleSolicitudDao;
@@ -141,6 +145,7 @@ public class PagosExtranjerosController {
         this.configComisionesBancoDao = configComisionesBancoDao;
         this.cargoPagoDao = cargoPagoDao;
         this.asientosDao = asientosDao;
+        this.transaccionParticipantesDao = transaccionParticipantesDao;
         this.fileStorageService = fileStorageService;
     }
 
@@ -272,6 +277,84 @@ public class PagosExtranjerosController {
         return respuestaCreada(payload.getIdSolicitud());
     }
 
+    /**
+     * Aprueba una cuota individual (línea de DetalleSolicitud).
+     * <p>
+     * Cada cuota se aprueba por separado. Cuando todas las cuotas de un proveedor
+     * están aprobadas, el SP marca automáticamente el SolicitudProveedor como
+     * APROBADO. Esto a su vez habilita el paso de la SolicitudPago a APROBADA.
+     * <p>
+     * Mapea a ACCION='A' del SP p_abm_tpex_DetalleSolicitud.
+     *
+     * @param payload Body con idDetalle y audUsuario
+     * @return 201 con idDetalle aprobado + mensaje del SP indicando cuotas restantes o proveedor APROBADO
+     */
+    @PostMapping("/aprobar-cuota")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> aprobarCuota(@RequestBody DetalleSolicitud payload) {
+        RespuestaSp res = detalleSolicitudDao.registrarDetalleSolicitud(payload, "A");
+        ejecutar(res, "Error aprobando cuota");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(res.getErrormsg(), payload.getIdDetalle(), HttpStatus.CREATED.value()));
+    }
+
+    /**
+     * Revierte la aprobación de una cuota previamente aprobada.
+     * <p>
+     * Si la reversión deja al proveedor con cuotas no aprobadas y antes estaba
+     * APROBADO, el SP lo regresa automáticamente a PENDIENTE.
+     * <p>
+     * Mapea a ACCION='R' del SP p_abm_tpex_DetalleSolicitud.
+     *
+     * @param payload Body con idDetalle y audUsuario
+     * @return 201 con idDetalle revertido
+     */
+    @PostMapping("/revertir-aprobacion-cuota")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> revertirAprobacionCuota(@RequestBody DetalleSolicitud payload) {
+        RespuestaSp res = detalleSolicitudDao.registrarDetalleSolicitud(payload, "R");
+        ejecutar(res, "Error revertiendo aprobación de cuota");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(res.getErrormsg(), payload.getIdDetalle(), HttpStatus.CREATED.value()));
+    }
+
+    /**
+     * Aprueba manualmente todas las cuotas de un proveedor en una solicitud.
+     * <p>
+     * Marca todas sus DetalleSolicitud como esAprobado=1 y el SolicitudProveedor
+     * como APROBADO en una sola transacción.
+     * <p>
+     * Mapea a ACCION='A' del SP p_abm_tpex_SolicitudProveedor.
+     *
+     * @param payload Body con idSolicitudProveedor, obsAprobacion (opcional) y audUsuario
+     * @return 201 con idSolicitudProveedor
+     */
+    @PostMapping("/aprobar-proveedor")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> aprobarProveedor(@RequestBody SolicitudProveedor payload) {
+        RespuestaSp res = solicitudProveedorDao.registrarSolicitudProveedor(payload, "A");
+        ejecutar(res, "Error aprobando proveedor");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(res.getErrormsg(), payload.getIdSolicitudProveedor(), HttpStatus.CREATED.value()));
+    }
+
+    /**
+     * Rechaza un proveedor en una solicitud.
+     * <p>
+     * Marca el SolicitudProveedor como RECHAZADO. Sus cuotas no se modifican
+     * (mantienen su estado de aprobación individual), pero el proveedor queda
+     * excluido del cálculo de cotizaciones.
+     * <p>
+     * Mapea a ACCION='R' del SP p_abm_tpex_SolicitudProveedor.
+     *
+     * @param payload Body con idSolicitudProveedor, obsAprobacion (motivo del rechazo) y audUsuario
+     * @return 201 con idSolicitudProveedor
+     */
+    @PostMapping("/rechazar-proveedor")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> rechazarProveedor(@RequestBody SolicitudProveedor payload) {
+        RespuestaSp res = solicitudProveedorDao.registrarSolicitudProveedor(payload, "R");
+        ejecutar(res, "Error rechazando proveedor");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(res.getErrormsg(), payload.getIdSolicitudProveedor(), HttpStatus.CREATED.value()));
+    }
+
     // ==================== FASE 2: COTIZACIÓN BANCARIA ====================
 
     /**
@@ -285,7 +368,8 @@ public class PagosExtranjerosController {
      * (idCotizacion == 0). En UPDATE de cotización, los cargos no se modifican desde aquí.
      * <p>
      * <b>Exclusividad FK en cargos:</b> Cada cargo pertenece a una cotización O a una
-     * transacción, nunca a ambas. Aquí se asigna idCotizacion y se fuerza idTransaccion = 0.
+     * transacción, nunca a ambas. Aquí se asigna idCotizacion y la FK no usada
+     * (idTransaccion) va NULL — enviar 0 viola la FK a tpex_Transacciones.
      *
      * @param payload Objeto Cotizaciones con cargos[] anidados
      * @return 201 Created con el ID de la cotización
@@ -307,7 +391,7 @@ public class PagosExtranjerosController {
             int ordenAuto = 1;
             for (CargoPago cargo : payload.getCargos()) {
                 cargo.setIdCotizacion(idCotizacion);   // Vincular a esta cotización
-                cargo.setIdTransaccion(0L);             // Exclusividad: no pertenece a transacción
+                cargo.setIdTransaccion(null);          // Exclusividad: FK no usada va NULL (no 0 → viola FK)
                 cargo.setAudUsuario(payload.getAudUsuario());
                 // Auto-numerar el orden si no fue especificado
                 if (cargo.getOrden() == 0) cargo.setOrden(ordenAuto);
@@ -359,8 +443,8 @@ public class PagosExtranjerosController {
      * <b>Regla de cargos:</b> Similar a cotizaciones, los cargos solo se insertan
      * cuando la transacción es nueva (idTransaccion == 0).
      * <p>
-     * <b>Exclusividad FK en cargos:</b> Aquí se asigna idTransaccion y se fuerza
-     * idCotizacion = 0 (el cargo pertenece a la transacción, no a la cotización).
+     * <b>Exclusividad FK en cargos:</b> Aquí se asigna idTransaccion y la FK no usada
+     * (idCotizacion) va NULL — enviar 0 viola la FK a tpex_Cotizaciones.
      *
      * @param payload Objeto Transacciones con cargos[] anidados
      * @return 201 Created con el ID de la transacción
@@ -381,7 +465,7 @@ public class PagosExtranjerosController {
             int ordenAuto = 1;
             for (CargoPago cargo : payload.getCargos()) {
                 cargo.setIdTransaccion(idTransaccion);  // Vincular a esta transacción
-                cargo.setIdCotizacion(0L);              // Exclusividad: no pertenece a cotización
+                cargo.setIdCotizacion(null);            // Exclusividad: FK no usada va NULL (no 0 → viola FK)
                 cargo.setAudUsuario(payload.getAudUsuario());
                 if (cargo.getOrden() == 0) cargo.setOrden(ordenAuto);
                 ordenAuto++;
@@ -432,32 +516,26 @@ public class PagosExtranjerosController {
     // ==================== FASE 5: CONFIRMAR PAGO (Operación más crítica) ====================
 
     /**
-     * Confirma el pago de una transacción y cierra la solicitud asociada.
+     * Confirma el pago de una transacción.
      * <p>
-     * Esta es la operación más crítica del flujo: en una sola transacción Java (ACID)
-     * cierra DOS entidades:
-     * <ol>
-     *   <li>La transacción pasa a estado "CONFIRMADO"</li>
-     *   <li>La solicitud de pago pasa a estado "PAGADA"</li>
-     * </ol>
+     * Circuito DESACOPLADO: la transacción pasa a "CONFIRMADO", pero la solicitud
+     * NO se cierra: permanece en PENDIENTE. El pago vive en la transacción y las
+     * demás cuotas/proveedores pueden aprobarse y pagarse después (estilo SAP).
+     * Por eso ya no se ejecuta la transición solicitud APROBADA → PAGADA.
      * <p>
-     * Si cualquier paso falla, se hace rollback de AMBAS actualizaciones, garantizando
-     * que nunca quede una transacción confirmada con una solicitud sin pagar (o viceversa).
+     * Usa el DTO {@link ConfirmarPagoRequest} (se conservan los campos de solicitud
+     * por compatibilidad del body, aunque la solicitud ya no se modifica aquí).
      * <p>
-     * Usa el DTO {@link ConfirmarPagoRequest} que agrupa datos de ambas entidades
-     * (Transacción + SolicitudPago) en un solo body.
-     * <p>
-     * El SP internamente registra los cambios en LogEstados:
-     * (PROCESADO → CONFIRMADO) para la transacción y (APROBADA → PAGADA) para la solicitud.
+     * El SP registra en LogEstados el cambio (PROCESADO → CONFIRMADO) de la transacción.
      *
-     * @param payload DTO con idTransaccion, idSolicitud, numeroTransaccion, fechaValor, audUsuario, codEmpresa, montoTotalSolicitud
-     * @return 201 Created con el ID de la solicitud
+     * @param payload DTO con idTransaccion, numeroTransaccion, fechaValor, audUsuario, codEmpresa
+     * @return 201 Created con el ID de la transacción confirmada
      */
     @PostMapping("/confirmar-pago")
     @Transactional
     public ResponseEntity<ApiResponse<?>> confirmarPago(@RequestBody ConfirmarPagoRequest payload) {
 
-        // --- PASO 1: Confirmar la transacción ---
+        // Confirmar la transacción (la solicitud queda PENDIENTE, no se cierra).
         Transacciones trxActual = transaccionesDao.obtenerTransaccionPorId(payload.getIdTransaccion(), payload.getCodEmpresa());
         if (trxActual == null) throw new SpBusinessException("No se encontró la transacción con ID: " + payload.getIdTransaccion());
 
@@ -470,19 +548,25 @@ public class PagosExtranjerosController {
         RespuestaSp resTrx = transaccionesDao.registrarTransacciones(trxActual, "U");
         ejecutar(resTrx, "Error confirmando transacción");
 
-        // --- PASO 2: Cerrar la solicitud como PAGADA ---
-        SolicitudPago solActual = solicitudPagoDao.obtenerSolicitudPagoPorId(payload.getIdSolicitud());
-        if (solActual == null) throw new SpBusinessException("No se encontró la solicitud con ID: " + payload.getIdSolicitud());
+        return respuestaCreada(payload.getIdTransaccion());
+    }
 
-        solActual.setEstado("PAGADA");
-        solActual.setAudUsuario((int) payload.getAudUsuario());
-        // Actualizar el monto total definitivo si viene en el payload
-        if (payload.getMontoTotalSolicitud() > 0) solActual.setMontoTotalSolicitud(payload.getMontoTotalSolicitud());
-
-        RespuestaSp resSol = solicitudPagoDao.registrarSolicitudPago(solActual, "U");
-        ejecutar(resSol, "Error cerrando solicitud como PAGADA");
-
-        return respuestaCreada(payload.getIdSolicitud());
+    /**
+     * Corrige SOLO el comprobante de una transacción: N° de transacción bancaria,
+     * fecha valor y/o voucher. Funciona incluso si la transacción ya está
+     * CONFIRMADA (no reabre el pago ni toca montos/cotización/estado).
+     * <p>
+     * Mapea a ACCION='C' del SP p_abm_tpex_Transacciones.
+     *
+     * @param payload Transacciones con idTransaccion + numeroTransaccion / fechaValor / rutaVoucher + audUsuario
+     * @return 201 Created con el id de la transacción corregida
+     */
+    @PostMapping("/corregir-comprobante")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> corregirComprobante(@RequestBody Transacciones payload) {
+        RespuestaSp res = transaccionesDao.corregirComprobante(payload);
+        ejecutar(res, "Error corrigiendo el comprobante");
+        return respuestaCreada(payload.getIdTransaccion());
     }
 
     // ==================== ENDPOINTS DE CONSULTA ====================
@@ -552,6 +636,24 @@ public class PagosExtranjerosController {
     }
 
     /**
+     * Obtiene los documentos abiertos de SAP (facturas proveedor / órdenes de compra)
+     * filtrados por proyecto.
+     * <p>
+     * Usa el SP p_list_tpex_SolicitudPago con ACCION "C" (OPENQUERY a SRV_2022).
+     * Pensado para el buscador con debounce del frontend: cada llamada consulta
+     * el linked server SAP, por lo que el cliente debe limitar la frecuencia.
+     *
+     * @param mb Filtro con codEmpresa y project (ambos opcionales)
+     * @return Lista de documentos con proyecto, moneda y monto total
+     */
+    @PostMapping("/obtener-documentos-proyecto")
+    public ResponseEntity<ApiResponse<?>> obtenerDocumentosPorProyecto(@RequestBody SolicitudPago mb) {
+        return procesarLista(
+                solicitudPagoDao.obtenerDocumentosPorProyecto((int) mb.getCodEmpresa(), mb.getProject()),
+                "No se encontraron documentos para el proyecto.");
+    }
+
+    /**
      * Genera un reporte de solicitudes de pago filtrado por rango de fechas.
      * <p>
      * Usa el SP p_list_tpex_SolicitudPago con ACCION "B". El DAO internamente
@@ -590,7 +692,9 @@ public class PagosExtranjerosController {
      */
     @PostMapping("/obtener-transacciones-solicitud")
     public ResponseEntity<ApiResponse<?>> obtenerTransaccionesPorSolicitud(@RequestBody Transacciones mb) {
-        return procesarLista(transaccionesDao.obtenerTransacciones(mb.getIdSolicitud(), mb.getCardCode(), mb.getCodBanco(), mb.getEstado(), mb.getIdTipoTransaccion(), mb.getCodEmpresa()), "No se encontraron transacciones.");
+        long idSol = mb.getIdSolicitud() != null ? mb.getIdSolicitud() : 0L;
+        int codBan = mb.getCodBanco() != null ? mb.getCodBanco() : 0;
+        return procesarLista(transaccionesDao.obtenerTransacciones(idSol, mb.getCardCode(), codBan, mb.getEstado(), mb.getIdTipoTransaccion(), mb.getCodEmpresa()), "No se encontraron transacciones.");
     }
 
     /**
@@ -603,7 +707,8 @@ public class PagosExtranjerosController {
      */
     @PostMapping("/obtener-transacciones-cotizacion")
     public ResponseEntity<ApiResponse<?>> obtenerTransaccionesPorCotizacion(@RequestBody Transacciones mb) {
-        return procesarLista(transaccionesDao.obtenerTransaccionesPorCotizacion(mb.getIdCotizacion()), "No se encontraron transacciones.");
+        long idCot = mb.getIdCotizacion() != null ? mb.getIdCotizacion() : 0L;
+        return procesarLista(transaccionesDao.obtenerTransaccionesPorCotizacion(idCot), "No se encontraron transacciones.");
     }
 
     /**
@@ -645,7 +750,8 @@ public class PagosExtranjerosController {
      */
     @PostMapping("/obtener-cargos-cotizacion")
     public ResponseEntity<ApiResponse<?>> obtenerCargosPorCotizacion(@RequestBody CargoPago mb) {
-        return procesarLista(cargoPagoDao.obtenerCargoPorCotizacion(mb.getIdCotizacion()), "No se encontraron cargos.");
+        long idCotizacion = mb.getIdCotizacion() != null ? mb.getIdCotizacion() : 0L;
+        return procesarLista(cargoPagoDao.obtenerCargoPorCotizacion(idCotizacion), "No se encontraron cargos.");
     }
 
     /**
@@ -658,7 +764,8 @@ public class PagosExtranjerosController {
      */
     @PostMapping("/obtener-cargos-transaccion")
     public ResponseEntity<ApiResponse<?>> obtenerCargosPorTransaccion(@RequestBody CargoPago mb) {
-        return procesarLista(cargoPagoDao.obtenerCargoPorTransaccion(mb.getIdTransaccion()), "No se encontraron cargos.");
+        long idTransaccion = mb.getIdTransaccion() != null ? mb.getIdTransaccion() : 0L;
+        return procesarLista(cargoPagoDao.obtenerCargoPorTransaccion(idTransaccion), "No se encontraron cargos.");
     }
 
     /**
@@ -778,6 +885,28 @@ public class PagosExtranjerosController {
         return procesarLista(tiposCambioDao.obtenerTiposCambioPorBanco(mb.getCodBanco()), "No se encontraron tipos de cambio.");
     }
 
+    /**
+     * Obtiene el último tipo de cambio vigente (acción 'V') para la combinación
+     * banco/monedas, con fechaVigencia &lt;= hoy. codBanco 0 = BCB (referencia
+     * oficial). Devuelve UN objeto (o 204 si no hay) — lo consume el formulario
+     * de asiento para mostrar el "Equivalente US$".
+     *
+     * @param mb Filtro con codBanco (0 = BCB), idMonedaOrigen, idMonedaDestino
+     * @return El TC vigente más reciente, o 204 si no existe
+     */
+    @PostMapping("/obtener-tc-vigente-ref")
+    public ResponseEntity<ApiResponse<?>> obtenerTcVigenteRef(@RequestBody TiposCambio mb) {
+        Long codBanco = mb.getCodBanco() != 0 ? (long) mb.getCodBanco() : null;
+        List<TiposCambio> lista = tiposCambioDao.obtenerTcVigenteRef(
+                codBanco, mb.getIdMonedaOrigen(), mb.getIdMonedaDestino());
+        TiposCambio tc = (lista == null || lista.isEmpty()) ? null : lista.get(0);
+        if (tc == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ApiResponse<>("No se encontró tipo de cambio vigente.", null, HttpStatus.NO_CONTENT.value()));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(SUCCESS_MESSAGE, tc, HttpStatus.OK.value()));
+    }
+
     /** Registra o actualiza un tipo de cargo. Si idTipoCargo == 0 → INSERT, si > 0 → UPDATE. */
     @PostMapping("/registrar-tipo-cargo")
     public ResponseEntity<ApiResponse<?>> registrarTipoCargo(@RequestBody TiposCargo mb) {
@@ -891,8 +1020,13 @@ public class PagosExtranjerosController {
             fileStorageService.guardarVoucher(file, rutaRelativa);
 
             try {
-                // PASO 2: Actualizar la ruta en la BD
-                transaccionesDao.actualizarVoucher(idTransaccion, rutaRelativa, audUsuario);
+                // PASO 2: Actualizar la ruta en la BD (ACCION 'C' → permite subir/
+                // reemplazar voucher incluso en transacciones ya CONFIRMADAS).
+                Transacciones trxVoucher = new Transacciones();
+                trxVoucher.setIdTransaccion(idTransaccion);
+                trxVoucher.setRutaVoucher(rutaRelativa);
+                trxVoucher.setAudUsuario(audUsuario);
+                transaccionesDao.corregirComprobante(trxVoucher);
             } catch (SpBusinessException spEx) {
                 // COMPENSACIÓN: Si el SP falló, eliminar el archivo que ya se guardó
                 fileStorageService.eliminarVoucher(rutaRelativa);
@@ -1022,6 +1156,68 @@ public class PagosExtranjerosController {
         Asientos result = asientosDao.validarCuadre(mb.getIdTransaccion());
         if (result == null) return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(new ApiResponse<>("No se encontraron asientos para cuadrar.", null, HttpStatus.NO_CONTENT.value()));
+        return ResponseEntity.ok(new ApiResponse<>(SUCCESS_MESSAGE, result, HttpStatus.OK.value()));
+    }
+
+    // ==================== PARTICIPANTES (SPLIT DE TRANSACCIÓN) ====================
+
+    /**
+     * Registra o actualiza un participante del split de una transacción
+     * (reparto del monto entre la empresa y terceros, p.ej. IPX / MONRROY).
+     * Si idParticipante == 0 → INSERT ("I"), si > 0 → UPDATE ("U").
+     *
+     * @param payload Objeto TransaccionParticipantes con los datos del participante
+     * @return 201 Created con el ID del participante
+     */
+    @PostMapping("/registrar-participante")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> registrarParticipante(@RequestBody TransaccionParticipantes payload) {
+        String accion = payload.getIdParticipante() == 0 ? "I" : "U";
+        RespuestaSp res = transaccionParticipantesDao.registrarParticipante(payload, accion);
+        ejecutar(res, "Error registrando participante");
+        long id = res.getIdGenerado() > 0 ? res.getIdGenerado() : payload.getIdParticipante();
+        return respuestaCreada(id);
+    }
+
+    /**
+     * Elimina un participante por su ID.
+     *
+     * @param payload Objeto con idParticipante y audUsuario
+     * @return 201 Created con el ID eliminado
+     */
+    @PostMapping("/eliminar-participante")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> eliminarParticipante(@RequestBody TransaccionParticipantes payload) {
+        RespuestaSp res = transaccionParticipantesDao.registrarParticipante(payload, "D");
+        ejecutar(res, "Error eliminando participante");
+        return respuestaCreada(payload.getIdParticipante());
+    }
+
+    /**
+     * Obtiene todos los participantes del split de una transacción.
+     * Usa p_list_tpex_TransaccionParticipantes ACCION="T".
+     *
+     * @param mb Filtro con idTransaccion
+     * @return Lista de participantes de la transacción
+     */
+    @PostMapping("/obtener-participantes-transaccion")
+    public ResponseEntity<ApiResponse<?>> obtenerParticipantesPorTransaccion(@RequestBody TransaccionParticipantes mb) {
+        return procesarLista(transaccionParticipantesDao.obtenerParticipantesPorTransaccion(mb.getIdTransaccion()), "No se encontraron participantes.");
+    }
+
+    /**
+     * Valida el cuadre del split de una transacción: Σ montoUs de los
+     * participantes vs montoConvertido y suma de porcentajes.
+     * Usa p_list_tpex_TransaccionParticipantes ACCION="V".
+     *
+     * @param mb Filtro con idTransaccion
+     * @return Resumen de cuadre o 204 si no hay participantes
+     */
+    @PostMapping("/validar-cuadre-participantes")
+    public ResponseEntity<ApiResponse<?>> validarCuadreParticipantes(@RequestBody TransaccionParticipantes mb) {
+        TransaccionParticipantes result = transaccionParticipantesDao.validarCuadre(mb.getIdTransaccion());
+        if (result == null) return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(new ApiResponse<>("No se encontraron participantes para cuadrar.", null, HttpStatus.NO_CONTENT.value()));
         return ResponseEntity.ok(new ApiResponse<>(SUCCESS_MESSAGE, result, HttpStatus.OK.value()));
     }
 

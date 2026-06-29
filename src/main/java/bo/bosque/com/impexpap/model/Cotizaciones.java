@@ -28,6 +28,10 @@ public class Cotizaciones implements Serializable {
     private String observaciones;
     private long audUsuario;              // bigint en BD (era int)
 
+    // ── campos de join (solo lectura, devueltos por el SP en L/R) ─────────
+    private String banco;
+    private String moneda;
+
     private Date fechaInicio;
     private Date fechaFin;
 

@@ -18,6 +18,7 @@ public class SolicitudPago implements Serializable {
     private Date fechaSolicitud;
     private double montoTotalSolicitud;  // decimal(18,2) en BD — float pierde precisión
     private String estado;
+    private String project;              // Código del proyecto SAP asociado a esta solicitud
     private int audUsuario;
 
 

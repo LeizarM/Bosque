@@ -69,4 +69,14 @@ public interface ITransacciones {
      * @param audUsuario     ID del usuario que realiza la operación
      */
     RespuestaSp actualizarVoucher(long idTransaccion, String rutaVoucher, int audUsuario);
+
+    /**
+     * [C] Corrige SOLO el comprobante de una transacción (N° de transacción
+     * bancaria, fecha valor y/o voucher), incluso si está CONFIRMADA. No reabre
+     * el pago ni modifica montos/cotización/estado (ACCION='C').
+     *
+     * @param mb Objeto con idTransaccion + numeroTransaccion / fechaValor /
+     *           rutaVoucher (los que vengan) + audUsuario
+     */
+    RespuestaSp corregirComprobante(Transacciones mb);
 }

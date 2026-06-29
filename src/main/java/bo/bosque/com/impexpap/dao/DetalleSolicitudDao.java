@@ -5,7 +5,9 @@ import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class DetalleSolicitudDao implements IDetalleSolicitud {
@@ -44,10 +46,9 @@ public class DetalleSolicitudDao implements IDetalleSolicitud {
     @Override
     public List<DetalleSolicitud> obtenerDetalleSolicitud( long idDetalle ) {
 
-        DetalleSolicitud filtro = new DetalleSolicitud();
-        filtro.setIdDetalle( idDetalle );
-
-        // 2. Ejecutamos el listado.
+        // Map: el modelo tiene campos (numeroCuota, montoTotalDocumento) que el SP no recibe.
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put( "idDetalle", idDetalle );
 
         return spHelper.ejecutarListado(
                 "p_list_tpex_DetalleSolicitud",
@@ -67,10 +68,9 @@ public class DetalleSolicitudDao implements IDetalleSolicitud {
      */
     @Override
     public List<DetalleSolicitud> obtenerFacProvYOrdCompraXEmpresa( int codEmpresa ) {
-        DetalleSolicitud filtro = new DetalleSolicitud();
-        filtro.setCodEmpresa( codEmpresa );
-
-        // 2. Ejecutamos el listado.
+        // Map: el modelo tiene campos (numeroCuota, montoTotalDocumento) que el SP no recibe.
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put( "codEmpresa", codEmpresa );
 
         return spHelper.ejecutarListado(
                 "p_list_tpex_DetalleSolicitud",

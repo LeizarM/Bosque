@@ -19,6 +19,8 @@ public class LogEstados implements Serializable {
     private Long   idSolicitud;
     private Long   idCotizacion;
     private Long   idTransaccion;
+    private Long   idSolicitudProveedor;  // bitácora granular: cambios de estado por proveedor
+    private Long   idDetalle;             // bitácora granular: aprobación por cuota
     private String estadoAnterior;
     private String estadoNuevo;
     private String observaciones;
@@ -31,5 +33,9 @@ public class LogEstados implements Serializable {
 
     /** ID de la entidad afectada como VARCHAR (usado en acción B y F) */
     private String idEntidad;
+
+    /** Nombre completo del usuario (audUsuario) resuelto vía tb_usuario→tb_empleado→trh_persona.
+     *  Fallback en el SP: nombre completo → login → 'Usuario #<id>'. */
+    private String nombreUsuario;
 
 }

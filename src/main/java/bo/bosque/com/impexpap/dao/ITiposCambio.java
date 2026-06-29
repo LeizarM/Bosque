@@ -28,5 +28,15 @@ public interface ITiposCambio {
      * @return Lista de TiposCambio
      */
     List<TiposCambio> obtenerTiposCambioPorBanco(int codBanco);
+
+    /**
+     * Obtener el último tipo de cambio vigente (acción 'V' del SP) para una
+     * combinación banco/monedas, con fechaVigencia &lt;= hoy.
+     * @param codBanco código de banco; null o 0 = BCB (referencia oficial)
+     * @param idMonedaOrigen  moneda origen
+     * @param idMonedaDestino moneda destino
+     * @return lista con a lo sumo 1 elemento (TOP 1 por fechaVigencia DESC)
+     */
+    List<TiposCambio> obtenerTcVigenteRef(Long codBanco, long idMonedaOrigen, long idMonedaDestino);
 }
 

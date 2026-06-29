@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 
+import bo.bosque.com.impexpap.dto.DocumentoProyectoDto;
 import bo.bosque.com.impexpap.dto.SolicitudPagoDto;
 import bo.bosque.com.impexpap.model.SolicitudPago;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
@@ -43,5 +44,13 @@ public interface ISolicitudPago {
      */
     List<SolicitudPagoDto> reporteSolicitudesXFecha(Date fechaInicio, Date fechaFin);
 
+    /**
+     * [C] Documentos abiertos de SAP (facturas proveedor / órdenes de compra)
+     * filtrados por proyecto. Consulta OPENQUERY a SRV_2022.
+     *
+     * @param codEmpresa empresa (NULL/0 = todas)
+     * @param project    código de proyecto SAP (NULL/vacío = todos)
+     */
+    List<DocumentoProyectoDto> obtenerDocumentosPorProyecto(int codEmpresa, String project);
 
 }

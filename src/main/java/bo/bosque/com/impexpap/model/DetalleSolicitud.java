@@ -20,7 +20,9 @@ public class DetalleSolicitud implements Serializable {
     private String codigoImportacion;
     private double montoFacturaUsd;      // decimal(18,2) en BD
     private double montoAmortizadoUsd;   // decimal(18,2) en BD
-    private double montoAPagarUsd;       // decimal(18,2) en BD
+    private double montoAPagarUsd;       // decimal(18,2) en BD — esta cuota
+    private double montoTotalDocumento;  // decimal(18,2) — total del doc SAP (DocTotal de OPCH/OPOR)
+    private int numeroCuota;             // 1, 2, 3... permite varias cuotas por mismo facturaProvSap
     private Date fechaFactura;
     private Date fechaVencimiento;
     private String concepto;

@@ -16,10 +16,13 @@ public class Transacciones implements Serializable {
     // ── campos de la tabla tpex_Transacciones ──────────────────────────────
     private long idTransaccion;
     private String numeroTransaccion;
-    private long idSolicitud;
-    private long idCotizacion;
+    // NULL-ables: en operaciones de TESORERÍA (USDT/Mercury/Devolución) no hay
+    // solicitud/cotización/banco → wrapper para que BeanPropertyRowMapper no
+    // reviente al leer (la columna llega NULL).
+    private Long idSolicitud;
+    private Long idCotizacion;
     private long idTipoTransaccion;
-    private int codBanco;
+    private Integer codBanco;
     private long idCanal;                    // bigint en BD (era int)
     private long codEmpresa;                 // bigint en BD (era int)
     private String cardCode;
@@ -46,6 +49,7 @@ public class Transacciones implements Serializable {
     private String metodoExportadora;
     private String estado;
     private String observaciones;
+    private Long idTransaccionOrigen;        // vínculo devolución → transacción origen (NULL en transacciones normales → wrapper)
     private long audUsuario;                 // bigint en BD (era int)
     private String  rutaVoucher;             // ruta relativa del archivo voucher
     private Boolean tieneVoucher;            // columna calculada desde BD (solo lectura)

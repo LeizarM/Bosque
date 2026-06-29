@@ -111,6 +111,9 @@ public class SolicitudPagoDao implements ISolicitudPago{
                 SolicitudProveedorDto proveedor = mapProveedores.computeIfAbsent(fila.getIdSolicitudProveedor(), idProv -> {
                     SolicitudProveedorDto p = new SolicitudProveedorDto();
                     BeanUtils.copyProperties(fila, p);
+                    // copyProperties copia "estado" de la SOLICITUD (mismo nombre);
+                    // el estado real del proveedor viaja en "estadoProveedor".
+                    p.setEstado(fila.getEstadoProveedor());
                     solicitud.getProveedores().add(p);
                     return p;
                 });
@@ -125,5 +128,22 @@ public class SolicitudPagoDao implements ISolicitudPago{
         }
 
         return new ArrayList<>(mapSolicitudes.values());
+    }
+
+    // ── C: Documentos abiertos SAP por proyecto ────────────────────────────
+    // Usa Map para enviar SOLO codEmpresa/project; el modelo completo enviaría
+    // campos que el SP no recibe.
+    @Override
+    public List<DocumentoProyectoDto> obtenerDocumentosPorProyecto(int codEmpresa, String project) {
+        Map<String, Object> filtro = new HashMap<>();
+        if (codEmpresa > 0) filtro.put("codEmpresa", codEmpresa);
+        if (project != null && !project.trim().isEmpty()) filtro.put("project", project.trim());
+
+        return spHelper.ejecutarListado(
+                "p_list_tpex_SolicitudPago",
+                filtro,
+                "C",
+                DocumentoProyectoDto.class
+        );
     }
 }

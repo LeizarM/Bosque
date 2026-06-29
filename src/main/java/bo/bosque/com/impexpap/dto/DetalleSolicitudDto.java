@@ -15,7 +15,9 @@ public class DetalleSolicitudDto {
     private String codigoImportacion;
     private double montoFacturaUsd;      // decimal(18,2) en BD
     private double montoAmortizadoUsd;   // decimal(18,2) en BD
-    private double montoAPagarUsd;       // decimal(18,2) en BD
+    private double montoAPagarUsd;       // decimal(18,2) en BD — esta cuota
+    private double montoTotalDocumento;  // decimal(18,2) — total del doc SAP
+    private int numeroCuota;             // 1, 2, 3...
     private Date fechaFactura;
     private Date fechaVencimiento;
     private String concepto;

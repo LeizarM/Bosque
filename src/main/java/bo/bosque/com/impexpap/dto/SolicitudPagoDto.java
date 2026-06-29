@@ -15,6 +15,7 @@ public class SolicitudPagoDto {
     private Date fechaSolicitud;
     private double montoTotalSolicitud;  // decimal(18,2) en BD
     private String estado;
+    private String project;              // Código del proyecto SAP
     private int audUsuario;
 
     // CORRECCIÓN: Usar la lista del DTO, no del Modelo
