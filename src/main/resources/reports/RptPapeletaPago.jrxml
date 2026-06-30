@@ -4,6 +4,9 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="codPlanilla" class="java.lang.Integer"/>
+	<parameter name="RUTA_LOGOS" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/app/uploads/LOGOS/"]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[EXEC p_list_PlanillaDetalle @ACCION = 'R3', @codPlanilla = $P{codPlanilla}]]>
 	</queryString>
@@ -111,6 +114,10 @@
 		<property name="com.jaspersoft.studio.field.name" value="Caja"/>
 		<property name="com.jaspersoft.studio.field.label" value="Caja"/>
 	</field>
+	<field name="codEmpresa" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="codEmpresa"/>
+		<property name="com.jaspersoft.studio.field.label" value="codEmpresa"/>
+	</field>
 	<field name="Periodo" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="Periodo"/>
 		<property name="com.jaspersoft.studio.field.label" value="Periodo"/>
@@ -132,7 +139,7 @@
 				<text><![CDATA[PAPELETA DE PAGO]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="10" y="30" width="110" height="30" uuid="a10a4dda-8090-4e00-8e05-477337c07a9d"/>
+				<reportElement x="10" y="40" width="120" height="20" uuid="a10a4dda-8090-4e00-8e05-477337c07a9d"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA["NIT " + $F{Nit}]]></textFieldExpression>
 			</textField>
@@ -368,7 +375,7 @@
 				<text><![CDATA[PAPELETA DE PAGO]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="10" y="415" width="110" height="30" uuid="a10a4dda-8090-4e00-8e05-477337c08a9d"/>
+				<reportElement x="15" y="420" width="110" height="14" uuid="a10a4dda-8090-4e00-8e05-477337c08a9d"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA["NIT " + $F{Nit}]]></textFieldExpression>
 			</textField>
@@ -674,38 +681,26 @@
 				<text><![CDATA[Bs.]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="15" y="10" width="100" height="20" uuid="1e38cd61-e622-4d51-b827-3f9aff739d99"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="15" y="390" width="100" height="24" uuid="3e3a5c14-efb5-48e8-ab24-d9ccf7ef833b"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="345" y="706" width="100" height="24" uuid="2c763dc8-470e-4bc6-841f-c9119ca06bdc"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement x="340" y="346" width="110" height="14" uuid="07ae7b6f-3a60-4766-9a18-aa14d4315439"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
 				<textFieldExpression><![CDATA["NIT " + $F{Nit}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="345" y="320" width="100" height="26" uuid="f4bb0ac2-1266-4cae-aedc-2b9a109fca63"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
-			</textField>
+			<image scaleImage="FillFrame" onErrorType="Blank">
+				<reportElement stretchType="ContainerHeight" x="10" y="10" width="120" height="30" uuid="cdefced8-0ece-4b2c-bdff-ec4b6cde274a"/>
+				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+			</image>
+			<image scaleImage="FillFrame" onErrorType="Blank">
+				<reportElement stretchType="ContainerHeight" x="336" y="316" width="120" height="30" uuid="f29c7338-cb38-423c-93a4-c4d28e62d45e"/>
+				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+			</image>
+			<image scaleImage="FillFrame" onErrorType="Blank">
+				<reportElement stretchType="ContainerHeight" x="335" y="700" width="120" height="30" uuid="cd055ade-70fd-4de6-8103-f9e287d881d4"/>
+				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+			</image>
+			<image scaleImage="FillFrame" onErrorType="Blank">
+				<reportElement stretchType="ContainerHeight" x="10" y="390" width="120" height="30" uuid="b891f81c-0b02-4648-9de7-304fe2575660"/>
+				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+			</image>
 		</band>
 	</detail>
 </jasperReport>

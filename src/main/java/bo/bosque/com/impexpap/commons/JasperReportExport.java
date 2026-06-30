@@ -7,6 +7,8 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,6 +303,68 @@ public class JasperReportExport {
         }
         return reportBytes;
     }
+
+    public byte[] exportExcelStatic(String fileName, Map<String, Object> params) {
+        byte[] reportBytes = null;
+        String jasperPath = REPORT_FOLDER + "/" + fileName + JASPER;
+
+        // Configura UPLOADS_DIR
+        if (!params.containsKey("SUBREPORT_DIR")) {
+            params.put("SUBREPORT_DIR", REPORT_FOLDER + "/");
+        }
+
+        String baseDir;
+        if (uploadsDir == null) {
+            baseDir = "/app/uploads/";
+        } else {
+            baseDir = uploadsDir.endsWith("/") ? uploadsDir : uploadsDir + "/";
+        }
+        params.put("UPLOADS_DIR", baseDir);
+
+        Connection conn = null;
+        try {
+            if (jdbcTemplate == null || jdbcTemplate.getDataSource() == null) {
+                throw new RuntimeException("jdbcTemplate o DataSource es null");
+            }
+            conn = jdbcTemplate.getDataSource().getConnection();
+
+            InputStream reportStream = getClass().getResourceAsStream("/" + jasperPath);
+            if (reportStream == null) {
+                throw new RuntimeException("Reporte principal no encontrado: /" + jasperPath);
+            }
+
+            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(reportStream);
+            JasperPrint report = JasperFillManager.fillReport(jasperReport, params, conn);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            JRXlsxExporter exporter = new JRXlsxExporter();
+            exporter.setExporterInput(new SimpleExporterInput(report));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(baos));
+
+            SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
+            configuration.setDetectCellType(true);
+            configuration.setCollapseRowSpan(false);
+            configuration.setRemoveEmptySpaceBetweenRows(true);
+            configuration.setRemoveEmptySpaceBetweenColumns(true);
+            configuration.setWhitePageBackground(false);
+            exporter.setConfiguration(configuration);
+
+            exporter.exportReport();
+            reportBytes = baos.toByteArray();
+            
+        } catch (Exception e) {
+            logger.error("Error en exportExcelStatic: " + e.getMessage(), e);
+            throw new RuntimeException("Error exporting Excel: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception ignored) {}
+            }
+        }
+        return reportBytes;
+    }
+
 
     /**
      * Carga subreportes precompilados (.jasper)

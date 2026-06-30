@@ -110,6 +110,24 @@ public class PlanillaController {
         }
     }
 
+    @PostMapping("/excelPlanillaCompacta")
+    public ResponseEntity<?> excelPlanillaCompacta(@RequestBody Planilla planilla) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
+            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportExcelStatic("RptExcPlanillaCompacto", params);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "PlanillaCompacta.xlsx");
+            return new ResponseEntity<>(reportBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/pdfPlanillaExtendida")
     public ResponseEntity<?> pdfPlanillaExtendida(@RequestBody Planilla planilla) {
         try {
