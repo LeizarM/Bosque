@@ -206,7 +206,7 @@
 		<band splitType="Stretch"/>
 	</background>
 	<pageHeader>
-		<band height="76" splitType="Stretch">
+		<band height="79" splitType="Stretch">
 			<textField>
 				<reportElement x="180" y="0" width="180" height="15" uuid="e622b7dc-8d82-45e3-85f0-6edc4a92c019"/>
 				<textElement>
@@ -236,14 +236,14 @@
 				<text><![CDATA[N° NIT:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="387" y="22" width="220" height="30" uuid="f6f8af0d-89a1-44b8-ab58-19b4c3af2449"/>
+				<reportElement x="387" y="22" width="233" height="30" uuid="f6f8af0d-89a1-44b8-ab58-19b4c3af2449"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[PLANILLA DE SUELDOS Y SALARIOS PERSONAL PERMANENTE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="425" y="52" width="143" height="15" uuid="d792d529-efad-4292-a932-0d7a6ec3970c"/>
+				<reportElement x="387" y="52" width="233" height="15" uuid="d792d529-efad-4292-a932-0d7a6ec3970c"/>
 				<textElement textAlignment="Center">
 					<font isBold="true"/>
 				</textElement>
@@ -619,7 +619,7 @@
 					<pen lineWidth="0.25"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="6"/>
+					<font size="5.5"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{cargo}]]></textFieldExpression>
 			</textField>

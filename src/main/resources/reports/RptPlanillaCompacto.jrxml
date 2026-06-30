@@ -192,7 +192,7 @@
 				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="380" y="22" width="220" height="30" uuid="585a2b78-7689-4194-9d9d-9e0715f17285"/>
+				<reportElement x="380" y="22" width="238" height="30" uuid="585a2b78-7689-4194-9d9d-9e0715f17285"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
@@ -276,8 +276,8 @@
 				<text><![CDATA[N° NIT:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="427" y="52" width="143" height="15" uuid="726d8733-f76e-475d-8a79-8c59deda8d12"/>
-				<textElement>
+				<reportElement x="380" y="52" width="238" height="15" uuid="726d8733-f76e-475d-8a79-8c59deda8d12"/>
+				<textElement textAlignment="Center">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[(Expresado en Bolivianos)]]></text>
