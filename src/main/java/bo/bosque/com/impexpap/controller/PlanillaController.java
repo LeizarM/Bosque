@@ -117,6 +117,7 @@ public class PlanillaController {
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
             byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportExcelStatic("RptExcPlanillaCompacto", params);
 
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(reportBytes.length);
             headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
