@@ -284,20 +284,6 @@
 				</textElement>
 				<text><![CDATA[Periodo :]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="830" y="40" width="50" height="20" uuid="bee50050-c73d-45ba-826b-f073a89838aa"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<text><![CDATA[T.C :]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="880" y="40" width="50" height="20" uuid="27b05562-c5fa-418f-9c8e-80542a6c6733"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<text><![CDATA[9.73]]></text>
-			</staticText>
 			<textField>
 				<reportElement x="180" y="15" width="180" height="15" uuid="3ea0b3a3-1cb9-49fe-b103-d962fa415eab"/>
 				<textElement>
