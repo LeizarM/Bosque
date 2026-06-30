@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/planilla")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST})
 @PreAuthorize("hasAnyRole('ROLE_ADM','ROLE_LIM')")
 public class PlanillaController {
 
@@ -116,6 +116,23 @@ public class PlanillaController {
             Map<String, Object> params = new HashMap<>();
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
             byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic("RptPlanillaExtendida", params);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(reportBytes.length);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            return new ResponseEntity<>(reportBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/pdfPapeletaPago")
+    public ResponseEntity<?> pdfPapeletaPago(@RequestBody Planilla planilla) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
+            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic("RptPapeletaPago", params);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(reportBytes.length);

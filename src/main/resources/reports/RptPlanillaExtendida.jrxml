@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptPlanillaCompacta" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0710d078-2f10-49ac-9e9c-8c26aca4f178">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptPlanillaCompacta" printOrder="Horizontal" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0710d078-2f10-49ac-9e9c-8c26aca4f178">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
@@ -209,63 +208,63 @@
 	<pageHeader>
 		<band height="76" splitType="Stretch">
 			<textField>
-				<reportElement x="140" y="0" width="180" height="15" uuid="e622b7dc-8d82-45e3-85f0-6edc4a92c019"/>
+				<reportElement x="180" y="0" width="180" height="15" uuid="e622b7dc-8d82-45e3-85f0-6edc4a92c019"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="0" width="130" height="15" uuid="528739e2-9365-4ef5-879f-bfaf6810a3c5"/>
+				<reportElement x="0" y="0" width="150" height="15" uuid="528739e2-9365-4ef5-879f-bfaf6810a3c5"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[Razón Social:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="15" width="130" height="15" uuid="a1d73be4-7f46-4035-8981-80bbc8d35c12"/>
+				<reportElement x="0" y="15" width="150" height="15" uuid="a1d73be4-7f46-4035-8981-80bbc8d35c12"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[N° Empleador Ministerio de Trabajo:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="30" width="130" height="15" uuid="bc295e53-d25e-4433-b1a8-e46e33877386"/>
+				<reportElement x="0" y="30" width="150" height="15" uuid="bc295e53-d25e-4433-b1a8-e46e33877386"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[N° NIT:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="380" y="22" width="220" height="30" uuid="f6f8af0d-89a1-44b8-ab58-19b4c3af2449"/>
+				<reportElement x="387" y="22" width="220" height="30" uuid="f6f8af0d-89a1-44b8-ab58-19b4c3af2449"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[PLANILLA DE SUELDOS Y SALARIOS PERSONAL PERMANENTE]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="426" y="52" width="128" height="15" uuid="d792d529-efad-4292-a932-0d7a6ec3970c"/>
-				<textElement>
+				<reportElement x="425" y="52" width="143" height="15" uuid="d792d529-efad-4292-a932-0d7a6ec3970c"/>
+				<textElement textAlignment="Center">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[(Expresado en Bolivianos)]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="140" y="30" width="180" height="15" uuid="4520bc9b-35ec-4c37-8e39-c3f3837930cd"/>
+				<reportElement x="180" y="30" width="180" height="15" uuid="4520bc9b-35ec-4c37-8e39-c3f3837930cd"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Nit}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="140" y="45" width="180" height="15" uuid="042d2264-6eab-4e8c-b294-7a58bc59afb0"/>
+				<reportElement x="180" y="45" width="180" height="15" uuid="042d2264-6eab-4e8c-b294-7a58bc59afb0"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NunSeguro}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="45" width="130" height="15" uuid="977dc4a2-c315-47fd-835c-fd5c35954c5e"/>
+				<reportElement x="0" y="45" width="170" height="15" uuid="977dc4a2-c315-47fd-835c-fd5c35954c5e"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -297,8 +296,15 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<text><![CDATA[6.96]]></text>
+				<text><![CDATA[9.73]]></text>
 			</staticText>
+			<textField>
+				<reportElement x="180" y="15" width="180" height="15" uuid="3ea0b3a3-1cb9-49fe-b103-d962fa415eab"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NunEmpleador}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -635,7 +641,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{dias_pagados_mes}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{dias_pagados_mes})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="426" y="0" width="34" height="15" uuid="10000000-0000-0000-0000-000000000010"/>
@@ -645,9 +651,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{horas_dias_pagadas}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{horas_dias_pagadas})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="460" y="0" width="45" height="15" uuid="10000000-0000-0000-0000-000000000011"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -655,9 +661,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{haberBasico}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{haberBasico})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="505" y="0" width="40" height="15" uuid="10000000-0000-0000-0000-000000000012"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -665,9 +671,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{bonoAntiguedad})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{bonoAntiguedad})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="545" y="0" width="45" height="15" uuid="10000000-0000-0000-0000-000000000014"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -675,9 +681,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{total})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{total})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="590" y="0" width="40" height="15" uuid="10000000-0000-0000-0000-000000000015"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -685,9 +691,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{AFP})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{AFP})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="630" y="0" width="40" height="15" uuid="10000000-0000-0000-0000-000000000016"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -695,9 +701,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{saldo})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{saldo})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="670" y="0" width="35" height="15" uuid="10000000-0000-0000-0000-000000000017"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -705,9 +711,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{cuotasDolares})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{cuotasDolares})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement mode="Opaque" x="705" y="0" width="35" height="15" backcolor="#D9D9D9" uuid="10000000-0000-0000-0000-000000000018"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -715,9 +721,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{cuotasBolivianos})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{cuotasBolivianos})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="740" y="0" width="33" height="15" uuid="10000000-0000-0000-0000-000000000019"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -725,9 +731,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{multas})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{multas})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="773" y="0" width="35" height="15" uuid="10000000-0000-0000-0000-000000000020"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -735,9 +741,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{anticipo})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{anticipo})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="808" y="0" width="32" height="15" uuid="10000000-0000-0000-0000-000000000021"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -745,9 +751,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{otros})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{otros})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="840" y="0" width="40" height="15" uuid="10000000-0000-0000-0000-000000000022"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -755,9 +761,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{totalDescuentos})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{totalDescuentos})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="880" y="0" width="39" height="15" uuid="10000000-0000-0000-0000-000000000023"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -765,7 +771,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{liquido})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($F{liquido})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="919" y="0" width="48" height="15" uuid="10000000-0000-0000-0000-000000000024"/>
@@ -781,7 +787,7 @@
 	<pageFooter>
 		<band height="15">
 			<textField>
-				<reportElement x="767" y="0" width="200" height="15" uuid="453e9903-888e-4952-b133-c5ed8fb08cf4"/>
+				<reportElement x="760" y="0" width="206" height="15" uuid="453e9903-888e-4952-b133-c5ed8fb08cf4"/>
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
@@ -799,7 +805,7 @@
 				</textElement>
 				<text><![CDATA[TOTALES:]]></text>
 			</staticText>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="460" y="0" width="45" height="15" uuid="20000000-0000-0000-0000-000000000002"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -811,9 +817,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_haberBasico})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_haberBasico})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="505" y="0" width="40" height="15" uuid="20000000-0000-0000-0000-000000000003"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -825,9 +831,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_bonoAntiguedad})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_bonoAntiguedad})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="545" y="0" width="45" height="15" uuid="20000000-0000-0000-0000-000000000005"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -839,9 +845,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_total})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_total})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="590" y="0" width="40" height="15" uuid="20000000-0000-0000-0000-000000000006"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -853,9 +859,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_AFP})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_AFP})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="630" y="0" width="40" height="15" uuid="20000000-0000-0000-0000-000000000007"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -867,9 +873,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_saldo})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_saldo})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="670" y="0" width="35" height="15" uuid="20000000-0000-0000-0000-000000000008"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -881,9 +887,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_cuotasDolares})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_cuotasDolares})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="705" y="0" width="35" height="15" uuid="20000000-0000-0000-0000-000000000009"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -895,9 +901,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_cuotasBolivianos})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_cuotasBolivianos})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="740" y="0" width="33" height="15" uuid="20000000-0000-0000-0000-000000000010"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -909,9 +915,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_multas})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_multas})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="773" y="0" width="35" height="15" uuid="20000000-0000-0000-0000-000000000011"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -923,9 +929,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_anticipo})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_anticipo})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="808" y="0" width="32" height="15" uuid="20000000-0000-0000-0000-000000000012"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -937,9 +943,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_otros})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_otros})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="840" y="0" width="40" height="15" uuid="20000000-0000-0000-0000-000000000013"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -951,9 +957,9 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_totalDescuentos})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_totalDescuentos})]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="880" y="0" width="39" height="15" uuid="20000000-0000-0000-0000-000000000014"/>
 				<box rightPadding="2">
 					<pen lineWidth="0.25"/>
@@ -965,7 +971,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($V{v_liquido})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{v_liquido})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="919" y="0" width="48" height="15" uuid="b99e75d9-a76d-449f-95cd-71f5b06df1ba"/>

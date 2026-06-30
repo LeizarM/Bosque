@@ -185,19 +185,12 @@
 	<title>
 		<band height="110" splitType="Stretch">
 			<textField>
-				<reportElement x="140" y="0" width="180" height="15" uuid="ebb30231-1d15-4356-87e3-c707a70d8aa9"/>
+				<reportElement x="150" y="0" width="180" height="15" uuid="ebb30231-1d15-4356-87e3-c707a70d8aa9"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="0" y="45" width="130" height="15" uuid="cf9d9fec-aa64-45ad-8065-8deb07771c7a"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<text><![CDATA[N° de Empleador:]]></text>
-			</staticText>
 			<staticText>
 				<reportElement x="380" y="22" width="220" height="30" uuid="585a2b78-7689-4194-9d9d-9e0715f17285"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -206,21 +199,21 @@
 				<text><![CDATA[PLANILLA DE SUELDOS Y SALARIOS PERSONAL PERMANENTE]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="140" y="60" width="180" height="15" uuid="682df193-8cde-495e-af3f-1b18e70645ab"/>
+				<reportElement x="151" y="45" width="170" height="15" uuid="682df193-8cde-495e-af3f-1b18e70645ab"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NunSeguro}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="140" y="45" width="180" height="15" uuid="68e5cbf9-45f0-4af4-b59a-c2756ab36b2b"/>
+				<reportElement x="150" y="15" width="180" height="15" uuid="68e5cbf9-45f0-4af4-b59a-c2756ab36b2b"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NunEmpleador}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="140" y="30" width="180" height="15" uuid="16e42d51-04d2-4a27-8d18-835f5a2f2a5a"/>
+				<reportElement x="150" y="30" width="180" height="15" uuid="16e42d51-04d2-4a27-8d18-835f5a2f2a5a"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -233,29 +226,29 @@
 				</textElement>
 				<text><![CDATA[Razón Social:]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="0" y="60" width="130" height="15" uuid="4a518b05-0304-433c-9f0e-3670bf395ccb"/>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="0" y="45" width="150" height="15" uuid="4a518b05-0304-433c-9f0e-3670bf395ccb"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Caja}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="140" y="75" width="210" height="15" uuid="fe2d2511-eca6-4a8f-8609-0a6e4991864c"/>
+				<reportElement x="150" y="60" width="210" height="15" uuid="fe2d2511-eca6-4a8f-8609-0a6e4991864c"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Direccion}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="90" width="130" height="15" uuid="fa3116c1-5d36-41e9-9067-0b8a13bf667c"/>
+				<reportElement x="0" y="75" width="130" height="15" uuid="fa3116c1-5d36-41e9-9067-0b8a13bf667c"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[Telefono:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="75" width="130" height="15" uuid="b26d96d4-cba7-4059-8c4e-60598bc52396"/>
+				<reportElement x="0" y="60" width="130" height="15" uuid="b26d96d4-cba7-4059-8c4e-60598bc52396"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -283,14 +276,14 @@
 				<text><![CDATA[N° NIT:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="426" y="52" width="128" height="15" uuid="726d8733-f76e-475d-8a79-8c59deda8d12"/>
+				<reportElement x="427" y="52" width="143" height="15" uuid="726d8733-f76e-475d-8a79-8c59deda8d12"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[(Expresado en Bolivianos)]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="140" y="90" width="180" height="15" uuid="6c49651a-1ad3-4ba5-b9b8-79c1cc4a595f"/>
+				<reportElement x="150" y="75" width="180" height="15" uuid="6c49651a-1ad3-4ba5-b9b8-79c1cc4a595f"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>

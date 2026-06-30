@@ -86,21 +86,21 @@
 	<pageFooter>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="210" y="0" width="60" height="20" uuid="d9e8f7a6-b5c4-3d2e-1f0a-9e8d7c6b5a4f"/>
+				<reportElement x="230" y="0" width="60" height="20" uuid="d9e8f7a6-b5c4-3d2e-1f0a-9e8d7c6b5a4f"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="270" y="0" width="60" height="20" uuid="e8f9a0b1-c6d5-4e3f-2b1c-0f9e8d7c6b5a"/>
+				<reportElement x="290" y="0" width="60" height="20" uuid="e8f9a0b1-c6d5-4e3f-2b1c-0f9e8d7c6b5a"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" de " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="390" y="0" width="165" height="20" uuid="b1c2d3e4-f5a6-7b8c-9d0e-1f2a3b4c5d6e"/>
+				<reportElement x="370" y="0" width="200" height="20" uuid="b1c2d3e4-f5a6-7b8c-9d0e-1f2a3b4c5d6e"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
@@ -109,9 +109,9 @@
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="300" splitType="Stretch">
+		<band height="250" splitType="Stretch">
 			<crosstab horizontalPosition="Center">
-				<reportElement x="1" y="40" width="570" height="90" uuid="eb25b64c-b4db-40a2-9e8c-8430fc59c5d1"/>
+				<reportElement x="1" y="30" width="570" height="70" uuid="eb25b64c-b4db-40a2-9e8c-8430fc59c5d1"/>
 				<rowGroup name="Empresa" width="90" totalPosition="End">
 					<bucket class="java.lang.String">
 						<bucketExpression><![CDATA[$F{Empresa}]]></bucketExpression>
@@ -124,7 +124,7 @@
 							<textField textAdjust="ScaleFont">
 								<reportElement x="0" y="0" width="90" height="20" uuid="cc691fbb-dc51-41ff-83f5-7bdf753bbf4a"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 									<paragraph leftIndent="5"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{Empresa}]]></textFieldExpression>
@@ -139,7 +139,7 @@
 							<staticText>
 								<reportElement mode="Transparent" x="0" y="0" width="90" height="20" uuid="f28fc4a7-b1a7-4b71-a035-afc756284f18"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 									<paragraph rightIndent="5"/>
 								</textElement>
 								<text><![CDATA[Total General]]></text>
@@ -159,7 +159,7 @@
 							<textField textAdjust="ScaleFont">
 								<reportElement mode="Opaque" x="0" y="0" width="70" height="30" backcolor="#B3B3B3" uuid="88eebdb1-b286-4e5a-8b17-74beffc7cda3"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{Banco}]]></textFieldExpression>
 							</textField>
@@ -173,7 +173,7 @@
 							<staticText>
 								<reportElement mode="Opaque" x="0" y="0" width="90" height="30" backcolor="#B3B3B3" uuid="69c1cecf-97de-4277-ba8e-c3408dcbf89c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Total BS]]></text>
 							</staticText>
@@ -188,12 +188,13 @@
 						<box>
 							<pen lineWidth="0.5"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement x="0" y="0" width="70" height="20" uuid="5c71120f-b4bd-44c1-ae40-5e6383387b32"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font size="9"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -202,13 +203,13 @@
 						<box>
 							<pen lineWidth="0.5"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement x="0" y="0" width="90" height="20" uuid="16e1db0b-044e-4fcc-a120-cf1719c23171"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -217,13 +218,13 @@
 						<box>
 							<pen lineWidth="0.5"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement mode="Transparent" x="0" y="0" width="70" height="20" uuid="14b301c2-c283-4a1d-a342-7fcf18d0af74"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -232,26 +233,28 @@
 						<box>
 							<pen lineWidth="0.5"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement x="0" y="0" width="90" height="20" uuid="0e0b3c66-41cd-4cda-9213-9828eeb5ad22"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
 			</crosstab>
 			<staticText>
-				<reportElement x="0" y="130" width="555" height="30" uuid="7cf24f5a-3d23-4415-bc7b-c39cfc5fbaac"/>
+				<reportElement x="1" y="115" width="555" height="30" uuid="7cf24f5a-3d23-4415-bc7b-c39cfc5fbaac">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="13" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Estimado pago planilla completo]]></text>
 			</staticText>
 			<crosstab horizontalPosition="Center">
-				<reportElement x="9" y="170" width="555" height="120" uuid="88888888-2222-3333-4444-555555550001"/>
+				<reportElement x="9" y="150" width="555" height="100" uuid="88888888-2222-3333-4444-555555550001"/>
 				<crosstabDataset>
 					<dataset>
 						<datasetRun subDataset="DatasetR2" uuid="88888888-2222-3333-4444-555555550002">
@@ -274,7 +277,7 @@
 								<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 							</textElement>
 							<text><![CDATA[Empresa]]></text>
 						</staticText>
@@ -288,7 +291,7 @@
 								<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 							</textElement>
 							<text><![CDATA[Banco]]></text>
 						</staticText>
@@ -302,13 +305,13 @@
 								<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 							</box>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 							</textElement>
 							<text><![CDATA[Caja / Seguro]]></text>
 						</staticText>
 					</cellContents>
 				</crosstabHeaderCell>
-				<rowGroup name="Empresa" width="100" totalPosition="End">
+				<rowGroup name="Empresa" width="100" totalPosition="End" headerPosition="Middle">
 					<bucket class="java.lang.String">
 						<bucketExpression><![CDATA[$F{Empresa}]]></bucketExpression>
 					</bucket>
@@ -318,8 +321,9 @@
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
 							<textField>
-								<reportElement x="0" y="0" width="100" height="20" uuid="88888888-2222-3333-4444-555555550006"/>
+								<reportElement x="0" y="0" width="100" height="60" uuid="88888888-2222-3333-4444-555555550006"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="9"/>
 									<paragraph leftIndent="3"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{Empresa}]]></textFieldExpression>
@@ -334,7 +338,7 @@
 							<staticText>
 								<reportElement mode="Opaque" x="0" y="0" width="435" height="20" backcolor="#E2EFDA" uuid="88888888-2222-3333-4444-555555550007"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Total General]]></text>
 							</staticText>
@@ -350,9 +354,10 @@
 							<box>
 								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 							</box>
-							<textField>
+							<textField textAdjust="ScaleFont">
 								<reportElement x="0" y="0" width="115" height="20" uuid="88888888-2222-3333-4444-555555550008"/>
 								<textElement verticalAlignment="Middle">
+									<font size="9"/>
 									<paragraph leftIndent="3"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{Banco}]]></textFieldExpression>
@@ -367,7 +372,7 @@
 							<textField>
 								<reportElement mode="Opaque" x="0" y="0" width="335" height="20" backcolor="#DDEBF7" uuid="88888888-2222-3333-4444-555555550009"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 								</textElement>
 								<textFieldExpression><![CDATA["Total " + $V{Empresa}]]></textFieldExpression>
 							</textField>
@@ -386,6 +391,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="220" height="20" uuid="88888888-2222-3333-4444-555555550010"/>
 								<textElement verticalAlignment="Middle">
+									<font size="9"/>
 									<paragraph leftIndent="3"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{Caja}]]></textFieldExpression>
@@ -400,7 +406,7 @@
 							<textField>
 								<reportElement mode="Opaque" x="0" y="0" width="220" height="20" backcolor="#FFF2CC" uuid="88888888-2222-3333-4444-555555550011"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font isBold="true"/>
+									<font size="9" isBold="true"/>
 								</textElement>
 								<textFieldExpression><![CDATA["Total " + $V{Banco}]]></textFieldExpression>
 							</textField>
@@ -444,12 +450,13 @@
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement x="0" y="0" width="120" height="20" uuid="88888888-2222-3333-4444-555555550013"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
+								<font size="9"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -458,13 +465,13 @@
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement mode="Opaque" x="0" y="0" width="120" height="20" backcolor="#FFF2CC" uuid="88888888-2222-3333-4444-555555550014"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -473,13 +480,13 @@
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement mode="Opaque" x="0" y="0" width="120" height="20" backcolor="#DDEBF7" uuid="88888888-2222-3333-4444-555555550015"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -488,13 +495,13 @@
 						<box>
 							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 						</box>
-						<textField pattern="#,##0.00">
+						<textField>
 							<reportElement mode="Opaque" x="0" y="0" width="120" height="20" backcolor="#E2EFDA" uuid="88888888-2222-3333-4444-555555550016"/>
 							<textElement textAlignment="Right" verticalAlignment="Middle">
-								<font isBold="true"/>
+								<font size="9" isBold="true"/>
 								<paragraph rightIndent="3"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{Monto_MEASURE}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00", new java.text.DecimalFormatSymbols(new java.util.Locale("es", "ES"))).format($V{Monto_MEASURE})]]></textFieldExpression>
 						</textField>
 					</cellContents>
 				</crosstabCell>
@@ -509,9 +516,11 @@
 				</crosstabCell>
 			</crosstab>
 			<staticText>
-				<reportElement x="0" y="10" width="555" height="20" uuid="18f4b3ed-f676-45db-9c85-9ce18bff6655"/>
+				<reportElement x="0" y="5" width="555" height="20" uuid="18f4b3ed-f676-45db-9c85-9ce18bff6655">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="13" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Estimado pago planilla bancos]]></text>
 			</staticText>
