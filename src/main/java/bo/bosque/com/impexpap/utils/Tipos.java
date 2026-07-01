@@ -286,6 +286,23 @@ public class Tipos {
         listaTemp.add(new Tipos("ANUL","ANULADO",63));
         return listaTemp;
     }
+    /**
+     * Devolvera una lista para tipos de permiso-vacacion
+     * @return
+     */
+    public List<Tipos>listTipoPermiso(){
+        List<Tipos>listaTemp= new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("vac","Vacación",13));
+        listaTemp.add(new Tipos("baja","Baja por Enfermedad",13));
+        listaTemp.add(new Tipos("sinsuel","Sin Sueldo",13));
+        listaTemp.add(new Tipos("libre","Día Libre",13));
+        listaTemp.add(new Tipos("def","Por Defunción",13));
+        //listaTemp.add(new Tipos("pva","Pago Vacación",13));
+        listaTemp.add(new Tipos("clb","Comision Laboral",13));
+        listaTemp.add(new Tipos("pcr","Permisos con reposicion",13));
+        listaTemp.add(new Tipos("otro","Otros",13));
+        return listaTemp;
+    }
 
 
 

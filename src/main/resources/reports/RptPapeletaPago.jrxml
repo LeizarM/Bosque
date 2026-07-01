@@ -4,8 +4,9 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="codPlanilla" class="java.lang.Integer"/>
+	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="RUTA_LOGOS" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["/app/uploads/LOGOS/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[$P{UPLOADS_DIR} + "LOGOS/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[EXEC p_list_PlanillaDetalle @ACCION = 'R3', @codPlanilla = $P{codPlanilla}]]>

@@ -28,10 +28,12 @@ public class PlanillaController {
 
     private final IPlanilla planillaDao;
     private final JdbcTemplate jdbcTemplate;
+    private final JasperReportExport jasperReportExport;
 
-    public PlanillaController(IPlanilla planillaDao, JdbcTemplate jdbcTemplate) {
+    public PlanillaController(IPlanilla planillaDao, JdbcTemplate jdbcTemplate, JasperReportExport jasperReportExport) {
         this.planillaDao = planillaDao;
         this.jdbcTemplate = jdbcTemplate;
+        this.jasperReportExport = jasperReportExport;
     }
 
     @PostMapping("/listarPlanilla")
@@ -81,7 +83,7 @@ public class PlanillaController {
     public ResponseEntity<?> pdfEstimadoPagoBanco() {
         try {
             Map<String, Object> params = new HashMap<>();
-            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic("RptPagoEstimadoBanco", params);
+            byte[] reportBytes = this.jasperReportExport.exportPDFStatic("RptPagoEstimadoBanco", params);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(reportBytes.length);
@@ -98,7 +100,7 @@ public class PlanillaController {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
-            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic("RptPlanillaCompacto", params);
+            byte[] reportBytes = this.jasperReportExport.exportPDFStatic("RptPlanillaCompacto", params);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(reportBytes.length);
@@ -115,7 +117,7 @@ public class PlanillaController {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
-            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportExcelStatic("RptExcPlanillaCompacto", params);
+            byte[] reportBytes = this.jasperReportExport.exportExcelStatic("RptExcPlanillaCompacto", params);
 
 
             HttpHeaders headers = new HttpHeaders();
@@ -134,7 +136,7 @@ public class PlanillaController {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
-            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic("RptPlanillaExtendida", params);
+            byte[] reportBytes = this.jasperReportExport.exportPDFStatic("RptPlanillaExtendida", params);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(reportBytes.length);
@@ -151,7 +153,7 @@ public class PlanillaController {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
-            byte[] reportBytes = new JasperReportExport(this.jdbcTemplate).exportPDFStatic("RptPapeletaPago", params);
+            byte[] reportBytes = this.jasperReportExport.exportPDFStatic("RptPapeletaPago", params);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(reportBytes.length);

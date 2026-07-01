@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FormReImpSolPermisoVac" pageWidth="612" pageHeight="792" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="d055d916-c204-4a26-aff7-dbe7de586292">
+	<property name="ireport.zoom" value="1.652892561983475"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="numPermiso" class="java.lang.Integer"/>
+	<parameter name="logoEmpresa" class="java.io.InputStream"/>
+	<parameter name="logoAgua" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[EXEC dbo.p_list_Permiso @ACCION='R1' , @codPermiso=$P{numPermiso}]]>
+	</queryString>
+	<field name="codPermiso" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="codPermiso"/>
+		<property name="com.jaspersoft.studio.field.label" value="codPermiso"/>
+	</field>
+	<field name="codEmpleado" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="codEmpleado"/>
+		<property name="com.jaspersoft.studio.field.label" value="codEmpleado"/>
+	</field>
+	<field name="codUsuarioAutorizador" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="codUsuarioAutorizador"/>
+		<property name="com.jaspersoft.studio.field.label" value="codUsuarioAutorizador"/>
+	</field>
+	<field name="tipoPermiso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipoPermiso"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipoPermiso"/>
+	</field>
+	<field name="desde" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="desde"/>
+		<property name="com.jaspersoft.studio.field.label" value="desde"/>
+	</field>
+	<field name="hasta" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="hasta"/>
+		<property name="com.jaspersoft.studio.field.label" value="hasta"/>
+	</field>
+	<field name="motivo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="motivo"/>
+		<property name="com.jaspersoft.studio.field.label" value="motivo"/>
+	</field>
+	<field name="cantidadDias" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="cantidadDias"/>
+		<property name="com.jaspersoft.studio.field.label" value="cantidadDias"/>
+	</field>
+	<field name="codRelEmplEmpr" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="codRelEmplEmpr"/>
+		<property name="com.jaspersoft.studio.field.label" value="codRelEmplEmpr"/>
+	</field>
+	<field name="datoEmpleado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="datoEmpleado"/>
+		<property name="com.jaspersoft.studio.field.label" value="datoEmpleado"/>
+	</field>
+	<field name="JefeInmediato" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="JefeInmediato"/>
+		<property name="com.jaspersoft.studio.field.label" value="JefeInmediato"/>
+	</field>
+	<field name="RRHH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RRHH"/>
+		<property name="com.jaspersoft.studio.field.label" value="RRHH"/>
+	</field>
+	<field name="datoTipoPermiso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="datoTipoPermiso"/>
+		<property name="com.jaspersoft.studio.field.label" value="datoTipoPermiso"/>
+	</field>
+	<field name="datoEmpresa" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="datoEmpresa"/>
+		<property name="com.jaspersoft.studio.field.label" value="datoEmpresa"/>
+	</field>
+	<field name="datoCargo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="datoCargo"/>
+		<property name="com.jaspersoft.studio.field.label" value="datoCargo"/>
+	</field>
+	<field name="estado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="estado"/>
+		<property name="com.jaspersoft.studio.field.label" value="estado"/>
+	</field>
+	<field name="fechaImpresion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fechaImpresion"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaImpresion"/>
+	</field>
+	<detail>
+		<band height="376">
+			<image>
+				<reportElement x="17" y="2" width="100" height="47" uuid="ffe08429-9dc8-4b1c-af22-af7d82c88a63">
+					<printWhenExpression><![CDATA[$F{datoEmpresa}=="Vladi"]]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<image>
+				<reportElement isPrintRepeatedValues="false" mode="Transparent" x="133" y="58" width="318" height="231" uuid="e2e06c93-990b-440f-8c9b-8a436791773e">
+					<printWhenExpression><![CDATA[$F{datoEmpresa}=="Vladi"]]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA[$P{logoAgua}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="17" y="49" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre:]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="139" y="132" width="228" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<rectangle radius="10">
+				<reportElement mode="Transparent" x="1" y="1" width="572" height="359" uuid="42339717-de14-4a11-949d-18fe39a7ad53"/>
+			</rectangle>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="359" y="73" width="199" height="16" uuid="25b0666b-092f-4497-b313-7a1b7b1a8f69"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement mode="Transparent" x="434" y="153" width="114" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="17" y="69" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Empresa :]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="459" y="2" width="47" height="20" uuid="58cde98c-3b6e-4b8d-9325-92d00cf7fb9d"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nº  :"]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement mode="Transparent" x="139" y="171" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="190" y="331" width="170" height="15" uuid="8f039a16-c05f-41b5-bcce-8de5dc558521"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Autorización]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="139" y="151" width="227" height="2" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement mode="Transparent" x="140" y="112" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="17" y="112" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de Inicio:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="459" y="22" width="100" height="20" backcolor="#CCFFCC" uuid="6d190043-8995-4fe6-88ca-0255891c6f83"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Copia: Administración]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="305" y="132" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[A Horas:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="400" y="330" width="154" height="1" uuid="b036ae18-2a2c-43d3-b462-9e213063acee"/>
+			</line>
+			<line>
+				<reportElement mode="Transparent" x="139" y="68" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="18" y="91" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cargo:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="160" y="53" width="299" height="15" uuid="1ce65f09-473c-4c50-831a-e5c139dfefe4"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpleado}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="190" y="346" width="170" height="15" uuid="8f039a16-c05f-41b5-bcce-8de5dc558521"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Jefe Inmediato Superior]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="17" y="132" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de Finalización:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="330" width="154" height="31" uuid="8f039a16-c05f-41b5-bcce-8de5dc558521"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vo. B. RRHH]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="434" y="132" width="114" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="190" y="330" width="170" height="1" uuid="b036ae18-2a2c-43d3-b462-9e213063acee"/>
+			</line>
+			<staticText>
+				<reportElement x="17" y="152" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Motivo de la Solicitud:]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="139" y="88" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="139" y="18" width="288" height="20" uuid="0d8bafac-9281-455d-88bd-815f962718a9"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SOLICITUD DE PERMISO - VACACIÓN]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="162" y="96" width="386" height="15" uuid="71b43538-2211-4924-8364-0fe574c31c22"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoCargo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="162" y="73" width="297" height="15" uuid="857d8b7c-58fe-4277-82af-1771bd043fe6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpresa}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="305" y="112" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[De Horas:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="510" y="2" width="50" height="20" uuid="967fc71a-4c7a-49c6-8df4-48fd6db9f2db"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codPermiso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="162" y="155" width="386" height="15" uuid="d2b623a3-daa7-45c7-aac5-1fb1050c2d44"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{motivo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm" isBlankWhenNull="true">
+				<reportElement x="433" y="115" width="113" height="15" uuid="1f323bc9-3823-493f-9df1-81069aff6666"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{desde}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="160" y="136" width="201" height="15" uuid="629249f8-5429-4bd2-b26c-7360c75f1d37"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hasta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="160" y="115" width="201" height="15" uuid="e9d6516a-6e28-46fe-992f-c309a3c8a7c6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{desde}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm" isBlankWhenNull="true">
+				<reportElement x="433" y="136" width="113" height="15" uuid="59744464-3b40-4fb6-83ba-4313efe4fb92"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hasta}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="435" y="215" width="59" height="15" uuid="aff9e9fa-3ffb-40b5-88ca-ce34993e5f18">
+					<printWhenExpression><![CDATA[$F{cantidadDias} >= 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Dias :]]></text>
+			</staticText>
+			<textField pattern="#,##0.0">
+				<reportElement mode="Opaque" x="495" y="215" width="49" height="15" backcolor="#FFFF99" uuid="28e87ba5-c064-4946-b2b8-aaac56ac49d6">
+					<printWhenExpression><![CDATA[$F{cantidadDias} >= 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidadDias}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="436" y="216" width="59" height="15" uuid="aff9e9fa-3ffb-40b5-88ca-ce34993e5f18">
+					<printWhenExpression><![CDATA[$F{cantidadDias} < 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Hrs :]]></text>
+			</staticText>
+			<textField pattern="#,##0.0">
+				<reportElement mode="Opaque" x="495" y="216" width="49" height="15" backcolor="#99FF99" uuid="28e87ba5-c064-4946-b2b8-aaac56ac49d6">
+					<printWhenExpression><![CDATA[$F{cantidadDias} < 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidadDias}*8]]></textFieldExpression>
+			</textField>
+			<rectangle radius="10">
+				<reportElement mode="Transparent" x="427" y="213" width="122" height="20" uuid="ed982d38-d158-4d93-81e6-a2582823d6ef"/>
+				<graphicElement>
+					<pen lineStyle="Double"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="16" y="18" width="124" height="25" forecolor="#990000" uuid="857d8b7c-58fe-4277-82af-1771bd043fe6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpresa}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="163" y="174" width="176" height="15" forecolor="#990000" backcolor="#CCCCCC" uuid="69c8fdd2-0400-4a2a-908f-55e4871e2df2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoTipoPermiso}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement mode="Transparent" x="139" y="193" width="227" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="16" y="173" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de Permiso :]]></text>
+			</staticText>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="190" y="310" width="170" height="20" uuid="877b8c21-2bfe-4b13-8d25-8e464cf04756"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{JefeInmediato}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="400" y="310" width="154" height="20" uuid="f3d4b520-17ab-4689-bf55-5375bccef442"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{RRHH}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="302" y="173" width="122" height="20" uuid="4b0162ff-aef5-413c-9784-0df708b92528"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado:]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="433" y="193" width="114" height="1" uuid="14716378-528f-475e-a754-54a7ed73aadc"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<textField pattern="HH.mm" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="433" y="176" width="113" height="15" forecolor="#22E674" uuid="5077ce3c-2e22-4202-8284-70daad266f16"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="459" y="42" width="99" height="16" uuid="a51c2fb4-e41a-42ba-8a5e-3edc243fe727"/>
+				<textFieldExpression><![CDATA[$F{fechaImpresion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="10" y="331" width="170" height="15" uuid="69152b04-42a1-4e04-9a04-52e0a96f0527"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Firma solicitante]]></text>
+			</staticText>
+			<line>
+				<reportElement x="10" y="330" width="170" height="1" uuid="0ab03c0a-694a-4a7f-a9dc-717dd61ec9a4"/>
+			</line>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="10" y="310" width="170" height="20" uuid="397a69a1-e5e5-42d2-af14-529d4029bc0f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{datoEmpleado}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="376">
+			<line>
+				<reportElement mode="Transparent" x="138" y="179" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement mode="Transparent" x="433" y="161" width="114" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="304" y="140" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[A Horas:]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="433" y="140" width="114" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement mode="Transparent" x="139" y="120" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="304" y="120" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[De Horas:]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="138" y="160" width="239" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="159" y="61" width="299" height="15" uuid="1ce65f09-473c-4c50-831a-e5c139dfefe4"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpleado}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="17" y="99" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cargo:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="120" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de Inicio:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="140" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de Finalización:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="458" y="30" width="100" height="20" backcolor="#FFFF66" uuid="6d190043-8995-4fe6-88ca-0255891c6f83"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Copia:  Empleado]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="138" y="140" width="228" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement mode="Transparent" x="138" y="76" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<rectangle radius="10">
+				<reportElement mode="Transparent" x="1" y="0" width="572" height="376" uuid="42339717-de14-4a11-949d-18fe39a7ad53"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="138" y="26" width="288" height="20" uuid="0d8bafac-9281-455d-88bd-815f962718a9"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SOLICITUD DE PERMISO - VACACIÓN]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="458" y="10" width="47" height="20" uuid="58cde98c-3b6e-4b8d-9325-92d00cf7fb9d"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nº  :"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="16" y="77" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Empresa :]]></text>
+			</staticText>
+			<line>
+				<reportElement mode="Transparent" x="138" y="96" width="409" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="16" y="57" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="160" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Motivo de la Solicitud:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="161" y="81" width="297" height="15" uuid="857d8b7c-58fe-4277-82af-1771bd043fe6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpresa}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="161" y="104" width="386" height="15" uuid="71b43538-2211-4924-8364-0fe574c31c22"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoCargo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="10" width="50" height="20" uuid="967fc71a-4c7a-49c6-8df4-48fd6db9f2db"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codPermiso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="161" y="163" width="386" height="15" uuid="a68e7401-7c83-4a62-b737-e9b70e709af8"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{motivo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="161" y="123" width="201" height="15" uuid="698f07d0-bd16-426b-87aa-f868734c0947"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{desde}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="161" y="144" width="201" height="15" uuid="ccd518b4-bc65-4fe2-80a7-f286c9832101"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hasta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm" isBlankWhenNull="true">
+				<reportElement x="434" y="144" width="113" height="15" uuid="16c79612-a40e-4810-adf1-2c4640559c88"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hasta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm" isBlankWhenNull="true">
+				<reportElement x="434" y="123" width="113" height="15" uuid="1df3d8ba-5924-4100-bc61-0367c26c609b"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{desde}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.0">
+				<reportElement mode="Opaque" x="492" y="224" width="49" height="15" backcolor="#99FF99" uuid="28e87ba5-c064-4946-b2b8-aaac56ac49d6">
+					<printWhenExpression><![CDATA[$F{cantidadDias} < 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidadDias}*8]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="433" y="224" width="59" height="15" uuid="aff9e9fa-3ffb-40b5-88ca-ce34993e5f18">
+					<printWhenExpression><![CDATA[$F{cantidadDias} < 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Hrs :]]></text>
+			</staticText>
+			<textField pattern="#,##0.0">
+				<reportElement mode="Opaque" x="492" y="224" width="49" height="15" backcolor="#FFFF99" uuid="28e87ba5-c064-4946-b2b8-aaac56ac49d6">
+					<printWhenExpression><![CDATA[$F{cantidadDias} >= 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidadDias}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="432" y="224" width="59" height="15" uuid="aff9e9fa-3ffb-40b5-88ca-ce34993e5f18">
+					<printWhenExpression><![CDATA[$F{cantidadDias} >= 0.5]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Dias :]]></text>
+			</staticText>
+			<rectangle radius="10">
+				<reportElement mode="Transparent" x="424" y="222" width="122" height="20" uuid="ed982d38-d158-4d93-81e6-a2582823d6ef"/>
+				<graphicElement>
+					<pen lineStyle="Double"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="10" y="18" width="124" height="25" forecolor="#990000" uuid="857d8b7c-58fe-4277-82af-1771bd043fe6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpresa}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="162" y="183" width="176" height="15" forecolor="#990000" backcolor="#CCCCCC" uuid="69c8fdd2-0400-4a2a-908f-55e4871e2df2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoTipoPermiso}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement mode="Transparent" x="138" y="201" width="239" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="15" y="182" width="122" height="20" uuid="cb4ec7ac-b447-46b7-8137-64809d3ad792"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de Permiso :]]></text>
+			</staticText>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="404" y="320" width="154" height="20" uuid="28acaf60-a864-43e3-aa69-7926e9e2420d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{RRHH}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="404" y="340" width="154" height="31" uuid="e2ce474a-93b4-41c5-a346-59dd35f9022e"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vo. B. RRHH]]></text>
+			</staticText>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="198" y="320" width="170" height="20" uuid="444d4747-30eb-4be7-8d92-908a4e1510f7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{JefeInmediato}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="198" y="339" width="170" height="15" uuid="f21ea377-b676-4e54-9d36-c2815de7b297"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Autorización]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="198" y="354" width="170" height="15" uuid="8c420534-48a3-4ccd-b9d7-6329f9c2a815"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Jefe Inmediato Superior]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="302" y="182" width="122" height="20" uuid="ef5ddbde-5811-4b39-9d0f-b3bf4dd675fb"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado:]]></text>
+			</staticText>
+			<textField pattern="HH.mm" isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="433" y="185" width="113" height="15" forecolor="#22E674" uuid="10fd4624-16b1-490c-8742-00de208ee144"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement mode="Transparent" x="432" y="201" width="114" height="1" uuid="7b308283-a1e3-4a9f-be47-29e1bf013561"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="459" y="50" width="99" height="16" uuid="0a100350-f831-462d-af35-4f402281a1fb"/>
+				<textFieldExpression><![CDATA[$F{fechaImpresion}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="198" y="339" width="170" height="1" uuid="a4d5eea2-6dd7-4daa-bd74-05425d83f836"/>
+			</line>
+			<line>
+				<reportElement x="404" y="339" width="154" height="1" uuid="df130f36-1e5f-4276-82ca-af804559ad4b"/>
+			</line>
+			<staticText>
+				<reportElement x="10" y="340" width="170" height="15" uuid="e6a59cca-40d6-410f-b360-acb52523ab24"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Firma solicitante]]></text>
+			</staticText>
+			<line>
+				<reportElement x="10" y="339" width="170" height="1" uuid="e2178020-2d98-4906-80a9-437aad6671bd"/>
+			</line>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="10" y="319" width="170" height="20" uuid="78a5af76-c998-4c73-9198-bfd72bdf9534"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{datoEmpleado}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
