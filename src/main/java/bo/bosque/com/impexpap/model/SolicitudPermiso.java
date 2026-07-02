@@ -14,10 +14,12 @@ public class SolicitudPermiso {
     private int codEmpleado;
     private int codRelEmplEmpr;
     private String tipoPermiso;
-    // Al usar Date, Jackson usa FlexibleDateDeserializer para aceptar el 'T' de Flutter,
-    // y para serializar hacia SpHelper usará el formato global con ESPACIO.
-    private Date desde;
-    private Date hasta;
+    // @JsonFormat fuerza a Jackson a usar ESTE patrón exacto (con la T de Flutter)
+    // tanto para deserializar el JSON entrante como para serializar al convertir a Map.
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private Timestamp desde;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private Timestamp hasta;
     private String horaInicio;      // ◄ NUEVO
     private String horaFin;         // ◄ NUEVO
     private String motivo;

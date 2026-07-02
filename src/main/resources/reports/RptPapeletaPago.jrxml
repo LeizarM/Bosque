@@ -688,19 +688,19 @@
 			</textField>
 			<image scaleImage="FillFrame" onErrorType="Blank">
 				<reportElement stretchType="ContainerHeight" x="10" y="10" width="120" height="30" uuid="cdefced8-0ece-4b2c-bdff-ec4b6cde274a"/>
-				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + $F{codEmpresa} + ".png"]]></imageExpression>
 			</image>
 			<image scaleImage="FillFrame" onErrorType="Blank">
 				<reportElement stretchType="ContainerHeight" x="336" y="316" width="120" height="30" uuid="f29c7338-cb38-423c-93a4-c4d28e62d45e"/>
-				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + $F{codEmpresa} + ".png"]]></imageExpression>
 			</image>
 			<image scaleImage="FillFrame" onErrorType="Blank">
 				<reportElement stretchType="ContainerHeight" x="335" y="700" width="120" height="30" uuid="cd055ade-70fd-4de6-8103-f9e287d881d4"/>
-				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + $F{codEmpresa} + ".png"]]></imageExpression>
 			</image>
 			<image scaleImage="FillFrame" onErrorType="Blank">
 				<reportElement stretchType="ContainerHeight" x="10" y="390" width="120" height="30" uuid="b891f81c-0b02-4648-9de7-304fe2575660"/>
-				<imageExpression><![CDATA[$P{RUTA_LOGOS} + $F{codEmpresa} + ".png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + $F{codEmpresa} + ".png"]]></imageExpression>
 			</image>
 		</band>
 	</detail>
