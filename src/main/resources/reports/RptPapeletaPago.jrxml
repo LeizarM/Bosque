@@ -6,7 +6,7 @@
 	<parameter name="codPlanilla" class="java.lang.Integer"/>
 	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="RUTA_LOGOS" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[$P{UPLOADS_DIR} + "LOGOS/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[$P{UPLOADS_DIR}]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[EXEC p_list_PlanillaDetalle @ACCION = 'R3', @codPlanilla = $P{codPlanilla}]]>

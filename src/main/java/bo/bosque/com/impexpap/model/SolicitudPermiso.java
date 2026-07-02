@@ -14,11 +14,10 @@ public class SolicitudPermiso {
     private int codEmpleado;
     private int codRelEmplEmpr;
     private String tipoPermiso;
-    // Con esta anotación, Jackson ignorará la 'T' y parsee la hora a Timestamp limpiamente
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private Timestamp desde;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private Timestamp hasta;
+    // Al usar Date, Jackson usa FlexibleDateDeserializer para aceptar el 'T' de Flutter,
+    // y para serializar hacia SpHelper usará el formato global con ESPACIO.
+    private Date desde;
+    private Date hasta;
     private String horaInicio;      // ◄ NUEVO
     private String horaFin;         // ◄ NUEVO
     private String motivo;
