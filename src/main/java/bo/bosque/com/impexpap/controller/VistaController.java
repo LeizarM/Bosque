@@ -89,9 +89,9 @@ public class VistaController {
 
         List<UsuarioBtn> lstPermisos = this.uDao.botonesXUsuario( obj.getCodUsuario() );
 
-        if (lstPermisos.isEmpty()) {
-            throw new RuntimeException("No hay permisos asociados al usuario.");
-        }
+//        if (lstPermisos.isEmpty()) {
+//            throw new RuntimeException("No hay permisos asociados al usuario.");
+//        }
         return lstPermisos;
     }
 
