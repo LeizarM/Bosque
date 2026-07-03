@@ -110,13 +110,6 @@
 			<rectangle radius="10">
 				<reportElement mode="Transparent" x="1" y="1" width="572" height="359" uuid="42339717-de14-4a11-949d-18fe39a7ad53"/>
 			</rectangle>
-			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="359" y="73" width="199" height="16" uuid="25b0666b-092f-4497-b313-7a1b7b1a8f69"/>
-				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="SansSerif" size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-			</textField>
 			<line>
 				<reportElement mode="Transparent" x="434" y="153" width="114" height="1" uuid="9e7fa686-d811-43d2-a15c-8454a7aba4c4"/>
 				<graphicElement>
