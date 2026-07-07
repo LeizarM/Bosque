@@ -36,9 +36,14 @@ public class SolicitudPermiso {
     private Integer codPermiso;     // ◄ Relación directa al permiso generado (si fue aprobado)
     // ── Auxiliares para previsualizar saldo (acción 'C') ──────────
     private Float diasSolicitados;
+    private String diasSolicitadosTxt; // ◄ NUEVO
     private Float saldoRestante;
+    private String saldoRestanteTxt;   // ◄ NUEVO
     private Float saldoActualBase;
+    private String saldoActualBaseTxt; // ◄ NUEVO
     private String autorizador;
     private Float diasDisponibles;
+    private String diasDisponiblesTxt; // ◄ NUEVO
+    private String fechasTxt; // ◄ NUEVO
     private String motivoRechazo;
 }

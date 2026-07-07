@@ -20,12 +20,10 @@ public class Permiso {
     private int audUsuarioI;
     private Date audFechaI;
 
-    //auxiliares
+    // auxiliares
     private float cantidadDiasTotal;
     private float cantidadDiasAsig;
     private float cantidadDiasAbon;
     private Date fecRango;
-
-
 
 }
