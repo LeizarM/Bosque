@@ -8,10 +8,16 @@ import bo.bosque.com.impexpap.model.ChBanco;
 
 public interface IChBanco {
 
-	/*******************************************************
+    /*******************************************************
      *  Funcion de devuelve el listado de bancos de la DB
      * @return LinkedList
      ********************************************************/
     List<ChBanco> listBancos() ;
+
+    /*******************************************************
+     *  Funcion de devuelve el listado de bancos habilitados para planillas de la DB
+     * @return LinkedList
+     ********************************************************/
+    List<ChBanco> listBancosPlanilla() ;
     
 }

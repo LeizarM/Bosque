@@ -66,6 +66,14 @@ public class SolicitudPermisoDao implements ISolicitudPermiso {
         return this.spHelper.ejecutarAbm("p_abm_SolicitudVacacion", s, acc);
     }
 
+    /**
+     * ANULAR SOLICITUD APROBADA (Acción 'AN')
+     */
+    @Override
+    public RespuestaSp anularSolicitud(SolicitudPermiso s, String acc) {
+        return this.spHelper.ejecutarAbm("p_abm_SolicitudVacacion", s, acc);
+    }
+
     @Override
     public List<SolicitudPermiso> listarPendientes(SolicitudPermiso filtro) {
         // Usamos un objeto vacío solo para disparar la acción 'P'
@@ -87,8 +95,8 @@ public class SolicitudPermisoDao implements ISolicitudPermiso {
      *
      * @return
      */
-    public List<Tipos> listTipoPermiso() {
-        return new Tipos().listTipoPermiso();
+    public List<Tipos> listTipoPermiso(SolicitudPermiso s) {
+        return this.spHelper.ejecutarListado("p_list_SolicitudVacacion", s, "TP", Tipos.class);
     }
 
     @Override

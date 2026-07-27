@@ -55,5 +55,34 @@ public class ChBancoDAO implements IChBanco {
     }
     
 
-    
+    /*******************************************************
+     *  Funcion de devuelve el listado de bancos para planillas
+     * @return LinkedList
+     ********************************************************/
+    public List<ChBanco> listBancosPlanilla() {
+    	List<ChBanco> lstTemp = new ArrayList<ChBanco>();
+    	
+    	  try {
+              lstTemp =  this.jdbcTemplate.query("execute dbo.p_list_Banco  @ACCION=?",
+                          new Object[] {  "A" },
+                          new int[] {  Types.VARCHAR },
+                          (rs, rowNum) -> {
+                        	  ChBanco temp = new ChBanco();
+
+                              temp.setFila( rowNum +1 );
+                              temp.setCodBanco( rs.getInt(1 ) );
+                              temp.setNombre( rs.getString(2) );
+                              
+                              return temp;
+                      });
+
+          }  catch (BadSqlGrammarException e) {
+              System.out.println("Error: BancoDao en listBancosPlanilla, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+              lstTemp = new ArrayList<ChBanco>();
+          }
+    	  
+    	return lstTemp ;
+    }
+
+
 }

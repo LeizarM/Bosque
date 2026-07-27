@@ -28,5 +28,15 @@ public class ChBancoController {
     public List<ChBanco> listadoX( ) {
         return this.chBdao.listBancos();
     }
+
+    /**
+     * 
+     * @return List
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/bancosPlanilla")
+    public List<ChBanco> listadoBancosPlanilla( ) {
+        return this.chBdao.listBancosPlanilla();
+    }
     
 }

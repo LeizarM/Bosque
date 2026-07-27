@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
+import bo.bosque.com.impexpap.utils.ExcelExportUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -29,11 +30,13 @@ public class PlanillaController {
     private final IPlanilla planillaDao;
     private final JdbcTemplate jdbcTemplate;
     private final JasperReportExport jasperReportExport;
+    private final ExcelExportUtils excelExportUtils;
 
-    public PlanillaController(IPlanilla planillaDao, JdbcTemplate jdbcTemplate, JasperReportExport jasperReportExport) {
+    public PlanillaController(IPlanilla planillaDao, JdbcTemplate jdbcTemplate, JasperReportExport jasperReportExport, ExcelExportUtils excelExportUtils) {
         this.planillaDao = planillaDao;
         this.jdbcTemplate = jdbcTemplate;
         this.jasperReportExport = jasperReportExport;
+        this.excelExportUtils = excelExportUtils;
     }
 
     @PostMapping("/listarPlanilla")
@@ -77,6 +80,32 @@ public class PlanillaController {
         
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/excelPlanillaTributaria")
+    public ResponseEntity<byte[]> excelPlanillaTributaria(@RequestBody Map<String, Object> payload) {
+        try {
+            int mes = Integer.parseInt(payload.get("mes").toString());
+            int anio = Integer.parseInt(payload.get("anio").toString());
+            int codEmpresa = Integer.parseInt(payload.get("codEmpresa").toString());
+
+            // Obtener los datos del DAO (Stored Procedure con Acción R4)
+            List<Map<String, Object>> datos = planillaDao.reporteTributaria(codEmpresa, mes, anio);
+
+            // Generar el Excel en memoria
+            byte[] excelContent = excelExportUtils.exportToExcel(datos, "Reporte Tributaria");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "Planilla_Tributaria_" + anio + "_" + mes + ".xlsx");
+            headers.setContentLength(excelContent.length);
+
+            return new ResponseEntity<>(excelContent, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/pdfEstimadoPagoBanco")

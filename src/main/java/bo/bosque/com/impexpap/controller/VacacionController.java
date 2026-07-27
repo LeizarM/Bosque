@@ -33,7 +33,7 @@ public class VacacionController {
     private final FeriadoDao feriadoDao;
 
     public VacacionController(JdbcTemplate jdbcTemplate, IPermiso pDao, ISolicitudPermiso solicitudDao,
-                              FeriadoDao feriadoDao) {
+            FeriadoDao feriadoDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.pDao = pDao;
         this.solicitudDao = solicitudDao;
@@ -103,6 +103,17 @@ public class VacacionController {
     }
 
     /**
+     * ANULAR SOLICITUD APROBADA
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/anular")
+    public ResponseEntity<ApiResponse<?>> anularSolicitud(@RequestBody SolicitudPermiso s) {
+        RespuestaSp res = solicitudDao.anularSolicitud(s, "AN");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(res.getErrormsg(), res.getIdGenerado(), HttpStatus.OK.value()));
+    }
+
+    /**
      * LISTAR SOLICITUDES PERMISO - VACACION
      *
      * @param
@@ -133,8 +144,8 @@ public class VacacionController {
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/tipoPermiso")
-    public List<Tipos> listTipoPermiso() {
-        return this.solicitudDao.listTipoPermiso();
+    public List<Tipos> listTipoPermiso(@RequestBody SolicitudPermiso s) {
+        return this.solicitudDao.listTipoPermiso(s);
     }
 
     /**

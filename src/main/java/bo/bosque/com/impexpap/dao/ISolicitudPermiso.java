@@ -18,6 +18,9 @@ public interface ISolicitudPermiso {
 
     /** Rechaza una solicitud existente (ACCION 'R') */
     RespuestaSp rechazarSolicitud(SolicitudPermiso s, String acc);
+
+    /** Anula una solicitud ya aprobada (ACCION 'AN') */
+    RespuestaSp anularSolicitud(SolicitudPermiso s, String acc);
     /** Listar solicitudes de vacion pendientes*/
     List<SolicitudPermiso> listarPendientes(SolicitudPermiso filtro);
     /** Listar solicitudes de vacion pendientes individuales*/
@@ -28,5 +31,5 @@ public interface ISolicitudPermiso {
      * lista tipo permiso
      * @return
      */
-    List<Tipos>listTipoPermiso();
+    List<Tipos>listTipoPermiso(SolicitudPermiso s);
 }

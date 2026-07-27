@@ -29,4 +29,5 @@ public class Planilla {
     private Integer totalRegistros;
     private Integer filtroMes;
     private Integer filtroAnio;
+    private boolean soloValidar;
 }

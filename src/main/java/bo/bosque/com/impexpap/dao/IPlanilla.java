@@ -12,4 +12,5 @@ public interface IPlanilla {
     List<PlanillaDetalle> listarPlanillaDetalle(PlanillaDetalle pd);
     RespuestaSp abmPlanilla(Planilla p, String acc);
     List<Map<String, Object>> listarPagosBanco(int mes, int anio, int codBanco, Integer codEmpresa);
+    List<Map<String, Object>> reporteTributaria(int codEmpresa, int mes, int anio);
 }

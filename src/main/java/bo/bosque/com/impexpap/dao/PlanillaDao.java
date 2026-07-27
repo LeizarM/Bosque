@@ -44,4 +44,15 @@ public class PlanillaDao implements IPlanilla {
         
         return this.spHelper.ejecutarListadoDinamico("p_list_PlanillaPagosBanco", params);
     }
+
+    @Override
+    public List<Map<String, Object>> reporteTributaria(int codEmpresa, int mes, int anio) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEmpresa", codEmpresa);
+        params.put("mes", mes);
+        params.put("anio", anio);
+        params.put("ACCION", "R4");
+        
+        return this.spHelper.ejecutarListadoDinamico("p_list_PlanillaDetalle", params);
+    }
 }

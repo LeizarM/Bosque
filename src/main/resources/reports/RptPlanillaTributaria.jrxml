@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4_Landscape" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="32e62ad4-431d-488b-b5c5-32c22967c9de">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="codEmpresa" class="java.lang.Integer"/>
+	<parameter name="mes" class="java.lang.Integer"/>
+	<parameter name="anio" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[execute p_list_PlanillaDetalle @ACCION='R4',@mes=$P{mes},@anio=$P{anio},@codEmpresa=$P{codEmpresa}]]>
+	</queryString>
+	<field name="Nro" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="Nro"/>
+		<property name="com.jaspersoft.studio.field.label" value="Nro"/>
+	</field>
+	<field name="tipoDocIdentidad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipoDocIdentidad"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipoDocIdentidad"/>
+	</field>
+	<field name="ciNumero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ciNumero"/>
+		<property name="com.jaspersoft.studio.field.label" value="ciNumero"/>
+	</field>
+	<field name="lugarExp" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="lugarExp"/>
+		<property name="com.jaspersoft.studio.field.label" value="lugarExp"/>
+	</field>
+	<field name="fechaNacimiento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fechaNacimiento"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaNacimiento"/>
+	</field>
+	<field name="apPaterno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apPaterno"/>
+		<property name="com.jaspersoft.studio.field.label" value="apPaterno"/>
+	</field>
+	<field name="apMaterno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apMaterno"/>
+		<property name="com.jaspersoft.studio.field.label" value="apMaterno"/>
+	</field>
+	<field name="nombres" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nombres"/>
+		<property name="com.jaspersoft.studio.field.label" value="nombres"/>
+	</field>
+	<field name="nacionalidad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nacionalidad"/>
+		<property name="com.jaspersoft.studio.field.label" value="nacionalidad"/>
+	</field>
+	<field name="sexo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sexo"/>
+		<property name="com.jaspersoft.studio.field.label" value="sexo"/>
+	</field>
+	<field name="jubilado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="jubilado"/>
+		<property name="com.jaspersoft.studio.field.label" value="jubilado"/>
+	</field>
+	<field name="aportaAFP" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="aportaAFP"/>
+		<property name="com.jaspersoft.studio.field.label" value="aportaAFP"/>
+	</field>
+	<field name="discapacidad" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="discapacidad"/>
+		<property name="com.jaspersoft.studio.field.label" value="discapacidad"/>
+	</field>
+	<field name="tutorDiscapacidad" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="tutorDiscapacidad"/>
+		<property name="com.jaspersoft.studio.field.label" value="tutorDiscapacidad"/>
+	</field>
+	<field name="fechaIngreso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fechaIngreso"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaIngreso"/>
+	</field>
+	<field name="fechaSalida" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fechaSalida"/>
+		<property name="com.jaspersoft.studio.field.label" value="fechaSalida"/>
+	</field>
+	<field name="motivoFin" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="motivoFin"/>
+		<property name="com.jaspersoft.studio.field.label" value="motivoFin"/>
+	</field>
+	<field name="cajaSalud" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="cajaSalud"/>
+		<property name="com.jaspersoft.studio.field.label" value="cajaSalud"/>
+	</field>
+	<field name="afpQueAporta" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="afpQueAporta"/>
+		<property name="com.jaspersoft.studio.field.label" value="afpQueAporta"/>
+	</field>
+	<field name="NUA/CUA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="NUA/CUA"/>
+		<property name="com.jaspersoft.studio.field.label" value="NUA/CUA"/>
+	</field>
+	<field name="sucursalUbicacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sucursalUbicacion"/>
+		<property name="com.jaspersoft.studio.field.label" value="sucursalUbicacion"/>
+	</field>
+	<field name="clasificacionLaboral" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="clasificacionLaboral"/>
+		<property name="com.jaspersoft.studio.field.label" value="clasificacionLaboral"/>
+	</field>
+	<field name="cargo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="cargo"/>
+		<property name="com.jaspersoft.studio.field.label" value="cargo"/>
+	</field>
+	<field name="modalidadContrato" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="modalidadContrato"/>
+		<property name="com.jaspersoft.studio.field.label" value="modalidadContrato"/>
+	</field>
+	<field name="tipoContrato" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="tipoContrato"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipoContrato"/>
+	</field>
+	<field name="dias_pagados_mes" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="dias_pagados_mes"/>
+		<property name="com.jaspersoft.studio.field.label" value="dias_pagados_mes"/>
+	</field>
+	<field name="horas_dias_pagadas" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="horas_dias_pagadas"/>
+		<property name="com.jaspersoft.studio.field.label" value="horas_dias_pagadas"/>
+	</field>
+	<field name="haberBasico" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="haberBasico"/>
+		<property name="com.jaspersoft.studio.field.label" value="haberBasico"/>
+	</field>
+	<field name="bonoAntiguedad" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="bonoAntiguedad"/>
+		<property name="com.jaspersoft.studio.field.label" value="bonoAntiguedad"/>
+	</field>
+	<field name="horasExtra" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="horasExtra"/>
+		<property name="com.jaspersoft.studio.field.label" value="horasExtra"/>
+	</field>
+	<field name="montoHorasExtra" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="montoHorasExtra"/>
+		<property name="com.jaspersoft.studio.field.label" value="montoHorasExtra"/>
+	</field>
+	<field name="horasRecargoNocturno" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="horasRecargoNocturno"/>
+		<property name="com.jaspersoft.studio.field.label" value="horasRecargoNocturno"/>
+	</field>
+	<field name="montoHorasExtraNocturnas" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="montoHorasExtraNocturnas"/>
+		<property name="com.jaspersoft.studio.field.label" value="montoHorasExtraNocturnas"/>
+	</field>
+	<field name="horasExtraDominicales" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="horasExtraDominicales"/>
+		<property name="com.jaspersoft.studio.field.label" value="horasExtraDominicales"/>
+	</field>
+	<field name="montoHorasExtraDominicales" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="montoHorasExtraDominicales"/>
+		<property name="com.jaspersoft.studio.field.label" value="montoHorasExtraDominicales"/>
+	</field>
+	<field name="domingosTrabajados" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="domingosTrabajados"/>
+		<property name="com.jaspersoft.studio.field.label" value="domingosTrabajados"/>
+	</field>
+	<field name="montoDomingoTrabajado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="montoDomingoTrabajado"/>
+		<property name="com.jaspersoft.studio.field.label" value="montoDomingoTrabajado"/>
+	</field>
+	<field name="nroDominicales" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="nroDominicales"/>
+		<property name="com.jaspersoft.studio.field.label" value="nroDominicales"/>
+	</field>
+	<field name="salarioDominical" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="salarioDominical"/>
+		<property name="com.jaspersoft.studio.field.label" value="salarioDominical"/>
+	</field>
+	<field name="bonoProduccion" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="bonoProduccion"/>
+		<property name="com.jaspersoft.studio.field.label" value="bonoProduccion"/>
+	</field>
+	<field name="subsidioFrontera" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="subsidioFrontera"/>
+		<property name="com.jaspersoft.studio.field.label" value="subsidioFrontera"/>
+	</field>
+	<field name="otrosBonosYpagos" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="otrosBonosYpagos"/>
+		<property name="com.jaspersoft.studio.field.label" value="otrosBonosYpagos"/>
+	</field>
+	<field name="RC-IVA" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="RC-IVA"/>
+		<property name="com.jaspersoft.studio.field.label" value="RC-IVA"/>
+	</field>
+	<field name="aportaCajaSalud" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="aportaCajaSalud"/>
+		<property name="com.jaspersoft.studio.field.label" value="aportaCajaSalud"/>
+	</field>
+	<field name="AFP" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="AFP"/>
+		<property name="com.jaspersoft.studio.field.label" value="AFP"/>
+	</field>
+	<field name="otros" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="otros"/>
+		<property name="com.jaspersoft.studio.field.label" value="otros"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="30" y="0" width="100" height="30" uuid="86889d58-76da-4392-970c-86e203aa993b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="707b8ce4-dfb4-4985-b012-58abac3f11d4"/>
+				</reportElement>
+				<text><![CDATA[ciNumero]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="130" y="0" width="100" height="30" uuid="09cc1653-4f5a-4ce0-a390-a0aa16187698">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e70efb8d-4f7c-468e-8f29-5477916f0d11"/>
+				</reportElement>
+				<text><![CDATA[tipoDocIdentidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="30" height="30" uuid="0b727285-e60f-4cd3-9450-bf06acb0bbcf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1500dcf9-d47a-428a-8818-018cd58f988d"/>
+				</reportElement>
+				<text><![CDATA[Nro]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="230" y="0" width="100" height="30" uuid="222e626c-0318-4668-9604-a2a7a08936cd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="aa4b8f9e-6310-44ea-bc33-4b192db49913"/>
+				</reportElement>
+				<text><![CDATA[ciNumero]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="0" width="100" height="30" uuid="eaba498a-9c2a-4111-91ea-6760b8ff4d4e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e7bf9e26-6291-4bbc-96e0-84299372129c"/>
+				</reportElement>
+				<text><![CDATA[lugarExp]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="0" width="100" height="30" uuid="735a366a-360e-4fe5-93c0-52f123b650c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="63a3b998-1078-4672-95ca-5d7012b4959c"/>
+				</reportElement>
+				<text><![CDATA[fechaNacimiento]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="127" splitType="Stretch">
+			<textField>
+				<reportElement x="100" y="0" width="100" height="30" uuid="f28e0b0e-6ff8-41dc-aa5e-ab8c98337a28">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="707b8ce4-dfb4-4985-b012-58abac3f11d4"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{ciNumero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="100" height="30" uuid="fd70562c-5102-44ea-8f12-03a9e06913e0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e70efb8d-4f7c-468e-8f29-5477916f0d11"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{tipoDocIdentidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="30" height="30" uuid="48243e55-d0c8-484e-a285-bbb89d960fab">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1500dcf9-d47a-428a-8818-018cd58f988d"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{Nro}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="0" width="100" height="30" uuid="73ab30fe-adf7-4e7d-9fe8-20bc75037c5d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="aa4b8f9e-6310-44ea-bc33-4b192db49913"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{ciNumero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="0" width="100" height="30" uuid="8d1ce730-421d-4ed8-ba63-4e32d963fa0e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e7bf9e26-6291-4bbc-96e0-84299372129c"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{lugarExp}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="0" width="100" height="30" uuid="1af95be7-f40a-418a-8179-1bcb621498fc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="63a3b998-1078-4672-95ca-5d7012b4959c"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{fechaNacimiento}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
