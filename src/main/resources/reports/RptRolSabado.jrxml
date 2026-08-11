@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Rol de Turnos de Sabado - la hoja que RR.HH. publica cada sabado en el grupo de WhatsApp.
+     Se lee en un telefono: dos columnas para que las ~43 personas entren en UNA pagina sin
+     achicar la letra, encabezado de sucursal que se repite al saltar de columna, y el pie
+     explica que significa cada letra. Datos: p_list_trs_Asignacion @ACCION='R'. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptRolSabado" pageWidth="612" pageHeight="792" columnWidth="281" columnCount="2" columnSpacing="14" printOrder="Vertical" leftMargin="18" rightMargin="18" topMargin="14" bottomMargin="14" uuid="7b1f0a10-5c41-4d2e-9a01-000000000001">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<parameter name="idSabado" class="java.lang.Long"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[EXECUTE p_list_trs_Asignacion @ACCION='R', @idSabado=$P{idSabado}]]>
+	</queryString>
+	<field name="nombreRol" class="java.lang.String"/>
+	<field name="fechaLarga" class="java.lang.String"/>
+	<field name="fechaCorta" class="java.lang.String"/>
+	<field name="indiceAnio" class="java.lang.Integer"/>
+	<field name="grupoQueRota" class="java.lang.String"/>
+	<field name="esFeriado" class="java.lang.Integer"/>
+	<field name="alcanceEvento" class="java.lang.String"/>
+	<field name="motivoEspecial" class="java.lang.String"/>
+	<field name="leyenda" class="java.lang.String"/>
+	<field name="bloque" class="java.lang.Integer"/>
+	<field name="subgrupo" class="java.lang.String"/>
+	<field name="trabajador" class="java.lang.String"/>
+	<field name="detalle" class="java.lang.String"/>
+	<field name="codigoExcel" class="java.lang.String"/>
+	<field name="nro" class="java.lang.Integer"/>
+	<field name="totalSubgrupo" class="java.lang.Integer"/>
+	<field name="totalTrabajan" class="java.lang.Integer"/>
+	<field name="totalAusentes" class="java.lang.Integer"/>
+	<group name="BLOQUE">
+		<groupExpression><![CDATA[$F{bloque}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<printWhenExpression><![CDATA[new Integer(2).equals($F{bloque})]]></printWhenExpression>
+				<textField textAdjust="ScaleFont">
+					<reportElement mode="Opaque" x="0" y="10" width="281" height="20" forecolor="#FFFFFF" backcolor="#595959" uuid="7b1f0a10-5c41-4d2e-9a01-000000000002"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["NO VIENEN ESTE SÁBADO: " + $F{totalAusentes}
+						+ (new Integer(1).equals($F{totalAusentes}) ? " persona, con su motivo" : " personas, con su motivo")]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="SUBGRUPO">
+		<groupExpression><![CDATA[$F{subgrupo}]]></groupExpression>
+		<groupHeader>
+			<band height="18">
+				<printWhenExpression><![CDATA[$F{trabajador} != null]]></printWhenExpression>
+				<textField textAdjust="ScaleFont">
+					<reportElement mode="Opaque" x="0" y="3" width="281" height="15" backcolor="#DCE6F1" uuid="7b1f0a10-5c41-4d2e-9a01-000000000003"/>
+					<box leftPadding="4">
+						<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#8EA9C1"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{subgrupo}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="150" y="3" width="127" height="15" uuid="7b1f0a10-5c41-4d2e-9a01-000000000004"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="SansSerif" size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{totalSubgrupo} + (new Integer(1).equals($F{totalSubgrupo}) ? " persona" : " personas")]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="94" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="576" height="14" uuid="7b1f0a10-5c41-4d2e-9a01-000000000005"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ROL DE TURNOS DE SÁBADO]]></text>
+			</staticText>
+			<textField textAdjust="ScaleFont">
+				<reportElement mode="Opaque" x="0" y="16" width="576" height="34" forecolor="#FFFFFF" backcolor="#1F3864" uuid="7b1f0a10-5c41-4d2e-9a01-000000000006"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="21" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["SÁBADO " + $F{fechaLarga}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement mode="Opaque" x="0" y="52" width="576" height="25" backcolor="#C6EFCE" uuid="7b1f0a10-5c41-4d2e-9a01-000000000007"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#7FA97F"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{totalTrabajan} == null || $F{totalTrabajan}.intValue() == 0)
+					? "NADIE TRABAJA EN OFICINA ESTE SÁBADO"
+					: (new Integer(1).equals($F{totalTrabajan})
+						? "1 PERSONA TRABAJA EN OFICINA ESTE SÁBADO"
+						: $F{totalTrabajan} + " PERSONAS TRABAJAN EN OFICINA ESTE SÁBADO")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="80" width="576" height="12" forecolor="#595959" uuid="7b1f0a10-5c41-4d2e-9a01-000000000008"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreRol} + "     ·     sábado N° " + $F{indiceAnio}
+					+ " del año     ·     por rotación le toca al grupo " + $F{grupoQueRota}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="30" splitType="Stretch">
+			<printWhenExpression><![CDATA[(new Integer(1).equals($F{esFeriado}))
+				|| ($F{alcanceEvento} != null && $F{alcanceEvento}.length() > 0)]]></printWhenExpression>
+			<textField textAdjust="ScaleFont">
+				<reportElement mode="Opaque" x="0" y="4" width="576" height="24" backcolor="#FFC7CE" uuid="7b1f0a10-5c41-4d2e-9a01-000000000009"/>
+				<box leftPadding="6" rightPadding="6">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#9C0006"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#9C0006"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#9C0006"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#9C0006"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8.5" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ATENCIÓN: "
+					+ (new Integer(1).equals($F{esFeriado}) ? "ESTE SÁBADO ES FERIADO / NO LABORABLE.  " : "")
+					+ (($F{alcanceEvento} != null && $F{alcanceEvento}.length() > 0)
+						? "SÁBADO ESPECIAL — " + $F{motivoEspecial} + " (convocatoria " + $F{alcanceEvento}
+						  + "). La lista de abajo es la de ese día, no la rotación normal."
+						: "")]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="16" splitType="Stretch">
+			<printWhenExpression><![CDATA[$V{SUBGRUPO_COUNT}.intValue() > 0 && $F{trabajador} != null]]></printWhenExpression>
+			<textField textAdjust="ScaleFont">
+				<reportElement mode="Opaque" x="0" y="1" width="281" height="14" forecolor="#33526E" backcolor="#EAF0F7" uuid="7b1f0a10-5c41-4d2e-9a01-00000000000a"/>
+				<box leftPadding="4">
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#8EA9C1"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subgrupo} + "   (viene de la columna anterior)"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Prevent">
+			<printWhenExpression><![CDATA[$F{trabajador} != null]]></printWhenExpression>
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="281" height="14" backcolor="#F4F4F4" uuid="7b1f0a10-5c41-4d2e-9a01-00000000000b">
+					<printWhenExpression><![CDATA[$V{REPORT_COUNT}.intValue() % 2 == 0]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0" lineStyle="Solid" lineColor="#F4F4F4"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="0" width="16" height="14" forecolor="#909090" uuid="7b1f0a10-5c41-4d2e-9a01-00000000000c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nro}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="20" y="0" width="261" height="14" uuid="7b1f0a10-5c41-4d2e-9a01-00000000000d">
+					<printWhenExpression><![CDATA[new Integer(1).equals($F{bloque})]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{trabajador}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="20" y="0" width="134" height="14" uuid="7b1f0a10-5c41-4d2e-9a01-00000000000e">
+					<printWhenExpression><![CDATA[new Integer(2).equals($F{bloque})]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{trabajador}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="156" y="0" width="125" height="14" forecolor="#707070" uuid="7b1f0a10-5c41-4d2e-9a01-00000000000f">
+					<printWhenExpression><![CDATA[new Integer(2).equals($F{bloque})]]></printWhenExpression>
+				</reportElement>
+				<box rightPadding="3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{detalle}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="48" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="2" width="576" height="1" forecolor="#BFBFBF" uuid="7b1f0a10-5c41-4d2e-9a01-000000000010"/>
+			</line>
+			<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+				<reportElement x="0" y="6" width="576" height="11" forecolor="#404040" uuid="7b1f0a10-5c41-4d2e-9a01-000000000011"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["QUÉ SIGNIFICA CADA LETRA EN ESTE SÁBADO:      " + $F{leyenda}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="19" width="576" height="14" uuid="7b1f0a10-5c41-4d2e-9a01-000000000012"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Si tu nombre no está en la lista, este sábado no te toca venir a la oficina.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="36" width="400" height="10" forecolor="#909090" uuid="7b1f0a10-5c41-4d2e-9a01-000000000013"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Generado por el sistema el "
+					+ new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date())
+					+ "  ·  sábado " + $F{fechaCorta}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="36" width="137" height="10" forecolor="#909090" uuid="7b1f0a10-5c41-4d2e-9a01-000000000014"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="541" y="36" width="35" height="10" forecolor="#909090" uuid="7b1f0a10-5c41-4d2e-9a01-000000000015"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="6.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
