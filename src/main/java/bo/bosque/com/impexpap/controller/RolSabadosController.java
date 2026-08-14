@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.controller;
 
+import bo.bosque.com.impexpap.commons.AccesoModuloHelper;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dao.*;
@@ -16,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -132,6 +132,14 @@ public class RolSabadosController {
      */
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * Quién sos y qué podés tocar. Los cuatro métodos de identidad de este controlador
+     * ({@code esAdmin}, {@code loginDelToken}, {@code miPermiso}, {@code exigirAdminORrhh})
+     * viven ahora acá y se comparten con el módulo de Permisos de RR.HH.; abajo quedan como
+     * delegaciones de una línea para no tocar las ~20 llamadas que ya funcionan.
+     */
+    private final AccesoModuloHelper acceso;
+
     public RolSabadosController(IEstadoTurno estadoTurnoDao, IRol rolDao, ISabado sabadoDao,
                                 IParticipante participanteDao, IConvocatoria convocatoriaDao,
                                 IProgramador programadorDao, IProgramacion programacionDao,
@@ -139,7 +147,8 @@ public class RolSabadosController {
                                 IProcesoRol procesoRolDao,
                                 IPermisoSabado permisoSabadoDao,
                                 IRrhh rrhhDao,
-                                JdbcTemplate jdbcTemplate) {
+                                JdbcTemplate jdbcTemplate,
+                                AccesoModuloHelper acceso) {
         this.estadoTurnoDao  = estadoTurnoDao;
         this.rolDao          = rolDao;
         this.sabadoDao       = sabadoDao;
@@ -153,6 +162,7 @@ public class RolSabadosController {
         this.permisoSabadoDao = permisoSabadoDao;
         this.rrhhDao         = rrhhDao;
         this.jdbcTemplate    = jdbcTemplate;
+        this.acceso          = acceso;
     }
 
     // ==================================================================
@@ -508,18 +518,22 @@ public class RolSabadosController {
      * <p>La meta de cobertura del rol NO se recalcula: es un requisito, no un
      * promedio. Si la baja deja déficit, la grilla lo tiene que mostrar.
      *
-     * <p><b>Sólo ROLE_ADM</b>, igual que el ABM de programadores: decidir quién hace
-     * sábados y quién no es de RR.HH., no de cualquier usuario del módulo.
+     * <p><b>ROLE_ADM o RR.HH.</b>, igual que el ABM de programadores: decidir quién hace
+     * sábados y quién no es de RR.HH., no de cualquier usuario del módulo. Estaba con
+     * {@code @PreAuthorize("hasRole('ROLE_ADM')")}, que deja afuera justamente al área
+     * dueña de la decisión: el módulo entero se pensó para que RR.HH. no dependa de
+     * Sistemas para mover su propia nómina. Ver {@link #exigirAdminORrhh}.
      *
      * @param mb Participante con {@code idParticipante} y, opcional,
      *           {@code fechaBaja} (hasta cuándo viene, inclusive; sin ella, hoy)
      */
-    @PreAuthorize("hasRole('ROLE_ADM')")
     @PostMapping("/eliminar-participante")
-    public ResponseEntity<ApiResponse<?>> eliminarParticipante(@RequestBody Participante mb) {
-        long aud = mb.getAudUsuario() != null ? mb.getAudUsuario() : 0L;
+    public ResponseEntity<ApiResponse<?>> eliminarParticipante(@RequestBody Participante mb,
+                                                               Authentication auth) {
+        exigirAdminORrhh(auth);
         return respuestaEscritura(
-            participanteDao.sacarDeSabados(mb.getIdParticipante(), mb.getFechaBaja(), aud));
+            participanteDao.sacarDeSabados(mb.getIdParticipante(), mb.getFechaBaja(),
+                                           miPermiso(auth).getCodUsuario()));
     }
 
     /**
@@ -535,15 +549,20 @@ public class RolSabadosController {
      * <p>Rebota si ya no figura en la relación laboral vigente: eso se arregla
      * corriendo REGENERAR, no desde acá.
      *
+     * <p><b>ROLE_ADM o RR.HH.</b>, la contracara de {@link #eliminarParticipante}: quien
+     * puede cerrar la ventana tiene que poder volver a abrirla, o una baja hecha por
+     * error queda esperando a Sistemas.
+     *
      * @param mb Participante con {@code idParticipante} y, opcional,
      *           {@code fechaAlta} (sin ella, el próximo sábado del rol)
      */
-    @PreAuthorize("hasRole('ROLE_ADM')")
     @PostMapping("/reincorporar-participante")
-    public ResponseEntity<ApiResponse<?>> reincorporarParticipante(@RequestBody Participante mb) {
-        long aud = mb.getAudUsuario() != null ? mb.getAudUsuario() : 0L;
+    public ResponseEntity<ApiResponse<?>> reincorporarParticipante(@RequestBody Participante mb,
+                                                                    Authentication auth) {
+        exigirAdminORrhh(auth);
         return respuestaEscritura(
-            participanteDao.reincorporar(mb.getIdParticipante(), mb.getFechaAlta(), aud));
+            participanteDao.reincorporar(mb.getIdParticipante(), mb.getFechaAlta(),
+                                         miPermiso(auth).getCodUsuario()));
     }
 
     /** Participantes de un rol. {@code activo} -1 = todos, 0/1 = filtra. */
@@ -933,16 +952,11 @@ public class RolSabadosController {
     }
 
     /**
-     * Si el token trae ROLE_ADM.
-     *
-     * <p>Se lee de las authorities y no de la base: es lo mismo que evalúa
-     * {@code @PreAuthorize}, así que no puede quedar desincronizado con el resto de la
-     * seguridad del controlador.
+     * Si el token trae ROLE_ADM. Delega en {@link AccesoModuloHelper#esAdmin(Authentication)},
+     * que es donde vive la implementación desde que la comparte el módulo de Permisos de RR.HH.
      */
     private boolean esAdmin(Authentication auth) {
-        if (auth == null || auth.getAuthorities() == null) return false;
-        return auth.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_ADM".equals(a.getAuthority()));
+        return acceso.esAdmin(auth);
     }
 
     /**
@@ -966,9 +980,7 @@ public class RolSabadosController {
      * es darse ROLE_ADM, que vive en otra tabla y fuera de este módulo.
      */
     private void exigirAdminORrhh(Authentication auth) {
-        if (esAdmin(auth)) return;
-        if (miPermiso(auth).getEsRrhh() == 1) return;
-        throw new AccessDeniedException("Solo Sistemas o RR.HH. administran estos permisos.");
+        acceso.exigirAdminORrhh(auth);
     }
 
     /**
@@ -1153,12 +1165,7 @@ public class RolSabadosController {
      * que se corta acá antes de escribir nada.
      */
     private String loginDelToken(Authentication auth) {
-        String login = auth != null ? auth.getName() : null;
-        if (login == null || login.trim().isEmpty()) {
-            throw new SpBusinessException("No pudimos identificar tu usuario. "
-                    + "Cerra sesion y volve a entrar.");
-        }
-        return login.trim();
+        return acceso.loginDelToken(auth);
     }
 
     /**
@@ -1170,7 +1177,7 @@ public class RolSabadosController {
      * Cargar el equipo entero acá sería una consulta al pedo en cada click.
      */
     private MiEquipoDto miPermiso(Authentication auth) {
-        return programadorDao.resolverPermiso(loginDelToken(auth));
+        return acceso.miPermiso(auth);
     }
 
     // ==================================================================

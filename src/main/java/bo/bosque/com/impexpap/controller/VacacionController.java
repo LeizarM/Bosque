@@ -1,9 +1,13 @@
 package bo.bosque.com.impexpap.controller;
 
+import bo.bosque.com.impexpap.commons.AccesoModuloHelper;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
+import bo.bosque.com.impexpap.config.SpBusinessException;
+import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.IPermiso;
 import bo.bosque.com.impexpap.dao.ISolicitudPermiso;
 import bo.bosque.com.impexpap.model.DiaNoLaborable;
+import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.Permiso;
 import bo.bosque.com.impexpap.model.SolicitudPermiso;
 import bo.bosque.com.impexpap.dao.FeriadoDao;
@@ -15,7 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -31,13 +37,19 @@ public class VacacionController {
     private final IPermiso pDao;
     private final ISolicitudPermiso solicitudDao;
     private final FeriadoDao feriadoDao;
+    /** Para el gate de la boleta: el ACL de botones y el codEmpleado del token. */
+    private final AccesoModuloHelper acceso;
+    /** Para el gate de la boleta: a quiénes puede ver el que pide (organigrama). */
+    private final IEmpleado empDao;
 
     public VacacionController(JdbcTemplate jdbcTemplate, IPermiso pDao, ISolicitudPermiso solicitudDao,
-            FeriadoDao feriadoDao) {
+            FeriadoDao feriadoDao, AccesoModuloHelper acceso, IEmpleado empDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.pDao = pDao;
         this.solicitudDao = solicitudDao;
         this.feriadoDao = feriadoDao;
+        this.acceso = acceso;
+        this.empDao = empDao;
     }
 
     private static final String SUCCESS_MESSAGE = "Operación realizada exitosamente";
@@ -158,13 +170,38 @@ public class VacacionController {
     }
 
     /**
-     * REPORTE PERMISO - VACACION
+     * REPORTE PERMISO - VACACION (la boleta de un permiso concreto)
      *
-     * @param P
-     * @return
+     * <p><b>Este endpoint estaba abierto.</b> No tenía {@code @Secured}, así que caía en el
+     * {@code anyRequest().authenticated()} de {@code MainSecurity}: cualquiera de los 134
+     * usuarios, con cualquier token válido, podía enumerar {@code codPermiso} de 1 a 8459 y
+     * bajarse la boleta de cualquier empleado —motivo del permiso incluido—. Es la deuda D4 del
+     * plan de migración.
+     *
+     * <p><b>Por qué el gate no es sólo el botón del ACL.</b> Con {@code nivelAcceso=1},
+     * {@code btnReImprimirBoleta} lo tienen <b>6 usuarios</b> más los 6 {@code ROLE_ADM}
+     * <i>(verificado en la base)</i>. Hoy quien usa este endpoint es un JEFE mirando la ficha de
+     * un dependiente: {@code MisSolicitudesWidget} → {@code rptPermisoVacacionProvider}, montado
+     * dentro de {@code InfoEmpleadoScreen}, a la que se llega desde
+     * {@code empleado_dependiente_screen.dart:1087}. Cerrar sólo con el ACL le sacaría la
+     * función a todos los jefes que no son de RR.HH. Por eso la regla es un O:
+     *
+     * <ol>
+     *   <li>tiene {@code btnReImprimirBoleta} (o es {@code ROLE_ADM}) → RR.HH. y Sistemas ven todo;</li>
+     *   <li>la boleta es <b>suya</b>;</li>
+     *   <li>la boleta es de alguien que <b>ya puede ver</b> en la ficha del trabajador.</li>
+     * </ol>
+     *
+     * <p>El punto 3 no inventa una jerarquía nueva: pregunta por la MISMA lista que pinta la
+     * pantalla desde la que se aprieta el botón ({@code p_list_Empleado @ACCION='X'}, el subárbol
+     * de cargos del que pide). Si puede abrir la ficha, puede imprimir la boleta; si no, no. Así
+     * el cambio cierra el agujero sin sacarle nada a nadie que hoy lo use legítimamente.
      */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/RptPermisoVacacion")
-    public ResponseEntity<?> RptPermisoVacacion(@RequestBody Permiso p) {
+    public ResponseEntity<?> RptPermisoVacacion(@RequestBody Permiso p, Authentication auth) {
+
+        exigirAccesoABoleta(auth, p.getCodPermiso());
 
         String nombreReporte = "RptPermisoVacacion";
 
@@ -186,6 +223,38 @@ public class VacacionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    /**
+     * SUPUESTO D4 — pendiente de confirmación de RR.HH. (ver plan §5).
+     *
+     * <p>Las tres puertas de la boleta, en orden de costo: el ACL primero (una consulta que
+     * además resuelve a todos los de RR.HH. y Sistemas), después la identidad, y sólo al final el
+     * organigrama, que es la consulta cara.
+     *
+     * <p><b>La identidad sale del token, nunca del body.</b> El {@code codEmpleado} que manda el
+     * cliente no se mira: si el cliente pudiera afirmar quién es, el gate no valdría nada.
+     */
+    private void exigirAccesoABoleta(Authentication auth, long codPermiso) {
+        if (acceso.tieneBoton(auth, 24, "btnReImprimirBoleta")) return;
+
+        Long dueno = pDao.codEmpleadoDeBoleta(codPermiso);
+        if (dueno == null) {
+            throw new SpBusinessException("No existe la boleta N° " + codPermiso + ".");
+        }
+
+        Long yo = acceso.codEmpleadoDelToken(auth);
+        if (yo == null) {
+            // Login sin empleado asociado en tb_usuario: no tiene boleta propia ni equipo.
+            throw new AccessDeniedException("Tu usuario no esta asociado a ningun empleado.");
+        }
+        if (dueno.equals(yo)) return;                       // su propia boleta
+
+        // El subárbol de cargos del que pide: exactamente la gente cuya ficha ya puede abrir.
+        for (Empleado e : empDao.obtenerListaEmpleadoyDependientes(yo.intValue())) {
+            if (dueno.intValue() == e.getCodEmpleado()) return;
+        }
+        throw new AccessDeniedException("Esa boleta no es tuya ni de tu equipo.");
     }
 
     /**

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rptPermEmpTotalSubAbon" pageWidth="565" pageHeight="752" whenNoDataType="AllSectionsNoDetail" columnWidth="565" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="b6c7a007-ba85-49ba-9e6f-0907d81cbeb5">
+	<property name="ireport.zoom" value="2.593742460100005"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="codE" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="codR" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[EXEC p_list_AbonoDias @accion='B' , @codEmpleado=$P{codE} , @codRelEmplEmpr=$P{codR}]]>
+	</queryString>
+	<field name="fila" class="java.lang.Long"/>
+	<field name="codEmpleado" class="java.lang.Long"/>
+	<field name="diasAbonados" class="java.lang.Double"/>
+	<field name="fecha" class="java.sql.Date"/>
+	<field name="motivo" class="java.lang.String"/>
+	<field name="totalDias" class="java.lang.Double"/>
+	<title>
+		<band height="10">
+			<staticText>
+				<reportElement uuid="dd126e55-5cb2-4ec8-b1bb-fad54827fac2" x="1" y="0" width="140" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ RESUMEN DIAS ABONADOS]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="13" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="dd126e55-5cb2-4ec8-b1bb-fad54827fac2" x="28" y="1" width="105" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b913829c-4848-4220-a892-f9bc5a23b4a2" x="218" y="1" width="335" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Motivo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6f0afd90-936d-449a-b428-2b1c9b40b8fb" x="144" y="1" width="61" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dias Solicitados]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="8afe8041-655a-459c-8556-c0ed24f49695" x="1" y="0" width="564" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="8afe8041-655a-459c-8556-c0ed24f49695" x="0" y="12" width="564" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="564" y="0" width="1" height="13"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="0" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="24" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" stretchType="RelativeToBandHeight" x="137" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" stretchType="RelativeToBandHeight" x="210" y="1" width="1" height="12"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement uuid="be0ad884-93cd-4763-9616-64b5f56352b4" x="2" y="1" width="20" height="9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fila}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f68aed5b-617d-4b22-bca8-6f79db7d6997" x="218" y="1" width="335" height="9"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{motivo}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="8afe8041-655a-459c-8556-c0ed24f49695" x="0" y="11" width="564" height="1" isPrintWhenDetailOverflows="true"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="0" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="24" y="0" width="1" height="11"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="137" y="0" width="1" height="11"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="564" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="210" y="0" width="1" height="11"/>
+			</line>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="b19d12d7-b67a-42c2-81c2-8efd030e4760" x="28" y="1" width="105" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="f00f738a-9c3f-4628-9cb7-bb7e56b8471d" x="144" y="1" width="61" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasAbonados}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="12">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="aa7e0dc0-5463-4a58-957b-076316274d21" positionType="FixRelativeToBottom" stretchType="RelativeToBandHeight" x="143" y="1" width="61" height="10" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalDias}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="94246684-3bc7-47dd-8d50-7834e430269f" mode="Opaque" x="25" y="0" width="111" height="11" backcolor="#CCCCCC"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Dias Abonados]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="24" y="0" width="1" height="11"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="210" y="0" width="1" height="11"/>
+			</line>
+			<line>
+				<reportElement uuid="a7233263-6fb2-4bc8-86f6-8b2790338a5e" x="137" y="0" width="1" height="11"/>
+			</line>
+			<line>
+				<reportElement uuid="44a899ce-10b2-43fc-9554-5b8e75bcb349" x="24" y="11" width="187" height="1"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

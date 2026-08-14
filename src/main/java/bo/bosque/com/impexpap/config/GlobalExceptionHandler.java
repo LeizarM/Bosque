@@ -24,6 +24,29 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(ex.getMessage(), null, HttpStatus.BAD_REQUEST.value()));
     }
 
+    // 1.a Lo mismo, pero el usuario PUEDE confirmarlo -> 400 con "confirmable": true
+    //     Va antes que el handler de SpBusinessException por claridad; Spring elige igual el
+    //     @ExceptionHandler del tipo más específico, no el primero declarado.
+    @ExceptionHandler(SpConfirmableException.class)
+    public ResponseEntity<ApiResponse<?>> handleSpConfirmableException(SpConfirmableException ex) {
+        ApiResponse<?> cuerpo =
+                new ApiResponse<>(ex.getMessage(), null, HttpStatus.BAD_REQUEST.value());
+        // El marcador que le dice al cliente "ofrecé Confirmar y reintentá con confirmado:true",
+        // en vez de obligarlo a buscar una palabra en el mensaje. Ver SpConfirmableException.
+        cuerpo.setConfirmable(Boolean.TRUE);
+        return ResponseEntity.badRequest().body(cuerpo);
+    }
+
+    // 1.b Datos del ERP en un estado que impide responder -> 409 Conflict
+    //     No es un 400: la pregunta está bien hecha, el que está mal es el dato, y el cliente
+    //     no lo arregla reintentando. Ver SpConflictException.
+    @ExceptionHandler(SpConflictException.class)
+    public ResponseEntity<ApiResponse<?>> handleSpConflictException(SpConflictException ex) {
+        logger.warn("Conflicto de datos: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiResponse<>(ex.getMessage(), null, HttpStatus.CONFLICT.value()));
+    }
+
     // 2. Errores de Permisos (Spring Security) -> 403 Forbidden
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException ex) {

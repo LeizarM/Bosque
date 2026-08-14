@@ -20,12 +20,24 @@ public class JacksonConfig {
     /**
      * Formatos de fecha aceptados desde el frontend.
      * Se prueban en orden; el primero que parsee correctamente gana.
+     *
+     * <p><b>EL ORDEN ES LA REGLA, no una lista.</b> Van del más largo al más corto y hay que
+     * mantenerlo así. {@code SimpleDateFormat.parse(String)} <b>no exige consumir el texto
+     * entero</b>: parsea el prefijo y devuelve lo que haya entendido, sin error. Con
+     * {@code "yyyy-MM-dd"} arriba de los formatos ISO, un {@code "2026-04-06T08:30:00"} lo ganaba
+     * el formato corto y volvía como {@code 2026-04-06 00:00:00} — <b>la hora se perdía en
+     * silencio</b>.
+     *
+     * <p>Eso no era cosmético: la vacación colectiva manda el rango con hora
+     * ({@code 08:30}–{@code 18:30}) y {@code f_CalcularDiasHabilesPermiso} cuenta minutos hábiles
+     * entre las dos puntas, así que el último día pasaba a valer cero y a todo el lote se le
+     * grababa —y se le descontaba del saldo— un día menos del que le corresponde.
      */
     private static final String[] DATE_FORMATS = {
-            "yyyy-MM-dd HH:mm:ss",  // "2026-03-19 00:00:00"  (con hora)
-            "yyyy-MM-dd",           // "2026-03-19"            (solo fecha)
-            "yyyy-MM-dd'T'HH:mm:ss.SSSX",  // ISO 8601 con zona
-            "yyyy-MM-dd'T'HH:mm:ss"        // ISO 8601 sin zona
+            "yyyy-MM-dd'T'HH:mm:ss.SSSX", // ISO 8601 con zona
+            "yyyy-MM-dd'T'HH:mm:ss",      // ISO 8601 sin zona ("2026-04-06T08:30:00")
+            "yyyy-MM-dd HH:mm:ss",        // "2026-03-19 00:00:00"  (con hora)
+            "yyyy-MM-dd"                  // "2026-03-19"           (sólo fecha) — SIEMPRE el último
     };
 
     @Bean

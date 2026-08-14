@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rptPermEmpTotal" pageWidth="612" pageHeight="792" whenNoDataType="AllSectionsNoDetail" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="2e7982f0-9f0d-44cf-b4c0-7bdd04d22d87">
+	<property name="ireport.zoom" value="1.6105100000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="codEmp" class="java.lang.Integer"/>
+	<parameter name="codRee" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\Proyectos Netbeans\\Productiva\\web\\Bosque\\reportes\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logoEmpresa" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[EXEC p_list_Permiso @accion='S' , @codEmpleado= $P{codEmp} , @codRelEmplEmpr= $P{codRee}, @codPermiso = 1]]>
+	</queryString>
+	<field name="datoEmpleado" class="java.lang.String"/>
+	<field name="diasVacacion" class="java.lang.Double"/>
+	<field name="diasPagados" class="java.lang.Double"/>
+	<field name="diasAsignados" class="java.lang.Double"/>
+	<field name="diasAbonados" class="java.lang.Double"/>
+	<field name="haber" class="java.lang.Double"/>
+	<field name="debe" class="java.lang.Double"/>
+	<field name="totalFinal" class="java.lang.Double"/>
+	<field name="diasAcumulados" class="java.lang.Double"/>
+	<field name="fechaIngreso" class="java.lang.String"/>
+	<title>
+		<band height="86" splitType="Stretch">
+			<line>
+				<reportElement uuid="595ba83d-5d56-4f1c-9d10-9a44c89d99ef" x="0" y="51" width="571" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="24ae18ff-07ed-4ea9-b961-7acd9f47fa63" x="0" y="1" width="1" height="50"/>
+			</line>
+			<line>
+				<reportElement uuid="56265e7e-5e69-4218-b41b-bfb06b6c0235" x="421" y="2" width="1" height="50"/>
+			</line>
+			<line>
+				<reportElement uuid="d414aee1-8e4f-4a7b-8b0b-2c1771c935a7" x="117" y="26" width="453" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="4f1cbd1b-04ba-4838-a015-c224f81c40b0" x="0" y="1" width="571" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="d7c95d9b-c9af-493c-9ce6-356c871dcbd4" x="118" y="2" width="300" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[REGISTROS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="160cc612-64b9-4ad8-921c-c6ebce4a9917" x="118" y="27" width="300" height="23"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[PERMISOS   Y    VACACIONES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7ce97515-9823-498c-b55d-96a8a18e7826" x="425" y="29" width="143" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERSIÓN  Nº 1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7ce97515-9823-498c-b55d-96a8a18e7826" x="423" y="4" width="145" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PRCD-CC-ASP / REG-PYVTE]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="fe2988da-37a5-47b8-bc78-0fd71b39b9ad" x="116" y="2" width="1" height="50"/>
+			</line>
+			<line>
+				<reportElement uuid="c06dce2c-7ae9-41b9-9683-b42b541d6bf0" x="570" y="1" width="1" height="50"/>
+			</line>
+			<textField>
+				<reportElement uuid="bb42c844-c1fa-43cd-8740-61e67431ec62" x="118" y="57" width="304" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoEmpleado}]]></textFieldExpression>
+			</textField>
+			<image onErrorType="Blank">
+				<reportElement uuid="c5e5a702-fa0e-492a-8856-e603457dc983" x="3" y="4" width="111" height="45"/>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement uuid="ec4c70f7-de4b-479e-9a75-ad794bb5721f" x="125" y="73" width="100" height="12"/>
+				<textElement>
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaIngreso}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="3" y="73" width="126" height="12"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[ Fecha  de Ingreso a la empresa:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<subreport>
+				<reportElement uuid="73a63763-314c-4177-9bc7-83c304d74746" x="0" y="5" width="500" height="10"/>
+				<subreportParameter name="codE">
+					<subreportParameterExpression><![CDATA[$P{codEmp}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codR">
+					<subreportParameterExpression><![CDATA[$P{codRee}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RptPermEmpTotalSubVac.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="20">
+			<subreport>
+				<reportElement uuid="d95c1454-1fb6-4471-904c-0f498dd3a6bd" x="0" y="5" width="500" height="10"/>
+				<subreportParameter name="codE">
+					<subreportParameterExpression><![CDATA[$P{codEmp}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codR">
+					<subreportParameterExpression><![CDATA[$P{codRee}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RptPermEmpTotalSubPagAsig.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="21">
+			<subreport>
+				<reportElement uuid="794427ae-9524-4f51-b3f6-42e7c1cf01f2" x="0" y="5" width="500" height="10"/>
+				<subreportParameter name="codE">
+					<subreportParameterExpression><![CDATA[$P{codEmp}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codR">
+					<subreportParameterExpression><![CDATA[$P{codRee}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RptPermEmpTotalSubAbono.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="20">
+			<subreport>
+				<reportElement uuid="2bad109d-0efa-4ab8-a0ed-115e64e5bfc1" x="0" y="5" width="568" height="10"/>
+				<subreportParameter name="codE">
+					<subreportParameterExpression><![CDATA[$P{codEmp}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codR">
+					<subreportParameterExpression><![CDATA[$P{codRee}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "RptPermEmpTotalSubVacAsig.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="12">
+			<line>
+				<reportElement uuid="c03472ec-4d10-417b-9ad5-716cada49c22" stretchType="RelativeToBandHeight" x="0" y="0" width="571" height="1" isPrintWhenDetailOverflows="true"/>
+			</line>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement uuid="cf5cd269-09b2-4438-a5b8-58d4423c7fec" x="2" y="2" width="100" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="57a8573a-4ebe-401f-9741-f3844008ce63" x="522" y="2" width="49" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="988ca244-b8dc-4c29-a076-ff9fa19a5716" x="441" y="2" width="80" height="10"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de "]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="80" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="c699488e-3a43-4992-a87e-aac76ec2e9b1" x="371" y="58" width="155" height="20"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="231" y="15" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="271" y="15" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="271" y="25" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="231" y="25" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="271" y="35" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="231" y="35" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="271" y="45" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="231" y="45" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="271" y="64" width="40" height="10"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="f8b72c87-2187-4dbf-b3de-7517165bd09f" x="231" y="64" width="40" height="10"/>
+			</rectangle>
+			<line>
+				<reportElement uuid="94518c31-6117-454f-8853-a2d73c1e156f" x="223" y="59" width="100" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="172" y="15" width="55" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Dias Vacación]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="1e739b58-602b-4152-badf-2ea3bd786719" x="271" y="15" width="40" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasVacacion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="7f1c4645-962a-49a3-b87b-982d308a3631" x="271" y="25" width="40" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasPagados}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="29b5a4ba-8105-4a2f-b07e-3a32ca0079f7" x="231" y="35" width="40" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasAsignados}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="cd9886d1-76df-4a1a-acde-c2b437d6cec0" x="231" y="45" width="40" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasAbonados}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="e629fa15-7b55-4cfa-8064-5a17e9478597" x="231" y="64" width="40" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debe}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="7412b5b6-a7c5-42db-90f1-48e0ade201f6" x="271" y="64" width="40" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{haber}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="2c80b2db-ace8-4c28-8e1a-16d78d498b5d" x="470" y="63" width="50" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalFinal}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="172" y="25" width="55" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Dias Pagados]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="172" y="35" width="55" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Dias Asignados]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="172" y="45" width="55" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="7"/>
+				</textElement>
+				<text><![CDATA[Dias Abonados]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="375" y="63" width="92" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Dias Disponibles  :]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="c699488e-3a43-4992-a87e-aac76ec2e9b1" x="370" y="30" width="155" height="20" backcolor="#CCCCCC"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="c47664da-9106-4e8f-ad18-63ab655a5bd8" x="377" y="35" width="81" height="10"/>
+				<textElement>
+					<font fontName="Arial" size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Duodecimas Ganadas :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.0" isBlankWhenNull="true">
+				<reportElement uuid="e1ca66f0-3aba-40f0-9cff-74e0cef391d9" x="455" y="35" width="65" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasAcumulados}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

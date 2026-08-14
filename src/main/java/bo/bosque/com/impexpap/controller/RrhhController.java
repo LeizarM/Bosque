@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.controller;
 
+import bo.bosque.com.impexpap.commons.AccesoModuloHelper;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,14 +60,17 @@ public class RrhhController {
     private final ICargo cargoDao;
     private final INivelJerarquico nivelJerarquicoDao;
     private final IArea areaDao;
+    /** Gate del ACL de botones para los dos reportes globales de permisos y vacaciones. */
+    private final AccesoModuloHelper acceso;
 
     public RrhhController(JdbcTemplate jdbcTemplate, IEmail emailDao, ITelefono telfDao, IEmpleado empDao,
             IPersona perDao, IExperienciaLaboral expLabDao, IFormacion formDao, ILicencia licenDao, IRelEmpEmpr reeDao,
             ICiudad ciudadDao, IEmpleadoCargo empCargoDao, IPais paisDao, IZona zonaDao, ISucursal sucDao,
             ICargoSucursal cagoSucDao, IEmpresa empresaDao, ICargo cargoDao, INivelJerarquico nivelJerarquicoDao,
             IEducacion eduDao, INroCuentaBancaria cuentaDao, ISeguro segDao, IAfiliacionSeguro afiSegDao,
-            IArea areaDao) {
+            IArea areaDao, AccesoModuloHelper acceso) {
         this.jdbcTemplate = jdbcTemplate;
+        this.acceso = acceso;
 
         this.emailDao = emailDao;
         this.telfDao = telfDao;
@@ -1598,11 +1603,25 @@ public class RrhhController {
 
     /**
      * PARA GENERAR EL RPT DE PERMISOS Y VACACIONES TOTAL EN PDF
-     * 
+     *
+     * <p><b>SUPUESTO D4 — pendiente de confirmación de RR.HH. (ver plan §5).</b> Estaba sin
+     * {@code @Secured}: caía en {@code anyRequest().authenticated()} y cualquiera de los 134
+     * usuarios se bajaba el detalle de permisos y vacaciones de <b>toda la empresa</b>.
+     *
+     * <p>Acá no hay carve-out posible por "es mi dato": el reporte es de todos, así que el único
+     * criterio es el ACL. Con {@code nivelAcceso=1}, {@code btnReportesPYV} lo tienen <b>4
+     * usuarios</b> más los 6 {@code ROLE_ADM} <i>(verificado en la base)</i>.
+     * <b>Es un cambio de comportamiento visible</b> —hoy pasan 134, después pasan 10— y ese es
+     * exactamente el punto de la deuda. Anotarlo en el checklist de la PR: si RR.HH. quiere que
+     * alguien más lo siga bajando, se le da el botón en {@code tb_usuarioBtn}, no se saca el
+     * gate.
+     *
      * @return
      */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/pdfRptPermVacTotal")
-    public ResponseEntity<?> exportPDFRptPermVacTotal() {
+    public ResponseEntity<?> exportPDFRptPermVacTotal(Authentication auth) {
+        acceso.exigirBoton(auth, 24, "btnReportesPYV");
         String nombreReporte = "RptPermVacTotal";
         try {
             Map<String, Object> params = new HashMap<>();
@@ -1622,11 +1641,17 @@ public class RrhhController {
 
     /**
      * PARA GENERAR EL RPT DE PERMISOS Y VACACIONES TOTAL EN EXCEL
-     * 
+     *
+     * <p>Mismo reporte y mismo gate que {@link #exportPDFRptPermVacTotal(Authentication)}, en
+     * otro formato. Cerrar sólo el PDF habría dejado la misma información saliendo por la
+     * planilla.
+     *
      * @return
      */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/excelRptPermVacTotal")
-    public ResponseEntity<?> exportExcelRptPermVacTotal() {
+    public ResponseEntity<?> exportExcelRptPermVacTotal(Authentication auth) {
+        acceso.exigirBoton(auth, 24, "btnReportesPYV");
         String nombreReporte = "RptPermVacTotal";
         try {
             Map<String, Object> params = new HashMap<>();

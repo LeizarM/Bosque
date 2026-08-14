@@ -1,9 +1,13 @@
 package bo.bosque.com.impexpap.dao;
+import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dto.DescuentoEmpleadoDTO;
 import bo.bosque.com.impexpap.dto.DocsVencidosDTO;
 import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.SpHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +19,9 @@ import java.util.*;
 
 @Repository
 public class EmpleadoDAO implements IEmpleado{
+
+    private static final Logger logger = LoggerFactory.getLogger(EmpleadoDAO.class);
+
     private final SpHelper spHelper;
 
     public EmpleadoDAO (SpHelper spHelper){this.spHelper = spHelper;}
@@ -372,6 +379,19 @@ public class EmpleadoDAO implements IEmpleado{
      */
     /**
      * Procedimiento para obtener los Empleados
+     *
+     * <p><b>Este método sostiene el buscador de empleados</b> — la puerta de entrada del módulo
+     * de RR.HH. y de la consola de Permisos y Vacaciones. Por eso es el único de esta clase
+     * saneado: antes hacía {@code this.jdbcTemplate = null} en el {@code catch}, o sea que un
+     * error transitorio de la base dejaba el DAO <b>muerto hasta reiniciar la app</b>, y todas
+     * las búsquedas siguientes fallaban con NPE.
+     *
+     * <p><b>Cambio de comportamiento visible</b> (anotarlo en la PR): antes un error de base
+     * devolvía lista vacía y la pantalla decía "sin resultados" —el usuario buscaba de nuevo,
+     * cambiaba el texto, y nadie se enteraba de que la base estaba caída—. Ahora sube como
+     * {@code SpBusinessException} → 400 con mensaje. Es lo que se busca: que un error se vea
+     * como un error.
+     *
      * @return List<Empleado>
      */
     public List<Empleado> obtenerLstEmpleados( String search,Integer esActivo, int pageNumber,int pageSize, Integer codEmpresa ) {
@@ -397,10 +417,12 @@ public class EmpleadoDAO implements IEmpleado{
                         return temp;
                     });
 
-        }  catch (BadSqlGrammarException e) {
-            System.out.println("Error: EmpleadoDAO en obtenerEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
+        }  catch (DataAccessException e) {
+            // DataAccessException y no BadSqlGrammarException: la sintaxis del SP no cambia sola,
+            // lo que falla de verdad es la conexión o un timeout, y esos son otras subclases.
+            logger.error("Error al buscar empleados (search='{}', esActivo={}, page={}/{}, codEmpresa={})",
+                    search, esActivo, pageNumber, pageSize, codEmpresa, e);
+            throw new SpBusinessException("No pudimos buscar empleados en este momento. Intente de nuevo.");
         }
 
         return  lstTemp;

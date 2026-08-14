@@ -46,4 +46,11 @@ public class SolicitudPermiso {
     private String diasDisponiblesTxt; // ◄ NUEVO
     private String fechasTxt; // ◄ NUEVO
     private String motivoRechazo;
+
+    // ── Filtro del kardex del empleado (acción 'A') ──────────────────────────
+    // Integer y no int: SpHelper.ejecutarListado borra del Map los null, así que
+    // "no filtrar" viaja como parámetro ausente y el SP usa su DEFAULT NULL. Con
+    // primitivos llegaría 0 y el SP filtraría por el año 0 — ninguna fila.
+    private Integer anio;
+    private Integer mes;
 }
