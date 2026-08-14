@@ -1301,9 +1301,53 @@ public class PermisoDao implements IPermiso{
         if (filas.isEmpty()) return;   // la relación se borró entre una consulta y la otra
 
         Map<String, Object> f = filas.get(0);
-        d.setRelacionVigenteDesde((Date) f.get("relacionVigenteDesde"));
+        d.setRelacionVigenteDesde(aFecha(f.get("relacionVigenteDesde")));
         d.setTieneRelacionesAnteriores(((Number) f.get("relacionesAnteriores")).intValue() > 0);
         d.setMovimientosFueraDeRelacionVigente(((Number) f.get("movimientosFuera")).intValue());
+    }
+
+    /**
+     * La fecha que devolvió el driver, venga como venga.
+     *
+     * <p><b>Esto tiró 500 en producción.</b> La línea era
+     * {@code (Date) f.get("relacionVigenteDesde")} y reventaba con
+     * {@code ClassCastException: String cannot be cast to Date}, tumbando
+     * <b>toda</b> la ficha de saldo — no un rótulo, el endpoint entero, y con él
+     * la pestaña «Saldo» y el botón de abonar, que necesita la relación vigente.
+     *
+     * <p>{@code tb_relEmplEmpr.fechaIni} es de tipo {@code date} —no
+     * {@code datetime}, que es lo que usa el resto del esquema— y ese tipo es
+     * justo donde los drivers de SQL Server difieren: unos devuelven
+     * {@code java.sql.Date} y otros el texto crudo. Cuál de los dos toca no lo
+     * decide este código, así que no puede darlo por sentado.
+     *
+     * <p>Se lee defensivamente en vez de arreglar la consulta con un
+     * {@code CONVERT(datetime, ...)} porque el {@code CONVERT} cambia un modo de
+     * fallar por otro: {@code datetime} arranca en 1753 y {@code date} en 0001,
+     * así que una fila con una fecha anterior pasaría de castear mal a explotar
+     * en la base. Acá lo peor que puede pasar es que el rótulo salga sin fecha.
+     *
+     * <p>Devuelve {@code null} cuando no hay nada que interpretar: el rótulo de
+     * alcance sabe vivir sin la fecha, y una ficha sin rótulo es infinitamente
+     * mejor que ninguna ficha.
+     */
+    static Date aFecha(Object valor) {
+        if (valor == null) return null;
+        // java.sql.Date y java.sql.Timestamp entran por acá: los dos SON Date.
+        if (valor instanceof Date) return (Date) valor;
+
+        final String texto = valor.toString().trim();
+        // Las dos formas en que un driver manda una fecha como texto:
+        // 'yyyy-MM-dd' y 'yyyy-MM-dd HH:mm:ss[.SSS]'. Sólo interesa el día.
+        if (texto.length() < 10) return null;
+        try {
+            java.text.SimpleDateFormat formato =
+                    new java.text.SimpleDateFormat("yyyy-MM-dd");
+            formato.setLenient(false);
+            return formato.parse(texto.substring(0, 10));
+        } catch (java.text.ParseException e) {
+            return null;
+        }
     }
 
     /**
