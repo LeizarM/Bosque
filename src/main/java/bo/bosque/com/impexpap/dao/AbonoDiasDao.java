@@ -31,11 +31,10 @@ import java.util.Map;
  * un SQL por ACCION, con los parámetros por nombre — el orden de este SP <b>no</b> es el del otro
  * ({@code @fecha} va antes que {@code @motivo}).
  *
- * <h3>Dos consultas directas, con la misma excepción documentada que {@code PermisoDao}</h3>
- * Resolver la relación laboral activa de un lote de empleados y ver quién ya tiene un abono en esa
- * fecha no lo ofrece ninguna ACCION de ningún SP. Son lecturas puras, una consulta cada una, sin
- * lógica de negocio. <b>TODO:</b> pedir al DBA las ACCIONes que las devuelvan y borrar los dos
- * métodos, igual que el TODO de {@code PermisoDao.completarAlcanceD0}.
+ * <h3>Las dos consultas de lote</h3>
+ * Resolver la relación laboral activa de un lote de empleados ({@code @ACCION='R'}) y ver quién ya
+ * tiene un abono en esa fecha ({@code @ACCION='F'}) son ACCIONes de {@code p_list_AbonoDias}: acá
+ * no se arma SQL. Las dos reciben el lote en {@code @codEmpleados}, separado por comas.
  */
 @Slf4j
 @Repository
@@ -94,7 +93,7 @@ public class AbonoDiasDao implements IAbonoDias {
         // devolver un 400 que obliga a la pantalla a pedir la ficha primero.
         long codRel = (codRelEmplEmpr != null && codRelEmplEmpr > 0)
                 ? codRelEmplEmpr
-                : relacionActivaDe(jdbcTemplate, codEmpleado);
+                : relacionActivaDe(spHelper, codEmpleado);
 
         Map<String, Object> filtro = new HashMap<>();
         filtro.put("codEmpleado", codEmpleado);
@@ -143,7 +142,7 @@ public class AbonoDiasDao implements IAbonoDias {
         // La relación NO se toma del body: la equivocada le movería el saldo a otra
         // persona-relación, y todas las lecturas del módulo filtran justamente por ella.
         final long codEmpleado = a.getCodEmpleado();
-        final long codRel = relacionActivaDe(jdbcTemplate, codEmpleado);
+        final long codRel = relacionActivaDe(spHelper, codEmpleado);
 
         validarSinDuplicado(codEmpleado, codRel, fecha, a.getDiasAbonados(), motivo, confirmado);
 
@@ -286,7 +285,7 @@ public class AbonoDiasDao implements IAbonoDias {
                     "No se pueden cargar más de " + MAX_LOTE + " empleados de una vez.");
         }
 
-        Map<Long, Object[]> relaciones = relacionesActivas(jdbcTemplate, ids); // id → {codRel, activas, nombre}
+        Map<Long, Object[]> relaciones = relacionesActivas(spHelper, ids); // id → {codRel, activas, nombre}
         Map<Long, String> yaTienen = abonosEnFecha(ids, fecha);       // id → detalle del abono existente
 
         List<AbonoDias> previa = new ArrayList<>(ids.size());
@@ -507,15 +506,12 @@ public class AbonoDiasDao implements IAbonoDias {
     /**
      * Relación laboral activa y nombre de cada empleado del lote, en una sola consulta.
      *
-     * <p><b>Excepción consciente a la regla de oro del ERP</b> (toda la lógica en SPs), la misma
-     * que ya documenta {@code PermisoDao.completarAlcanceD0}: ninguna ACCION devuelve esto y el
-     * alcance no permite tocar los SP. Es una lectura pura, sin lógica de negocio.
-     * {@code p_list_Permiso @ACCION='E'} se le parece, pero encadena {@code INNER JOIN} a cargo y
-     * sucursal: alguien sin cargo desaparecería y el motivo de omisión diría algo falso.
+     * <p>Sale de {@code p_list_AbonoDias @ACCION='R'}, que recibe el lote en {@code @codEmpleados}
+     * como lista separada por comas. {@code p_list_Permiso @ACCION='E'} se le parece, pero
+     * encadena {@code INNER JOIN} a cargo y sucursal: alguien sin cargo desaparecería y el motivo
+     * de omisión diría algo falso.
      *
-     * <p><b>TODO:</b> pedir al DBA una ACCION que lo devuelva y borrar este método.
-     *
-     * <p><b>Estática y con el {@code JdbcTemplate} por parámetro</b> para que
+     * <p><b>Estática y con el {@code SpHelper} por parámetro</b> para que
      * {@link VacacionAsignadaDao} use ESTA y no una copia: el alta de vacación asignada también
      * tiene que resolver la relación en el servidor, y dos consultas "casi iguales" para la misma
      * pregunta es exactamente cómo se empiezan a contradecir.
@@ -523,21 +519,13 @@ public class AbonoDiasDao implements IAbonoDias {
      * @return id → {@code {codRelEmplEmpr, cuántas activas, nombre}}; sin entrada si el empleado no
      *         existe
      */
-    static Map<Long, Object[]> relacionesActivas(JdbcTemplate jdbcTemplate, List<Long> ids) {
-        String sql =
-                "SELECT e.codEmpleado"
-              + "     , MIN(ree.codRelEmplEmpr) AS codRelEmplEmpr"
-              + "     , COUNT(ree.codRelEmplEmpr) AS activas"
-              + "     , MIN(ISNULL(p.apPaterno,'') + ' ' + ISNULL(p.apMaterno,'') + ' '"
-              + "         + ISNULL(p.nombres,'')) AS datoEmpleado"
-              + "  FROM tb_empleado e"
-              + "  JOIN trh_persona p ON p.codPersona = e.codPersona"
-              + "  LEFT JOIN tb_relEmplEmpr ree ON ree.codEmpleado = e.codEmpleado AND ree.esActivo = 1"
-              + " WHERE e.codEmpleado IN (" + marcadores(ids.size()) + ")"
-              + " GROUP BY e.codEmpleado";
+    static Map<Long, Object[]> relacionesActivas(SpHelper spHelper, List<Long> ids) {
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codEmpleados", SpHelper.listaDeIds(ids));
+        filtro.put("ACCION", "R");
 
         Map<Long, Object[]> resp = new HashMap<>();
-        for (Map<String, Object> f : jdbcTemplate.queryForList(sql, ids.toArray())) {
+        for (Map<String, Object> f : spHelper.ejecutarListadoDinamico("p_list_AbonoDias", filtro)) {
             Number cod = (Number) f.get("codEmpleado");
             Number rel = (Number) f.get("codRelEmplEmpr");
             Number activas = (Number) f.get("activas");
@@ -558,17 +546,13 @@ public class AbonoDiasDao implements IAbonoDias {
      * @return id → descripción corta del abono que ya existe
      */
     private Map<Long, String> abonosEnFecha(List<Long> ids, Date fecha) {
-        String sql =
-                "SELECT codEmpleado, diasAbonados, motivo"
-              + "  FROM trh_abonoDias"
-              + " WHERE fecha = ? AND codEmpleado IN (" + marcadores(ids.size()) + ")";
-
-        Object[] args = new Object[ids.size() + 1];
-        args[0] = new java.sql.Date(fecha.getTime());
-        for (int i = 0; i < ids.size(); i++) args[i + 1] = ids.get(i);
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codEmpleados", SpHelper.listaDeIds(ids));
+        filtro.put("fecha", new java.sql.Date(fecha.getTime()));
+        filtro.put("ACCION", "F");
 
         Map<Long, String> resp = new HashMap<>();
-        for (Map<String, Object> f : jdbcTemplate.queryForList(sql, args)) {
+        for (Map<String, Object> f : spHelper.ejecutarListadoDinamico("p_list_AbonoDias", filtro)) {
             long cod = ((Number) f.get("codEmpleado")).longValue();
             double dias = ((Number) f.get("diasAbonados")).doubleValue();
             String motivo = (String) f.get("motivo");
@@ -586,8 +570,8 @@ public class AbonoDiasDao implements IAbonoDias {
      * propósito: nombran lo que falta ("no tiene relación laboral activa"), no la operación que se
      * estaba intentando, porque el mismo hecho vale para las cuatro.
      */
-    public static long relacionActivaDe(JdbcTemplate jdbcTemplate, long codEmpleado) {
-        Object[] rel = relacionesActivas(jdbcTemplate, java.util.Collections.singletonList(codEmpleado))
+    public static long relacionActivaDe(SpHelper spHelper, long codEmpleado) {
+        Object[] rel = relacionesActivas(spHelper, java.util.Collections.singletonList(codEmpleado))
                 .get(codEmpleado);
         if (rel == null) {
             throw new SpBusinessException("No existe un empleado con el código " + codEmpleado + ".");
@@ -604,12 +588,6 @@ public class AbonoDiasDao implements IAbonoDias {
                   + "); corrija en el ERP antes de registrarle movimientos.");
         }
         return (Long) rel[0];
-    }
-
-    private static String marcadores(int cuantos) {
-        StringBuilder sb = new StringBuilder(cuantos * 2);
-        for (int i = 0; i < cuantos; i++) sb.append(i == 0 ? "?" : ",?");
-        return sb.toString();
     }
 
     private static void marcarOmitido(AbonoDias fila, String motivo) {

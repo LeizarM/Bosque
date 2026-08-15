@@ -13,8 +13,8 @@ import java.io.Serializable;
  * {@code vac} y {@code pva}, igual que {@code Tipos.cargarList13A()} del legacy, porque esos dos
  * tienen su propia pantalla— y el filtro de la nómina, que los incluye a los nueve.
  *
- * <p>No hay {@code model/Tipos}: {@code v_tipos} es una vista de catálogo sin SP de listado, se lee
- * con un {@code SELECT} de dos columnas y no tiene más forma que ésta.
+ * <p>No hay {@code model/Tipos}: {@code v_tipos} es una vista de catálogo y no tiene más forma que
+ * ésta. Se lee por {@code p_list_Permiso @ACCION='T1'}.
  */
 @Data
 @NoArgsConstructor

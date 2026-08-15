@@ -416,7 +416,7 @@
 				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="459" y="42" width="99" height="16" uuid="a51c2fb4-e41a-42ba-8a5e-3edc243fe727"/>
+				<reportElement x="459" y="42" width="99" height="28" uuid="a51c2fb4-e41a-42ba-8a5e-3edc243fe727"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -757,7 +757,7 @@
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="459" y="50" width="99" height="16" uuid="0a100350-f831-462d-af35-4f402281a1fb"/>
+				<reportElement x="459" y="50" width="99" height="28" uuid="0a100350-f831-462d-af35-4f402281a1fb"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>

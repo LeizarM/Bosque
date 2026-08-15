@@ -104,7 +104,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
         // la pantalla a consultar la ficha primero. Misma consulta que usa el alta.
         long codRel = (codRelEmplEmpr != null && codRelEmplEmpr > 0)
                 ? codRelEmplEmpr
-                : AbonoDiasDao.relacionActivaDe(jdbcTemplate, codEmpleado);
+                : AbonoDiasDao.relacionActivaDe(spHelper, codEmpleado);
 
         Map<String, Object> filtro = new HashMap<>();
         filtro.put("codEmpleado", codEmpleado);
@@ -201,7 +201,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
         filtro.put("codEmpleado", codEmpleado);
         long codRel = (codRelEmplEmpr != null && codRelEmplEmpr > 0)
                 ? codRelEmplEmpr
-                : AbonoDiasDao.relacionActivaDe(jdbcTemplate, codEmpleado);
+                : AbonoDiasDao.relacionActivaDe(spHelper, codEmpleado);
         filtro.put("codRelEmplEmpr", codRel);
         if (desde != null) filtro.put("fecha",      new java.sql.Date(desde.getTime()));
         if (hasta != null) filtro.put("fechaBase",  new java.sql.Date(hasta.getTime()));
@@ -252,7 +252,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
          * persona-relación de una vez, sin que ninguna validación chistara. Es la misma decisión
          * que ya tomaba el alta de abono, con la misma consulta.
          */
-        final long codRel = AbonoDiasDao.relacionActivaDe(jdbcTemplate, codEmpleado);
+        final long codRel = AbonoDiasDao.relacionActivaDe(spHelper, codEmpleado);
         final Date fecha = v.getFecha();
         validarAniversarioLibre(codEmpleado, codRel, fecha, v.getDiasAsignados(), motivo, confirmado);
 

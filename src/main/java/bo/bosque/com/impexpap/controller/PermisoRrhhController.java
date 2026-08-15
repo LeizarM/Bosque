@@ -12,6 +12,7 @@ import bo.bosque.com.impexpap.dto.PermisoRrhhFiltroDto;
 import bo.bosque.com.impexpap.model.AbonoDias;
 import bo.bosque.com.impexpap.model.VacacionAsignada;
 import bo.bosque.com.impexpap.utils.ApiResponse;
+import bo.bosque.com.impexpap.utils.SpHelper;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.AbonoDiasDao;
 import org.slf4j.Logger;
@@ -203,15 +204,19 @@ public class PermisoRrhhController {
 
     public PermisoRrhhController(IPermiso pDao, AccesoModuloHelper acceso,
                                  IVacacionAsignada vacDao, IAbonoDias abonoDao,
-                                 JdbcTemplate jdbcTemplate) {
+                                 JdbcTemplate jdbcTemplate, SpHelper spHelper) {
         this.pDao = pDao;
         this.acceso = acceso;
         this.vacDao = vacDao;
         this.abonoDao = abonoDao;
         this.jdbcTemplate = jdbcTemplate;
+        this.spHelper = spHelper;
     }
 
+    /** Sólo para los reportes Jasper, que necesitan la conexión cruda. */
     private final JdbcTemplate jdbcTemplate;
+
+    private final SpHelper spHelper;
 
     /** El botón del ACL de los reportes de saldos (codBtn 210, 4 usuarios). */
     private static final String BTN_REPORTES = "btnReportesPYV";
@@ -314,7 +319,7 @@ public class PermisoRrhhController {
         Long pedida = f.getCodRelEmplEmpr();
         long ree = (pedida != null && pedida > 0)
                 ? pedida
-                : AbonoDiasDao.relacionActivaDe(jdbcTemplate, f.getCodEmpleado());
+                : AbonoDiasDao.relacionActivaDe(spHelper, f.getCodEmpleado());
 
         Map<String, Object> params = new HashMap<>();
         params.put("codEmp", (int) f.getCodEmpleado());

@@ -81,22 +81,6 @@ public class PermisoDao implements IPermiso{
      */
     static final String TIPO_PAGO_VACACION = "pva";
 
-    /** El combo de tipo de permiso. Nueve códigos, es una vista de catálogo sin SP de listado. */
-    private static final String SQL_TIPOS =
-            "SELECT codigo, descripcion FROM v_tipos WHERE grupo = 13 ORDER BY descripcion";
-
-    /**
-     * Los pagos de vacación de esa persona en ese día, con la auditoría. La ACCION {@code 'Q'} no
-     * devuelve {@code audFechaI}, y sin ella no se puede distinguir el doble toque de una carga
-     * deliberada. Misma excepción consciente que {@link #diasPorEmpleado}.
-     */
-    private static final String SQL_PVA_DEL_DIA =
-            "SELECT codPermiso, cantidadDias, motivo, audFechaI"
-          + "  FROM trh_permiso"
-          + " WHERE codEmpleado = ? AND tipoPermiso = '" + TIPO_PAGO_VACACION + "'"
-          + "   AND CONVERT(date, desde) = CONVERT(date, ?)"
-          + " ORDER BY codPermiso DESC";
-
     /**
      * Los tipos que el legacy marca como "hay que reponer estas horas"
      * ({@code WizardPermiso.verificarTipoPermiso}). Es un cartel de pantalla: no se persiste.
@@ -135,9 +119,8 @@ public class PermisoDao implements IPermiso{
 
     private final SpHelper spHelper;
     /**
-     * Sólo para las dos consultas de alcance/diagnóstico de más abajo, que no tienen SP. Ver el
-     * comentario de {@link #completarAlcanceD0}. La inyección es por constructor, como
-     * {@code spHelper}: antes este campo era un {@code @Autowired} suelto y ni siquiera se usaba.
+     * Sólo para {@link SpEscritura}, que ejecuta el {@code execute p_abm_Permiso} del alta. Ya no
+     * queda ninguna consulta armada en Java: todas las lecturas pasan por {@code spHelper}.
      */
     private final JdbcTemplate jdbcTemplate;
 
@@ -463,7 +446,7 @@ public class PermisoDao implements IPermiso{
 
         // Dos consultas para todo el lote, no dos por persona. La primera es LA MISMA que resuelve
         // la relación en el abono: una sola definición de "relación laboral activa" en el módulo.
-        Map<Long, Object[]> relaciones = AbonoDiasDao.relacionesActivas(jdbcTemplate, ids);
+        Map<Long, Object[]> relaciones = AbonoDiasDao.relacionesActivas(spHelper, ids);
         Map<Long, Map<String, Object>> calculo = diasPorEmpleado(ids, desde, hasta);
 
         List<EmpleadoColectivoDto> previa = new ArrayList<>(ids.size());
@@ -612,50 +595,19 @@ public class PermisoDao implements IPermiso{
      * de verdad graba los días. Si las dos se separan, la pantalla explicaría una resta distinta
      * de la que se guarda: cualquier cambio en la función se replica acá y al revés.
      *
-     * <p>Consulta directa y no un SP, como {@link #completarAlcanceD0} y {@link #diasPorEmpleado}:
-     * no existe una ACCION que devuelva esto. Está en el pedido al DBA junto con las otras dos.
+     * <p>Sale de {@code p_list_Permiso @ACCION='N1'}, que es donde vive la regla: ni una línea de
+     * este cálculo se arma en Java.
      */
     @Override
     public List<DiaNoHabilDto> diasNoHabiles(long codEmpleado, Date desde, Date hasta) {
         if (codEmpleado <= 0 || desde == null || hasta == null) {
             return new ArrayList<>();
         }
-        final String sql =
-                "  SELECT d.fecha AS fecha, 'FERIADO' AS tipo, d.motivo AS motivo"
-              + "    FROM trh_diaNoLaborable d"
-              + "   WHERE d.fecha BETWEEN ? AND ?"
-              + "     AND ( NOT EXISTS (SELECT 1 FROM trh_diaNoLaborable_sucursal ds"
-              + "                        WHERE ds.codDiaNoLaborable = d.codDiaNoLaborable)"
-              + "        OR EXISTS (SELECT 1 FROM trh_diaNoLaborable_sucursal ds"
-              + "                    WHERE ds.codDiaNoLaborable = d.codDiaNoLaborable"
-              + "                      AND ds.codSucursal = ("
-              + "                            SELECT TOP 1 cs.codSucursal"
-              + "                              FROM trh_empleadoCargo ec"
-              + "                              JOIN tb_cargo_sucursal cs"
-              + "                                ON ec.codCargoSucursal = cs.codCargoSucursal"
-              + "                             WHERE ec.codEmpleado = ?"
-              + "                             ORDER BY ec.fechaInicio DESC)))"
-              + "   UNION ALL"
-              + "  SELECT s.fecha, 'SABADO_LIBRE', 'No le toca trabajar este sábado'"
-              + "    FROM trs_Sabado s"
-              + "   WHERE s.fecha BETWEEN ? AND ?"
-              + "     AND NOT EXISTS (SELECT 1"
-              + "                       FROM trs_Asignacion a"
-              + "                       JOIN trs_Participante p ON p.idParticipante = a.idParticipante"
-              + "                      WHERE a.idSabado = s.idSabado AND p.codEmpleado = ?)"
-              + "   ORDER BY fecha";
-
-        java.sql.Date d1 = new java.sql.Date(desde.getTime());
-        java.sql.Date d2 = new java.sql.Date(hasta.getTime());
-        return jdbcTemplate.query(sql,
-                new Object[]{ d1, d2, codEmpleado, d1, d2, codEmpleado },
-                (rs, i) -> {
-                    DiaNoHabilDto d = new DiaNoHabilDto();
-                    d.setFecha(rs.getDate("fecha"));
-                    d.setTipo(rs.getString("tipo"));
-                    d.setMotivo(rs.getString("motivo"));
-                    return d;
-                });
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codEmpleado", codEmpleado);
+        filtro.put("desde", new java.sql.Date(desde.getTime()));
+        filtro.put("hasta", new java.sql.Date(hasta.getTime()));
+        return spHelper.ejecutarListado("p_list_Permiso", filtro, "N1", DiaNoHabilDto.class);
     }
 
     /**
@@ -815,8 +767,8 @@ public class PermisoDao implements IPermiso{
      */
     @Override
     public List<TipoPermisoDto> tiposPermiso(boolean incluirVacacionYPago) {
-        List<TipoPermisoDto> tipos = jdbcTemplate.query(SQL_TIPOS,
-                (rs, i) -> new TipoPermisoDto(rs.getString("codigo"), rs.getString("descripcion")));
+        List<TipoPermisoDto> tipos = new ArrayList<>(spHelper.ejecutarListado(
+                "p_list_Permiso", new HashMap<String, Object>(), "T1", TipoPermisoDto.class));
         if (!incluirVacacionYPago) {
             tipos.removeIf(t -> TIPO_VACACION.equals(t.getCodigo())
                              || TIPO_PAGO_VACACION.equals(t.getCodigo()));
@@ -930,7 +882,7 @@ public class PermisoDao implements IPermiso{
         final String motivoOk = validarMotivo(motivo);
         validarDiasPagados(dias, confirmado);
 
-        final long codRel = AbonoDiasDao.relacionActivaDe(jdbcTemplate, codEmpleado);
+        final long codRel = AbonoDiasDao.relacionActivaDe(spHelper, codEmpleado);
         // El saldo ANTES que el duplicado, a propósito: las dos preguntas comparten el mismo flag
         // `confirmado` (como en toda la escritura del módulo), así que la que se hace primero es la
         // que el usuario ve. Se elige la que habla de plata. El doble toque real no depende de esto:
@@ -977,46 +929,19 @@ public class PermisoDao implements IPermiso{
      * carga dos veces le descuenta los días dos veces a todo el mundo — y en {@code trh_permiso}
      * ya hay 291 pares solapados de esa forma.
      *
-     * <p><b>Excepción consciente a la regla de oro del ERP</b> (toda la lógica en SPs), la misma
-     * que ya documentan {@link #completarAlcanceD0} y {@code AbonoDiasDao.relacionesActivas}:
-     * ninguna ACCION devuelve esto. <b>TODO:</b> pedir al DBA una ACCION que lo haga y borrar este
-     * método.
+     * <p>Sale de {@code p_list_Permiso @ACCION='D1'}, que recibe el lote en {@code @codEmpleados}
+     * como lista separada por comas y lo parte adentro. Un solo viaje para las ~85 personas del
+     * padrón activo.
      */
     private Map<Long, Map<String, Object>> diasPorEmpleado(List<Long> ids, Date desde, Date hasta) {
-        StringBuilder marcadores = new StringBuilder(ids.size() * 2);
-        for (int i = 0; i < ids.size(); i++) marcadores.append(i == 0 ? "?" : ",?");
-
-        String sql =
-                "SELECT e.codEmpleado"
-              + "     , ISNULL(cs.codSucursal, 0)                       AS codSucursal"
-              + "     , ISNULL(s.nombre, '')                            AS datoSucursal"
-              + "     , ISNULL(emp.nombre, '')                          AS datoEmpresa"
-              + "     , dbo.f_CalcularDiasHabilesPermiso(e.codEmpleado, ?, ?) AS dias"
-              + "     , CASE WHEN pe.codPermiso IS NULL THEN 0 ELSE 1 END     AS yaTienePermiso"
-              + "     , pe.desde                                        AS chocaDesde"
-              + "     , pe.hasta                                        AS chocaHasta"
-              + "  FROM tb_empleado e"
-              + "  OUTER APPLY (SELECT TOP 1 c2.codSucursal"
-              + "                 FROM trh_empleadoCargo ec"
-              + "                 JOIN tb_cargo_sucursal c2 ON c2.codCargoSucursal = ec.codCargoSucursal"
-              + "                WHERE ec.codEmpleado = e.codEmpleado"
-              + "                ORDER BY ec.fechaInicio DESC) cs"
-              + "  LEFT JOIN tb_sucursal s   ON s.codSucursal = cs.codSucursal"
-              + "  LEFT JOIN tb_empresa  emp ON emp.codEmpresa = s.codEmpresa"
-              + "  OUTER APPLY (SELECT TOP 1 p.codPermiso, p.desde, p.hasta"
-              + "                 FROM trh_permiso p"
-              + "                WHERE p.codEmpleado = e.codEmpleado"
-              + "                  AND ? < p.hasta AND ? > p.desde) pe"
-              + " WHERE e.codEmpleado IN (" + marcadores + ")";
-
-        java.sql.Timestamp d = new java.sql.Timestamp(desde.getTime());
-        java.sql.Timestamp h = new java.sql.Timestamp(hasta.getTime());
-        Object[] args = new Object[ids.size() + 4];
-        args[0] = d; args[1] = h; args[2] = d; args[3] = h;
-        for (int i = 0; i < ids.size(); i++) args[i + 4] = ids.get(i);
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codEmpleados", SpHelper.listaDeIds(ids));
+        filtro.put("desde", new java.sql.Timestamp(desde.getTime()));
+        filtro.put("hasta", new java.sql.Timestamp(hasta.getTime()));
+        filtro.put("ACCION", "D1");
 
         Map<Long, Map<String, Object>> resp = new HashMap<>();
-        for (Map<String, Object> f : jdbcTemplate.queryForList(sql, args)) {
+        for (Map<String, Object> f : spHelper.ejecutarListadoDinamico("p_list_Permiso", filtro)) {
             resp.put(((Number) f.get("codEmpleado")).longValue(), f);
         }
         return resp;
@@ -1148,8 +1073,16 @@ public class PermisoDao implements IPermiso{
      */
     private void validarPagoSinRepetir(long codEmpleado, Date fecha, double dias, String motivo,
                                        boolean confirmado) {
-        List<Map<String, Object>> previos = jdbcTemplate.queryForList(
-                SQL_PVA_DEL_DIA, codEmpleado, new java.sql.Timestamp(fecha.getTime()));
+        // ACCION 'P1' y no 'Q': 'Q' no devuelve audFechaI, y sin ella no se puede distinguir el
+        // doble toque de una carga deliberada.
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codEmpleado", codEmpleado);
+        filtro.put("tipoPermiso", TIPO_PAGO_VACACION);
+        filtro.put("desde", new java.sql.Timestamp(fecha.getTime()));
+        filtro.put("ACCION", "P1");
+
+        List<Map<String, Object>> previos =
+                spHelper.ejecutarListadoDinamico("p_list_Permiso", filtro);
         if (previos.isEmpty()) return;
 
         long ahora = System.currentTimeMillis();
@@ -1275,29 +1208,18 @@ public class PermisoDao implements IPermiso{
      * permiten rotular el alcance del saldo: desde cuándo corre la relación vigente y cuánta
      * historia quedó afuera.
      *
-     * <p><b>Excepción consciente a la regla de oro del ERP</b> (toda la lógica en SPs): esto es
-     * SQL directo desde Java. Ninguna ACCION de {@code p_list_Permiso} devuelve estos datos y el
-     * alcance de la fase no permite tocar los SP. Es una lectura pura, una sola consulta, sin
-     * lógica de negocio. <b>TODO:</b> pedir al DBA una ACCION que los devuelva y borrar este
-     * método.
+     * <p>Sale de {@code p_list_Permiso @ACCION='C1'}.
      *
      * <p>Sin este rótulo un saldo correcto se lee como un saldo equivocado — que es exactamente
      * lo que bloquea el criterio de aceptación #6.
      */
     private void completarAlcanceD0(FichaSaldoDto d) {
-        final String sql =
-                "SELECT ree.fechaIni AS relacionVigenteDesde"
-              + "     , (SELECT COUNT(*) FROM tb_relEmplEmpr r"
-              + "         WHERE r.codEmpleado = ree.codEmpleado AND r.codRelEmplEmpr <> ree.codRelEmplEmpr) AS relacionesAnteriores"
-              + "     , (SELECT COUNT(*) FROM trh_permiso p"
-              + "         WHERE p.codEmpleado = ree.codEmpleado AND p.codRelEmplEmpr <> ree.codRelEmplEmpr)"
-              + "     + (SELECT COUNT(*) FROM trh_vacacionAsignada v"
-              + "         WHERE v.codEmpleado = ree.codEmpleado AND v.codRelEmplEmpr <> ree.codRelEmplEmpr) AS movimientosFuera"
-              + "  FROM tb_relEmplEmpr ree"
-              + " WHERE ree.codRelEmplEmpr = ?";
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codRelEmplEmpr", d.getDatoRelEmplEmprVigente());
+        filtro.put("ACCION", "C1");
 
         List<Map<String, Object>> filas =
-                jdbcTemplate.queryForList(sql, d.getDatoRelEmplEmprVigente());
+                spHelper.ejecutarListadoDinamico("p_list_Permiso", filtro);
         if (filas.isEmpty()) return;   // la relación se borró entre una consulta y la otra
 
         Map<String, Object> f = filas.get(0);
@@ -1358,19 +1280,20 @@ public class PermisoDao implements IPermiso{
      * tiene relación laboral activa" cuando lo que falta es el cargo manda a alguien a revisar
      * el lugar equivocado, así que se pregunta y se responde con el motivo real.
      *
-     * <p>Una sola consulta con tres {@code EXISTS} — no tiene {@code FROM}, así que siempre
-     * devuelve exactamente una fila. Misma excepción a la regla de oro que
-     * {@link #completarAlcanceD0}, mismo TODO.
+     * <p>Sale de {@code p_list_Permiso @ACCION='E1'}: una sola consulta con tres {@code EXISTS},
+     * sin {@code FROM}, así que siempre devuelve exactamente una fila.
      *
      * <p>Si los tres dan bien, <b>no lanza nada</b>: el vacío es legítimo (→ 204).
      */
     private void explicarVacio(long codEmpleado) {
-        final String sql =
-                "SELECT CASE WHEN EXISTS(SELECT 1 FROM tb_empleado WHERE codEmpleado = ?) THEN 1 ELSE 0 END AS existe"
-              + "     , CASE WHEN EXISTS(SELECT 1 FROM tb_relEmplEmpr WHERE codEmpleado = ? AND esActivo = 1) THEN 1 ELSE 0 END AS conRelacion"
-              + "     , CASE WHEN EXISTS(SELECT 1 FROM trh_empleadoCargo WHERE codEmpleado = ?) THEN 1 ELSE 0 END AS conCargo";
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("codEmpleado", codEmpleado);
+        filtro.put("ACCION", "E1");
 
-        Map<String, Object> f = jdbcTemplate.queryForMap(sql, codEmpleado, codEmpleado, codEmpleado);
+        List<Map<String, Object>> filas =
+                spHelper.ejecutarListadoDinamico("p_list_Permiso", filtro);
+        if (filas.isEmpty()) return;   // no debería pasar: la consulta no tiene FROM
+        Map<String, Object> f = filas.get(0);
 
         if (!esUno(f.get("existe"))) {
             throw new SpBusinessException(
