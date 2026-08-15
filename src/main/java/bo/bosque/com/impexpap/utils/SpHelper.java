@@ -247,6 +247,25 @@ public class SpHelper {
     }
 
     /**
+     * Un lote de ids como {@code "1,2,3"}, que es lo que esperan las ACCIONes que reciben un
+     * parámetro de lista (por ejemplo {@code @codEmpleados}).
+     *
+     * <p>El SP la parte adentro con XML y no con {@code STRING_SPLIT} porque el motor es SQL
+     * Server 2008 (nivel de compatibilidad 100) y {@code STRING_SPLIT} recién existe desde 2016.
+     *
+     * <p>Son {@code Long}, no texto que venga del usuario: no hay nada que escapar acá.
+     */
+    public static String listaDeIds(Collection<Long> ids) {
+        StringBuilder sb = new StringBuilder(ids.size() * 6);
+        for (Long id : ids) {
+            if (id == null) continue;
+            if (sb.length() > 0) sb.append(',');
+            sb.append(id.longValue());
+        }
+        return sb.toString();
+    }
+
+    /**
      * Ejecuta un SP que retorna columnas dinámicas como una lista de mapas clave-valor.
      * Útil para SPs que no tienen un parámetro @ACCION y que devuelven resultados
      * que no se pueden mapear a un DTO estático (Ej. Reportes cruzados o formatos bancarios).
