@@ -64,28 +64,51 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: LoginDaoImpl en abmLogin, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         return resp != 0;
     }
 
     /**
-     * Procedimiento para verificar usuario usando el procedimiento almacenado
+     * Verifica que el usuario exista y en que estado esta (activo / bloqueado).
+     *
+     * <h3>Ya no se le manda la contrasena al SP</h3>
+     * La llamada era {@code @login=?, @password2=?, @ip=?, @ACCION='C'} con la
+     * contrasena <b>en texto plano</b>. Eso la dejaba en las trazas de SQL
+     * Profiler, en el plan cache y en cualquier auditoria del motor — y viajando
+     * por la red con la proteccion que tenga la conexion, que contra SQL Server
+     * 2008 no es mucha.
+     *
+     * <p><b>Y el SP no la estaba usando.</b> La prueba es que
+     * {@code /auth/changePassword} llamaba a este mismo metodo pasando
+     * {@code passwordEncoder.encode(...)} — un hash BCrypt recien generado, que
+     * no coincide con nada guardado— y funcionaba igual. Si el SP verificara
+     * {@code @password2}, ese endpoint nunca habria andado. El comentario
+     * original del metodo ya lo decia: "solo verifica si el usuario existe, la
+     * verificacion de contrasena se hará en el controlador".
+     *
+     * <p>Quien verifica de verdad es {@code authenticationManager} con
+     * {@code BCryptPasswordEncoder}, contra el hash que devuelve
+     * {@code loadUserByUsername} ({@code p_list_Usuario @ACCION='B'}). Eso no
+     * cambio.
+     *
+     * <p>Omitir un parametro es seguro con este SP: {@code registerFailedAttempt},
+     * {@code registerSuccessfulLogin} y {@code loadUserByUsername} ya lo llaman
+     * con subconjuntos distintos de parametros, o sea que todos tienen DEFAULT.
+     *
      * @param login Nombre de usuario
-     * @param password2 Contraseña
      * @param ip Dirección IP del cliente
      * @return Objeto Login con información del usuario
      */
-    public Login verifyUser(String login, String password2, String ip) {
+    public Login verifyUser(String login, String ip) {
         Login temp = new Login();
         try {
             // Llamamos al procedimiento almacenado que solo verifica si el usuario existe
             // La verificación de contraseña se hará en el controlador con Spring Security
             temp = this.jdbcTemplate.queryForObject(
-                    "execute p_list_Usuario @login=?, @password2=?, @ip=?, @ACCION=?",
-                    new Object[] { login, password2, ip, "C" },
-                    new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR },
+                    "execute p_list_Usuario @login=?, @ip=?, @ACCION=?",
+                    new Object[] { login, ip, "C" },
+                    new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR },
                     (rs, rowNum) -> {
                         Login login1 = new Login();
                         login1.setCodUsuario(rs.getInt(1));
@@ -125,7 +148,6 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
             System.out.println("Error en verifyUser: " + e.getMessage() +
                     ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             temp = new Login();
-            this.jdbcTemplate = null;
         } catch (Exception e) {
             System.out.println("Error en verifyUser: " + e.getMessage());
             temp = new Login();
@@ -244,7 +266,6 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: LoginDaoImpl en loadUserByUsername, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             temp = new Login();
-            this.jdbcTemplate = null;
         } catch (UsernameNotFoundException e) {
             System.out.println("Error: LoginDaoImpl en loadUserByUsername, UsernameNotFoundException->" + e.getMessage());
         }catch (EmptyResultDataAccessException e) {
@@ -287,7 +308,6 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: LoginDaoImpl en getAllUsers, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 

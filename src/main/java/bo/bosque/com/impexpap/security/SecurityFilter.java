@@ -13,9 +13,39 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
+/**
+ * Rechaza herramientas de escaneo por su User-Agent.
+ *
+ * <h3>Lo que este filtro dejo de hacer, y por que</h3>
+ * Antes tambien evaluaba el contenido de los parametros contra tres expresiones
+ * regulares que pretendian detectar SQL injection. Se sacaron:
+ *
+ * <ol>
+ *   <li>{@code .*['"].*} rechazaba <b>cualquier valor con una comilla o un
+ *       apostrofo</b>. O sea que un apellido como {@code D'Angelo} o una glosa
+ *       con comillas daba 403, sin mensaje que lo explicara.</li>
+ *   <li>{@code \b(union|select|from|where|drop|--)\b} rechaza palabras que
+ *       aparecen en texto libre en espanol y en ingles ({@code from},
+ *       {@code where}). Ademas {@code --} estaba repetido en la alternancia.</li>
+ *   <li>Sobre todo: <b>no aportaba defensa real.</b> En este proyecto no se
+ *       concatena SQL — el test {@code SinSqlCrudoTest} lo hace cumplir, los
+ *       nombres de procedimiento son literales y todos los valores viajan como
+ *       parametros de {@code PreparedStatement}. Filtrar comillas a la entrada
+ *       es la defensa que se usa cuando NO hay parametros vinculados. Aca los
+ *       hay, y el filtro solo agregaba falsos positivos y una falsa sensacion de
+ *       seguridad.</li>
+ *   <li>Y tenia un efecto lateral silencioso: {@code request.getParameterMap()}
+ *       sobre un POST {@code application/x-www-form-urlencoded} hace que Tomcat
+ *       <b>consuma el body</b>, con lo cual el {@code @RequestBody} del
+ *       controlador llegaba vacio. Esta documentado en
+ *       {@code WhatsAppWebhookController}, que se tuvo que escribir esquivandolo.</li>
+ * </ol>
+ *
+ * <p>Queda la lista de User-Agents, que es barata, no tiene falsos positivos
+ * sobre trafico legitimo y sirve para sacarse de encima el ruido de fondo de los
+ * escaneres automaticos. No es un WAF y no pretende serlo.
+ */
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
@@ -26,75 +56,26 @@ public class SecurityFilter extends OncePerRequestFilter {
             "sqlmap", "nikto", "nessus", "nmap", "burpsuite", "ZAP", "masscan", "python-requests"
     );
 
-    // Lista de patrones de ataque comunes
-    private final List<Pattern> attackPatterns = Arrays.asList(
-            Pattern.compile(".*\\b(union|select|from|where|drop|--|--)\\b.*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*['\"].*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*\\b(or|and)\\s+\\d+=\\d+.*", Pattern.CASE_INSENSITIVE)
-    );
+    private final ClienteIp clienteIp;
+
+    public SecurityFilter(ClienteIp clienteIp) {
+        this.clienteIp = clienteIp;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
         String userAgent = request.getHeader("User-Agent");
-        String ip = getClientIP(request);
 
         // Verificar User-Agent sospechoso
         if (userAgent != null && suspiciousUserAgents.stream().anyMatch(userAgent::contains)) {
-            logger.warn("Suspicious User-Agent detected from IP {}: {}", ip, userAgent);
+            logger.warn("Suspicious User-Agent detected from IP {}: {}", clienteIp.de(request), userAgent);
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"Acceso denegado\", \"ok\": false}");
             return;
         }
 
-        // Determinar si es una solicitud de carga de archivos
-        String contentType = request.getContentType();
-        boolean isMultipart = contentType != null && contentType.toLowerCase().startsWith("multipart/form-data");
-
-        // Para subidas de archivos, omitir la verificación de parámetros del cuerpo
-        if (!isMultipart) {
-            // Verificar patrones de ataque solo en peticiones que no son de carga de archivos
-            Map<String, String[]> params = request.getParameterMap();
-            for (String[] values : params.values()) {
-                for (String value : values) {
-                    for (Pattern pattern : attackPatterns) {
-                        if (pattern.matcher(value).matches()) {
-                            logger.warn("Possible attack pattern detected from IP {}: {}", ip, value);
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.getWriter().write("{\"error\": \"Acceso denegado\", \"ok\": false}");
-                            return;
-                        }
-                    }
-                }
-            }
-        } else {
-            // Es una petición multipart (subida de archivos), permitir sin revisar el contenido del archivo
-            logger.debug("Multipart request detected, allowing file upload from IP {}", ip);
-        }
-
-        // Verificar solo parámetros de la URL para todas las peticiones
-        String queryString = request.getQueryString();
-        if (queryString != null) {
-            for (Pattern pattern : attackPatterns) {
-                if (pattern.matcher(queryString).matches()) {
-                    logger.warn("Possible attack pattern in URL from IP {}: {}", ip, queryString);
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().write("{\"error\": \"Acceso denegado\", \"ok\": false}");
-                    return;
-                }
-            }
-        }
-
-        // Si llegamos aquí, todo está bien, continuar con la cadena de filtros
         chain.doFilter(request, response);
-    }
-
-    private String getClientIP(HttpServletRequest request) {
-        String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null) {
-            return request.getRemoteAddr();
-        }
-        return xfHeader.split(",")[0];
     }
 }

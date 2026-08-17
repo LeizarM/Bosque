@@ -93,25 +93,31 @@ public class LoginController {
         }
 
         try {
-            // Paso 1: Verificar si el usuario existe y obtener su información
+            // Paso 1: Verificar si el usuario existe y obtener su información.
+            // Ya NO se le manda la contraseña al SP: no la usaba y viajaba en claro.
             Login loginTemp = this.ldao.verifyUser(
                     login.getUsername(),
-                    login.getPassword2(),
                     request.getRemoteAddr()
             );
 
-            // Paso 2: Verificar diferentes estados de autenticación
+            // Paso 2: Verificar diferentes estados de autenticación.
+            //
+            // El motivo real va al log y NUNCA a la respuesta. Antes se distinguía
+            // "El usuario ingresado no existe" (401) de "Su cuenta ha sido bloqueada"
+            // (403) de "Contraseña incorrecta" (401), y con eso se enumeraban los 134
+            // usuarios de tb_usuario sin acertar una sola contraseña: alcanzaba con
+            // mirar cuál de los tres mensajes volvía. La cuenta bloqueada era la que
+            // más informaba, porque además confirma que ese login existe. Las tres
+            // respuestas son ahora idénticas, byte por byte.
             if (loginTemp.getCodUsuario() < 0) {
-                // Usuario bloqueado (codUsuario negativo)
-                response.put("mensaje", "Su cuenta ha sido bloqueada. Por favor, contacte al administrador del sistema.");
-                response.put("status", "error");
-                return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+                log.warn("Login rechazado (cuenta bloqueada): usuario '{}' desde {}",
+                        login.getUsername(), request.getRemoteAddr());
+                return credencialesInvalidas(response);
 
             } else if (loginTemp.getCodUsuario() == 0) {
-                // Usuario no existe
-                response.put("mensaje", "El usuario ingresado no existe en el sistema.");
-                response.put("status", "error");
-                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+                log.warn("Login rechazado (usuario inexistente): '{}' desde {}",
+                        login.getUsername(), request.getRemoteAddr());
+                return credencialesInvalidas(response);
             }
 
 
@@ -156,26 +162,19 @@ public class LoginController {
 
             } catch (BadCredentialsException e) {
                 // Contraseña incorrecta - Registrar intento fallido
-                log.error("Contraseña incorrecta: " + e.getMessage());
+                log.warn("Login rechazado (contraseña incorrecta): usuario '{}' desde {}",
+                        login.getUsername(), request.getRemoteAddr());
 
-                // Registramos el intento fallido
+                // Registramos el intento fallido. El resultado dice si la cuenta quedó
+                // bloqueada por este intento, y eso se anota en el log — pero NO cambia
+                // la respuesta: decirle al que está probando contraseñas que acaba de
+                // bloquear la cuenta le confirma que el usuario existe.
                 Login updatedLogin = this.ldao.registerFailedAttempt(login.getUsername(), request.getRemoteAddr());
-
-                // Preparamos la respuesta
-                response.put("mensaje", "Contraseña incorrecta. Por favor, verifique e intente nuevamente.");
-                response.put("status", "error");
-
-                // Si hay información de intentos fallidos
-                if (updatedLogin != null) {
-
-                    // Si la cuenta fue bloqueada debido a este intento
-                    if (updatedLogin.getCodUsuario() < 0) {
-                        response.put("mensaje", "Su cuenta ha sido bloqueada debido a múltiples intentos fallidos. Por favor, contacte al administrador.");
-                        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-                    }
+                if (updatedLogin != null && updatedLogin.getCodUsuario() < 0) {
+                    log.warn("La cuenta '{}' quedó bloqueada por intentos fallidos", login.getUsername());
                 }
 
-                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+                return credencialesInvalidas(response);
             } catch (Exception e) {
                 // Otros errores durante la autenticación
                 log.error("Error durante la autenticación: " + e.getMessage());
@@ -191,6 +190,24 @@ public class LoginController {
             response.put("status", "error");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * La única respuesta de login fallido que sale del servidor.
+     *
+     * <p>Es el mismo cuerpo y el mismo 401 para las tres causas: usuario que no
+     * existe, cuenta bloqueada y contraseña incorrecta. Que sea un solo método
+     * es a propósito — con tres <em>return</em> sueltos, el próximo que agregue
+     * un caso vuelve a escribir un mensaje distinto sin darse cuenta, y ahí
+     * mismo se reabre la enumeración de usuarios.
+     *
+     * <p>El detalle de qué pasó realmente queda en el log del servidor, que es
+     * donde le sirve al que administra y no al que ataca.
+     */
+    private ResponseEntity<?> credencialesInvalidas(Map<String, Object> response) {
+        response.put("mensaje", "Usuario o contraseña incorrectos.");
+        response.put("status", "error");
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     /**
@@ -220,7 +237,12 @@ public class LoginController {
         Map<String, Object> response = new HashMap<>();
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();  // extraemos la ip de donde se esta logueando
 
-        Login loginTemp = this.ldao.verifyUser(login.getUsername(),  passwordEncoder.encode( login.getPassword2() ), request.getRemoteAddr());
+        // Antes esta llamada mandaba passwordEncoder.encode(...) como @password2 del
+        // SP: un hash BCrypt recién generado, que no coincide con nada guardado. Que
+        // este endpoint funcionara igual es la prueba de que el SP nunca verificó ese
+        // parámetro. Ahora directamente no se manda. Quien verifica es el
+        // authenticationManager de tres líneas más abajo, como siempre.
+        Login loginTemp = this.ldao.verifyUser(login.getUsername(), request.getRemoteAddr());
 
         if( loginTemp.getCodUsuario() <= 0 ){
             response.put("error", "Error al reconocer el usuario");

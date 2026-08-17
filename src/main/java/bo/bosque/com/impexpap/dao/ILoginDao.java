@@ -16,12 +16,15 @@ public interface ILoginDao {
     boolean abmLogin( Login login, String oper );
 
     /**
-     * Para obtener el usuario
-     * @param login
-     * @param password2
-     * @return
+     * Para obtener el usuario y su estado (existe / bloqueado).
+     *
+     * <p>Ya NO recibe la contrasena: el SP no la usaba y mandarla en claro la
+     * dejaba en las trazas del motor. Ver {@code LoginDaoImpl#verifyUser}.
+     *
+     * @param login nombre de usuario
+     * @param ip    IP del cliente, para la bitacora del SP
      */
-    Login verifyUser( String login, String password2, String ip );
+    Login verifyUser( String login, String ip );
 
     /**
      * Procedimiento para verificar los usuarios por nombre
