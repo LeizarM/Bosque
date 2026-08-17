@@ -41,7 +41,6 @@ public class ProveedorExtSapDao implements  IProveedorExtSap {
                     });
         }catch( BadSqlGrammarException e){
             System.out.println("Error: ProveedorExtSapDao en registrarProveedorExtSap, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

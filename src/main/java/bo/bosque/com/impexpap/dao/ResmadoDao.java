@@ -53,7 +53,6 @@ public class ResmadoDao implements IResmado {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: ResmadoDao en registrarLoteProduccion, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

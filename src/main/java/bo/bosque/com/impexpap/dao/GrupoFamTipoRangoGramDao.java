@@ -40,7 +40,6 @@ public class GrupoFamTipoRangoGramDao implements  IGrupoFamTipoRangoGram{
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: GrupoFamTipoRangoGramDao en registrarGrupoFamTipoRangoGram, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

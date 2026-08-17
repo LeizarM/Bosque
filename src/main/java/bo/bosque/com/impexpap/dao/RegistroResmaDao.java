@@ -55,7 +55,6 @@ public class RegistroResmaDao implements IRegistroResma {
                     });
         }catch( BadSqlGrammarException e){
             System.out.println("Error: RegistroResmaDao en registrarRegistroResma, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
@@ -100,7 +99,6 @@ public class RegistroResmaDao implements IRegistroResma {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: RegistroResmaDao en lstEntradaDeMercaderias, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -133,7 +131,6 @@ public class RegistroResmaDao implements IRegistroResma {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: RegistroResmaDao en lstArticuloXEntrada, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

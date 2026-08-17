@@ -50,7 +50,6 @@ public class PrecioPropuestaDao implements IPrecioPropuesta {
 
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: PrecioPropuestaDao en registrarPrecioPropuesta, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

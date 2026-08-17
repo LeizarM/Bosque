@@ -44,7 +44,6 @@ public class MermaDao implements IMerma {
 
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: MermaDao en registrarMerma, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

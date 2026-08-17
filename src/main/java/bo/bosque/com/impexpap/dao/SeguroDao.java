@@ -43,7 +43,6 @@ public class SeguroDao implements ISeguro{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: SeguroDAO en obtenerSeguros,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

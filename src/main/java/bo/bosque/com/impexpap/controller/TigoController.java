@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import bo.bosque.com.impexpap.security.jwt.DatosToken;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,12 +95,19 @@ public class TigoController {
     }
     /**
      * procedimiento para subir la FACTURA TIGO EXCEL
-     * @param file
-     * @param codEmpleado
+     *
+     * <p><b>{@code audUsuario} sale del token, no del formulario.</b> Antes se
+     * recibia como {@code @RequestParam} y ademas <b>daba nombre al archivo</b>
+     * ({@code audUsuario + extension}), asi que el que subia elegia tanto la
+     * fila de auditoria como el archivo que pisaba en {@code uploads/}.
+     *
+     * @param file  Excel de facturas de Tigo
+     * @param auth  identidad del que llama; de aca sale el {@code audUsuario}
      * @return
      */
     @PostMapping("/SubirExcel")
-    public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file, @RequestParam("audUsuario") int audUsuario) {
+    public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file, Authentication auth) {
+        final int audUsuario = DatosToken.codUsuarioDe(auth);
         Map<String, Object> response = new HashMap<>();
 
         if (!file.isEmpty()) {

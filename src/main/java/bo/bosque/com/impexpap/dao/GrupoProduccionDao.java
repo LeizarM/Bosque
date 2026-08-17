@@ -50,7 +50,6 @@ public class GrupoProduccionDao implements  IGrupoProduccion {
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: GrupoProduccionDao en obtenerGrupoProduccion, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

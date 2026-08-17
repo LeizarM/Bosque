@@ -56,7 +56,6 @@ public class EmpleadoDAO implements IEmpleado{
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: EmpleadoDAO en obtenerEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return  lstTemp;
@@ -120,7 +119,6 @@ public class EmpleadoDAO implements IEmpleado{
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: EmpleadoDAO en obtenerEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             emp = new Empleado();
-            this.jdbcTemplate = null;
         }
 
         return emp;
@@ -180,7 +178,6 @@ public class EmpleadoDAO implements IEmpleado{
                     });
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en registroEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             temp = new Empleado();
         }
         return temp.getCodEmpleado();
@@ -212,7 +209,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerListaEmpleadoyDependientes,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -247,7 +243,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerDatosPerEmp,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -270,7 +265,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en listaCumpleEmpleado,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -304,7 +298,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerDatosPerEmp,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             Temp = new Empleado();
-            this.jdbcTemplate = null;
         }
         return Temp;
     }
@@ -339,7 +332,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerDatosPerEmp,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             Temp = new Empleado();
-            this.jdbcTemplate = null;
         }
         return Temp;
     }
@@ -462,7 +454,6 @@ public class EmpleadoDAO implements IEmpleado{
         }catch (BadSqlGrammarException e) {
             System.out.println("Error: PersonaDao en obtenerEmpleadoCargo, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             eCargo = new Empleado();
-            this.jdbcTemplate = null;
         }
 
         return eCargo;
@@ -498,7 +489,6 @@ public class EmpleadoDAO implements IEmpleado{
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: EmpleadoDAO en obtenerCargosEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return  lstTemp;
@@ -583,7 +573,6 @@ public class EmpleadoDAO implements IEmpleado{
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: EmpleadoDAO en obtenerEmpleados, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return  lstTemp;
@@ -649,7 +638,6 @@ public class EmpleadoDAO implements IEmpleado{
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: EmpleadoDAO en obtenerPrestamosAnticiposYMultasEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null; // Cuidado con esto, anular el jdbcTemplate puede romper futuros llamados a este DAO
         }
 
         return lstTemp;

@@ -56,7 +56,6 @@ public class ProductoDao implements IProducto {
 
         }catch( BadSqlGrammarException e ){
             System.out.println("Error: ProductoDao en registrarProducto, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         return resp!=0;
@@ -85,7 +84,6 @@ public class ProductoDao implements IProducto {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: listadoProveedor en ProductoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -111,7 +109,6 @@ public class ProductoDao implements IProducto {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: listadoFamilia en ProductoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -139,7 +136,6 @@ public class ProductoDao implements IProducto {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: listadoFamiliaXGrupo en ProductoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 
@@ -181,7 +177,6 @@ public class ProductoDao implements IProducto {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: cargarDatoFamilia en ProductoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             p = new Producto();
-            this.jdbcTemplate = null;
         }
 
         return p;

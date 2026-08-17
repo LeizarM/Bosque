@@ -53,7 +53,6 @@ public class SolicitudChoferDao implements ISolicitudChofer {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: SolicitudChoferDao en registrarSolicitudChofer, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
@@ -87,7 +86,6 @@ public class SolicitudChoferDao implements ISolicitudChofer {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: SolicitudChoferDao en lstSolicitudesXEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -114,7 +112,6 @@ public class SolicitudChoferDao implements ISolicitudChofer {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: SolicitudChoferDao en lstCoches, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

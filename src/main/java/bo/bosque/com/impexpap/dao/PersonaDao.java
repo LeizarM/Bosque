@@ -64,7 +64,6 @@ public class PersonaDao implements IPersona {
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: PersonaDao en obtenerDatosPersonales, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             per = new Persona();
-            this.jdbcTemplate = null;
         }
 
         return per;
@@ -132,7 +131,6 @@ public class PersonaDao implements IPersona {
                     });
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: PersonaDao en obtenerUltimoPersona, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             temp = new Persona();
         }
         System.out.println("el codigo ultima persona es "+temp.getCodPersona()
@@ -195,7 +193,6 @@ public class PersonaDao implements IPersona {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerListaPersonas,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -241,7 +238,6 @@ public class PersonaDao implements IPersona {
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: PersonaDao en obtenerDatosPersonales, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             per = new Persona();
-            this.jdbcTemplate = null;
         }
 
         return per;
@@ -272,7 +268,6 @@ public class PersonaDao implements IPersona {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerListaPersonas,DataAccessException->"+e.getMessage()+".SQL code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

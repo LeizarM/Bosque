@@ -52,7 +52,6 @@ public class AutorizacionDao implements IAutorizacion{
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: VistaDaoImpl en AutorizacionDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<Autorizacion>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

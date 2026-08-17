@@ -65,7 +65,6 @@ public class RegistroDanoBobinaDetalleDao implements  IRegistroDanoBobinaDetalle
                     });
         }catch( BadSqlGrammarException e){
             System.out.println("Error: RegistroDanoBobinaDetalleDao en registrarRegistroDanoBobinaDetalle, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

@@ -39,7 +39,6 @@ public class CostoSugDao implements ICostoSug {
                     });
         }catch (BadSqlGrammarException e){
             System.out.println("Error: CostoSugDao en registrarCostoSug, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

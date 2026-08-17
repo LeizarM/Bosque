@@ -74,7 +74,6 @@ public class PrecioDao implements  IPrecio {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: listPrecioToneladasActuales en PrecioDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 

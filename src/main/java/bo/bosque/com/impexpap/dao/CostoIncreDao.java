@@ -44,7 +44,6 @@ public class CostoIncreDao implements  ICostoIncre {
                     });
         }catch (BadSqlGrammarException e){
             System.out.println("Error: CostoIncreDao en registrarCostoIncre, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
@@ -79,7 +78,6 @@ public class CostoIncreDao implements  ICostoIncre {
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: costoTransporteCiudad en CostoIncreDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return lstTemp;

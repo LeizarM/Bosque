@@ -48,7 +48,6 @@ public class ArticuloPropuestoDao implements IArticuloPropuesto {
 
         }catch (BadSqlGrammarException e){
             System.out.println("Error: ArticuloPropuestoDao en registrarArticuloPropuesto, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
@@ -83,7 +82,6 @@ public class ArticuloPropuestoDao implements IArticuloPropuesto {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: listarArticulosXFamilia en ArticuloPropuestoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -130,7 +128,6 @@ public class ArticuloPropuestoDao implements IArticuloPropuesto {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: listarArticulosPropuesta en ArticuloPropuestoDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

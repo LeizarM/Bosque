@@ -59,7 +59,6 @@ public class VistaUsuarioDao implements  IVistaUsuario{
 
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: VistaUsuarioDao en registrarVistaUsuario, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

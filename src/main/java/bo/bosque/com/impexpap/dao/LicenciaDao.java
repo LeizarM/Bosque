@@ -49,7 +49,6 @@ public class LicenciaDao implements  ILicencia {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: LicenciaDao en obtenerLicencia, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 
@@ -76,7 +75,6 @@ public class LicenciaDao implements  ILicencia {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: LicenciaDao en registrarLicencia, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         return resp != 0;

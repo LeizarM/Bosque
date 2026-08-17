@@ -44,7 +44,6 @@ public class AfiliacionSeguroDao implements IAfiliacionSeguro {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: EmpleadoDAO en obtenerEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             afSeg = new AfiliacionSeguro();
-            this.jdbcTemplate = null;
         }
         return afSeg;
     }
@@ -67,7 +66,6 @@ public class AfiliacionSeguroDao implements IAfiliacionSeguro {
                     });
         }catch(BadSqlGrammarException e){
             System.out.println("Error: AfiliacionSeguroDAO en afiliarSeguroEmpleado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         return resp !=0;

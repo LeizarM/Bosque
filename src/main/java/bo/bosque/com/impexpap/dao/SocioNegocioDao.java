@@ -51,7 +51,6 @@ public class SocioNegocioDao implements  ISocionegocio {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: SocioNegocioDao en obtenerSocioNegocio, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 

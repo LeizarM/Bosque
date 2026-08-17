@@ -52,7 +52,6 @@ public class TelefonoDao implements ITelefono {
          }catch (BadSqlGrammarException e) {
              System.out.println("Error: EmailDao en obtenerCorreos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
              lstTemp = new ArrayList<>();
-             this.jdbcTemplate = null;
          }
 
         return lstTemp;
@@ -81,7 +80,6 @@ public class TelefonoDao implements ITelefono {
         }catch (BadSqlGrammarException e) {
             System.out.println("Error: EmailDao en obtenerCorreos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return lstTemp;
@@ -109,7 +107,6 @@ public class TelefonoDao implements ITelefono {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: TelefonoDao en registrarTelefono, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         // Ahora solo devuelve true si se afectó al menos 1 fila.
@@ -135,7 +132,6 @@ public class TelefonoDao implements ITelefono {
                     });
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: PersonaDao en obtenerUltimoPersona, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             temp = new Telefono();
         }
         return temp.getCodPersona();
@@ -170,7 +166,6 @@ public class TelefonoDao implements ITelefono {
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: EmailDao en obtenerCorreos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             Temp = null;
-            this.jdbcTemplate = null;
         }
         return Temp;
     }

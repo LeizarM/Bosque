@@ -68,7 +68,6 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: TigoEjecutadoDao en obtenerTigoEjecutadoTotalXCuenta, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -124,7 +123,6 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: TigoEjecutadoDao en obtenerTigoEjecutadoTotalXCuenta, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -157,7 +155,6 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: TigoEjecutadoDao en obtenerDetalleXCuentas, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return lstTemp;
@@ -180,7 +177,6 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
             System.out.println("Error: TigoEjecutadoDao en generarAnticiposTigo, DataAccessException->"
                     + e.getMessage() + ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             resultado = 0;
-            this.jdbcTemplate = null;
         }
 
         return resultado != 0;
@@ -267,7 +263,6 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         }catch (BadSqlGrammarException e){
             System.out.println("Error: TigoEjecutadoDao en obtenerTigoEjecutado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -301,7 +296,6 @@ public class TigoEjecutadoDao implements  ITigoEjecutado{
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: TigoEjecutadoDao en obtenerArbolDetallado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }

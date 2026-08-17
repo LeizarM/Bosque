@@ -53,7 +53,6 @@ public class UsuarioBtnDao implements  IUsuarioBtn {
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: UsuarioBtnDao en botonesXUsuario, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 
@@ -89,7 +88,6 @@ public class UsuarioBtnDao implements  IUsuarioBtn {
 
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: UsuarioBtnDao en registroBoton, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

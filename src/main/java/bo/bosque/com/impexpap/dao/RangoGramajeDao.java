@@ -42,7 +42,6 @@ public class RangoGramajeDao implements IRangoGramaje {
                     });
         }catch( BadSqlGrammarException e){
             System.out.println("Error: RangoGramajeDao en registrarRangoGramaje, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

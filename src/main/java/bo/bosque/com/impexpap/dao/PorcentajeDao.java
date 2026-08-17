@@ -41,7 +41,6 @@ public class PorcentajeDao implements IPorcentaje {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: PorcentajeDao en registrarPorcentaje, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

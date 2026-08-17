@@ -42,7 +42,6 @@ public class TipoDao implements ITipo {
 
         }catch (  BadSqlGrammarException e){
             System.out.println("Error: TipoDao en registrarTipo, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

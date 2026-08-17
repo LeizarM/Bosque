@@ -52,7 +52,6 @@ public class VistaDaoImpl implements IVistaDao {
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: VistaDaoImpl en obtainMenuXUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<Vista>();
-            this.jdbcTemplate = null;
         }
 
         return  lstTemp;
@@ -79,7 +78,6 @@ public class VistaDaoImpl implements IVistaDao {
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: VistaDaoImpl en obtainRoutes, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<Vista>();
-            this.jdbcTemplate = null;
         }
 
         return  lstTemp;

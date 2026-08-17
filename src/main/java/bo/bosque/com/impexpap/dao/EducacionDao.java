@@ -38,7 +38,6 @@ public class EducacionDao implements IEducacion  {
                     });
         }catch(BadSqlGrammarException e){
             System.out.println("Error: EducacionDao  en registrarEducacion, DataAccessException->"+e.getMessage()+",SQL Code->"+((SQLException)e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp=0;
         }
         return resp !=0;
@@ -68,7 +67,6 @@ public class EducacionDao implements IEducacion  {
         }catch(BadSqlGrammarException e){
             System.out.println("Error: EducacionDao eb obtenerEducacion, DataAccessException->"+e.getMessage()+",SQL Code->"+((SQLException)e.getCause()).getErrorCode());
             lstTemp= new ArrayList<>();
-            this.jdbcTemplate= null;
         }
         return lstTemp;
     }

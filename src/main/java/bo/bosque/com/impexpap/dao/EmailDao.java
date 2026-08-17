@@ -46,7 +46,6 @@ public class EmailDao implements IEmail {
         }catch (BadSqlGrammarException e) {
             System.out.println("Error: EmailDao en obtenerCorreos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return lstTemp;
@@ -75,7 +74,6 @@ public class EmailDao implements IEmail {
 
             }catch ( BadSqlGrammarException e ){
                 System.out.println("Error: EmailDao en registrarEmail, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-                this.jdbcTemplate = null;
                 resp = 0;
             }
             return resp != 0;
@@ -99,7 +97,6 @@ public class EmailDao implements IEmail {
                     });
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: EmailDao en obtenerUltimoPersona, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             temp = new Email();
         }
         return temp.getCodPersona();

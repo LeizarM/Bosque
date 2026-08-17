@@ -89,7 +89,6 @@ public class CargoSucursalDao implements ICargoSucursal {
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: CargoSucursalDao en obtenerSucursalesXEmpresa, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return lstTemp;
@@ -124,7 +123,6 @@ public class CargoSucursalDao implements ICargoSucursal {
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: CargoSucursalDao en obtenerCargoEnSucursales, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
 
         return lstTemp;

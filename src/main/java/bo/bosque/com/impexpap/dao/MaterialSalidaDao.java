@@ -55,7 +55,6 @@ public class MaterialSalidaDao implements IMaterialSalida {
 
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: MaterialSalidaDao en registrarMaterialSalida, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

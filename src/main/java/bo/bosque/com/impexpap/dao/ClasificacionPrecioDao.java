@@ -44,7 +44,6 @@ public class ClasificacionPrecioDao implements IClasificacionPrecio {
                    });
         }catch (BadSqlGrammarException e){
             System.out.println("Error: ClasificacionPrecioDao en registrarClasificacionPrecio, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

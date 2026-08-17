@@ -14,7 +14,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import bo.bosque.com.impexpap.security.jwt.DatosToken;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -992,13 +994,21 @@ public class PagosExtranjerosController {
      * no son atómicos (filesystem + SQL Server), si el SP falla después de guardar el archivo,
      * se elimina el archivo manualmente para mantener consistencia.
      *
+     * <p><b>{@code audUsuario} sale del token, no del formulario.</b> Antes se
+     * recibia como {@code @RequestParam}, o sea que el que subia el comprobante
+     * elegia a nombre de quien quedaba registrado. En un modulo de pagos al
+     * exterior eso invalida la pista de auditoria entera: cualquiera podia
+     * adjudicarle una operacion a otro. El campo ya no se lee del request.
+     *
      * @param idTransaccion ID de la transacción a la que se asocia el voucher
      * @param file          Archivo multipart (PDF, JPG, JPEG o PNG)
-     * @param audUsuario    ID del usuario que realiza la operación
+     * @param auth          identidad del que llama; de aca sale el {@code audUsuario}
      * @return 201 Created con la ruta relativa del archivo guardado
      */
     @PostMapping(value = "/transacciones/{idTransaccion}/voucher", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<?>> subirVoucher(@PathVariable long idTransaccion, @RequestParam("file") MultipartFile file, @RequestParam("audUsuario") int audUsuario) {
+    public ResponseEntity<ApiResponse<?>> subirVoucher(@PathVariable long idTransaccion, @RequestParam("file") MultipartFile file, Authentication auth) {
+
+        final int audUsuario = DatosToken.codUsuarioDe(auth);
 
         // Validar que el archivo no esté vacío
         if (file == null || file.isEmpty()) {
@@ -1059,12 +1069,22 @@ public class PagosExtranjerosController {
      * <b>Nota:</b> Este es el único endpoint GET del controlador. Retorna el archivo
      * directamente (no un ApiResponse) para que el navegador pueda mostrarlo inline.
      *
+     * <p><b>La empresa sale del token, no del query string.</b> Antes era un
+     * {@code @RequestParam} opcional con default {@code 0}: lo elegia el que
+     * llamaba, y con {@code 0} el filtro no filtraba nada. Con eso, cualquier
+     * usuario autenticado recorria {@code idTransaccion} de 1 en adelante y se
+     * bajaba los comprobantes bancarios de TODAS las empresas. Ahora se usa el
+     * {@code codEmpresa} que viaja firmado en el JWT, que es el mismo con el que
+     * el usuario esta trabajando en pantalla.
+     *
      * @param idTransaccion ID de la transacción cuyo voucher se desea obtener
-     * @param codEmpresa    Código de empresa (opcional, default 0) para filtrar la búsqueda
+     * @param auth          identidad del que llama; de aca sale el {@code codEmpresa}
      * @return El archivo del voucher con Content-Type apropiado, o 404 si no existe
      */
     @GetMapping("/transacciones/{idTransaccion}/voucher")
-    public ResponseEntity<?> obtenerVoucher(@PathVariable long idTransaccion, @RequestParam(value = "codEmpresa", required = false, defaultValue = "0") long codEmpresa) {
+    public ResponseEntity<?> obtenerVoucher(@PathVariable long idTransaccion, Authentication auth) {
+
+        final long codEmpresa = DatosToken.de(auth).getCodEmpresa();
 
         // Buscar la transacción y verificar que tenga voucher
         Transacciones trx = transaccionesDao.obtenerTransaccionPorId(idTransaccion, codEmpresa);

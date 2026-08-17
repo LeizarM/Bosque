@@ -49,7 +49,6 @@ public class PrestamoEstadoDao implements IPrestamoEstado {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: PrestamoEstadoDao en registrarPrestamoEstado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

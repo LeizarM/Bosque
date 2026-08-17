@@ -48,7 +48,6 @@ public class MaterialIngresoDao implements IMaterialIngreso {
 
         }catch ( DataAccessException e ){
             System.out.println("Error: MaterialIngresoDao en registrarMaterialIngreso, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

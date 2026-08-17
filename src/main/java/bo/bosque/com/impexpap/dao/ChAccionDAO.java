@@ -116,7 +116,6 @@ public class ChAccionDAO  implements IChAccion {
           }  catch (BadSqlGrammarException e) {
               System.out.println("Error: listAccions en obtainMenuXUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
               lstTemp = new ArrayList<ChAccion>();
-              this.jdbcTemplate = null;
           }
     	
     	return lstTemp ;
@@ -201,7 +200,6 @@ public class ChAccionDAO  implements IChAccion {
         }  catch (BadSqlGrammarException e) {
             System.out.println("Error: listAccions en obtainMenuXUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<ChAccion>();
-            this.jdbcTemplate = null;
         }
   	
     	return lstTemp ;
@@ -243,7 +241,6 @@ public class ChAccionDAO  implements IChAccion {
 			}  catch (BadSqlGrammarException e) {
 			    System.out.println("Error: registroAccion en obtainMenuXUser, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
 			    accionTemp = new  ChAccion();
-			    this.jdbcTemplate = null;
 			}
 
         return accionTemp;

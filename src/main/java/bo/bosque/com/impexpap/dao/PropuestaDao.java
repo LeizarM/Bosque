@@ -53,7 +53,6 @@ public class PropuestaDao implements  IPropuesta{
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: PropuestaDao en registrarPropuesta, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
@@ -84,7 +83,6 @@ public class PropuestaDao implements  IPropuesta{
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: ultimaIdPropuesta en PropuestaDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             temp = new Propuesta();
-            this.jdbcTemplate = null;
         }
 
         assert temp != null;

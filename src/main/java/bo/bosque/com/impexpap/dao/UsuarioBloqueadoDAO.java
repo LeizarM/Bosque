@@ -31,7 +31,6 @@ public class UsuarioBloqueadoDAO implements IUsuarioBloqueado {
                     );
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: UsuarioBloqueadoDAO en insertar advertencia, DataAccessException->" + e.getMessage() + ",SQL code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         return resp !=0;
@@ -54,7 +53,6 @@ public class UsuarioBloqueadoDAO implements IUsuarioBloqueado {
             );
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: UsuarioBloqueadoDAO en actualizarAdvertencia, DataAccessException->" + e.getMessage() + ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
         return resp != 0;
@@ -73,7 +71,6 @@ public class UsuarioBloqueadoDAO implements IUsuarioBloqueado {
             return true;
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: UsuarioBloqueadoDAO en eliminarAdvertencia, DataAccessException->" + e.getMessage() + ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             return false;
         }
     }

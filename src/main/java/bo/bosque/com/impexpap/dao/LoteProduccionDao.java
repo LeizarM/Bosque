@@ -73,7 +73,6 @@ public class LoteProduccionDao implements ILoteProduccion {
 
         }catch ( BadSqlGrammarException e){
             System.out.println("Error: LoteProduccionDao en registrarLoteProduccion, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
@@ -122,7 +121,6 @@ public class LoteProduccionDao implements ILoteProduccion {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: LoteProduccionDao en obtenerLotesProduccionNew, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
     }
@@ -154,7 +152,6 @@ public class LoteProduccionDao implements ILoteProduccion {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: LoteProduccionDao en obtenerArticulos, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 
@@ -185,7 +182,6 @@ public class LoteProduccionDao implements ILoteProduccion {
         }catch (BadSqlGrammarException e){
             System.out.println("Error: LoteProduccionDao en obtenerDocNumXEmpresa, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
             lstTemp = new ArrayList<>();
-            this.jdbcTemplate = null;
         }
         return lstTemp;
 

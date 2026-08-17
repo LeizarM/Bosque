@@ -53,7 +53,6 @@ public class RegistroResmaDetalleDao implements IRegistroResmaDetalle {
                     });
         }catch( BadSqlGrammarException e){
             System.out.println("Error: RegistroResmaDetalleDao en registrarRegistroResmaDetalle, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

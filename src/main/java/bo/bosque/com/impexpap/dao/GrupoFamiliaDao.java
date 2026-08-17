@@ -42,7 +42,6 @@ public class GrupoFamiliaDao implements IGrupoFamiliaSap{
                     });
         }catch(BadSqlGrammarException e){
             System.out.println("Error: GrupoFamiliaDao en registrarGrupoFamiliaSap, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 

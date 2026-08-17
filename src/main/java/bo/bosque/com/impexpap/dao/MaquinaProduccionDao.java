@@ -48,7 +48,6 @@ public class MaquinaProduccionDao implements IMaquinaProduccion {
             }catch ( BadSqlGrammarException e){
                 System.out.println("Error: MaquinaProduccionDao en obtenerMaquina, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
                 lstTemp = new ArrayList<>();
-                this.jdbcTemplate = null;
             }
             return lstTemp;
         }

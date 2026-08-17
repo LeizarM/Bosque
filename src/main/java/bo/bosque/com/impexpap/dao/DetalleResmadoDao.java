@@ -49,7 +49,6 @@ public class DetalleResmadoDao implements  IDetalleResmado {
 
         }catch ( BadSqlGrammarException e ){
             System.out.println("Error: DetalleResmadoDao en registrarDetalleResmado, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            this.jdbcTemplate = null;
             resp = 0;
         }
 
