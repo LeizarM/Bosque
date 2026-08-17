@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptPapeletaPago" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="10" bottomMargin="10" uuid="3927a975-b0e2-4724-8075-1f76b2079d82">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -686,29 +686,88 @@
 				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
 				<textFieldExpression><![CDATA["NIT " + $F{Nit}]]></textFieldExpression>
 			</textField>
+			<!-- ================== LOGO POR EMPRESA ==================
+			     El archivo se arma como  <RUTA_LOGOS>logos/<codEmpresa>.png
+			     RUTA_LOGOS cae por defecto en UPLOADS_DIR, que JasperReportExport
+			     entrega ya con la barra final (en el contenedor, /app/uploads/).
+
+			     'logos' va en MINUSCULAS: asi se llama el directorio dentro del
+			     volumen bosque-uploads. En Windows daria igual, en Linux no.
+
+			     onErrorType="Blank": si a una empresa le falta el .png, queda el
+			     hueco y el PDF se genera igual. Sin esto, un logo faltante tira
+			     el reporte entero.
+
+			     scaleImage="RetainShape": los logos tienen proporciones muy
+			     distintas (1.png es 400x155, 5.png es 1417x850). Con FillFrame se
+			     deformarian; asi entran completos y centrados.
+
+			     Las alturas estan al maximo que permite cada hueco: en la
+			     cabecera el "NIT" arranca en y=40 (y=420 en la mitad de abajo), y
+			     en el pie de firma el "NIT" esta en y=346 / y=730. Con h=20 el
+			     logo de ESPPAPEL salia de 33x20 px — poco mas de un centimetro
+			     impreso, ilegible.
+			     ====================================================== -->
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+				<reportElement x="10" y="0" width="120" height="38" uuid="9a1f0e10-1111-4c22-9d33-aa0000000004"/>
+				<imageExpression><![CDATA[new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png")]]></imageExpression>
+			</image>
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+				<reportElement x="340" y="322" width="110" height="23" uuid="9a1f0e10-1111-4c22-9d33-aa0000000003"/>
+				<imageExpression><![CDATA[new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png")]]></imageExpression>
+			</image>
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+				<reportElement x="10" y="386" width="120" height="33" uuid="9a1f0e10-1111-4c22-9d33-aa0000000002"/>
+				<imageExpression><![CDATA[new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png")]]></imageExpression>
+			</image>
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+				<reportElement x="340" y="706" width="110" height="23" uuid="9a1f0e10-1111-4c22-9d33-aa0000000001"/>
+				<imageExpression><![CDATA[new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png")]]></imageExpression>
+			</image>
+			<!-- ============ RESPALDO: NOMBRE DE LA EMPRESA ============
+			     Ocupa el MISMO recuadro que el logo y se imprime SOLO cuando el
+			     .png no existe. Nunca aparecen los dos, y nunca ninguno.
+
+			     Existe porque no todas las empresas tienen logo cargado. Con solo
+			     el <image> y onErrorType="Blank", la papeleta de esas empresas
+			     salia sin logo Y sin nombre: un documento de pago que el empleado
+			     firma, sin decir quien paga.
+
+			     La condicion mira el disco (File.exists()) y no una lista fija: el
+			     dia que se suba el logo que falta, el texto desaparece solo, sin
+			     tocar el reporte ni recompilar.
+			     ======================================================== -->
 			<textField textAdjust="ScaleFont">
-				<reportElement x="20" y="21" width="100" height="19" uuid="73f6fc33-3f38-4740-bd67-a2a4339441c4"/>
+				<reportElement x="10" y="0" width="120" height="38" uuid="7c2b4d80-2222-4e33-8a44-bb0000000004">
+					<printWhenExpression><![CDATA[!new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png").exists()]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="345" y="327" width="100" height="19" uuid="e70659eb-3f35-4559-bdd8-ed36108b6212"/>
+				<reportElement x="340" y="322" width="110" height="23" uuid="7c2b4d80-2222-4e33-8a44-bb0000000003">
+					<printWhenExpression><![CDATA[!new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png").exists()]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="345" y="711" width="100" height="19" uuid="82f5ac2d-6133-48d1-8221-7f6ed52ca3f7"/>
+				<reportElement x="10" y="386" width="120" height="33" uuid="7c2b4d80-2222-4e33-8a44-bb0000000002">
+					<printWhenExpression><![CDATA[!new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png").exists()]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Empresa}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont">
-				<reportElement x="20" y="401" width="100" height="19" uuid="bdebf23d-1772-4760-a60b-bef035d26408"/>
+				<reportElement x="340" y="706" width="110" height="23" uuid="7c2b4d80-2222-4e33-8a44-bb0000000001">
+					<printWhenExpression><![CDATA[!new java.io.File($P{RUTA_LOGOS} + "logos/" + $F{codEmpresa} + ".png").exists()]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
