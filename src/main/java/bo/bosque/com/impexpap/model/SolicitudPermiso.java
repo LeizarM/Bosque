@@ -30,6 +30,7 @@ public class SolicitudPermiso {
     // ── Auxiliares del SELECT de p_list_Solicitudes (acción 'P') ──────────
     private String nombreEmpleado;  // apPaterno + apMaterno + nombres
     private String cargoEmpleado;   // empCargo.cargoDescripcion
+    private String sucursalEmpleado; // suc.nombre
     private Date   fechaSolicitud;  // audFechaI de la solicitud
     private String pasoActual;      // "Esperando Jefe Inmediato" | "Esperando Autorización de RRHH"
     private int codUsuarioLogueado;

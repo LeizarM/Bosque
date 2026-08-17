@@ -90,6 +90,12 @@ public class SolicitudPermisoDao implements ISolicitudPermiso {
         return this.spHelper.ejecutarListado("p_list_SolicitudVacacion", filtro, "A", SolicitudPermiso.class);
     }
 
+    @Override
+    public List<SolicitudPermiso> obtenerPermisosProximosDashboard(SolicitudPermiso filtro) {
+        return spHelper.ejecutarListado("p_list_Permiso", filtro, "A1", SolicitudPermiso.class);
+    }
+
+
     /**
      * Obtendra una lista de tipo de permiso
      *

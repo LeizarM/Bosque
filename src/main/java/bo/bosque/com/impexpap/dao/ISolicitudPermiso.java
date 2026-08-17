@@ -27,6 +27,10 @@ public interface ISolicitudPermiso {
     List<SolicitudPermiso> listarMisSolicitudes(SolicitudPermiso filtro);
     /** Previsualizar saldo de vacaciones (ACCION 'C') */
     List<SolicitudPermiso> previsualizarSaldo(SolicitudPermiso filtro);
+    
+    /** Obtener permisos y vacaciones proximos para el Dashboard (ACCION 'A1') */
+    List<SolicitudPermiso> obtenerPermisosProximosDashboard(SolicitudPermiso filtro);
+
     /**
      * lista tipo permiso
      * @return

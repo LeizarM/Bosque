@@ -150,6 +150,18 @@ public class VacacionController {
     }
 
     /**
+     * OBTENER PERMISOS Y VACACIONES PROXIMOS PARA EL DASHBOARD
+     *
+     * @param
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/proximosPermisos")
+    public ResponseEntity<ApiResponse<?>> proximosDashboard(@RequestBody SolicitudPermiso filtro) {
+        return procesarListaCambios(solicitudDao.obtenerPermisosProximosDashboard(filtro));
+    }
+
+    /**
      * Devolera una lista de los tipos del permiso
      *
      * @return
