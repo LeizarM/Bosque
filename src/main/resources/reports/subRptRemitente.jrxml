@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" columnCount="2" printOrder="Horizontal" pageWidth="360" pageHeight="70" orientation="Landscape" columnWidth="160" columnSpacing="40" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="95ec9d48-f4a9-44bd-8908-e3c352e144bf">
+	<property name="ireport.zoom" value="4.707642565081505"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="nroCite" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="idTipoDoc" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="idDocumento" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[execute p_list_registroDoc @nroCite=$P{nroCite}, @idTipoDoc=$P{idTipoDoc},@idDocumento=$P{idDocumento} ,@ACCION='E']]>
+	</queryString>
+	<field name="remitente" class="java.lang.String"/>
+	<field name="cargoRemitente" class="java.lang.String"/>
+	<detail>
+		<band height="70" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="1" y="24" width="159" height="22" isPrintWhenDetailOverflows="true" uuid="a864ba72-53a1-471f-bfc5-70421bd903d9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+					<paragraph lineSpacing="Proportional"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{remitente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="1" y="45" width="159" height="25" isPrintWhenDetailOverflows="true" uuid="08e81ea5-03d3-4047-af53-61f93f6d2ea4"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Arial" size="8" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+					<paragraph lineSpacing="Proportional" tabStopWidth="30"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cargoRemitente}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

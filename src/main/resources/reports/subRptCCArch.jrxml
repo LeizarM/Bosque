@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="200" pageHeight="100" columnWidth="200" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d003e95b-45a6-44e9-9c3e-e0e0f7610f30">
+	<property name="ireport.zoom" value="4.177248169415657"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="nroCite" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="idTipoDoc" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="idDocumento" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[execute p_list_registroDoc @nroCite=$P{nroCite}, @idTipoDoc=$P{idTipoDoc},@idDocumento=$P{idDocumento} ,@ACCION='D']]>
+	</queryString>
+	<field name="copiaArch" class="java.lang.String"/>
+	<detail>
+		<band height="8" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="0" width="199" height="8" uuid="ab98334c-ce10-4a1d-85d1-b3475fc2a311"/>
+				<textElement verticalAlignment="Middle">
+					<font size="6" isBold="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{copiaArch}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

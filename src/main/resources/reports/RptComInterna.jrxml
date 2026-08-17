@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="63ae61af-b619-4cd2-aea6-e6367004c4d0">
+	<property name="ireport.zoom" value="1.2418426461183125"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="175"/>
+	<parameter name="idDocumento" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nroCite" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="idTipoDoc" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\Compartido\\Bosque v2\\web\\Bosque\\reportes\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logoEmpresa" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[execute p_list_registroDoc @idDocumento = $P{idDocumento}, @nroCite = $P{nroCite}, @idTipoDoc =$P{idTipoDoc} ,@ACCION = 'C']]>
+	</queryString>
+	<field name="idTipoDoc" class="java.lang.Long"/>
+	<field name="codUsuario" class="java.lang.Long"/>
+	<field name="cargoRedactor" class="java.lang.String"/>
+	<field name="nombreCompletoRedactor" class="java.lang.String"/>
+	<field name="ciudad" class="java.lang.String"/>
+	<field name="area" class="java.lang.String"/>
+	<field name="tipo" class="java.lang.String"/>
+	<field name="nroCite" class="java.lang.Integer"/>
+	<field name="cite" class="java.lang.String"/>
+	<field name="fechaDoc" class="java.sql.Date"/>
+	<field name="dirigido" class="java.lang.String"/>
+	<field name="cargoDirigido" class="java.lang.String"/>
+	<field name="referencia" class="java.lang.String"/>
+	<field name="asunto" class="java.lang.String"/>
+	<field name="cuerpo" class="java.lang.String"/>
+	<field name="gestion" class="java.lang.Integer"/>
+	<field name="direccion" class="java.lang.String"/>
+	<field name="web" class="java.lang.String"/>
+	<field name="mesLiteral" class="java.lang.String"/>
+	<title>
+		<band height="205" splitType="Stretch">
+			<staticText>
+				<reportElement x="172" y="75" width="234" height="29" uuid="3450f891-11e4-4899-a427-68407919ba71"/>
+				<textElement>
+					<font size="18" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[COMUNICACION INTERNA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="68" y="140" width="52" height="16" uuid="75a0ee5c-45e0-4fc0-9bda-f7a4c66c28b0"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Para:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="68" y="173" width="41" height="16" uuid="1f9fe90b-c6f6-4a3f-9898-5e5723c9c492"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[De:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="140" width="390" height="16" uuid="35aadc22-d932-4081-9873-3744f1dd1a54"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dirigido}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="120" y="156" width="390" height="16" uuid="a1f0d097-b770-4663-b421-454d499f06a6"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cargoDirigido}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="68" y="29" width="134" height="46" uuid="827bae03-a11e-4836-b419-fb15be330d9a"/>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="221" y="104" width="100" height="20" uuid="1fc9792e-1566-4acf-a02a-bec6ea5521a4"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cite}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="122" y="173" width="388" height="16" uuid="202a40eb-7807-4da0-b8db-183157d9a6cc"/>
+				<textElement>
+					<font size="11" isBold="false" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreCompletoRedactor}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="121" y="189" width="389" height="16" uuid="b7694bd2-8308-4407-80da-28ff0d6b671c"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cargoRedactor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="34" splitType="Stretch">
+			<subreport>
+				<reportElement x="120" y="0" width="390" height="31" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" uuid="bee9d3e8-a92f-40c5-86d2-456e64354994"/>
+				<subreportParameter name="idDocumento">
+					<subreportParameterExpression><![CDATA[$P{idDocumento}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="nroCite">
+					<subreportParameterExpression><![CDATA[$P{nroCite}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="IdTipoDoc">
+					<subreportParameterExpression><![CDATA[$P{idTipoDoc}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptCopiaEncabezado.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="68">
+			<staticText>
+				<reportElement x="67" y="2" width="53" height="20" uuid="6117e27b-fa67-43ba-ad3e-f7f8f3d036c2"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Fecha:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="67" y="22" width="53" height="20" uuid="07477255-c5c6-4e1e-bf50-73a3300a64ab"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Asunto:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="120" y="2" width="390" height="20" uuid="879f56fa-159c-41ac-b331-e5f72cae9e0e"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaDoc}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="120" y="22" width="390" height="36" uuid="f6ee9ffc-f493-499c-aaa7-9807ccd13940"/>
+				<textElement>
+					<font size="11" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{asunto}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="50" y="62" width="489" height="1" uuid="de8956f3-6e1f-43d3-90c1-86cda5a0cf92"/>
+				<graphicElement>
+					<pen lineWidth="2.25" lineStyle="Double"/>
+				</graphicElement>
+			</line>
+		</band>
+		<band height="302">
+			<subreport>
+				<reportElement x="150" y="255" width="370" height="44" uuid="8f27d8eb-9bef-48ff-a7a4-d11f58b35c04"/>
+				<subreportParameter name="nroCite">
+					<subreportParameterExpression><![CDATA[$P{nroCite}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="idTipoDoc">
+					<subreportParameterExpression><![CDATA[$P{idTipoDoc}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="idDocumento">
+					<subreportParameterExpression><![CDATA[$P{idDocumento}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptRemitente.jasper"]]></subreportExpression>
+			</subreport>
+			<textField>
+				<reportElement isPrintRepeatedValues="false" x="68" y="1" width="452" height="254" uuid="1d354aaf-754c-49b9-8857-07e74f1d4a24"/>
+				<textElement textAlignment="Justified" verticalAlignment="Middle" markup="html">
+					<font fontName="Arial" size="8" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuerpo}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="52">
+			<subreport>
+				<reportElement x="67" y="4" width="67" height="48" uuid="421082bc-4398-4221-b037-d6b48f7621ea"/>
+				<subreportParameter name="nroCite">
+					<subreportParameterExpression><![CDATA[$P{nroCite}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="idTipoDoc">
+					<subreportParameterExpression><![CDATA[$P{idTipoDoc}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="idDocumento">
+					<subreportParameterExpression><![CDATA[$P{idDocumento}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subRptCCArch.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
