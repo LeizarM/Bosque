@@ -66,7 +66,7 @@ public class WhatsAppService {
     @Value("${openwa.session-id:58812227-7ca1-4205-b5c2-7dbc01870fc9}")
     private String sessionId;
 
-    @Value("${openwa.api-key:dev-admin-key}")
+    @Value("${openwa.api-key:}")
     private String apiKey;
 
     @Value("${openwa.default-phone:59178888274@c.us}")

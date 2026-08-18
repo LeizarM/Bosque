@@ -64,13 +64,13 @@ Generar: `openssl rand -base64 64`. Borrar `JwtConfig.java` entero (`RSA_PUBLIC`
 `src/main/resources/application.properties:23` · `utils/ClassGenerator.java:16-19` · `bin/src/main/resources/application.properties:4-5`
 
 ```properties
-spring.datasource.password=${DB_PASSWORD:sapbus1n3ss}   # el default ES la clave real
+spring.datasource.password=${DB_PASSWORD:<CLAVE-ROTADA>}   # el default ES la clave real
 ```
 
 ```java
 private static final String DATABASE_URL  = "jdbc:sqlserver://192.168.3.116:1433;databaseName=BOSQUE-2_0;?useSSL=false";
 private static final String DATABASE_USER = "sa";
-private static final String DATABASE_PASSWORD = "sapbus1n3ss";
+private static final String DATABASE_PASSWORD = "<CLAVE-ROTADA>";
 ```
 
 `bin/src/main/resources/application.properties` la tiene **sin siquiera la envoltura de variable de entorno**. `sa` es sysadmin: control total del motor, no solo de `BOSQUE-2_0`.
@@ -523,7 +523,7 @@ Cambio sugerido: reemplazar `spring-boot-starter-data-jdbc` por `spring-boot-sta
 
 ### Directorio `bin/` — 375 archivos, prioridad máxima
 
-Árbol completo del proyecto duplicado y versionado: `.class` compilados, `maven-wrapper.jar`, `mvnw`, `pom.xml`, `.idea/` y **`bin/src/main/resources/application.properties` con `sa`/`sapbus1n3ss` en claro**. Confunde cualquier búsqueda de código y filtra credenciales.
+Árbol completo del proyecto duplicado y versionado: `.class` compilados, `maven-wrapper.jar`, `mvnw`, `pom.xml`, `.idea/` y **`bin/src/main/resources/application.properties` con `sa`/`<CLAVE-ROTADA>` en claro**. Confunde cualquier búsqueda de código y filtra credenciales.
 
 ```bash
 git rm -r --cached bin/
@@ -580,13 +580,13 @@ Verificado: cada interfaz aparece solo en su propio archivo y en su implementaci
 | Archivo | Línea | Secreto | Acción |
 |---|---|---|---|
 | `security/jwt/JwtConfig.java` | 13-40 | Clave privada RSA, usada como secreto HMAC | Borrar la clase. `jwt.secret` por env. **Rotar.** |
-| `src/main/resources/application.properties` | 23 | `DB_PASSWORD:sapbus1n3ss` (default = clave real de `sa`) | Quitar el default. **Rotar.** |
+| `src/main/resources/application.properties` | 23 | `DB_PASSWORD:<CLAVE-ROTADA>` (default = clave real de `sa`) | Quitar el default. **Rotar.** |
 | `src/main/resources/application.properties` | 52 | `OPENWA_SESSION_ID:58812227-…` | Solo por env. |
-| `src/main/resources/application.properties` | 53 | `OPENWA_API_KEY:dev-admin-key` | Solo por env. **Rotar.** |
+| `src/main/resources/application.properties` | 53 | `OPENWA_API_KEY:<OPENWA_API_KEY>` | Solo por env. **Rotar.** |
 | `src/main/resources/application.properties` | 21 | IP y nombre de la base de producción | Externalizar la URL entera. |
-| `utils/ClassGenerator.java` | 16-19 | `sa` / `sapbus1n3ss` en literales | Borrar la clase. |
-| `bin/src/main/resources/application.properties` | 4-5 | `sa` / `sapbus1n3ss` **sin envoltura** | Borrar `bin/` completo. |
-| `controller/WhatsAppWebhookController.java` | 64-77 | `X-API-Key: dev-admin-key` y session-id en ejemplos de javadoc | Sustituir por marcadores. |
+| `utils/ClassGenerator.java` | 16-19 | `sa` / `<CLAVE-ROTADA>` en literales | Borrar la clase. |
+| `bin/src/main/resources/application.properties` | 4-5 | `sa` / `<CLAVE-ROTADA>` **sin envoltura** | Borrar `bin/` completo. |
+| `controller/WhatsAppWebhookController.java` | 64-77 | `X-API-Key: <OPENWA_API_KEY>` y session-id en ejemplos de javadoc | Sustituir por marcadores. |
 
 **El `.gitignore` no está protegiendo nada.** Lista `/pom.xml` y `/src/main/resources/application.properties` (líneas 36-38), pero ambos ya están trackeados y `.gitignore` no aplica a archivos versionados. Hay que hacer `git rm --cached` explícito.
 

@@ -62,7 +62,7 @@ import java.util.Locale;
  *
  * Invoke-RestMethod -Method Post `
  *   -Uri "http://181.114.119.195:2785/api/sessions/58812227-7ca1-4205-b5c2-7dbc01870fc9/webhooks" `
- *   -Headers @{ "X-API-Key" = "dev-admin-key" } `
+ *   -Headers @{ "X-API-Key" = "<OPENWA_API_KEY>" } `
  *   -ContentType "application/json" -Body $body
  * </pre>
  *
@@ -70,7 +70,7 @@ import java.util.Locale;
  * <pre>
  * curl -X POST \
  *   "http://host.containers.internal:2785/api/sessions/58812227-7ca1-4205-b5c2-7dbc01870fc9/webhooks" \
- *   -H "X-API-Key: dev-admin-key" \
+ *   -H "X-API-Key: <OPENWA_API_KEY>" \
  *   -H "Content-Type: application/json" \
  *   -d '{"url":"http://host.containers.internal:9223/whatsapp/webhook",
  *        "events":["message.received"],

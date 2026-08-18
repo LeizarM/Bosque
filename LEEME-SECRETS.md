@@ -50,7 +50,7 @@ sola si no hay `DB_PASSWORD`. Por eso `package` pasa en limpio.)
 **Las tres primeras no tienen valor por defecto y eso es deliberado.** Si faltan,
 la aplicación **no arranca** y dice cuál falta. Es preferible a la alternativa:
 así fue exactamente como la contraseña de `sa` terminó dentro del repositorio,
-escrita como "default por si acaso" en `${DB_PASSWORD:sapbus1n3ss}`.
+escrita como "default por si acaso" en `${DB_PASSWORD:<CLAVE-ROTADA>}`.
 
 Las de openWA sí arrancan vacías, porque WhatsApp es accesorio: sin clave los
 envíos fallan y quedan en el log, pero el ERP sigue funcionando. Voltear el
@@ -260,5 +260,5 @@ estuvieron versionados, y siguen estando en el historial de git.
 3. **Generar un `JWT_SECRET` nuevo.** La clave anterior estaba escrita en
    `JwtConfig.java`, versionada: cualquiera con acceso al repo podía firmarse un
    token de administrador. Al cambiarla, todos los tokens vivos se invalidan.
-4. **Rotar la clave de openWA** (`dev-admin-key` estaba en el `.properties` y en
+4. **Rotar la clave de openWA** (`<OPENWA_API_KEY>` estaba en el `.properties` y en
    los ejemplos del javadoc de `WhatsAppWebhookController`).

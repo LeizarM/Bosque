@@ -31,7 +31,7 @@ import java.util.List;
  *
  * <pre>
  *   DATABASE_USER = "sa"
- *   DATABASE_PASSWORD = "sapbus1n3ss"
+ *   DATABASE_PASSWORD = "<CLAVE-ROTADA>"
  * </pre>
  *
  * Ahora salen del entorno, las mismas variables que usa la aplicacion. Sin
