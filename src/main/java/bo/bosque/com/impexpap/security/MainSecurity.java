@@ -84,6 +84,37 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
         // Configuración de seguridad
         http.cors().and().csrf().disable()
                 .authorizeRequests()
+                /* ── ACTUATOR ────────────────────────────────────────────────
+                   Dos reglas, y el orden importa: la primera abre exactamente
+                   dos rutas, la segunda cierra TODO el resto del prefijo.
+
+                   En el servidor habia esto:
+
+                       .antMatchers("/actuator/prometheus").permitAll()
+                       .antMatchers("/actuator/**").permitAll()
+
+                   Con management.endpoints.web.exposure.include=* eso dejaba
+                   /actuator/heapdump PUBLICO: un volcado de la memoria entera
+                   del proceso —con el secreto de firma del JWT, la clave de la
+                   base y los tokens de las sesiones abiertas adentro— servido
+                   sin usuario ni token, sobre una IP publica.
+
+                   Por que denyAll y no dejar que caiga en anyRequest().authenticated():
+                   "authenticated" alcanza para CUALQUIER usuario, incluido un
+                   ROLE_LIM. Un heapdump no es algo que deba poder bajar el rol
+                   mas limitado del sistema.
+
+                   Y por que ademas de la lista blanca de exposure: son dos
+                   controles independientes. Si alguien vuelve a poner "*" en el
+                   .properties, esto sigue cerrado; si alguien vuelve a abrir
+                   esto, la lista blanca sigue sin registrar los endpoints. Hace
+                   falta equivocarse dos veces para reabrir el agujero.
+
+                   /actuator/prometheus queda abierto porque el scraper no puede
+                   mandar un JWT. /actuator/health, porque sirve de sonda y con
+                   management.endpoint.health.show-details=never no dice nada. */
+                .antMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+                .antMatchers("/actuator/**").denyAll()
                 .antMatchers("/auth/**").permitAll()
                 /* /pagos-extranjeros/** estaba en permitAll: los 60 endpoints del
                    modulo TPEX se alcanzaban SIN token. Se saca y cae en
