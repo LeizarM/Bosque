@@ -4,7 +4,7 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[EXECUTE p_list_Dependiente @ACCION='E']]>

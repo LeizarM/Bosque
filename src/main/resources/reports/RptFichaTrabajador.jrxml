@@ -9,7 +9,7 @@
 		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
 	</parameter>
 	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="MAPA_IMAGE" class="java.lang.Object"/>
 	<queryString language="SQL">

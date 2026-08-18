@@ -13,7 +13,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="codEmpleado" class="java.lang.Integer"/>
 	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[]]>

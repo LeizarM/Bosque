@@ -7,7 +7,7 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="464"/>
 	<parameter name="periodoCobrado" class="java.lang.String"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[execute p_list_tTigo_ejecutado @periodoCobrado=$P{periodoCobrado}, @ACCION='B']]>

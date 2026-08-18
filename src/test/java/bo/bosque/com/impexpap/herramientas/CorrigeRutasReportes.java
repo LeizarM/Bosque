@@ -55,8 +55,25 @@ public class CorrigeRutasReportes {
     private static final Pattern BLOQUE_IMAGEN = Pattern.compile(
             "<(imageExpression|printWhenExpression)>.*?</\\1>", Pattern.DOTALL);
 
+    /** Literal que arranca en la raiz del sistema de archivos. */
+    private static final Pattern RAIZ_UNIX = Pattern.compile("\"/[^\"]*\"");
+
+    /**
+     * Valor por defecto de CUALQUIER parametro; el grupo 2 es el nombre, y es el
+     * que decide con que se reemplaza.
+     *
+     * <p>Antes esto miraba solo SUBREPORT_DIR, y se le escapaban los
+     * {@code "/app/uploads/"} que traian los reportes ya "arreglados" en el
+     * servidor. Cambiar la ruta de Windows por la del contenedor es el mismo
+     * problema visto desde el otro sistema operativo: en una maquina Windows,
+     * {@code /app/uploads} se resuelve contra la unidad actual y no existe.
+     *
+     * <p>El default correcto es RELATIVO. El valor real lo pone
+     * JasperReportExport desde la propiedad {@code uploads.dir}, que cambia por
+     * perfil.
+     */
     private static final Pattern DEFAULT_SUBREPORT = Pattern.compile(
-            "(<parameter\\s+name=\"SUBREPORT_DIR\"[^>]*>\\s*"
+            "(<parameter\\s+name=\"([A-Za-z_]+)\"[^>]*>\\s*"
           + "<defaultValueExpression><!\\[CDATA\\[)(\"[^\"]*\")"
           + "(\\]\\]></defaultValueExpression>)", Pattern.DOTALL);
 
@@ -126,13 +143,21 @@ public class CorrigeRutasReportes {
                 }
             }
 
-            // ---- B) default de SUBREPORT_DIR ----
+            // ---- B) valores por defecto con ruta absoluta ----
             Matcher d = DEFAULT_SUBREPORT.matcher(texto);
             StringBuffer sd = new StringBuffer();
             while (d.find()) {
-                if (RUTA_ABSOLUTA.matcher(d.group(2)).matches()) {
+                String nombre = d.group(2);
+                String literal = d.group(3);
+                boolean absoluta = RUTA_ABSOLUTA.matcher(literal).matches()
+                                || RAIZ_UNIX.matcher(literal).matches();
+                if (absoluta) {
+                    // Los subreportes viven en el classpath, bajo reports/.
+                    // Cualquier otro parametro de ruta apunta a los archivos
+                    // subidos, y su raiz la decide uploads.dir por perfil.
+                    String relativo = "SUBREPORT_DIR".equals(nombre) ? "\"reports/\"" : "\"uploads/\"";
                     d.appendReplacement(sd,
-                            Matcher.quoteReplacement(d.group(1) + "\"reports/\"" + d.group(3)));
+                            Matcher.quoteReplacement(d.group(1) + relativo + d.group(4)));
                     defAqui++;
                 } else {
                     d.appendReplacement(sd, Matcher.quoteReplacement(d.group()));
