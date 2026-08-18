@@ -6,6 +6,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[EXECUTE p_list_Dependiente @ACCION='E']]>
 	</queryString>
@@ -66,7 +69,7 @@
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<imageExpression><![CDATA["D:\\proyecto\\FACTURASTIGO\\backend\\uploads\\logoIPXESP.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + "logoIPXESP.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="110" y="0" width="370" height="28" uuid="c485a589-28f8-4200-a08c-43f19f79f544"/>

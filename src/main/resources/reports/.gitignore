@@ -1,0 +1,25 @@
+# Los .jasper son ARTEFACTOS DE BUILD, no fuentes.
+#
+# Los compila Maven en la fase prepare-package, desde los .jrxml y con la
+# version de JasperReports que declara el pom (ver exec-maven-plugin en
+# pom.xml). Salen a target/classes/reports/ y de ahi al jar.
+#
+# ---------------------------------------------------------------------------
+# Este archivo listaba .jasper sueltos, uno por uno —en el servidor eran 18—.
+# Era peor que no tener nada: los otros ~28 seguian versionados, convivian dos
+# regimenes, y el resultado es que un clon limpio del repositorio NO podia
+# generar esos reportes (la ficha del trabajador, sus anexos, el consumo de
+# Tigo). Produccion funcionaba unicamente porque los binarios existian sueltos
+# en el disco de esa maquina.
+#
+# Ademas bloqueaba en silencio: al renombrar subRptDependiente a
+# subRptDependientes, el .jasper nuevo no se pudo agregar al commit y nadie lo
+# noto hasta revisarlo a mano.
+# ---------------------------------------------------------------------------
+#
+# Los .jrxml SI se versionan: esos son la fuente.
+*.jasper
+
+# Conexion de Jaspersoft Studio. Guarda usuario, contrasena y URL de la base en
+# texto plano (savePassword=true). No se commitea nunca.
+DataAdapter.jrdax

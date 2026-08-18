@@ -12,7 +12,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<queryString>
+		<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
+	</parameter>
+<queryString>
 		<![CDATA[execute p_list_EmpleadoCargo @ACCION='S']]>
 	</queryString>
 	<field name="fila" class="java.lang.Long">
@@ -93,7 +96,7 @@
 			</staticText>
 			<image>
 				<reportElement x="12" y="3" width="87" height="35" uuid="a21e20b4-a0d9-4b4c-8ef1-c39b47f331b4"/>
-				<imageExpression><![CDATA["D:/proyecto/backend/uploads/logoIPXESP.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + "logoIPXESP.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

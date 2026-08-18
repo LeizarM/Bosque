@@ -13,7 +13,7 @@
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["D:\\Compartido\\Bosque v2\\web\\Bosque\\reportes\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="logo" class="java.lang.String"/>
 	<parameter name="logoEmpresa" class="java.io.InputStream"/>

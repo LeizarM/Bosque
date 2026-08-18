@@ -7,7 +7,10 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="464"/>
 	<parameter name="periodoCobrado" class="java.lang.String"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["D:\\proyecto\\backend\\src\\main\\resources\\reports\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[execute p_list_tTigo_ejecutado @periodoCobrado=$P{periodoCobrado}, @ACCION='B']]>
@@ -91,7 +94,7 @@
 			</textField>
 			<image>
 				<reportElement x="12" y="5" width="87" height="47" uuid="49d37503-50cf-44ee-9158-b25b6184da23"/>
-				<imageExpression><![CDATA["D:/proyecto/backend/uploads/logoIPXESP.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + "logoIPXESP.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

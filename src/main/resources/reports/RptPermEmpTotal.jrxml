@@ -6,7 +6,7 @@
 	<parameter name="codEmp" class="java.lang.Integer"/>
 	<parameter name="codRee" class="java.lang.Integer"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["D:\\Proyectos Netbeans\\Productiva\\web\\Bosque\\reportes\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="logoEmpresa" class="java.io.InputStream"/>
 	<queryString>

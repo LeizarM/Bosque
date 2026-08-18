@@ -19,7 +19,10 @@
 		</conditionalStyle>
 	</style>
 	<parameter name="periodoCobrado" class="java.lang.String"/>
-	<queryString>
+		<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
+	</parameter>
+<queryString>
 		<![CDATA[execute p_list_tTigo_ejecutado @periodoCobrado=$P{periodoCobrado} ,@ACCION='F']]>
 	</queryString>
 	<field name="periodoCobrado" class="java.lang.String">
@@ -140,7 +143,7 @@
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<imageExpression><![CDATA["D:/proyecto/backend/uploads/logoIPXESP.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{UPLOADS_DIR} + "logoIPXESP.png"]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement x="660" y="17" width="90" height="17" uuid="addad450-bb83-4511-bc98-e40d5a0f416a"/>
