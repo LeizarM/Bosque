@@ -88,3 +88,5 @@ graft/
 .claude/
 .mcp.json
 .ignore
+# Clave privada TLS: vive en /etc/bosque, nunca en el repo.
+src/main/resources/keystore.p12

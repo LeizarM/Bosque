@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ConsumoTigoAgrupado" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="8464a8a2-a7bb-4696-a073-17cf7b1d88f6">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="523"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="464"/>
 	<parameter name="periodoCobrado" class="java.lang.String"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["uploads/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[execute p_list_tTigo_ejecutado @periodoCobrado=$P{periodoCobrado}, @ACCION='B']]>
@@ -92,10 +89,6 @@
     new java.text.SimpleDateFormat("yyyy-MM").parse($P{periodoCobrado})
 ).toUpperCase()]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="12" y="5" width="87" height="47" uuid="49d37503-50cf-44ee-9158-b25b6184da23"/>
-				<imageExpression><![CDATA[$P{UPLOADS_DIR} + "logoIPXESP.png"]]></imageExpression>
-			</image>
 		</band>
 	</title>
 	<pageFooter>
@@ -237,9 +230,6 @@
 			<break>
 				<reportElement x="0" y="228" width="100" height="1" uuid="77d702f9-5a9e-47ec-8510-3b08d0d06d66"/>
 			</break>
-			<break>
-				<reportElement x="0" y="228" width="100" height="1" uuid="66d5c033-c5ea-4a78-8a15-ddd967f28e5c"/>
-			</break>
 			<subreport>
 				<reportElement positionType="Float" x="-1" y="50" width="550" height="17" uuid="469284e7-be6b-4710-926e-2d82ef3b10c9"/>
 				<subreportParameter name="periodoCobrado">
@@ -248,6 +238,9 @@
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} +"subRptResumenDetalleII.jasper"]]></subreportExpression>
 			</subreport>
+			<break>
+				<reportElement x="0" y="234" width="100" height="1" uuid="fa5bd006-bff2-4b8d-a8da-278193cd0424"/>
+			</break>
 		</band>
 	</summary>
 </jasperReport>

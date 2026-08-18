@@ -1136,6 +1136,7 @@ public class TigoController {
 
         String nombreReporte = "RptComparacionEmpresas";
 
+
         try{
             Map<String, Object> params = new HashMap<>();
 
@@ -1149,7 +1150,7 @@ public class TigoController {
 
             return new ResponseEntity<>(reportBytes,headers ,HttpStatus.OK);
         } catch(Exception e) {
-            e.printStackTrace();
+            e.printStackTrace();  // 🔥 Imprime el stack trace COMPLETO en consola para ver el error real
             System.err.println("Error detallado: " + e.getClass().getName() + " - " + e.getMessage());  // Imprime tipo y mensaje
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
