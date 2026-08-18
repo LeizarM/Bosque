@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptDependientesGeneral" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b4886275-4cef-4497-acdd-9d05d5f20098">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[EXECUTE p_list_Dependiente @ACCION='E']]>
@@ -61,13 +61,6 @@
 	</background>
 	<title>
 		<band height="58" splitType="Stretch">
-			<image scaleImage="FillFrame" onErrorType="Icon">
-				<reportElement x="1" y="2" width="107" height="52" uuid="209811fa-62a3-4414-95ad-a3cdb64f210e">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<imageExpression><![CDATA["D:\\proyecto\\FACTURASTIGO\\backend\\uploads\\logoIPXESP.png"]]></imageExpression>
-			</image>
 			<staticText>
 				<reportElement x="110" y="0" width="370" height="28" uuid="c485a589-28f8-4200-a08c-43f19f79f544"/>
 				<box>
@@ -108,7 +101,7 @@
 				<text><![CDATA[Version Nº 1]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="-1" y="0" width="110" height="56" uuid="7f0d084b-c489-450b-8df0-fe41165b6c56"/>
+				<reportElement x="0" y="0" width="110" height="56" uuid="7f0d084b-c489-450b-8df0-fe41165b6c56"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

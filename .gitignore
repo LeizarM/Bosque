@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+src/main/resources/reports/DataAdapter.jrdax
+src/main/resources/keystore.p12

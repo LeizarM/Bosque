@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptFichaTrabajador" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="5bb90c5b-ad1d-4486-903d-d7a96771265d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.jrdax"/>
 	<property name="net.sf.jasperreports.components.map.google.version" value="weekly"/>
 	<parameter name="codEmpleado" class="java.lang.Integer"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["D:\\proyecto\\backend\\src\\main\\resources\\reports\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="UPLOADS_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["/app/uploads/"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="MAPA_IMAGE" class="java.lang.Object"/>
 	<queryString language="SQL">
@@ -593,9 +596,9 @@
 				</textElement>
 				<text><![CDATA[Fecha Ingreso]]></text>
 			</staticText>
-			<image scaleImage="FillFrame" onErrorType="Icon">
+			<image scaleImage="FillFrame" onErrorType="Blank">
 				<reportElement x="470" y="29" width="100" height="101" uuid="e880354f-a13e-48d7-869e-fe621e447b98"/>
-				<imageExpression><![CDATA["D:\\proyecto\\backend\\uploads\\" + $P{codEmpleado} + ".jpg"]]></imageExpression>
+				<imageExpression><![CDATA[$P{codEmpleado} == null ? new java.io.File($P{UPLOADS_DIR} + "icono.png") : new java.io.File($P{UPLOADS_DIR} + $P{codEmpleado} + ".jpg")]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement mode="Opaque" x="0" y="0" width="570" height="23" backcolor="#B3B3B3" uuid="9e2eeba5-6c78-4953-b0e4-32143ca47ca5"/>
@@ -729,7 +732,7 @@
 					<subreportParameterExpression><![CDATA[$P{codEmpleado}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} +"subRptDependiente.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} +"subRptDependientes.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="62">

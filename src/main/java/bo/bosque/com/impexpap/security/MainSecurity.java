@@ -84,6 +84,8 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
         // Configuración de seguridad
         http.cors().and().csrf().disable()
                 .authorizeRequests()
+                .antMatchers("/actuator/prometheus").permitAll()  // Sin ** al final
+                .antMatchers("/actuator/**").permitAll()          // Permitir todos los endpoints de actuator
                 .antMatchers("/auth/**").permitAll()
                 /* /pagos-extranjeros/** estaba en permitAll: los 60 endpoints del
                    modulo TPEX se alcanzaban SIN token. Se saca y cae en
