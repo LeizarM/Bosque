@@ -31,3 +31,60 @@ build/
 
 ### VS Code ###
 .vscode/
+
+/pom.xml
+
+# application.properties SI se versiona.
+#
+# Estaba listado aca, pero la regla no servia de nada: el archivo ya estaba
+# trackeado, y .gitignore no aplica a lo que git ya sigue. La clave de 'sa'
+# estuvo en el repositorio todo ese tiempo con la ignore-rule puesta al lado.
+#
+# Ahora el archivo no tiene ningun secreto: usuario, contrasena, JWT y las
+# credenciales de openWA son ${VARIABLE} sin default. Lo que queda es
+# configuracion de verdad (puertos, flags de entregas, niveles de log) y esa
+# conviene tenerla versionada. Los secretos van por variable de entorno; ver
+# LEEME-SECRETS.md.
+
+# Salida de compilacion. 'bin/' era un arbol entero del proyecto duplicado
+# —375 archivos, .class incluidos, y una copia de application.properties con la
+# clave de 'sa' en texto plano.
+bin/
+
+# Maven
+/target/
+
+# IDE
+.idea/
+*.iml
+
+# SVN
+.svn/
+
+/.idea2020/
+
+# AGENTS
+/AGENTS.md
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+graft/
+
+# ── Archivos subidos por los usuarios ────────────────────────────────────────
+# Fotos de empleados, comprobantes de deposito, vouchers, logos de empresa.
+#
+# Son DATOS, no codigo. Habia fotos de personas reales versionadas (172.jpg,
+# 20.jpg, deposito_2627.jpg) en un repositorio que ademas era publico.
+#
+# En produccion viven en el volumen 'bosque-uploads' de podman, montado en
+# /app/uploads. En desarrollo, en ./uploads. La ruta la resuelve la propiedad
+# uploads.dir segun el perfil; el contenido no se versiona.
+#
+# Para trabajar con los logos en local, copiarlos del volumen:
+#   podman cp bosque-app:/app/uploads/logos ./uploads/
+/uploads/
+
+# ── Configuracion de herramientas de escritorio ──────────────────────────────
+# Especificas de la maquina de cada uno, no del proyecto.
+.claude/
+.mcp.json
+.ignore

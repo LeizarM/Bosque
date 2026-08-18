@@ -2,10 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      Spring Boot 2.7.18 — la ULTIMA version de Boot que soporta Java 8.
+      Boot 3.x exige Java 17, asi que 2.7.18 es el techo de esta plataforma.
+
+      Se sube desde 2.6.1 (diciembre 2021) por seguridad: esa linea arrastra
+      Spring Framework 5.3.13, afectado por CVE-2022-22965 (Spring4Shell) entre
+      otros. 2.7.18 trae Spring 5.3.31.
+
+      Efecto lateral BUENO: Boot 2.7 gestiona Spring Security 5.7.x, que es
+      justo la version a la que este proyecto pineaba spring-security-web a
+      mano. Antes convivian web 5.7.4 con core/config 5.6.0 —Spring Security
+      mezclado, funcionando de casualidad—. Ahora las tres salen del mismo BOM
+      y el pin explicito sobra.
+
+      WebSecurityConfigurerAdapter (MainSecurity) queda deprecado en 5.7 pero
+      sigue funcionando: avisa por log, no rompe. Migrarlo a SecurityFilterChain
+      es un cambio aparte y no hace falta para esto.
+    -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.1</version>
+        <version>2.7.18</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>bo.bosque.com</groupId>
@@ -15,11 +34,40 @@
     <description>Bosque 3 con Angular pojo</description>
     <properties>
         <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
+        <!--
+          spring-boot-starter-jdbc, NO -data-jdbc.
+
+          Este proyecto usa JdbcTemplate a secas: no hay ni un repositorio de
+          Spring Data ("Found 0 JDBC repository interfaces" en cada arranque).
+          El starter -data-jdbc agregaba encima Spring Data JDBC, o sea mapeo
+          objeto-relacional, que es justo lo que este proyecto decidio no usar.
+
+          Y ademas era INCOMPATIBLE con jTDS. Spring Data JDBC resuelve el
+          dialecto a partir del producto que informa la conexion; contra SQL
+          Server carga SqlServerDialect, y ese dialecto referencia
+          microsoft.sql.DateTimeOffset — una clase que vive DENTRO de
+          mssql-jdbc. Al pasar a jTDS, la clase desaparece y el contexto muere
+          al arrancar:
+
+              java.lang.TypeNotPresentException:
+              Type microsoft.sql.DateTimeOffset not present
+
+          El detalle importante: eso NO lo ve el compilador ni los 103 tests. El
+          jar se construye perfecto y falla al levantarlo. Es el caso exacto de
+          "compilaba y en el servidor no anda", y por eso el cambio de driver se
+          valida arrancando el jar, no compilandolo.
+
+          Beneficio extra: sin Spring Data JDBC el contexto ya no necesita abrir
+          una conexion para arrancar. Si la base esta caida un momento, la
+          aplicacion levanta igual en vez de entrar en bucle de reinicio.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -32,11 +80,33 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+
+        <!--
+          DRIVER DE BASE DE DATOS — jTDS, uno solo para los dos entornos.
+
+          Antes: el repositorio declaraba mssql-jdbc y el servidor de produccion
+          corria jTDS con un pom distinto. O sea que se probaba en desarrollo con
+          un driver y se desplegaba con otro, y este proyecto depende del driver
+          en cuatro lugares concretos (SimpleJdbcCall leyendo metadatos del SP,
+          setObject(i, null) en SpHelper.ejecutarAbmMap, el recorrido de varios
+          ResultSets, y date vs datetime — ver FechaDelDriverTest, que existe
+          justo por un ClassCastException de esos que llego a produccion).
+
+          Se elige jTDS y no mssql-jdbc porque es lo que YA funciona contra
+          SQL Server 2008 en el servidor, y porque mssql-jdbc 9.x dejo de
+          soportar 2008 y ademas choca con las politicas de TLS de las JVM
+          modernas contra un motor que solo habla TLS 1.0.
+
+          1.3.1 es la ultima version de jTDS (2013). No recibe mantenimiento:
+          es una decision de compatibilidad con SQL Server 2008, no de
+          modernizacion.
+        -->
         <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <scope>runtime</scope>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>1.3.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -47,31 +117,48 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!--
+          spring-boot-starter-security trae spring-security-web, -core y -config
+          en la version que gestiona el BOM. Ya no se declara spring-security-web
+          suelto con version propia: era la causa del desajuste 5.7.4 / 5.6.0.
+        -->
         <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-            <version>2.5.1.RELEASE</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>5.7.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-jwt</artifactId>
-            <version>1.1.1.RELEASE</version>
-        </dependency>
+        <!--
+          Firma y verificacion de los JWT. Es la unica libreria de JWT del
+          proyecto: se quitaron spring-security-oauth2 2.5.1.RELEASE y
+          spring-security-jwt 1.1.1.RELEASE, que estaban declaradas y no las
+          importaba ni un archivo. Las dos estan en fin de vida.
+        -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
         </dependency>
+
+        <!--
+          BouncyCastle: NO lo usa el codigo de la aplicacion. Se declara a
+          proposito.
+
+          bcpkix entraba de arrastre por spring-security-jwt, en la version
+          1.64, mientras iText trae bcprov 1.70 — un par desparejo. Al sacar
+          spring-security-jwt, bcpkix desaparecia del classpath, e iText 7.2
+          resuelve BouncyCastle POR REFLEXION (BouncyCastleFactoryCreator): la
+          falta no se ve al compilar, aparece al ejecutar y solo en las rutas
+          que la tocan (pdfa, sign, cifrado). Es el caso tipico de "compilaba y
+          en el servidor no anda".
+
+          Se deja explicito y emparejado con bcprov 1.70. Cuesta un jar y
+          elimina las dos incognitas de una vez.
+        -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.70</version>
         </dependency>
 
         <dependency>
@@ -86,11 +173,29 @@
             <version>6.21.2</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
 
+        <!--
+          ACTUATOR + PROMETHEUS. Produccion ya usaba
+          management.endpoints.web.exposure y management.endpoint.prometheus,
+          pero la dependencia no estaba en el pom del repositorio: otra prueba
+          de que el jar desplegado se construia desde otro arbol de fuentes.
+
+          OJO con la exposicion: /actuator/heapdump vuelca la memoria entera del
+          proceso —con el secreto de firma del JWT y la clave de la base
+          adentro—. Por eso los perfiles exponen solo health y prometheus, y
+          NUNCA "*". Ver application-prod.properties.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <dependency>
@@ -111,6 +216,13 @@
             <version>7.2.5</version>
         </dependency>
 
+        <!--
+          JAXB. En Java 8 viene en el JDK, asi que en teoria sobra. Se deja:
+          JasperReports lo usa en tiempo de ejecucion para leer los .jrxml y
+          sacarlo es exactamente el tipo de cambio que compila y falla al
+          generar el primer reporte. Se revisa cuando haya como probar los 36
+          reportes, no antes.
+        -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
@@ -132,6 +244,14 @@
             <artifactId>bucket4j-core</artifactId>
             <version>7.6.0</version>
         </dependency>
+
+        <!--
+          zxing: NO aparece en ningun import, pero HACE FALTA. Es lo que usa
+          JasperReports para renderizar el <jr:QRCode> de
+          reports/RptFichaTrabajador.jrxml, y lo carga por reflexion en tiempo
+          de ejecucion. Sacarlo compila perfecto y rompe la ficha del trabajador
+          recien en el servidor. No tocar.
+        -->
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
@@ -142,6 +262,15 @@
             <artifactId>javase</artifactId>
             <version>3.5.2</version>
         </dependency>
+
+        <!--
+          barcode4j y batik: mismo caso que zxing —los carga Jasper por
+          reflexion—. Hoy ningun .jrxml usa codigos de barras ni SVG, asi que en
+          principio sobran, pero la unica forma de confirmarlo es generar los 36
+          reportes. Se dejan.
+          batik-all estaba declarada DOS VECES, identica. Se deja una sola: es
+          un cambio sin efecto, Maven ya deduplicaba.
+        -->
         <dependency>
             <groupId>net.sf.barcode4j</groupId>
             <artifactId>barcode4j</artifactId>
@@ -152,17 +281,12 @@
             <artifactId>batik-all</artifactId>
             <version>1.14</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-all</artifactId>
-            <version>1.14</version>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.2.3</version>
+            <version>5.4.0</version>
         </dependency>
-
 
     </dependencies>
 
@@ -185,7 +309,81 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+
+            <!--
+              COMPILACION DE LOS REPORTES JASPER.
+
+              Los .jrxml se compilan a .jasper durante el build, con la version
+              de JasperReports que declara este pom. Antes se compilaban a mano
+              en Jaspersoft Studio y se commiteaban los binarios.
+
+              Por que importa:
+
+               1. Un clon limpio del repositorio NO podia generar 10 de los 46
+                  reportes —la ficha del trabajador y sus anexos, entre otros—
+                  porque reports/.gitignore excluia esos .jasper. Produccion
+                  funcionaba solo porque los archivos estaban sueltos en el
+                  disco de esa maquina.
+
+               2. Los .jrxml los generaron Jaspersoft Studio 6.20.6 y 6.21.5, y
+                  el runtime es 6.21.2. Un .jasper compilado con una version mas
+                  nueva puede no cargar. Compilando aca se usa siempre la del
+                  pom, sin importar que Studio tenga cada uno.
+
+               3. Editar un .jrxml sin recompilar dejaba el reporte igual que
+                  antes, sin ningun aviso.
+
+              Fase 'prepare-package': despues de process-resources (que ya copio
+              los .jrxml a target/classes) y de test-compile (que dejo la
+              herramienta en target/test-classes), y antes de armar el jar. Los
+              .jasper recien compilados PISAN a los que vengan versionados, asi
+              que gana siempre el del build.
+
+              OJO con dos cosas:
+                - 'mvn -Dmaven.test.skip=true' no compila las clases de test y
+                  esto se cae. Usar '-DskipTests', que salta la EJECUCION pero
+                  compila igual (es lo que hace deploy.sh).
+                - Correr la aplicacion desde el IDE sin haber hecho un 'package'
+                  antes deja target/classes sin los .jasper generados. Una vez
+                  por clon:  mvn prepare-package -DskipTests
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>compilar-reportes-jasper</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <!--
+                              'exec' y no 'java': el goal java corre DENTRO de la
+                              JVM de Maven, y ahi batik declara un
+                              javax.xml.parsers.SAXParserFactory de Xerces que no
+                              esta en el classpath:
+
+                                  Provider org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                  not found
+
+                              El goal exec bifurca una JVM limpia, que es donde
+                              este compilador ya se probo funcionando.
+                            -->
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <classpathScope>test</classpathScope>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>bo.bosque.com.impexpap.herramientas.CompilaReportes</argument>
+                                <argument>${project.basedir}/src/main/resources/reports</argument>
+                                <argument>${project.build.outputDirectory}/reports</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>
