@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.scheduler;
 
+import bo.bosque.com.impexpap.commons.SincronizacionEntregasService;
 import bo.bosque.com.impexpap.commons.WhatsAppService;
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.IEntregaChofer;
@@ -29,17 +30,58 @@ public class DatabaseTaskScheduler {
     private final WhatsAppService whatsAppService;
     private final IProcesoRol procesoRolDao;
     private final IRol rolDao;
+    private final SincronizacionEntregasService sincronizacionEntregasService;
 
     public DatabaseTaskScheduler(IEntregaChofer entregaChoferDao,
                                  IEmpleado empleadoDao,
                                  WhatsAppService whatsAppService,
                                  IProcesoRol procesoRolDao,
-                                 IRol rolDao) {
+                                 IRol rolDao,
+                                 SincronizacionEntregasService sincronizacionEntregasService) {
         this.entregaChoferDao = entregaChoferDao;
         this.empleadoDao = empleadoDao;
         this.whatsAppService = whatsAppService;
         this.procesoRolDao = procesoRolDao;
         this.rolDao = rolDao;
+        this.sincronizacionEntregasService = sincronizacionEntregasService;
+    }
+
+    /**
+     * Mantiene {@code trch_Entregas} al día contra SAP para que ningún chofer pague nunca la
+     * sincronización dentro de su request.
+     *
+     * <h3>Qué problema arregla (medido en producción el 19/08/2026, 14:12)</h3>
+     * {@code SincronizacionEntregasService} ya evitaba el costo <i>repetido</i>, pero no el
+     * primero: al arrancar, {@code inicializar()} deja el reloj vencido a propósito, así que el
+     * primer chofer que abre la app encuentra el intervalo vencido, gana el candado y sincroniza
+     * por todos. Con la JVM y el buffer pool de SQL Server en frío eso costó <b>6012 ms</b> —casi
+     * 3x el peor caso medido en caliente (2129 ms)—, el request llegó a ~24 s en total y la app
+     * del chofer cortó la conexión antes de recibir el JSON. En el log quedó la firma exacta de
+     * ese caso: {@code [ok=1, fallidas=0, omitidas por intervalo=0, omitidas por candado=0]}, o
+     * sea la primerísima sincronización del proceso.
+     *
+     * <p>Con este job, a los 30 s del arranque el scheduler paga esos segundos y a partir de ahí
+     * los choferes siempre encuentran el intervalo fresco.
+     *
+     * <h3>Los tres números no son arbitrarios</h3>
+     * <ul>
+     *   <li><b>{@code fixedDelay} y no {@code fixedRate}.</b> {@code fixedDelay} cuenta desde que
+     *       <i>terminó</i> la corrida anterior, así que una sincronización lenta nunca se solapa
+     *       ni deja ejecuciones encoladas. Con {@code fixedRate}, un SAP degradado acumularía
+     *       corridas atrasadas.</li>
+     *   <li><b>120 s contra un intervalo de 180.</b> El período tiene que ser MENOR que
+     *       {@code entregas.sync.intervalo-segundos}; si no, queda una ventana en la que el
+     *       intervalo vence antes de la próxima corrida y vuelve a pagar un chofer.</li>
+     *   <li><b>{@code initialDelay} de 30 s.</b> Para no pelearle el arranque al resto del
+     *       contexto de Spring.</li>
+     * </ul>
+     *
+     * <p>No hace falta try/catch: {@code sincronizarAhora()} no lanza nunca y ya loguea el
+     * resultado. Tampoco puede solaparse con un request de chofer — comparten el mismo candado.
+     */
+    @Scheduled(fixedDelay = 120000L, initialDelay = 30000L)
+    public void sincronizarEntregasConSap() {
+        this.sincronizacionEntregasService.sincronizarAhora("programada");
     }
 
     /**
