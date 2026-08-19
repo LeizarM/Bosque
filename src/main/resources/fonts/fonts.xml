@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fuentes empaquetadas dentro del jar.
+
+  El problema que resuelven: los reportes se disenan en Jaspersoft Studio sobre
+  Windows, donde "Arial" y "SansSerif" existen. En el contenedor no. Sin este
+  mapeo, JasperReports le pide la fuente a AWT/fontconfig y recibe lo que haya
+  instalado — normalmente DejaVu Sans, que es MAS ANCHA que Arial. El texto no
+  falla: se desborda, se corta o se reacomoda, y el PDF sale distinto en cada
+  sistema sin que nadie vea un error.
+
+  Liberation Sans es metricamente compatible con Arial: mismo ancho por caracter.
+  Con pdfEmbedded=true la fuente viaja DENTRO del PDF, asi que tambien se ve
+  igual en la maquina del que lo abre.
+
+  Las dos familias apuntan a los mismos TTF a proposito:
+
+    Arial      -> 154 usos en los reportes
+    SansSerif  -> 192 usos. Es una fuente LOGICA de Java: en Windows se resuelve
+                  como Arial y en Linux como DejaVu. Es la que faltaba mapear, y
+                  la mas usada de las dos.
+
+  Se registra desde jasperreports_extension.properties.
+-->
 <fontFamilies>
   <fontFamily name="Arial">
+    <normal>fonts/LiberationSans-Regular.ttf</normal>
+    <bold>fonts/LiberationSans-Bold.ttf</bold>
+    <italic>fonts/LiberationSans-Italic.ttf</italic>
+    <boldItalic>fonts/LiberationSans-BoldItalic.ttf</boldItalic>
+    <pdfEncoding>Cp1252</pdfEncoding>
+    <pdfEmbedded>true</pdfEmbedded>
+  </fontFamily>
+
+  <fontFamily name="SansSerif">
     <normal>fonts/LiberationSans-Regular.ttf</normal>
     <bold>fonts/LiberationSans-Bold.ttf</bold>
     <italic>fonts/LiberationSans-Italic.ttf</italic>

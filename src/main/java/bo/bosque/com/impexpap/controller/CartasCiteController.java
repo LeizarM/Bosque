@@ -336,13 +336,19 @@ public class CartasCiteController {
         }
 
         Map<String, Object> params = new HashMap<>();
-        /* El reporte declara estos parámetros como Long/Integer y los pasa a un
-           SP; se mandan con el tipo exacto para no depender de la conversión
-           implícita del driver. */
-        params.put("idDocumento", doc.getIdDocumento());
+        /* Los tres van casteados a int a propósito. En los jrxml están
+           declarados como java.lang.Integer, y Jasper castea el valor al tipo
+           declarado sin convertirlo: un Long entra y tira ClassCastException
+           al armar el PreparedStatement. Documento los tiene como long, así
+           que sin el casteo autoboxean a Long. */
+        params.put("idDocumento", (int) doc.getIdDocumento());
         params.put("nroCite", doc.getNroCite());
-        params.put("idTipoDoc", doc.getIdTipoDoc());
+        params.put("idTipoDoc", (int) doc.getIdTipoDoc());
         params.put("logo", esVacio(f.getLogo()) ? "SI" : f.getLogo());
+        /* Ningún formato por documento declara codEmpresa; va igual porque es
+           lo que usa el servicio para elegir el membrete. Jasper recorre los
+           parámetros que declara el reporte, así que uno de más no molesta. */
+        params.put("codEmpresa", (int) doc.getCodEmpresa());
 
         byte[] pdf = pdfService.generar(reporte, params);
 
@@ -376,7 +382,7 @@ public class CartasCiteController {
         Map<String, Object> params = new HashMap<>();
         params.put("mes", f.getMes());
         params.put("anio", f.getAnio());
-        params.put("idTipoDoc", f.getIdTipoDoc());
+        params.put("idTipoDoc", (int) f.getIdTipoDoc());
         params.put("codEmpresa", (int) f.getCodEmpresa());
 
         byte[] pdf = pdfService.generar("RptCartaMensual", params);

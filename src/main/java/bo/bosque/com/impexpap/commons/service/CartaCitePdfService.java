@@ -8,6 +8,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRSaver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,15 +57,33 @@ public class CartaCitePdfService {
     private static final List<String> SUBREPORTES = Arrays.asList(
             "subRptCCArch", "subRptCopiaEncabezado", "subRptRemitente");
 
+    /**
+     * Carpeta en el classpath de las imágenes que son del formato y no de la
+     * empresa: el logo al agua y el logo izquierdo. Sólo las imprime este
+     * módulo, así que viajan adentro del jar con los jrxml.
+     */
+    private static final String DIR_LOGOS = "/logos/";
+
+    /** Membrete de respaldo cuando la empresa no tiene el suyo en disco. */
+    private static final String MEMBRETE_POR_DEFECTO = DIR_LOGOS + "logoEmpresa.jpg";  // IMPEXPAP
+
     private final JdbcTemplate jdbcTemplate;
+
+    /**
+     * Raíz de los archivos subidos ({@code ./uploads} en dev, {@code /app/uploads}
+     * en producción). De ahí cuelga {@code logos/}; ver {@link #membreteDe(Object)}.
+     */
+    private final String uploadsDir;
 
     private final Map<String, JasperReport> cache = new ConcurrentHashMap<>();
 
     /** Se resuelve una sola vez, la primera vez que se genera un PDF. */
     private volatile Path dirSubreportes;
 
-    public CartaCitePdfService(JdbcTemplate jdbcTemplate) {
+    public CartaCitePdfService(JdbcTemplate jdbcTemplate,
+                               @Value("${uploads.dir:/app/uploads}") String uploadsDir) {
         this.jdbcTemplate = jdbcTemplate;
+        this.uploadsDir = uploadsDir;
     }
 
     /**
@@ -82,9 +102,9 @@ public class CartaCitePdfService {
             /* Los logos son java.io.InputStream y se consumen al leerlos, así
                que se abren nuevos en cada generación. Cachearlos daría un PDF
                con logo la primera vez y sin logo el resto. */
-            p.put("logoEmpresa",   recurso("/reports/logoEmpresa.jpg"));
-            p.put("logoIzquierdo", recurso("/reports/logoIzquierdo.jpg"));
-            p.put("logoAgua",      recurso("/reports/logoEmpresaAgua.jpg"));
+            p.put("logoEmpresa",   membreteDe(params.get("codEmpresa")));
+            p.put("logoIzquierdo", recurso(DIR_LOGOS + "logoIzquierdo.jpg"));
+            p.put("logoAgua",      recurso(DIR_LOGOS + "logoEmpresaAgua.jpg"));
 
             /* RptCarta hace $P{logo}.equals("SI") sin chequear null: si el
                parámetro no llega, el reporte tira NullPointerException en vez
@@ -146,6 +166,39 @@ public class CartaCitePdfService {
             logger.info("Subreportes CITE compilados en {}", dir);
             dirSubreportes = dir;
         }
+    }
+
+    /**
+     * Membrete de la empresa, leído de {@code <uploads.dir>/logos/<codEmpresa>.png}.
+     *
+     * <p>Es la misma convención que ya usa {@code RptPapeletaPago}, que arma la
+     * ruta con {@code RUTA_LOGOS}. Un solo lugar para los logos de empresa: dar
+     * de alta una es dejar caer su png ahí, sin tocar código ni recompilar.
+     *
+     * <p>Si el archivo no está —una empresa nueva, o un despliegue donde el
+     * volumen de uploads todavía no se montó— cae en el de IMPEXPAP, que es lo
+     * que imprimía el módulo JSF para todas las empresas.
+     *
+     * @param codEmpresa el parámetro {@code codEmpresa} del reporte, que puede
+     *                   venir nulo: los formatos por documento no lo declaran y
+     *                   lo reciben sólo para elegir acá.
+     */
+    private InputStream membreteDe(Object codEmpresa) {
+        if (codEmpresa instanceof Number) {
+            Path archivo = Paths.get(uploadsDir, "logos",
+                    ((Number) codEmpresa).intValue() + ".png");
+            if (Files.isReadable(archivo)) {
+                try {
+                    return Files.newInputStream(archivo);
+                } catch (Exception e) {
+                    logger.warn("No se pudo leer el membrete {}; se usa el de IMPEXPAP",
+                            archivo, e);
+                }
+            } else {
+                logger.debug("Sin membrete propio en {}; se usa el de IMPEXPAP", archivo);
+            }
+        }
+        return recurso(MEMBRETE_POR_DEFECTO);
     }
 
     private InputStream recurso(String ruta) {

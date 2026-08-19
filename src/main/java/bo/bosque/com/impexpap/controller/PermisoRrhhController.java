@@ -326,7 +326,7 @@ public class PermisoRrhhController {
         params.put("codRee", (int) ree);
         // El logo va como InputStream, igual que en el legacy. La imagen tiene
         // onErrorType="Blank", así que si faltara el PDF sale sin logo en vez de fallar.
-        params.put("logoEmpresa", getClass().getResourceAsStream("/reports/logoEmpresa.jpg"));
+        params.put("logoEmpresa", getClass().getResourceAsStream("/logos/logoEmpresa.jpg"));
 
         byte[] pdf = new JasperReportExport(jdbcTemplate).exportPDFStatic(reporte, params);
 
