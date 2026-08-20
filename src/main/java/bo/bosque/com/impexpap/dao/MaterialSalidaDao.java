@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class MaterialSalidaDao implements IMaterialSalida {
@@ -60,5 +63,45 @@ public class MaterialSalidaDao implements IMaterialSalida {
 
         return resp!=0;
 
+    }
+
+    /**
+     * Para obtener el material de salida de un lote
+     *
+     * @param idLp
+     * @return
+     */
+    @Override
+    public List<MaterialSalida> obtenerMaterialSalidaXLote( int idLp ) {
+
+        List<MaterialSalida> lstTemp = new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_materialSalida @idLp=?, @ACCION=?",
+                    new Object[] { idLp, "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount)->{
+
+                        MaterialSalida temp = new MaterialSalida();
+
+                        temp.setIdMs(rs.getInt(1));
+                        temp.setIdLp(rs.getInt(2));
+                        temp.setCodArticulo(rs.getString(3));
+                        temp.setDescripcion(rs.getString(4));
+                        temp.setNroPaleta(rs.getInt(5));
+                        temp.setPesoResma(rs.getFloat(6));
+                        temp.setPesoPaleta(rs.getFloat(7));
+                        temp.setPesoMaterial(rs.getFloat(8));
+                        temp.setCantidadResma(rs.getInt(9));
+                        temp.setCantidadHojas(rs.getInt(10));
+
+                        return temp;
+
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: MaterialSalidaDao en obtenerMaterialSalidaXLote, DataAccessException->" + e.getMessage());
+            lstTemp = new ArrayList<>();
+        }
+        return lstTemp;
     }
 }

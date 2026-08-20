@@ -11,4 +11,11 @@ public interface IMerma {
      * @return
      */
     boolean registrarMerma( Merma regMerma, String acc );
+
+    /**
+     * Para obtener las mermas de un lote
+     * @param idLp
+     * @return
+     */
+    java.util.List<Merma> obtenerMermaXLote( int idLp );
 }

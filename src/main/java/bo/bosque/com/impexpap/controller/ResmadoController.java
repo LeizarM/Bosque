@@ -13,6 +13,7 @@ import bo.bosque.com.impexpap.dao.IDetalleResmado;
 import bo.bosque.com.impexpap.dao.IGrupoProduccion;
 import bo.bosque.com.impexpap.dao.ILoteProduccion;
 import bo.bosque.com.impexpap.dao.IResmado;
+import bo.bosque.com.impexpap.dto.ReporteProduccionDto;
 import bo.bosque.com.impexpap.model.*;
 import bo.bosque.com.impexpap.utils.Utiles;
 
@@ -122,6 +123,73 @@ public class ResmadoController {
 
 
         response.put("msg", "Datos del Detalle de Resmado Actualizados");
+        response.put("ok", "ok");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    // ==================================================================
+    // VER RESMADO
+    // ==================================================================
+
+    /**
+     * Lista los resmados de un rango de fechas, con su grupo, empleado y empresa.
+     * Sin rango en el cuerpo devuelve los ultimos 125, como antes.
+     *
+     * @param mb parametros con fechaIni y fechaFin
+     * @return lstTemp
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listaResmados")
+    public List<Resmado> obtenerResmados( @RequestBody ReporteProduccionDto mb ) {
+
+        List<Resmado> lstTemp = this.resmadoDao.obtenerResmados(
+                mb.getFechaIni(), mb.getFechaFin() );
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
+    }
+
+
+    /**
+     * Detalle de articulos resmados de un resmado.
+     * @param mb resmado con idRes
+     * @return lstTemp
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/detalleResmado")
+    public List<DetalleResmado> obtenerDetalleResmado( @RequestBody Resmado mb ) {
+
+        List<DetalleResmado> lstTemp = this.detalleResmadoDao.obtenerDetalleXResmado( mb.getIdRes() );
+
+        if( lstTemp.size() == 0 ) return new ArrayList<>();
+
+        return lstTemp;
+
+    }
+
+
+    /**
+     * Actualiza solo la orden de fabricacion y la empresa de un resmado.
+     * El resto de la cabecera no se toca: se registra en el momento del resmado.
+     * @param mb
+     * @return
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/actualizarOrdenFabricacion")
+    public ResponseEntity<?> actualizarOrdenFabricacion( @RequestBody Resmado mb ) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        if( !this.resmadoDao.actualizarOrdenFabricacion( mb ) ){
+            response.put("msg", "No se pudo actualizar la orden de fabricacion del resmado");
+            response.put("ok", "error");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        response.put("msg", "Orden de fabricacion actualizada");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

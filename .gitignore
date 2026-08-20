@@ -90,3 +90,6 @@ graft/
 .ignore
 # Clave privada TLS: vive en /etc/bosque, nunca en el repo.
 src/main/resources/keystore.p12
+/src/main/resources/sql/2026-08-19_B_p_list_CcrSolicitud_fechas_y_sap_tolerante.sql
+/src/main/resources/sql/2026-08-19_p_list_tprod_loteProduccion_C_rango_fechas.sql
+/src/main/resources/sql/2026-08-19_p_list_tprod_Resmado_B_rango_fechas.sql

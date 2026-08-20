@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="612" pageHeight="504" columnWidth="612" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="5460a4aa-f0a4-4d12-96c3-ef98dae4618e">
+	<property name="ireport.zoom" value="3.4522712143931047"/>
+	<property name="ireport.x" value="758"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="idLp" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[execute p_list_tprod_materialIngreso @idLp = $P{idLp} , @ACCION='B']]>
+	</queryString>
+	<field name="fila" class="java.lang.Long"/>
+	<field name="codArticulo" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="pesoKilos" class="java.lang.Double"/>
+	<field name="balanza" class="java.lang.Double"/>
+	<field name="cantBobinas" class="java.lang.Integer"/>
+	<field name="numImportacion" class="java.lang.String"/>
+	<variable name="balanza_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{balanza}]]></variableExpression>
+	</variable>
+	<variable name="pesoKilos_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{pesoKilos}]]></variableExpression>
+	</variable>
+	<title>
+		<band height="54" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="7b407ddd-2f8c-4179-a501-2170b2782597" mode="Opaque" x="13" y="22" width="149" height="14" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ARTICULO DE INGRESO:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="397946c1-c35b-471d-b97f-3bd5b87ecd8a" mode="Opaque" x="162" y="22" width="115" height="14" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codArticulo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cb5d1699-1a3b-4d98-b5d7-a113a8626b3d" mode="Opaque" x="277" y="22" width="256" height="14" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="7b407ddd-2f8c-4179-a501-2170b2782597" mode="Opaque" x="13" y="36" width="149" height="14" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CANTIDAD BOBINAS:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="a8c8fd90-77f6-4941-8700-a3a25fd698b8" mode="Opaque" x="162" y="36" width="78" height="14" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantBobinas}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="fe5cbbb2-d658-476c-aad1-5e3ded090486" x="180" y="0" width="181" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[MATERIAL INGRESO]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="11" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="3f544b44-541c-4a77-9ebb-045e0b0230b9" mode="Opaque" x="156" y="1" width="100" height="10" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PESO KILOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3c39add4-34c8-4ddb-9dbb-a595a04d81df" mode="Opaque" x="256" y="1" width="100" height="10" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BALANZA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3c39add4-34c8-4ddb-9dbb-a595a04d81df" mode="Opaque" x="356" y="1" width="100" height="10" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[NUM. IMPORTACION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3f544b44-541c-4a77-9ebb-045e0b0230b9" mode="Opaque" x="99" y="1" width="57" height="10" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[#]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement uuid="f40e39ab-c3e6-481e-b05d-d2e4dc0903c2" x="156" y="0" width="100" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pesoKilos}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="61f890eb-120f-42f9-9411-978db28781fe" x="256" y="0" width="100" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{balanza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0e5cb741-ef7f-467a-ae7a-4c4c0042a73d" x="99" y="0" width="57" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fila}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2b826f17-75cb-4694-ba43-63ad8790006e" x="356" y="0" width="100" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numImportacion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="27" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement uuid="e483b456-f287-4391-bb43-fc5781fae6be" x="256" y="0" width="100" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{balanza_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="46a7794f-e0cc-4265-bda9-6d29ea3229ad" x="156" y="0" width="100" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{pesoKilos_1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="04576fbb-b4d5-4a2f-978f-90d8efe9b817" x="99" y="0" width="57" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTALES:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

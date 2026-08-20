@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 
 
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class MaterialIngresoDao implements IMaterialIngreso {
@@ -53,5 +56,42 @@ public class MaterialIngresoDao implements IMaterialIngreso {
 
         return resp!=0;
 
+    }
+
+    /**
+     * Para obtener el material de ingreso de un lote
+     *
+     * @param idLp
+     * @return
+     */
+    @Override
+    public List<MaterialIngreso> obtenerMaterialIngresoXLote( int idLp ) {
+
+        List<MaterialIngreso> lstTemp = new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_materialIngreso @idLp=?, @ACCION=?",
+                    new Object[] { idLp, "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount)->{
+
+                        MaterialIngreso temp = new MaterialIngreso();
+
+                        temp.setIdMi(rs.getInt(1));
+                        temp.setIdLp(rs.getInt(2));
+                        temp.setCodArticulo(rs.getString(3));
+                        temp.setDescripcion(rs.getString(4));
+                        temp.setPesoKilos(rs.getFloat(5));
+                        temp.setBalanza(rs.getFloat(6));
+                        temp.setNumImportacion(rs.getString(7));
+
+                        return temp;
+
+                    });
+        }catch ( DataAccessException e ){
+            System.out.println("Error: MaterialIngresoDao en obtenerMaterialIngresoXLote, DataAccessException->" + e.getMessage());
+            lstTemp = new ArrayList<>();
+        }
+        return lstTemp;
     }
 }

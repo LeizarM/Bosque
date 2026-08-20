@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class DetalleResmadoDao implements  IDetalleResmado {
@@ -56,5 +59,40 @@ public class DetalleResmadoDao implements  IDetalleResmado {
 
 
 
+    }
+
+    /**
+     * Para obtener el detalle de un resmado
+     *
+     * @param idRes
+     * @return
+     */
+    @Override
+    public List<DetalleResmado> obtenerDetalleXResmado( int idRes ) {
+
+        List<DetalleResmado> lstTemp = new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_DetalleResmado @idRes=?, @ACCION=?",
+                    new Object[] { idRes, "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount)->{
+
+                        DetalleResmado temp = new DetalleResmado();
+
+                        temp.setIdRetRes(rs.getInt(1));
+                        temp.setIdRes(rs.getInt(2));
+                        temp.setCodArticulo(rs.getString(3));
+                        temp.setDescripcion(rs.getString(4));
+                        temp.setCantResma(rs.getFloat(5));
+
+                        return temp;
+
+                    });
+        }catch ( BadSqlGrammarException e ){
+            System.out.println("Error: DetalleResmadoDao en obtenerDetalleXResmado, DataAccessException->" + e.getMessage());
+            lstTemp = new ArrayList<>();
+        }
+        return lstTemp;
     }
 }

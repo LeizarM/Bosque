@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.LoteProduccion;
+import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -187,5 +188,68 @@ public class LoteProduccionDao implements ILoteProduccion {
 
 
 
+    }
+
+    /**
+     * Para obtener los lotes de produccion de un rango de fechas.
+     * Con ambas fechas en null el SP devuelve los ultimos 125.
+     *
+     * @param fechaIni
+     * @param fechaFin
+     * @return
+     */
+    @Override
+    public List<LoteProduccion> obtenerLotesProduccion( java.util.Date fechaIni, java.util.Date fechaFin ) {
+
+        List<LoteProduccion> lstTemp = new ArrayList<>();
+
+        Utiles utiles = new Utiles();
+        Date desde = utiles.fechaJ_a_Sql( fechaIni );
+        Date hasta = utiles.fechaJ_a_Sql( fechaFin );
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_loteProduccion @fechaIni=?, @fechaFin=?, @ACCION=?",
+                    new Object[] { desde, hasta, "C" },
+                    new int[] { Types.DATE, Types.DATE, Types.VARCHAR },
+                    (rs, rowCount)->{
+
+                        LoteProduccion temp = new LoteProduccion();
+
+                        temp.setIdLp(rs.getInt(1));
+                        temp.setIdMa(rs.getInt(2));
+                        temp.setNumLote(rs.getInt(3));
+                        temp.setAnio(rs.getInt(4));
+                        temp.setFecha(rs.getDate(5));
+                        temp.setHraInicioCorte(rs.getString(6));
+                        temp.setHraInicio(rs.getString(7));
+                        temp.setHraFin(rs.getString(8));
+                        temp.setCantBobinasIngresoTotal(rs.getInt(9));
+                        temp.setPesoKilosTotalIngreso(rs.getFloat(10));
+                        temp.setPesoTotalSalida(rs.getFloat(11));
+                        temp.setPesoPaletaSalida(rs.getFloat(12));
+                        temp.setPesoMaterialSalida(rs.getFloat(13));
+                        temp.setCantResmaSalida(rs.getInt(14));
+                        temp.setCantHojasSalida(rs.getFloat(15));
+                        temp.setMermaTotal(rs.getFloat(16));
+                        temp.setDiferenciaProduccion(rs.getFloat(17));
+                        temp.setDiferenciaProdResma(rs.getFloat(18));
+                        temp.setCantEstimadaResma(rs.getFloat(19));
+                        temp.setPesoBalanzaTotal(rs.getFloat(20));
+                        temp.setEstado(rs.getInt(21));
+                        temp.setObs(rs.getString(22));
+                        temp.setNumCorte(rs.getInt(23));
+                        temp.setAnioCorte(rs.getInt(24));
+                        temp.setDocNumOrdFab(rs.getInt(25));
+                        temp.setCodEmpresa(rs.getInt(26));
+                        temp.setAudUsuario(rs.getInt(27));
+
+                        return temp;
+
+                    });
+        }catch (BadSqlGrammarException e){
+            System.out.println("Error: LoteProduccionDao en obtenerLotesProduccion, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
+            lstTemp = new ArrayList<>();
+        }
+        return lstTemp;
     }
 }

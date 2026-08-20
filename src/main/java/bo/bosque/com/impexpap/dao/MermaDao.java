@@ -7,6 +7,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class MermaDao implements IMerma {
@@ -48,5 +51,40 @@ public class MermaDao implements IMerma {
         }
 
         return resp!=0;
+    }
+
+    /**
+     * Para obtener las mermas de un lote
+     *
+     * @param idLp
+     * @return
+     */
+    @Override
+    public List<Merma> obtenerMermaXLote( int idLp ) {
+
+        List<Merma> lstTemp = new ArrayList<>();
+
+        try{
+            lstTemp = this.jdbcTemplate.query("execute p_list_tprod_merma @idLp=?, @ACCION=?",
+                    new Object[] { idLp, "A" },
+                    new int[] { Types.INTEGER, Types.VARCHAR },
+                    (rs, rowCount)->{
+
+                        Merma temp = new Merma();
+
+                        temp.setIdMe(rs.getInt(1));
+                        temp.setIdLp(rs.getInt(2));
+                        temp.setCodArticulo(rs.getString(3));
+                        temp.setDescripcion(rs.getString(4));
+                        temp.setPeso(rs.getFloat(5));
+
+                        return temp;
+
+                    });
+        }catch ( BadSqlGrammarException e){
+            System.out.println("Error: MermaDao en obtenerMermaXLote, DataAccessException->" + e.getMessage());
+            lstTemp = new ArrayList<>();
+        }
+        return lstTemp;
     }
 }

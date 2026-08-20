@@ -29,4 +29,13 @@ public interface ILoteProduccion {
 
     List<LoteProduccion> obtenerDocNumXEmpresa( int codEmpresa );
 
+    /**
+     * Para obtener los lotes de produccion de un rango de fechas.
+     * Con ambas fechas en null devuelve los ultimos 125.
+     * @param fechaIni
+     * @param fechaFin
+     * @return
+     */
+    List<LoteProduccion> obtenerLotesProduccion( java.util.Date fechaIni, java.util.Date fechaFin );
+
 }

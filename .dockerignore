@@ -1,0 +1,5 @@
+# El contexto de build es lo que podman le manda al demonio antes de empezar.
+# Sin este archivo viajaban .git, target/ entero, src/ y uploads/ — cientos de
+# megas para una imagen que solo necesita UN jar.
+*
+!target/bosque-1.0.0.jar

@@ -12,5 +12,12 @@ public interface IDetalleResmado {
      */
     boolean registrarDetalleResmado(DetalleResmado regDetResmado, String acc );
 
+    /**
+     * Para obtener el detalle de un resmado
+     * @param idRes
+     * @return
+     */
+    java.util.List<DetalleResmado> obtenerDetalleXResmado( int idRes );
+
 
 }

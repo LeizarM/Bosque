@@ -11,4 +11,11 @@ public interface IMaterialIngreso {
      * @return
      */
     boolean registrarMaterialIngreso( MaterialIngreso regMatIng, String acc );
+
+    /**
+     * Para obtener el material de ingreso de un lote
+     * @param idLp
+     * @return
+     */
+    java.util.List<MaterialIngreso> obtenerMaterialIngresoXLote( int idLp );
 }

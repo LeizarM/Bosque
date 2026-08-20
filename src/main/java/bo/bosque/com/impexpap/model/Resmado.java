@@ -23,5 +23,9 @@ public class Resmado implements Serializable {
     private int docNumOrdFab;
     private int audUsuario;
 
+    //===== ATRIBUTOS ADICIONALES (solo lectura, vienen de los joins del listado)
+    private String descripcion;     // grupo de resmado
+    private String nombreCompleto;  // empleado que resmo
+    private String empresa;
 
 }
