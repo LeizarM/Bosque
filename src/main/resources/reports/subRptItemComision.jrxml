@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Detalle por item de las comisiones pagadas.
+
+    De donde sale
+      De tcom_pagadoItem, via p_list_tcom_PagadoItem ACCION 'L'. Es historico:
+      se escribe una sola vez, al ejecutar el periodo, y no se recalcula. Antes
+      esta informacion se imprimia desde tcom_pagado.detalleItems, un varchar
+      armado con FOR XML PATH que servia para pintar un renglon y para nada mas:
+      no se podia agrupar, ni sumar, ni saber por que una linea no descontaba.
+
+    Que es lo que hay que mirar
+      Lo EXCLUIDO, que es la mayoria -15 de cada 19 items medidos-. Por eso las
+      lineas que no descuentan no se esconden ni se pintan de rojo: quedan en un
+      tono arena, con su motivo escrito al lado. Excluido no es un error, es el
+      caso normal, y el subtotal por nota es de lo excluido justamente porque es
+      el numero que no existia en ningun lado.
+
+    Donde se separan las dos empresas
+      Internas y Esppapel se congelan las dos con esInterno = 1 y se distinguen
+      solo por origen: las ACCIONes A y G de p_list_pagado son la misma consulta
+      con distinto origen.
+
+      El corte va en la base cuando se puede: p_list_tcom_PagadoItem recibe
+      @origen y este subreporte se lo pasa. Pero @origen compara por IGUALDAD
+      -"@origen IS NULL OR origen = @origen"- y las internas son TRES origenes,
+      IMPEXPAP, PAPIRUS y PRODUCTIVA PAPEL. Entonces:
+
+        · reporte de Esppapel  -> origen = 'ESPPAPEL', lo filtra el SP.
+        · reporte de internas  -> origen = null, y la negacion "todo lo que no
+          es ESPPAPEL" la sigue haciendo el filterExpression, que es lo unico
+          que puede expresarla.
+
+      Por eso el filterExpression queda: NO es redundante con el SP, cubre el
+      lado que el SP no sabe pedir. Cuando llegue en el filtro un origen
+      concreto, el mismo filterExpression da verdadero para todas las filas y no
+      descarta nada.
+
+    Por que hay una banda noData
+      La tabla puede estar vacia para un periodo y estar bien: si ninguna nota
+      cayo dentro de la vigencia de alguna politica, no hay nada que congelar.
+      Un cero pelado no se distingue de un historico que no se escribio, asi que
+      cuando no hay una sola linea se imprime la lectura del corte, que es la
+      que explica cual de los dos ceros es.
+
+      Ojo con el alcance: el corte de tcom_pagadoItemCorte es del PERIODO y de
+      las dos empresas juntas -esa tabla no guarda origen-, mientras que esta
+      banda se imprime por empresa. Los dos ceros no son el mismo: el periodo
+      puede no tener nada congelado, o puede tener detalle que es todo de la
+      otra empresa. Quien arma lecturaItems -ComisionesController- ya distingue
+      los dos casos y nombra la empresa antes que el numero del periodo; el
+      titulo de la banda tambien nombra la empresa, para que titulo y texto no
+      se contradigan como pasaba antes.
+-->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="subRptItemComision" pageWidth="648" pageHeight="612" orientation="Landscape"
+              columnWidth="648" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0"
+              whenNoDataType="NoDataSection"
+              uuid="0d000100-0000-4000-8002-000000000100">
+
+	<style name="itmCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"
+	       isBold="true" fontSize="6"/>
+	<!-- El fondo de la linea. Arena para lo excluido: se tiene que distinguir
+	     de un vistazo del resto, pero no puede leerse como una alarma. -->
+	<style name="itmFondo" mode="Opaque" backcolor="#FFFFFF">
+	</style>
+	<style name="itmCelda" fontSize="6" forecolor="#1A1A1A">
+	</style>
+	<style name="itmCeldaNum" fontSize="6" forecolor="#1A1A1A" hTextAlign="Right">
+	</style>
+	<style name="itmMotivo" fontSize="5" forecolor="#8A7A5C" isBold="true">
+	</style>
+	<style name="itmNota" mode="Opaque" backcolor="#E4EAF2" forecolor="#1F3A5F" isBold="true" fontSize="7"/>
+
+	<parameter name="mes" class="java.lang.Integer"/>
+	<parameter name="anio" class="java.lang.Integer"/>
+	<!-- Como se congelo el periodo, no como se llama el reporte. -->
+	<parameter name="esInterno" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[Integer.valueOf(1)]]></defaultValueExpression>
+	</parameter>
+	<!-- La empresa, para que el corte lo haga el SP. Null = sin filtro, que es
+	     como viaja desde el reporte de internas: son tres origenes y @origen
+	     compara por igualdad. SIN defaultValueExpression a proposito: null es un
+	     valor con significado y un default lo pisaria. -->
+	<parameter name="origen" class="java.lang.String"/>
+	<!-- true = Esppapel, false = IMPEXPAP / PAPIRUS / PRODUCTIVA PAPEL.
+	     Con default porque el filtro lo desreferencia: abierto suelto en
+	     Jaspersoft Studio, sin default, reventaria en la primera fila. -->
+	<parameter name="esEpp" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[Boolean.FALSE]]></defaultValueExpression>
+	</parameter>
+	<!-- La frase del corte que explica un periodo sin items DE ESTA EMPRESA. -->
+	<parameter name="lecturaItems" class="java.lang.String">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+
+	<queryString>
+		<![CDATA[execute p_list_tcom_PagadoItem @mes=$P{mes}, @anio=$P{anio}, @esInterno=$P{esInterno}, @origen=$P{origen}, @ACCION='L']]>
+	</queryString>
+
+	<field name="idPagadoItem" class="java.lang.Long"/>
+	<field name="idPagado" class="java.lang.Long"/>
+	<field name="mesPago" class="java.lang.Integer"/>
+	<field name="anioPago" class="java.lang.Integer"/>
+	<field name="esInterno" class="java.lang.Integer"/>
+	<field name="docNum" class="java.lang.Long"/>
+	<field name="origen" class="java.lang.String"/>
+	<field name="bd" class="java.lang.Integer"/>
+	<field name="fechaDoc" class="java.sql.Date"/>
+	<field name="idVendedor" class="java.lang.Long"/>
+	<field name="itemCode" class="java.lang.String"/>
+	<field name="itemName" class="java.lang.String"/>
+	<field name="itmsGrpCod" class="java.lang.Integer"/>
+	<field name="idGrpFamiliaSap" class="java.lang.Long"/>
+	<field name="grpFam" class="java.lang.String"/>
+	<field name="cantidad" class="java.lang.Double"/>
+	<field name="montoLineaBS" class="java.lang.Double"/>
+	<field name="aplicaDescuento" class="java.lang.Integer"/>
+	<field name="porcentajePago" class="java.math.BigDecimal"/>
+	<field name="descuentoBS" class="java.lang.Double"/>
+	<field name="motivoExclusion" class="java.lang.String"/>
+	<field name="audFecha" class="java.sql.Timestamp"/>
+
+	<!-- ===== Por nota ===== -->
+	<variable name="itemsNota" class="java.lang.Integer" resetType="Group" resetGroup="nota" calculation="Sum">
+		<variableExpression><![CDATA[Integer.valueOf(1)]]></variableExpression>
+	</variable>
+	<variable name="excluidosNota" class="java.lang.Integer" resetType="Group" resetGroup="nota" calculation="Sum">
+		<variableExpression><![CDATA[Integer.valueOf($F{aplicaDescuento} != null && $F{aplicaDescuento}.intValue() == 0 ? 1 : 0)]]></variableExpression>
+	</variable>
+	<variable name="montoExcluidoNota" class="java.lang.Double" resetType="Group" resetGroup="nota" calculation="Sum">
+		<variableExpression><![CDATA[Double.valueOf($F{aplicaDescuento} != null && $F{aplicaDescuento}.intValue() == 0 && $F{montoLineaBS} != null
+			? $F{montoLineaBS}.doubleValue() : 0)]]></variableExpression>
+	</variable>
+	<variable name="descuentoNota" class="java.lang.Double" resetType="Group" resetGroup="nota" calculation="Sum">
+		<variableExpression><![CDATA[Double.valueOf($F{descuentoBS} == null ? 0 : $F{descuentoBS}.doubleValue())]]></variableExpression>
+	</variable>
+
+	<!-- ===== Del periodo ===== -->
+	<variable name="notasTotal" class="java.lang.Integer" resetType="Report" incrementType="Group" incrementGroup="nota" calculation="Sum">
+		<variableExpression><![CDATA[Integer.valueOf(1)]]></variableExpression>
+	</variable>
+	<variable name="itemsTotal" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[Integer.valueOf(1)]]></variableExpression>
+	</variable>
+	<variable name="excluidosTotal" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[Integer.valueOf($F{aplicaDescuento} != null && $F{aplicaDescuento}.intValue() == 0 ? 1 : 0)]]></variableExpression>
+	</variable>
+	<variable name="montoTotal" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[Double.valueOf($F{montoLineaBS} == null ? 0 : $F{montoLineaBS}.doubleValue())]]></variableExpression>
+	</variable>
+	<variable name="montoExcluidoTotal" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[Double.valueOf($F{aplicaDescuento} != null && $F{aplicaDescuento}.intValue() == 0 && $F{montoLineaBS} != null
+			? $F{montoLineaBS}.doubleValue() : 0)]]></variableExpression>
+	</variable>
+	<variable name="descuentoTotal" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[Double.valueOf($F{descuentoBS} == null ? 0 : $F{descuentoBS}.doubleValue())]]></variableExpression>
+	</variable>
+
+	<!-- Dos condiciones que sobreviven al filtro del SP:
+	     1. la empresa, SOLO para el lado que el SP no sabe pedir. Con
+	        @origen = 'ESPPAPEL' el SP ya devolvio una sola empresa y esta
+	        condicion da verdadero para todas las filas; con @origen null
+	        -reporte de internas, tres origenes contra un parametro que compara
+	        por igualdad- es esto lo que descarta las filas de Esppapel.
+	     2. solo lo que descuenta. Esta NO se sube al SP y es deliberado: lo
+	        excluido se guarda igual en tcom_pagadoItem y se consulta desde la
+	        app, pero en este reporte una linea que no descuenta solo ocupa un
+	        renglon para decir que no pasa nada. Al filtrarlas desaparecen
+	        tambien las notas donde ninguna descuenta, que es lo buscado. -->
+	<filterExpression><![CDATA[Boolean.valueOf(
+		$P{esEpp}.booleanValue() == "ESPPAPEL".equals($F{origen})
+		&& $F{aplicaDescuento} != null && $F{aplicaDescuento}.intValue() == 1)]]></filterExpression>
+
+	<group name="nota" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{idPagado}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<rectangle>
+					<reportElement style="itmNota" mode="Opaque" x="0" y="1" width="646" height="12" uuid="0d000110-0000-4000-8002-000000000110"/>
+					<graphicElement><pen lineWidth="0.0"/></graphicElement>
+				</rectangle>
+				<textField isBlankWhenNull="true">
+					<reportElement style="itmNota" mode="Transparent" x="6" y="1" width="300" height="12" uuid="0d000111-0000-4000-8002-000000000111"/>
+					<textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+					<textFieldExpression><![CDATA["Nota " + $F{docNum} + "   ·   " + $F{origen}
+						+ "   ·   vendedor " + $F{idVendedor}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement style="itmNota" mode="Transparent" x="306" y="1" width="120" height="12" uuid="0d000112-0000-4000-8002-000000000112"/>
+					<textElement verticalAlignment="Middle"><font size="6"/></textElement>
+					<textFieldExpression><![CDATA[$F{fechaDoc}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="2"/>
+		</groupFooter>
+	</group>
+
+	<title>
+		<band height="34">
+			<staticText>
+				<reportElement x="2" y="2" width="330" height="16" uuid="0d000101-0000-4000-8002-000000000101"/>
+				<textElement><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[Detalle por item de lo pagado]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="2" y="18" width="380" height="12" uuid="0d000102-0000-4000-8002-000000000102"/>
+				<textElement><font size="8"/></textElement>
+				<textFieldExpression><![CDATA[($P{esEpp}.booleanValue() ? "Esppapel" : "Vendedores internos")
+					+ "  ·  Periodo " + $P{mes} + "/" + $P{anio}
+					+ "  ·  congelado al ejecutar el pago"]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement x="448" y="18" width="198" height="12" uuid="0d000103-0000-4000-8002-000000000103"/>
+				<textElement textAlignment="Right"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="31" width="646" height="2" backcolor="#1F3A5F" uuid="0d000104-0000-4000-8002-000000000104"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+		</band>
+	</title>
+
+	<columnHeader>
+		<band height="14">
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="646" height="14" backcolor="#1F3A5F" uuid="0d000130-0000-4000-8002-000000000130"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="6" y="0" width="58" height="14"/><textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[ITEM]]></text></staticText>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="64" y="0" width="168" height="14"/><textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[DESCRIPCION]]></text></staticText>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="232" y="0" width="86" height="14"/><textElement verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[FAMILIA]]></text></staticText>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="318" y="0" width="42" height="14"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[CANT.]]></text></staticText>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="360" y="0" width="72" height="14"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[MONTO (BS)]]></text></staticText>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="432" y="0" width="38" height="14"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[% PAGO]]></text></staticText>
+			<staticText><reportElement style="itmCabecera" mode="Transparent" x="470" y="0" width="72" height="14"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement><text><![CDATA[DESCUENTO (BS)]]></text></staticText>
+		</band>
+	</columnHeader>
+
+	<detail>
+		<band height="11" splitType="Stretch">
+			<rectangle>
+				<reportElement style="itmFondo" x="0" y="0" width="646" height="11" uuid="0d000140-0000-4000-8002-000000000140"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<!-- Marca al margen: la fila excluida se tiene que poder encontrar
+			     hojeando, sin leer la columna del motivo. -->
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="3" height="11" backcolor="#C8A15A" uuid="0d000141-0000-4000-8002-000000000141">
+					<printWhenExpression><![CDATA[$F{aplicaDescuento} != null && $F{aplicaDescuento}.intValue() == 0]]></printWhenExpression>
+				</reportElement>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<textField isBlankWhenNull="true">
+				<reportElement style="itmCelda" x="6" y="0" width="58" height="11" uuid="0d000142-0000-4000-8002-000000000142"/>
+				<textElement verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{itemCode}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="itmCelda" x="64" y="0" width="168" height="11" uuid="0d000143-0000-4000-8002-000000000143"/>
+				<textElement verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{itemName}]]></textFieldExpression>
+			</textField>
+			<!-- Sin familia mapeada no hay descuento posible, y la celda vacia no
+			     lo dice: se escribe. -->
+			<textField isBlankWhenNull="true">
+				<reportElement style="itmCelda" x="232" y="0" width="86" height="11" uuid="0d000144-0000-4000-8002-000000000144"/>
+				<textElement verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{grpFam} == null ? "(sin familia)" : $F{grpFam}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.##" isBlankWhenNull="true">
+				<reportElement style="itmCeldaNum" x="318" y="0" width="42" height="11" uuid="0d000145-0000-4000-8002-000000000145"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="itmCeldaNum" x="360" y="0" width="72" height="11" uuid="0d000146-0000-4000-8002-000000000146"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{montoLineaBS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="itmCeldaNum" x="432" y="0" width="38" height="11" uuid="0d000147-0000-4000-8002-000000000147"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{porcentajePago}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="itmCeldaNum" x="470" y="0" width="72" height="11" uuid="0d000148-0000-4000-8002-000000000148"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{descuentoBS}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="10" width="646" height="1" uuid="0d00014A-0000-4000-8002-00000000014A"/>
+				<graphicElement><pen lineWidth="0.25" lineColor="#D0D7E2"/></graphicElement>
+			</line>
+		</band>
+	</detail>
+
+	<pageFooter>
+		<band height="14">
+			<textField>
+				<reportElement x="446" y="2" width="160" height="10" uuid="0d000150-0000-4000-8002-000000000150"/>
+				<textElement textAlignment="Right"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="608" y="2" width="30" height="10" uuid="0d000151-0000-4000-8002-000000000151"/>
+				<textElement><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+
+	<summary>
+		<band height="24">
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="2" width="646" height="18" backcolor="#1F3A5F" uuid="0d000160-0000-4000-8002-000000000160"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement forecolor="#FFFFFF" x="6" y="2" width="352" height="18" uuid="0d000161-0000-4000-8002-000000000161"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["TOTAL DEL PERIODO  ·  " + ($V{notasTotal} == null ? 0 : $V{notasTotal}) + " notas  ·  "
+					+ ($V{itemsTotal} == null ? 0 : $V{itemsTotal}) + " items con descuento"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement forecolor="#FFFFFF" x="360" y="2" width="72" height="18" uuid="0d000162-0000-4000-8002-000000000162"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{montoTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement forecolor="#FFFFFF" x="470" y="2" width="72" height="18" uuid="0d000163-0000-4000-8002-000000000163"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{descuentoTotal}]]></textFieldExpression>
+			</textField>
+			<!-- El numero que no existia antes de tcom_pagadoItem. -->
+		</band>
+	</summary>
+
+	<noData>
+		<band height="70">
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="2" width="646" height="60" backcolor="#F4EFE3" uuid="0d000170-0000-4000-8002-000000000170"/>
+				<graphicElement><pen lineWidth="0.25" lineColor="#C8A15A"/></graphicElement>
+			</rectangle>
+			<!-- El titulo nombra la EMPRESA, no el periodo. Decia "Este periodo no
+			     tiene detalle por item" y se contradecia con la linea de abajo:
+			     el periodo podia tener 19 items congelados y ser todos de la otra
+			     empresa. El titulo era del periodo, el vacio era de la empresa. -->
+			<textField>
+				<reportElement x="10" y="6" width="500" height="14" uuid="0d000171-0000-4000-8002-000000000171"/>
+				<textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Sin detalle por item para "
+					+ ($P{esEpp}.booleanValue() ? "ESPPAPEL" : "IMPEXPAP / PAPIRUS / PRODUCTIVA PAPEL")
+					+ "  ·  Periodo " + $P{mes} + "/" + $P{anio}]]></textFieldExpression>
+			</textField>
+			<!-- La frase la arma ComisionesController y ya viene con el alcance
+			     dicho: primero la empresa, despues el numero del periodo aclarando
+			     que es de las dos juntas. -->
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="10" y="22" width="626" height="22" uuid="0d000172-0000-4000-8002-000000000172"/>
+				<textElement verticalAlignment="Top"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$P{lecturaItems}]]></textFieldExpression>
+			</textField>
+			<!-- Las dos razones por las que esta banda se imprime, sin afirmar
+			     cual de las dos es: eso lo dice lecturaItems, que conto. La
+			     anterior afirmaba "No hay ninguna linea congelada para X", y era
+			     falso cuando la empresa tenia lineas y ninguna descontaba. -->
+			<staticText>
+				<reportElement positionType="Float" x="10" y="46" width="626" height="14" uuid="0d000173-0000-4000-8002-000000000173"/>
+				<textElement verticalAlignment="Top"><font size="6" isItalic="true"/></textElement>
+				<text><![CDATA[Vacio no siempre es un problema: si ninguna nota cayo dentro de la vigencia de la politica no habia nada que descontar, y este reporte imprime solo las lineas que descuentan.]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

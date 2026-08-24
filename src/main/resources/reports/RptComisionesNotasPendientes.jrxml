@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Notas abiertas (no pagadas).
+
+     Apaisado y con las celdas en isStretchWithOverflow: los nombres largos de
+     vendedor se recortaban sin aviso, que en un reporte de control es peor que
+     una fila alta. La altura de la fila la fija el contenido, no un numero.
+
+     Se agregan totales al pie: el reporte se usa para cuadrar contra SAP y
+     antes habia que sumar a mano. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptComisionesNotasPendientes" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7a9e7d38-af49-40ef-a4b0-1782a1a8c3ce" whenNoDataType="AllSectionsNoDetail">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="tcomCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"/>
+	<style name="tcomRegla" mode="Opaque" backcolor="#1F3A5F"/>
+	<style name="tcomTotal" mode="Opaque" backcolor="#DCE6F1" forecolor="#1F3A5F"/>
+	<queryString>
+		<![CDATA[execute p_list_noPagado @ACCION='B']]>
+	</queryString>
+	<field name="fila" class="java.lang.Long"/>
+	<field name="idNoPagado" class="java.lang.Long"/>
+	<field name="codVendedor" class="java.lang.Long"/>
+	<field name="nombreVen" class="java.lang.String"/>
+	<field name="fechaDoc" class="java.sql.Date"/>
+	<field name="mes" class="java.lang.Integer"/>
+	<field name="anio" class="java.lang.Integer"/>
+	<field name="docNum" class="java.lang.Long"/>
+	<field name="valido" class="java.lang.String"/>
+	<field name="indicador" class="java.lang.String"/>
+	<field name="estado" class="java.lang.String"/>
+	<field name="montoTotalBS" class="java.lang.Double"/>
+	<field name="montoCerradoBS" class="java.lang.Double"/>
+	<field name="origen" class="java.lang.String"/>
+	<field name="saldoPendiente" class="java.math.BigDecimal"/>
+	<variable name="tot_montoTotalBS" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{montoTotalBS} == null ? java.math.BigDecimal.ZERO : new java.math.BigDecimal($F{montoTotalBS}.toString())]]></variableExpression>
+	</variable>
+	<variable name="tot_montoCerradoBS" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{montoCerradoBS} == null ? java.math.BigDecimal.ZERO : new java.math.BigDecimal($F{montoCerradoBS}.toString())]]></variableExpression>
+	</variable>
+	<variable name="tot_saldoPendiente" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{saldoPendiente} == null ? java.math.BigDecimal.ZERO : new java.math.BigDecimal($F{saldoPendiente}.toString())]]></variableExpression>
+	</variable>
+	<title>
+		<band height="62" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000023" x="0" y="4" width="802" height="28"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="20" isBold="true"/></textElement>
+				<text><![CDATA[NOTAS ABIERTAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000024" x="0" y="32" width="802" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement>
+				<text><![CDATA[Documentos cerrados y todavia sin pagar]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000025" x="602" y="4" width="200" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA["Generado: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement style="tcomRegla" uuid="c0d00000-0000-4000-8000-000000000026" x="0" y="52" width="802" height="3"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="26" splitType="Stretch">
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000001" x="0" y="0" width="28" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[#]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000002" x="28" y="0" width="204" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Vendedor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000003" x="232" y="0" width="62" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Fecha doc.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000004" x="294" y="0" width="68" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Nota]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000005" x="362" y="0" width="60" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Estado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000006" x="422" y="0" width="80" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Origen]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000007" x="502" y="0" width="100" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Monto total (Bs)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000008" x="602" y="0" width="100" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Monto cerrado (Bs)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="tcomCabecera" uuid="c0d00000-0000-4000-8000-000000000009" x="702" y="0" width="100" height="26"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Saldo pendiente (Bs)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000010" x="0" y="0" width="28" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{fila}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000011" x="28" y="0" width="204" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{nombreVen}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000012" x="232" y="0" width="62" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{fechaDoc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000013" x="294" y="0" width="68" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{docNum}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000014" x="362" y="0" width="60" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000015" x="422" y="0" width="80" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{origen}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000016" x="502" y="0" width="100" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{montoTotalBS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000017" x="602" y="0" width="100" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{montoCerradoBS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000018" x="702" y="0" width="100" height="13" stretchType="ContainerHeight"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{saldoPendiente}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000027" x="0" y="4" width="400" height="14"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="7"/></textElement>
+				<text><![CDATA[Notas abiertas]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c0d00000-0000-4000-8000-000000000028" x="402" y="4" width="400" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement style="tcomTotal" uuid="c0d00000-0000-4000-8000-000000000019" x="0" y="0" width="502" height="18"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<text><![CDATA[TOTAL   ]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="tcomTotal" uuid="c0d00000-0000-4000-8000-000000000020" x="502" y="0" width="100" height="18"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{tot_montoTotalBS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="tcomTotal" uuid="c0d00000-0000-4000-8000-000000000021" x="602" y="0" width="100" height="18"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{tot_montoCerradoBS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="tcomTotal" uuid="c0d00000-0000-4000-8000-000000000022" x="702" y="0" width="100" height="18"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.5" lineColor="#B9C4D4"/><topPen lineWidth="0.5" lineColor="#B9C4D4"/><leftPen lineWidth="0.5" lineColor="#B9C4D4"/><bottomPen lineWidth="0.5" lineColor="#B9C4D4"/><rightPen lineWidth="0.5" lineColor="#B9C4D4"/></box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{tot_saldoPendiente}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

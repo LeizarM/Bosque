@@ -47,7 +47,8 @@ import java.util.List;
  * mismo. Un módulo nuevo casi siempre quiere la segunda.
  */
 @Component
-public class AccesoModuloHelper {
+public class AccesoModuloHelper
+{
 
     private static final Logger log = LoggerFactory.getLogger(AccesoModuloHelper.class);
 

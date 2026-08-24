@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Detalle de comisiones pagadas - ESPPAPEL.
+
+    Es la copia del de internas -subRptDetComision- con una sola diferencia de
+    fondo: la ACCION del SP, 'G' en vez de 'A', que es lo que cambia la empresa.
+    Por venir de una copia byte a byte, el rotulo del titulo decia "Vendedores
+    internos" tambien aca y los dos PDF se veian iguales en la portada del
+    detalle; ahora dice Esppapel, igual que lo rotula subRptItemComision.
+
+    Reescrito sobre el original de Bosque v2. Que cambio y por que:
+
+      1. Se agrego la columna COMISION BS. El reporte mostraba el monto de la
+         venta y la tasa, pero nunca el importe de comision, que es el numero
+         que se le paga al vendedor. Habia que calcularlo a mano.
+      2. La tasa se muestra como porcentaje. Venia como 0,0080 porque la tabla
+         guarda base 1; ahora dice 0,80 %.
+      3. Se quito un <staticText> que habia quedado con el texto de ejemplo de
+         iReport ("Static text") y se pisaba con la columna de observaciones.
+         Era, en realidad, un resaltado de fondo: ahora es un <rectangle>.
+      4. Filas alternadas y encabezado en negativo, para poder seguir un renglon
+         largo sin perderse de columna.
+      5. Las filas de total que emite el SP se distinguen del detalle.
+      6. Se dejo de imprimir tcom_pagado.detalleItems, el varchar que el SP arma
+         con FOR XML PATH. El detalle por item pasa a ser una seccion propia
+         -subRptItemComision-, que lee tcom_pagadoItem: eso se puede agrupar por
+         nota, sumar, y decir por que cada linea no descontaba. El varchar sigue
+         llegando en el resultado del SP, solo que ya no se dibuja.
+         Ojo: el renglon de items colgaba de la banda del descuento Bond, asi
+         que solo salia cuando descuentoBondBS > 0. Las notas cuyos items estan
+         todos excluidos -que son la mayoria- nunca lo mostraban.
+
+    El SP devuelve detalle y totales mezclados: las filas de total llegan sin
+    docNum. Por eso los acumuladores excluyen esas filas, si no se contaria dos
+    veces.
+-->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="subRptDetComisionEpp" pageWidth="648" pageHeight="612" orientation="Landscape"
+              columnWidth="648" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0"
+              uuid="bfbd90f5-be11-457e-a42f-fb18477450a5">
+
+	<style name="detZebra" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F2F5F9"/>
+		</conditionalStyle>
+	</style>
+	<style name="detCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"
+	       isBold="true" fontSize="7"/>
+	<style name="detTotal" mode="Opaque" backcolor="#DCE6F1"/>
+	<style name="detCelda" fontSize="7"/>
+	<style name="detNumVenta" fontSize="7" hTextAlign="Right">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{montoPagadoBS} != null && $F{montoPagadoBS} < 0]]></conditionExpression>
+			<style forecolor="#C62828" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="detNumComision" fontSize="7" hTextAlign="Right">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{comisionFila} != null && $V{comisionFila}.signum() < 0]]></conditionExpression>
+			<style forecolor="#C62828" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="detCeldaNum" fontSize="7" hTextAlign="Right"/>
+
+	<parameter name="mes" class="java.lang.Integer"/>
+	<parameter name="anio" class="java.lang.Integer"/>
+
+	<queryString>
+		<![CDATA[execute p_list_pagado @mes=$P{mes}, @anio=$P{anio}, @ACCION='G']]>
+	</queryString>
+
+	<field name="fila" class="java.lang.Long"/>
+	<field name="idPagado" class="java.lang.Long"/>
+	<field name="codVendedor" class="java.lang.Long"/>
+	<field name="nombreVen" class="java.lang.String"/>
+	<field name="fechaDoc" class="java.sql.Date"/>
+	<field name="mes" class="java.lang.Integer"/>
+	<field name="anio" class="java.lang.Integer"/>
+	<field name="docNum" class="java.lang.Long"/>
+	<field name="valido" class="java.lang.String"/>
+	<field name="indicador" class="java.lang.String"/>
+	<field name="estado" class="java.lang.String"/>
+	<field name="montoPagadoBS" class="java.lang.Double"/>
+	<field name="mesPago" class="java.lang.Integer"/>
+	<field name="anioPago" class="java.lang.Integer"/>
+	<field name="origen" class="java.lang.String"/>
+	<field name="tc" class="java.lang.Double"/>
+	<field name="obs" class="java.lang.String"/>
+	<field name="comision" class="java.math.BigDecimal"/>
+	<field name="fechaUltimoPago" class="java.sql.Date"/>
+	<field name="diferenciaDias" class="java.lang.Integer"/>
+	<field name="montoCerradoBrutoBS" class="java.math.BigDecimal"/>
+	<field name="descuentoBondBS" class="java.math.BigDecimal"/>
+	<field name="detalleBond" class="java.lang.String"/>
+
+	<!-- Importe de comision de la fila. Cero en las filas de total. -->
+	<variable name="comisionFila" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[($F{docNum} == null || $F{montoPagadoBS} == null || $F{comision} == null)
+			? java.math.BigDecimal.ZERO
+			: new java.math.BigDecimal($F{montoPagadoBS}).multiply($F{comision})]]></variableExpression>
+	</variable>
+
+	<!-- Acumuladores. Solo detalle: las filas de total del SP se saltean. -->
+	<variable name="totalVenta" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[($F{docNum} == null || $F{montoPagadoBS} == null)
+			? Double.valueOf(0) : $F{montoPagadoBS}]]></variableExpression>
+	</variable>
+	<variable name="totalComision" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[($F{docNum} == null || $F{montoPagadoBS} == null || $F{comision} == null)
+			? java.math.BigDecimal.ZERO
+			: new java.math.BigDecimal($F{montoPagadoBS}).multiply($F{comision})]]></variableExpression>
+	</variable>
+	<variable name="cantNotas" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{docNum} == null ? Integer.valueOf(0) : Integer.valueOf(1)]]></variableExpression>
+	</variable>
+
+	<title>
+		<band height="34">
+			<staticText>
+				<reportElement uuid="0d000001-0000-4000-8001-000000000001" x="2" y="2" width="300" height="16"/>
+				<textElement><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[Detalle de comisiones]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="0d000002-0000-4000-8001-000000000002" x="2" y="18" width="300" height="12"/>
+				<textElement><font size="8"/></textElement>
+				<textFieldExpression><![CDATA["Esppapel  ·  Periodo " + $P{mes} + "/" + $P{anio}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement uuid="0d000003-0000-4000-8001-000000000003" x="448" y="18" width="198" height="12"/>
+				<textElement textAlignment="Right"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="0d000004-0000-4000-8001-000000000004" mode="Opaque" x="0" y="31" width="646" height="2" backcolor="#1F3A5F"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+		</band>
+	</title>
+
+	<columnHeader>
+		<band height="16">
+			<rectangle>
+				<reportElement uuid="0d000010-0000-4000-8001-000000000010" mode="Opaque" x="0" y="0" width="646" height="16" backcolor="#1F3A5F"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="2" y="0" width="22" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[#]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="24" y="0" width="92" height="16"/><textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[EMPLEADO]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="116" y="0" width="50" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[F. DOC.]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="166" y="0" width="64" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[DOCUMENTO]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="230" y="0" width="32" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[VALIDEZ]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="262" y="0" width="34" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[ESTADO]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="296" y="0" width="52" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[ULT. PAGO]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="348" y="0" width="32" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[DIAS]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="380" y="0" width="50" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[SISTEMA]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="430" y="0" width="68" height="16"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[VENTA (BS)]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="498" y="0" width="40" height="16"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[TASA]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="538" y="0" width="70" height="16"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[COMISION (BS)]]></text></staticText>
+			<staticText><reportElement style="detCabecera" mode="Transparent" x="608" y="0" width="38" height="16"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement><text><![CDATA[OBS.]]></text></staticText>
+		</band>
+	</columnHeader>
+
+	<detail>
+		<band height="13" splitType="Stretch">
+			<!-- Fondo alterno del detalle. Va primero para quedar detras. -->
+			<rectangle>
+				<reportElement style="detZebra" uuid="0d000020-0000-4000-8001-000000000020" x="0" y="0" width="646" height="13">
+					<printWhenExpression><![CDATA[$F{docNum} != null]]></printWhenExpression>
+				</reportElement>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<!-- Fondo de las filas de total que emite el SP. -->
+			<rectangle>
+				<reportElement style="detTotal" uuid="0d000021-0000-4000-8001-000000000021" x="0" y="0" width="646" height="13">
+					<printWhenExpression><![CDATA[$F{docNum} == null]]></printWhenExpression>
+				</reportElement>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<!-- Marca de observacion: solo resalta, el texto va en su columna. -->
+			<rectangle>
+				<reportElement uuid="0d000022-0000-4000-8001-000000000022" mode="Opaque" x="608" y="0" width="38" height="13" backcolor="#FFF3B0">
+					<printWhenExpression><![CDATA[$F{obs} != null && $F{obs}.trim().length() > 0]]></printWhenExpression>
+				</reportElement>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="2" y="0" width="22" height="13" uuid="0d000030-0000-4000-8001-000000000030"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{fila}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="24" y="0" width="92" height="13" uuid="0d000031-0000-4000-8001-000000000031"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="false"/></textElement>
+				<textFieldExpression><![CDATA[$F{nombreVen}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement style="detCelda" x="116" y="0" width="50" height="13" uuid="0d000032-0000-4000-8001-000000000032"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{fechaDoc}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="166" y="0" width="64" height="13" uuid="0d000033-0000-4000-8001-000000000033"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{docNum}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="230" y="0" width="32" height="13" uuid="0d000034-0000-4000-8001-000000000034"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{valido}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="262" y="0" width="34" height="13" uuid="0d000035-0000-4000-8001-000000000035"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement style="detCelda" x="296" y="0" width="52" height="13" uuid="0d000036-0000-4000-8001-000000000036"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{fechaUltimoPago}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="348" y="0" width="32" height="13" uuid="0d000037-0000-4000-8001-000000000037"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{diferenciaDias}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="380" y="0" width="50" height="13" uuid="0d000038-0000-4000-8001-000000000038"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{origen}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="detNumVenta" x="430" y="0" width="66" height="13" uuid="0d000039-0000-4000-8001-000000000039"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{montoPagadoBS}]]></textFieldExpression>
+			</textField>
+			<!-- Tasa en porcentaje: la tabla la guarda en base 1. -->
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="detCeldaNum" x="498" y="0" width="34" height="13" uuid="0d000040-0000-4000-8001-000000000040">
+					<printWhenExpression><![CDATA[$F{comision} != null && $F{docNum} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[$F{comision}.multiply(new java.math.BigDecimal(100))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="532" y="0" width="6" height="13" uuid="0d000041-0000-4000-8001-000000000041">
+					<printWhenExpression><![CDATA[$F{comision} != null && $F{docNum} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement verticalAlignment="Middle"><font size="6"/></textElement>
+				<text><![CDATA[%]]></text>
+			</staticText>
+			<!-- Columna nueva: el importe que efectivamente se paga. -->
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="detNumComision" x="538" y="0" width="68" height="13" uuid="0d000042-0000-4000-8001-000000000042">
+					<printWhenExpression><![CDATA[$F{docNum} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{comisionFila}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="detCelda" x="608" y="0" width="38" height="13" uuid="0d000043-0000-4000-8001-000000000043"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="5"/></textElement>
+				<textFieldExpression><![CDATA[$F{obs}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="12" width="646" height="1" uuid="0d000044-0000-4000-8001-000000000044"/>
+				<graphicElement><pen lineWidth="0.25" lineColor="#D0D7E2"/></graphicElement>
+			</line>
+		</band>
+		<!-- ===== Segunda banda: el descuento por familia.
+		     Va como banda APARTE y con printWhenExpression a nivel de banda: si
+		     estuviera dentro de la banda del detalle, el printWhenExpression de
+		     cada elemento evitaria que se dibuje pero no encogeria la banda, y
+		     todas las filas -que en su mayoria no descuentan- pagarian el alto.
+		     ===== -->
+		<band height="11" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{descuentoBondBS} != null && $F{descuentoBondBS}.doubleValue() > 0]]></printWhenExpression>
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="646" height="10" backcolor="#FDECEC" uuid="0d0000A0-0000-4000-8001-0000000000A0"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<textField isBlankWhenNull="true">
+				<reportElement x="24" y="0" width="300" height="10" uuid="0d0000A1-0000-4000-8001-0000000000A1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Bond:  bruto " + new java.text.DecimalFormat("#,##0.00").format($F{montoCerradoBrutoBS}) + "   -   descuento " + new java.text.DecimalFormat("#,##0.00").format($F{descuentoBondBS}) + "   =   base " + new java.text.DecimalFormat("#,##0.00").format($F{montoPagadoBS})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="326" y="0" width="320" height="10" uuid="0d0000A2-0000-4000-8001-0000000000A2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="6" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{detalleBond}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+
+
+	<pageFooter>
+		<band height="14">
+			<textField>
+				<reportElement x="446" y="2" width="160" height="10" uuid="0d000060-0000-4000-8001-000000000060"/>
+				<textElement textAlignment="Right"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="608" y="2" width="30" height="10" uuid="0d000061-0000-4000-8001-000000000061"/>
+				<textElement><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="34">
+			<rectangle>
+				<reportElement uuid="0d000050-0000-4000-8001-000000000050" mode="Opaque" x="0" y="2" width="646" height="18" backcolor="#1F3A5F"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement forecolor="#FFFFFF" x="10" y="2" width="300" height="18" uuid="0d000051-0000-4000-8001-000000000051"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph/></textElement>
+				<textFieldExpression><![CDATA["TOTAL GENERAL  ·  " + ($V{cantNotas} == null ? 0 : $V{cantNotas}) + " notas"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement forecolor="#FFFFFF" x="430" y="2" width="66" height="18" uuid="0d000052-0000-4000-8001-000000000052"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{totalVenta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement forecolor="#FFFFFF" x="538" y="2" width="68" height="18" uuid="0d000053-0000-4000-8001-000000000053"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$V{totalComision}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="22" width="400" height="10" uuid="0d000054-0000-4000-8001-000000000054"/>
+				<textElement><font size="6"/></textElement>
+				<text><![CDATA[Las filas resaltadas son subtotales por vendedor. El total general suma solo el detalle.]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="833c26dc-e3c8-40df-b45c-f6cdc4d96fc7">
+	<property name="ireport.zoom" value="1.3310000000000055"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="chipComision" mode="Opaque" backcolor="#CC79A7" forecolor="#000000">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} == null]]></conditionExpression>
+			<style mode="Transparent"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.0) < 0.0000005]]></conditionExpression>
+			<style backcolor="#BDBDBD" forecolor="#000000"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.002) < 0.0000005]]></conditionExpression>
+			<style backcolor="#FDE725" forecolor="#000000"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.003) < 0.0000005]]></conditionExpression>
+			<style backcolor="#B5DE2B" forecolor="#000000"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.004) < 0.0000005]]></conditionExpression>
+			<style backcolor="#6ECE58" forecolor="#000000"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.005) < 0.0000005]]></conditionExpression>
+			<style backcolor="#35B779" forecolor="#000000"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.006) < 0.0000005]]></conditionExpression>
+			<style backcolor="#1F9E89" forecolor="#FFFFFF"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.007) < 0.0000005]]></conditionExpression>
+			<style backcolor="#26828E" forecolor="#FFFFFF"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.008) < 0.0000005]]></conditionExpression>
+			<style backcolor="#31688E" forecolor="#FFFFFF"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{comision} != null && Math.abs($F{comision}.doubleValue() - 0.01) < 0.0000005]]></conditionExpression>
+			<style backcolor="#3E4A89" forecolor="#FFFFFF"/>
+		</conditionalStyle>
+	</style>
+	<style name="cabTabla" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF" isBold="true"/>
+	<style name="numVenta" hTextAlign="Right">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{montoPagadoBS} != null && $F{montoPagadoBS} < 0]]></conditionExpression>
+			<style forecolor="#C62828" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="numPagarBs" hTextAlign="Right">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{bsAPagar} != null && $F{bsAPagar} < 0]]></conditionExpression>
+			<style forecolor="#C62828" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="numPagarUsd" hTextAlign="Right">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{usd} != null && $F{usd} < 0]]></conditionExpression>
+			<style forecolor="#C62828" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="tcomCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"/>
+	<style name="tcomRegla" mode="Opaque" backcolor="#1F3A5F"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="mes" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="anio" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tipoCambioDia" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\Proyectos\\Bosque v2\\web\\Bosque\\reportes\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="subRptDetComision" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<!-- El detalle por item, que lee tcom_pagadoItem via p_list_tcom_PagadoItem.
+	     Los cuatro parametros de abajo son de ese subreporte y no de este: viajan
+	     por aca porque un subreporte solo recibe lo que el padre le pasa.
+	       esInterno    como se congelo el periodo (internas y Epp son 1).
+	       origen       la empresa, para que el corte lo haga el SP. En ESTE
+	                    reporte viaja en NULL a proposito: las internas son tres
+	                    origenes -IMPEXPAP, PAPIRUS, PRODUCTIVA PAPEL- y @origen
+	                    compara por igualdad, asi que no hay forma de pedir "todas
+	                    menos ESPPAPEL" en un llamado. La negacion la sigue
+	                    haciendo el filterExpression del subreporte.
+	       esEpp        que empresa imprime este reporte: rotula, y con origen en
+	                    null es ademas lo que separa las dos empresas.
+	       lecturaItems por que el periodo puede no tener items. Sin esto, un
+	                    periodo sin detalle imprimiria una hoja en blanco, que
+	                    es indistinguible de un historico que no se escribio. -->
+	<parameter name="subRptItemComision" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="esInterno" class="java.lang.Integer" isForPrompting="false">
+		<defaultValueExpression><![CDATA[Integer.valueOf(1)]]></defaultValueExpression>
+	</parameter>
+	<!-- Sin defaultValueExpression: null es un valor con significado -sin filtro-
+	     y un default lo pisaria. -->
+	<parameter name="origen" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="esEpp" class="java.lang.Boolean" isForPrompting="false">
+		<defaultValueExpression><![CDATA[Boolean.FALSE]]></defaultValueExpression>
+	</parameter>
+	<parameter name="lecturaItems" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[execute p_list_pagado @mes=$P{mes}, @anio=$P{anio}, @ACCION='B']]>
+	</queryString>
+	<field name="ord" class="java.lang.Integer"/>
+	<field name="idVendedor" class="java.lang.Integer"/>
+	<field name="mesPago" class="java.lang.Integer"/>
+	<field name="anioPago" class="java.lang.Integer"/>
+	<field name="fechaPago" class="java.lang.String"/>
+	<field name="grupo" class="java.lang.String"/>
+	<field name="nombreVen" class="java.lang.String"/>
+	<field name="comision" class="java.lang.Double"/>
+	<field name="montoPagadoBS" class="java.lang.Double"/>
+	<field name="bsAPagar" class="java.lang.Double"/>
+	<field name="usd" class="java.lang.Double"/>
+	<variable name="field1_1" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="montoPagado_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="usdc_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="bsc_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="montoPagado_2" class="java.lang.Double" resetType="Column" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="102">
+			<rectangle>
+				<reportElement style="tcomRegla" uuid="0c000001-0000-4000-8000-000000000001" x="0" y="80" width="752" height="3"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="f89b882d-14ce-4e80-b1aa-fb40f12d6133" x="274" y="0" width="211" height="31"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="26" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMISIONES]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="02a2b2e1-0e40-463b-80e5-e0775d0eca3f" x="284" y="45" width="95" height="19"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{mesPago}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="840f6e47-7c20-4f35-ad0b-20fa7716b068" x="392" y="45" width="81" height="19"/>
+				<textElement>
+					<font fontName="Arial" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{anioPago}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="4ad92d85-8d52-4154-b787-65f85bc9b090" x="379" y="45" width="13" height="19"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Arial" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[/]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7b4008fa-9fc4-4c02-9976-9cbed598129b" x="45" y="65" width="87" height="16"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Ejecutado:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4e033e8b-92e1-4605-9c90-407f08a674f5" x="260" y="31" width="260" height="14"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendedores Internos ( IMPEXPAP Y PRODUCTIVO )]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="42e037f7-c3ca-42c7-8293-45a6eb38aa73" x="132" y="64" width="160" height="17"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{fechaPago}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="45" y="86" width="675" height="14" uuid="0d000001-0000-4000-8000-0000000000c1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{tipoCambioDia}]]></textFieldExpression>
+			</textField>
+</band>
+	</title>
+	<pageHeader>
+		<band height="20">
+			<staticText>
+				<reportElement uuid="c0147543-7597-435f-b6d5-0b0a83bbc0ac" mode="Opaque" forecolor="#FFFFFF" x="176" y="0" width="144" height="20" backcolor="#1F3A5F"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[EMPLEADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f6a043b3-3603-4ae0-9235-cb99fc6cd051" mode="Opaque" forecolor="#FFFFFF" x="320" y="0" width="101" height="20" backcolor="#1F3A5F"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMISION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4695fe7d-a76f-4f49-9c19-142cd50abbe9" mode="Opaque" forecolor="#FFFFFF" x="420" y="0" width="100" height="20" backcolor="#1F3A5F"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VENTA CERRADA (BS)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1a954a3a-efda-4588-8cd5-52efad034f20" mode="Opaque" forecolor="#FFFFFF" x="520" y="0" width="100" height="20" backcolor="#1F3A5F"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MONTO A PAGAR (BS)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="49f984c5-c54e-45a3-b8b8-367985e51c03" mode="Opaque" forecolor="#FFFFFF" x="45" y="0" width="131" height="20" backcolor="#1F3A5F"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[GRUPO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6df38c89-d7cd-4ae5-9f83-46e0cb370353" mode="Opaque" forecolor="#FFFFFF" x="620" y="0" width="100" height="20" backcolor="#1F3A5F"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MONTO A PAGAR (USD)]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="6097f9da-7b61-4029-b2f5-f38a58a69905" mode="Opaque" x="176" y="0" width="144" height="15" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[$F{grupo} == null]]></printWhenExpression>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement style="numVenta" uuid="6097f9da-7b61-4029-b2f5-f38a58a69905" mode="Opaque" x="320" y="0" width="100" height="15" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[$F{grupo} == null]]></printWhenExpression>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="6097f9da-7b61-4029-b2f5-f38a58a69905" mode="Opaque" x="421" y="0" width="99" height="15" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[$F{grupo} == null]]></printWhenExpression>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement style="numPagarBs" uuid="6097f9da-7b61-4029-b2f5-f38a58a69905" mode="Opaque" x="520" y="0" width="100" height="15" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[$F{grupo} == null]]></printWhenExpression>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement style="numPagarUsd" uuid="6097f9da-7b61-4029-b2f5-f38a58a69905" mode="Opaque" x="620" y="0" width="100" height="15" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[$F{grupo} == null]]></printWhenExpression>
+				</reportElement>
+			</rectangle>
+			<textField pattern="#,##0.00 '%'" isBlankWhenNull="true">
+				<reportElement style="chipComision" uuid="bcaf1fe8-ac21-4aa4-9a6e-107e59e5bc8d" x="320" y="0" width="100" height="15">
+					<printWhenExpression><![CDATA[$F{comision}!=null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comision} == null ? null : Double.valueOf($F{comision}.doubleValue() * 100)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="be030892-333c-4f21-a1f7-ec8aa6263da2" x="176" y="0" width="144" height="15">
+					<printWhenExpression><![CDATA[$F{nombreVen}!=null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreVen}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="numVenta" uuid="cb6c2655-1274-4fea-92a4-94b9a6e82dfe" x="420" y="0" width="100" height="15">
+					<printWhenExpression><![CDATA[$F{montoPagadoBS}!=null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{montoPagadoBS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="numPagarBs" uuid="19beb98b-c71b-475e-b53a-fe2bf564ec8d" x="520" y="0" width="100" height="15">
+					<printWhenExpression><![CDATA[$F{bsAPagar}!=null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bsAPagar}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement style="numPagarUsd" uuid="cf5171f0-8911-4084-ac6c-13e8c048ac17" x="620" y="0" width="100" height="15">
+					<printWhenExpression><![CDATA[$F{usd}!=null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usd}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7c3a5f95-7502-4765-a18f-d452f28a81e7" x="45" y="0" width="131" height="15">
+					<printWhenExpression><![CDATA[$F{grupo}!=null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grupo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="32">
+			<textField>
+				<reportElement uuid="b6ec1a3a-6a3b-44d6-9034-3ea69174afd0" x="363" y="12" width="93" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="5039554d-82cd-4b4e-b096-16c93c3d74c4" x="458" y="12" width="46" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c442887b-6a79-411c-8c36-8b215408e13d" x="183" y="12" width="109" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha impresion:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement uuid="b53d7035-41dc-4605-a798-26ebf1d0830f" x="292" y="12" width="100" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="110">
+			<break>
+				<reportElement uuid="77eff33a-3e4b-4d43-8e2f-b77756c95979" x="0" y="2" width="752" height="1"/>
+			</break>
+			<subreport>
+				<reportElement uuid="733c7fa6-0023-4dbd-a0ef-e83e26451b86" x="45" y="5" width="675" height="39"/>
+				<subreportParameter name="anio">
+					<subreportParameterExpression><![CDATA[$P{anio}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mes">
+					<subreportParameterExpression><![CDATA[$P{mes}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptDetComision}]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement uuid="0d000200-0000-4000-8002-000000000200" positionType="Float" x="0" y="48" width="752" height="1"/>
+			</break>
+			<subreport>
+				<reportElement uuid="0d000201-0000-4000-8002-000000000201" positionType="Float" x="45" y="52" width="675" height="52"/>
+				<subreportParameter name="mes">
+					<subreportParameterExpression><![CDATA[$P{mes}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="anio">
+					<subreportParameterExpression><![CDATA[$P{anio}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="esInterno">
+					<subreportParameterExpression><![CDATA[$P{esInterno}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="origen">
+					<subreportParameterExpression><![CDATA[$P{origen}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="esEpp">
+					<subreportParameterExpression><![CDATA[$P{esEpp}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="lecturaItems">
+					<subreportParameterExpression><![CDATA[$P{lecturaItems}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptItemComision}]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

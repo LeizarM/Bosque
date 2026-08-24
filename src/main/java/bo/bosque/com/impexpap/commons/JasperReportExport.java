@@ -147,6 +147,58 @@ public class JasperReportExport {
     }
 
     /**
+     * Compila y exporta un reporte junto con los subreportes que declare.
+     * <p>
+     * Existe aparte de exportPDF y exportPDFStatic porque ninguno de los dos
+     * sirve para este caso: exportPDF esta atado a subRptDependientes, que es de
+     * ficha trabajador, y busca el principal en la raiz del classpath;
+     * exportPDFStatic exige archivos .jasper precompilados, y entonces cualquier
+     * cambio hecho sobre el .jrxml no se veria.
+     * <p>
+     * Aca se compila el .jrxml en caliente y cada subreporte se inyecta como
+     * parametro con su propio nombre. El .jrxml debe referenciarlo como
+     * {@code $P{nombreSubreporte}} y no como una ruta de archivo, porque dentro
+     * del JAR no hay rutas que resolver.
+     *
+     * @param nombreReporte nombre sin extension, dentro de resources/reports
+     * @param subreportes   nombres de los subreportes, sin extension
+     */
+    public byte[] exportPDFConSubreportes(String nombreReporte, String[] subreportes,
+                                          Map<String, Object> params) {
+        Connection conn = null;
+        try {
+            for (String sub : subreportes) {
+                JasperReport compilado = compileSubreport(sub);
+                if (compilado == null) {
+                    throw new RuntimeException("Subreporte no encontrado: reports/" + sub + JRXML);
+                }
+                params.put(sub, compilado);
+            }
+
+            params.put("SUBREPORT_DIR", SUBREPORT_DIR);
+
+            JasperReport principal = compileMainReport(REPORT_FOLDER + "/" + nombreReporte + JRXML);
+
+            conn = jdbcTemplate.getDataSource().getConnection();
+            JasperPrint print = JasperFillManager.fillReport(principal, params, conn);
+            return JasperExportManager.exportReportToPdf(print);
+
+        } catch (Exception e) {
+            logger.error("Error generando el reporte {}", nombreReporte, e);
+            throw new RuntimeException("No se pudo generar el reporte " + nombreReporte
+                    + ": " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
+                    logger.warn("No se pudo cerrar la conexion del reporte {}", nombreReporte, e);
+                }
+            }
+        }
+    }
+
+    /**
      * Compila todos los subreportes y los añade como parámetros
      */
     private void compileSubreports(Map<String, Object> params) {
