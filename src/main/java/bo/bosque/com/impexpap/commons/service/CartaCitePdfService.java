@@ -183,7 +183,7 @@ public class CartaCitePdfService {
      *                   venir nulo: los formatos por documento no lo declaran y
      *                   lo reciben sólo para elegir acá.
      */
-    private InputStream membreteDe(Object codEmpresa) {
+    public InputStream membreteDe(Object codEmpresa) {
         if (codEmpresa instanceof Number) {
             Path archivo = Paths.get(uploadsDir, "logos",
                     ((Number) codEmpresa).intValue() + ".png");

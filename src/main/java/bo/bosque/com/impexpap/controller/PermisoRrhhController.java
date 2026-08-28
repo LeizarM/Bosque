@@ -14,6 +14,7 @@ import bo.bosque.com.impexpap.model.VacacionAsignada;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.SpHelper;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
+import bo.bosque.com.impexpap.commons.service.CartaCitePdfService;
 import bo.bosque.com.impexpap.dao.AbonoDiasDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,22 +202,29 @@ public class PermisoRrhhController {
     /** La INTERFAZ, no la clase: la transacción de la carga colectiva vive en el proxy. */
     private final IVacacionAsignada vacDao;
     private final IAbonoDias abonoDao;
+    /** Sólo por su {@code membreteDe}: el logo del estado de cuenta. */
+    private final CartaCitePdfService membretes;
 
     public PermisoRrhhController(IPermiso pDao, AccesoModuloHelper acceso,
                                  IVacacionAsignada vacDao, IAbonoDias abonoDao,
-                                 JdbcTemplate jdbcTemplate, SpHelper spHelper) {
+                                 JdbcTemplate jdbcTemplate, SpHelper spHelper,
+                                 CartaCitePdfService membretes) {
         this.pDao = pDao;
         this.acceso = acceso;
         this.vacDao = vacDao;
         this.abonoDao = abonoDao;
         this.jdbcTemplate = jdbcTemplate;
         this.spHelper = spHelper;
+        this.membretes = membretes;
     }
 
     /** Sólo para los reportes Jasper, que necesitan la conexión cruda. */
     private final JdbcTemplate jdbcTemplate;
 
     private final SpHelper spHelper;
+
+    /** Empresa cuyo membrete lleva el estado de cuenta, fija por pedido de RR.HH. */
+    private static final int COD_EMPRESA_LOGO = 5;
 
     /** El botón del ACL de los reportes de saldos (codBtn 210, 4 usuarios). */
     private static final String BTN_REPORTES = "btnReportesPYV";
@@ -326,7 +334,10 @@ public class PermisoRrhhController {
         params.put("codRee", (int) ree);
         // El logo va como InputStream, igual que en el legacy. La imagen tiene
         // onErrorType="Blank", así que si faltara el PDF sale sin logo en vez de fallar.
-        params.put("logoEmpresa", getClass().getResourceAsStream("/logos/logoEmpresa.jpg"));
+        // Fijo en la empresa 5 por pedido de RR.HH.: el reporte lleva siempre ese membrete,
+        // no el de la empresa del empleado. `membreteDe` lee <uploads.dir>/logos/5.png y cae
+        // en el de IMPEXPAP si el archivo no está.
+        params.put("logoEmpresa", membretes.membreteDe(COD_EMPRESA_LOGO));
 
         byte[] pdf = new JasperReportExport(jdbcTemplate).exportPDFStatic(reporte, params);
 
