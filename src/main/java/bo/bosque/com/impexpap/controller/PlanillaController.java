@@ -129,6 +129,10 @@ public class PlanillaController {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("codPlanilla", planilla.getCodPlanilla() != null ? planilla.getCodPlanilla().intValue() : null);
+            // El logo del pie sale de <uploads.dir>/logos/<codEmpresa>.png. La ACCION R2 del SP
+            // no trae codEmpresa, asi que viaja en el body; si no llega, el reporte imprime el
+            // nombre de la empresa en el mismo recuadro.
+            params.put("codEmpresa", planilla.getCodEmpresa());
             byte[] reportBytes = this.jasperReportExport.exportPDFStatic("RptPlanillaCompacto", params);
 
             HttpHeaders headers = new HttpHeaders();
