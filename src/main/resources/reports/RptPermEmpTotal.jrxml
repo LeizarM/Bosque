@@ -80,7 +80,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{datoEmpleado}]]></textFieldExpression>
 			</textField>
-			<image onErrorType="Blank">
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
 				<reportElement uuid="c5e5a702-fa0e-492a-8856-e603457dc983" x="3" y="4" width="111" height="45"/>
 				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
 			</image>
