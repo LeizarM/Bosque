@@ -293,7 +293,7 @@ public class LoginController {
             // Crear objeto Login con información mínima necesaria
             Login login = new Login();
             login.setCodUsuario(codUsuario);
-            login.setPassword2(passwordEncoder.encode(npassword));
+            login.setPassword2(passwordEncoder.encode( npassword ));
 
 
 

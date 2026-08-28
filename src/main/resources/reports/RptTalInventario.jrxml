@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Inventario de talonarios.
+
+     Reemplaza a DOS reportes del wizard viejo, RptTalMantFisico y
+     RptTalMantEntregad, que eran el mismo stored procedure con la accion
+     hardcodeada adentro del CDATA ('M' y 'O'), sin un solo filtro de negocio.
+     Con el estado derivado, un reporte con filtros produce esos dos y cuatro
+     mas que el legacy no podia imprimir.
+
+     Agrupa por empresa y despues por tipo: la unidad de custodia y de costo es
+     la empresa, y dentro de ella el tipo es lo que arma la numeracion
+     correlativa. El estado es filtro y desglose, no agrupacion.
+
+     Los cuatro legacy no tenian ni un <variable>: cero sumas y cero conteos,
+     con los groupFooter vacios. Aca cada grupo cierra con cantidad, costo,
+     folios y el desglose por estado, que llega del SP como banderas 0/1 para
+     que la regla no quede duplicada en una expresion Java de este XML.
+
+     isStretchWithOverflow en las celdas de texto: un nombre de sucursal o una
+     observacion larga se recortaba sin aviso, que en un reporte de control es
+     peor que una fila alta. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptTalInventario" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b1c7e2a4-1f10-4c8e-9a11-3d5f7c210001" whenNoDataType="AllSectionsNoDetail">
+	<property name="ireport.zoom" value="1.0"/>
+	<style name="talCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"/>
+	<style name="talRegla" mode="Opaque" backcolor="#1F3A5F"/>
+	<style name="talGrupo" mode="Opaque" backcolor="#DCE6F1" forecolor="#1F3A5F"/>
+	<style name="talTotal" mode="Opaque" backcolor="#C5D3E8" forecolor="#1F3A5F"/>
+	<style name="talCebra" mode="Opaque">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F2F5F9"/>
+		</conditionalStyle>
+	</style>
+
+	<parameter name="codTipoRecibo" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codEmpresa" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codGrupo" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codEstadoActual" class="java.lang.Integer" isForPrompting="false"/>
+	<parameter name="fechaDesde" class="java.sql.Date" isForPrompting="false"/>
+	<parameter name="fechaHasta" class="java.sql.Date" isForPrompting="false"/>
+	<parameter name="incluirCerrados" class="java.lang.Boolean" isForPrompting="false">
+		<defaultValueExpression><![CDATA[Boolean.FALSE]]></defaultValueExpression>
+	</parameter>
+	<!-- El backend arma el texto de los filtros aplicados. Componerlo aca
+	     obligaria a repetir en una expresion Java lo que el controller ya sabe,
+	     y a mantener las dos versiones sincronizadas. -->
+	<parameter name="subtitulo" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+
+	<queryString>
+		<![CDATA[EXEC dbo.p_rpt_tmto_Talonario @ACCION = 'I', @codTipoRecibo = $P{codTipoRecibo}, @codEmpresa = $P{codEmpresa}, @codGrupo = $P{codGrupo}, @codEstadoActual = $P{codEstadoActual}, @fechaDesde = $P{fechaDesde}, @fechaHasta = $P{fechaHasta}, @incluirCerrados = $P{incluirCerrados}]]>
+	</queryString>
+
+	<field name="codTalonario" class="java.lang.Long"/>
+	<field name="nroTalonario" class="java.lang.String"/>
+	<field name="rangoFolios" class="java.lang.String"/>
+	<field name="cantidadFolios" class="java.lang.Integer"/>
+	<field name="costoBs" class="java.math.BigDecimal"/>
+	<field name="datoEmpresa" class="java.lang.String"/>
+	<field name="datoTipo" class="java.lang.String"/>
+	<field name="sigla" class="java.lang.String"/>
+	<field name="datoGrupo" class="java.lang.String"/>
+	<field name="estadoActual" class="java.lang.String"/>
+	<field name="esAdquirido" class="java.lang.Integer"/>
+	<field name="esEntregado" class="java.lang.Integer"/>
+	<field name="esDevuelto" class="java.lang.Integer"/>
+	<field name="esCerrado" class="java.lang.Integer"/>
+	<field name="datoDestinatario" class="java.lang.String"/>
+	<field name="diasEnPoder" class="java.lang.Integer"/>
+	<field name="fechaUltimoEvento" class="java.sql.Date"/>
+	<field name="datoUltimoEvento" class="java.lang.String"/>
+	<field name="observacionUltimoEvento" class="java.lang.String"/>
+
+	<!-- Totales por TIPO -->
+	<variable name="tipo_cant" class="java.lang.Integer" resetType="Group" resetGroup="gTipo" calculation="Count">
+		<variableExpression><![CDATA[$F{codTalonario}]]></variableExpression>
+	</variable>
+	<variable name="tipo_costo" class="java.math.BigDecimal" resetType="Group" resetGroup="gTipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{costoBs} == null ? java.math.BigDecimal.ZERO : $F{costoBs}]]></variableExpression>
+	</variable>
+	<variable name="tipo_folios" class="java.lang.Integer" resetType="Group" resetGroup="gTipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{cantidadFolios}]]></variableExpression>
+	</variable>
+	<variable name="tipo_adq" class="java.lang.Integer" resetType="Group" resetGroup="gTipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{esAdquirido}]]></variableExpression>
+	</variable>
+	<variable name="tipo_ent" class="java.lang.Integer" resetType="Group" resetGroup="gTipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{esEntregado}]]></variableExpression>
+	</variable>
+	<variable name="tipo_dev" class="java.lang.Integer" resetType="Group" resetGroup="gTipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{esDevuelto}]]></variableExpression>
+	</variable>
+	<variable name="tipo_cer" class="java.lang.Integer" resetType="Group" resetGroup="gTipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{esCerrado}]]></variableExpression>
+	</variable>
+
+	<!-- Totales por EMPRESA -->
+	<variable name="emp_cant" class="java.lang.Integer" resetType="Group" resetGroup="gEmpresa" calculation="Count">
+		<variableExpression><![CDATA[$F{codTalonario}]]></variableExpression>
+	</variable>
+	<variable name="emp_costo" class="java.math.BigDecimal" resetType="Group" resetGroup="gEmpresa" calculation="Sum">
+		<variableExpression><![CDATA[$F{costoBs} == null ? java.math.BigDecimal.ZERO : $F{costoBs}]]></variableExpression>
+	</variable>
+	<variable name="emp_folios" class="java.lang.Integer" resetType="Group" resetGroup="gEmpresa" calculation="Sum">
+		<variableExpression><![CDATA[$F{cantidadFolios}]]></variableExpression>
+	</variable>
+
+	<!-- Totales GENERALES -->
+	<variable name="gen_costo" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{costoBs} == null ? java.math.BigDecimal.ZERO : $F{costoBs}]]></variableExpression>
+	</variable>
+	<variable name="gen_folios" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{cantidadFolios}]]></variableExpression>
+	</variable>
+	<variable name="gen_adq" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esAdquirido}]]></variableExpression>
+	</variable>
+	<variable name="gen_ent" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esEntregado}]]></variableExpression>
+	</variable>
+	<variable name="gen_dev" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esDevuelto}]]></variableExpression>
+	</variable>
+	<variable name="gen_cer" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esCerrado}]]></variableExpression>
+	</variable>
+
+	<group name="gEmpresa" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{datoEmpresa}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<textField>
+					<reportElement style="talGrupo" x="0" y="2" width="802" height="18" uuid="b1c7e2a4-0002-0000-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="11" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA[$F{datoEmpresa}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement style="talTotal" x="0" y="0" width="235" height="18" uuid="b1c7e2a4-0002-0000-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA["Total " + $F{datoEmpresa}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="talTotal" x="235" y="0" width="55" height="18" uuid="b1c7e2a4-0002-0000-0000-000000000003"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$V{emp_folios}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement style="talTotal" x="290" y="0" width="70" height="18" uuid="b1c7e2a4-0002-0000-0000-000000000004"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$V{emp_costo}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="talTotal" x="360" y="0" width="442" height="18" uuid="b1c7e2a4-0002-0000-0000-000000000005"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA[$V{emp_cant} + " talonarios"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+
+	<group name="gTipo" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{datoTipo}]]></groupExpression>
+		<groupHeader>
+			<band height="16">
+				<textField>
+					<reportElement x="8" y="0" width="500" height="14" uuid="b1c7e2a4-0003-0000-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+					<textFieldExpression><![CDATA[$F{datoTipo} + "   ·   grupo: " + $F{datoGrupo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="18">
+				<textField>
+					<reportElement x="8" y="0" width="227" height="14" uuid="b1c7e2a4-0003-0000-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+					<textFieldExpression><![CDATA["Subtotal " + $F{sigla} + ":  " + $V{tipo_cant} + " talonarios"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="235" y="0" width="55" height="14" uuid="b1c7e2a4-0003-0000-0000-000000000003"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$V{tipo_folios}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="290" y="0" width="70" height="14" uuid="b1c7e2a4-0003-0000-0000-000000000004"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$V{tipo_costo}]]></textFieldExpression>
+				</textField>
+				<!-- El desglose por estado va aca y no como agrupacion: agrupar
+				     por estado partiria el subtotal de costo por empresa. -->
+				<textField>
+					<reportElement x="360" y="0" width="442" height="14" uuid="b1c7e2a4-0003-0000-0000-000000000005"/>
+					<textElement verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+					<textFieldExpression><![CDATA["adquiridos " + $V{tipo_adq} + "  ·  entregados " + $V{tipo_ent} + "  ·  devueltos " + $V{tipo_dev} + ($V{tipo_cer} > 0 ? "  ·  cerrados " + $V{tipo_cer} : "")]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="16" width="802" height="1" forecolor="#B0BEC5" uuid="b1c7e2a4-0003-0000-0000-000000000006"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+
+	<title>
+		<band height="52">
+			<textField>
+				<reportElement x="0" y="0" width="600" height="20" uuid="b1c7e2a4-0001-0000-0000-000000000001"/>
+				<textElement><font size="15" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Inventario de talonarios"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="21" width="600" height="13" uuid="b1c7e2a4-0001-0000-0000-000000000002"/>
+				<textElement><font size="9" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{subtitulo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement x="620" y="4" width="182" height="14" uuid="b1c7e2a4-0001-0000-0000-000000000003"/>
+				<textElement textAlignment="Right"><font size="8"/></textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement style="talRegla" x="0" y="46" width="802" height="3" uuid="b1c7e2a4-0001-0000-0000-000000000004"/>
+			</line>
+		</band>
+	</title>
+
+	<columnHeader>
+		<band height="18">
+			<staticText>
+				<reportElement style="talCabecera" x="0" y="0" width="90" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000001"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="6"/></textElement>
+				<text><![CDATA[TALONARIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="90" y="0" width="145" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000002"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[FOLIOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="235" y="0" width="55" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000003"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<text><![CDATA[CANT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="290" y="0" width="70" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000004"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<text><![CDATA[COSTO Bs]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="360" y="0" width="75" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000005"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[ESTADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="435" y="0" width="160" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000006"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[EN PODER DE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="595" y="0" width="42" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000007"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<text><![CDATA[DIAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="637" y="0" width="70" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000008"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[ULT. MOV.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="707" y="0" width="95" height="16" uuid="b1c7e2a4-0004-0000-0000-000000000009"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[OBSERVACION]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+
+	<detail>
+		<band height="14">
+			<frame>
+				<reportElement style="talCebra" x="0" y="0" width="802" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000000"/>
+				<textField>
+					<reportElement x="0" y="0" width="90" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA[$F{nroTalonario}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="90" y="0" width="145" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{rangoFolios}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0">
+					<reportElement x="235" y="0" width="55" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000003"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{cantidadFolios}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="290" y="0" width="70" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000004"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{costoBs}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="360" y="0" width="75" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000005"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{estadoActual}]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="435" y="0" width="160" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000006"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{datoDestinatario}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="595" y="0" width="42" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000007"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{diasEnPoder}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="637" y="0" width="70" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000008"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{fechaUltimoEvento}]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="707" y="0" width="95" height="13" uuid="b1c7e2a4-0005-0000-0000-000000000009"/>
+					<textElement verticalAlignment="Middle"><font size="7"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{observacionUltimoEvento}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+
+	<pageFooter>
+		<band height="16">
+			<textField>
+				<reportElement x="0" y="2" width="400" height="12" uuid="b1c7e2a4-0006-0000-0000-000000000001"/>
+				<textElement><font size="7" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA["RptTalInventario"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="602" y="2" width="160" height="12" uuid="b1c7e2a4-0006-0000-0000-000000000002"/>
+				<textElement textAlignment="Right"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="764" y="2" width="38" height="12" uuid="b1c7e2a4-0006-0000-0000-000000000003"/>
+				<textElement><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+
+	<summary>
+		<band height="46">
+			<line>
+				<reportElement style="talRegla" x="0" y="2" width="802" height="2" uuid="b1c7e2a4-0007-0000-0000-000000000001"/>
+			</line>
+			<textField>
+				<reportElement style="talTotal" x="0" y="6" width="235" height="18" uuid="b1c7e2a4-0007-0000-0000-000000000002"/>
+				<textElement verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph leftIndent="6"/></textElement>
+				<textFieldExpression><![CDATA["TOTAL GENERAL"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="talTotal" x="235" y="6" width="55" height="18" uuid="b1c7e2a4-0007-0000-0000-000000000003"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<textFieldExpression><![CDATA[$V{gen_folios}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement style="talTotal" x="290" y="6" width="70" height="18" uuid="b1c7e2a4-0007-0000-0000-000000000004"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<textFieldExpression><![CDATA[$V{gen_costo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="talTotal" x="360" y="6" width="442" height="18" uuid="b1c7e2a4-0007-0000-0000-000000000005"/>
+				<textElement verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph leftIndent="6"/></textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT} + " talonarios"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="28" width="802" height="14" uuid="b1c7e2a4-0007-0000-0000-000000000006"/>
+				<textElement><font size="9"/><paragraph leftIndent="6"/></textElement>
+				<textFieldExpression><![CDATA["Adquiridos " + $V{gen_adq} + "     Entregados " + $V{gen_ent} + "     Devueltos " + $V{gen_dev} + "     Cerrados " + $V{gen_cer}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

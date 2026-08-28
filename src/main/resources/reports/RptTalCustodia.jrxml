@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Custodia de talonarios: quien tiene que devolver algo, y quien se lo dio.
+
+     Es la pregunta que Trazabilidad no contestaba. Ese reporte devuelve las 955
+     entregas historicas y marca las abiertas con una bandera, pero no tiene con
+     que filtrarlas: para ver quien debe algo hoy habia que imprimir 955 filas y
+     buscar a mano. Aca el default son las 364 custodias abiertas, en 31
+     responsables.
+
+     QUIEN LO REGISTRO, no quien lo entrego. La columna sale de
+     tmto_talonarioDetalle.audUsuario, que es quien TIPEO el registro. En seis
+     anios hubo cuatro operadores y uno solo cargo el 97,8%, buena parte en dos
+     cargas retroactivas de papel a sistema. Rotularla "Entregado por"
+     afirmaria mas de lo que el dato sostiene, asi que dice "Registrado por" y
+     el pie del reporte lo aclara.
+
+     DOS FECHAS QUE NO SON LA MISMA. fechaEntrega la informa el usuario;
+     fechaRegistro la pone el sistema. Difieren en 290 de las 955 entregas, y
+     el peor caso son 1422 dias. Cuando el desfase pasa de una semana la fila
+     se marca con un asterisco: sin eso alguien lee la fecha de carga como si
+     fuera la de la entrega.
+
+     AGRUPA POR claveDestinatario ('S-3', 'E-211') y muestra el nombre. Agrupar
+     por el codigo pelado fusionaria SUCURSAL 9 con EMPLEADO 9, que existen las
+     dos; agrupar por nombre fusionaria 'Central' con 'CENTRAL', que son dos
+     sucursales distintas, porque la colacion no distingue mayusculas.
+
+     ORDENA DE LO MAS VIEJO A LO MAS NUEVO, al reves que Trazabilidad. Un
+     reporte de custodia se lee para reclamar, y lo que primero hay que
+     reclamar es lo que lleva mas tiempo afuera.
+
+     "DIAS EN PODER" MIDE DIAS SIN EVENTO DE CIERRE, no custodia efectiva: si
+     nadie registro la devolucion, el contador sigue corriendo. El maximo real
+     hoy son 2527 dias. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptTalCustodia" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b1c7e2a4-1f10-4c8e-9a11-3d5f7c210006" whenNoDataType="AllSectionsNoDetail">
+	<property name="ireport.zoom" value="1.0"/>
+	<style name="talCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"/>
+	<style name="talRegla" mode="Opaque" backcolor="#1F3A5F"/>
+	<style name="talGrupo" mode="Opaque" backcolor="#DCE6F1" forecolor="#1F3A5F"/>
+	<style name="talTotal" mode="Opaque" backcolor="#C5D3E8" forecolor="#1F3A5F"/>
+	<style name="talFila" mode="Opaque">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F2F5F9"/>
+		</conditionalStyle>
+	</style>
+	<!-- Semaforo por antiguedad. No se resalta "mas de un anio" porque hoy son
+	     328 de 364 y un reporte todo rojo no prioriza nada: el corte que separa
+	     es el semestre. -->
+	<style name="talDias" forecolor="#1F3A5F">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{sigueEnPoder} != null && $F{sigueEnPoder}.intValue() == 1
+			  && $F{diasEnPoder} != null && $F{diasEnPoder}.intValue() > 365]]></conditionExpression>
+			<style forecolor="#B00020" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{sigueEnPoder} != null && $F{sigueEnPoder}.intValue() == 1
+			  && $F{diasEnPoder} != null && $F{diasEnPoder}.intValue() > 180]]></conditionExpression>
+			<style forecolor="#8A5A00" isBold="true"/>
+		</conditionalStyle>
+	</style>
+
+	<parameter name="codTalonario" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codTipoRecibo" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codEmpresa" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codSucursal" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="codEmpleado" class="java.lang.Long" isForPrompting="false"/>
+	<parameter name="fechaDesde" class="java.sql.Date" isForPrompting="false"/>
+	<parameter name="fechaHasta" class="java.sql.Date" isForPrompting="false"/>
+	<!-- 0 = solo lo que sigue en poder de alguien. 1 = tambien lo ya cerrado. -->
+	<parameter name="incluirCerrados" class="java.lang.Boolean" isForPrompting="false">
+		<defaultValueExpression><![CDATA[Boolean.FALSE]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tipoDestinatario" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="diasMinimos" class="java.lang.Integer" isForPrompting="false"/>
+	<parameter name="fechaCorte" class="java.sql.Date" isForPrompting="false"/>
+	<parameter name="subtitulo" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+
+	<queryString>
+		<![CDATA[EXEC dbo.p_rpt_tmto_Talonario @ACCION = 'C', @codTalonario = $P{codTalonario}, @codTipoRecibo = $P{codTipoRecibo}, @codEmpresa = $P{codEmpresa}, @codSucursal = $P{codSucursal}, @codEmpleado = $P{codEmpleado}, @fechaDesde = $P{fechaDesde}, @fechaHasta = $P{fechaHasta}, @incluirCerrados = $P{incluirCerrados}, @tipoDestinatario = $P{tipoDestinatario}, @diasMinimos = $P{diasMinimos}, @fechaCorte = $P{fechaCorte}]]>
+	</queryString>
+
+	<field name="codDetalle" class="java.lang.Long"/>
+	<field name="tipoDestinatario" class="java.lang.String"/>
+	<field name="codDestinatario" class="java.lang.Long"/>
+	<field name="claveDestinatario" class="java.lang.String"/>
+	<field name="datoDestinatario" class="java.lang.String"/>
+	<field name="codTalonario" class="java.lang.Long"/>
+	<field name="nroTalonario" class="java.lang.String"/>
+	<field name="rangoFolios" class="java.lang.String"/>
+	<field name="cantidadFolios" class="java.lang.Integer"/>
+	<field name="costoBs" class="java.math.BigDecimal"/>
+	<field name="datoEmpresa" class="java.lang.String"/>
+	<field name="datoTipo" class="java.lang.String"/>
+	<field name="sigla" class="java.lang.String"/>
+	<field name="fechaEntrega" class="java.sql.Date"/>
+	<field name="fechaRegistro" class="java.sql.Timestamp"/>
+	<field name="registradoPor" class="java.lang.String"/>
+	<field name="loginRegistradoPor" class="java.lang.String"/>
+	<field name="diasDesfaseCarga" class="java.lang.Integer"/>
+	<field name="esCargaRetroactiva" class="java.lang.Integer"/>
+	<field name="observacionEntrega" class="java.lang.String"/>
+	<field name="fechaRetorno" class="java.sql.Date"/>
+	<field name="datoRetorno" class="java.lang.String"/>
+	<field name="sigueEnPoder" class="java.lang.Integer"/>
+	<field name="esDevuelto" class="java.lang.Integer"/>
+	<field name="esCerrado" class="java.lang.Integer"/>
+	<field name="diasEnPoder" class="java.lang.Integer"/>
+	<field name="fechasInconsistentes" class="java.lang.Integer"/>
+
+	<!-- Por responsable -->
+	<variable name="r_enPoder" class="java.lang.Integer" resetType="Group" resetGroup="gResponsable" calculation="Sum">
+		<variableExpression><![CDATA[$F{sigueEnPoder}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="r_devueltos" class="java.lang.Integer" resetType="Group" resetGroup="gResponsable" calculation="Sum">
+		<variableExpression><![CDATA[$F{esDevuelto}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="r_cerrados" class="java.lang.Integer" resetType="Group" resetGroup="gResponsable" calculation="Sum">
+		<variableExpression><![CDATA[$F{esCerrado}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="r_folios" class="java.lang.Integer" resetType="Group" resetGroup="gResponsable" calculation="Sum">
+		<variableExpression><![CDATA[$F{sigueEnPoder} != null && $F{sigueEnPoder}.intValue() == 1 ? $F{cantidadFolios} : Integer.valueOf(0)]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="r_maxDias" class="java.lang.Integer" resetType="Group" resetGroup="gResponsable" calculation="Highest">
+		<variableExpression><![CDATA[$F{sigueEnPoder} != null && $F{sigueEnPoder}.intValue() == 1 ? $F{diasEnPoder} : null]]></variableExpression>
+	</variable>
+
+	<!-- Por tipo de responsable -->
+	<variable name="t_enPoder" class="java.lang.Integer" resetType="Group" resetGroup="gTipoDest" calculation="Sum">
+		<variableExpression><![CDATA[$F{sigueEnPoder}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="t_responsables" class="java.lang.Integer" resetType="Group" resetGroup="gTipoDest" calculation="Count">
+		<variableExpression><![CDATA[$F{claveDestinatario}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+
+	<!-- Generales -->
+	<variable name="g_enPoder" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{sigueEnPoder}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="g_devueltos" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esDevuelto}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="g_cerrados" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esCerrado}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="g_retro" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{esCargaRetroactiva}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+
+	<group name="gTipoDest" isReprintHeaderOnEachPage="true" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{tipoDestinatario}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<textField>
+					<reportElement style="talGrupo" x="0" y="2" width="802" height="18" uuid="b1c7e2a4-0002-0006-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="11" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA["SUCURSAL".equals($F{tipoDestinatario}) ? "En poder de SUCURSALES" : "En poder de PERSONAL"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="22">
+				<textField>
+					<reportElement style="talTotal" x="0" y="0" width="802" height="18" uuid="b1c7e2a4-0002-0006-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA[("SUCURSAL".equals($F{tipoDestinatario}) ? "Total sucursales:  " : "Total personal:  ")
+					   + $V{t_enPoder} + " talonarios en poder"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+
+	<group name="gResponsable" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{claveDestinatario}]]></groupExpression>
+		<groupHeader>
+			<band height="18">
+				<textField textAdjust="StretchHeight">
+					<reportElement x="8" y="1" width="500" height="14" uuid="b1c7e2a4-0003-0006-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+					<textFieldExpression><![CDATA[($F{datoDestinatario} == null || $F{datoDestinatario}.trim().length() == 0)
+					   ? ("(responsable sin nombre · " + $F{claveDestinatario} + ")")
+					   : $F{datoDestinatario}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="16" width="802" height="1" forecolor="#B0BEC5" uuid="b1c7e2a4-0003-0006-0000-000000000002"/>
+				</line>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="17">
+				<textField>
+					<reportElement x="8" y="0" width="794" height="14" uuid="b1c7e2a4-0003-0006-0000-000000000003"/>
+					<textElement verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+					<textFieldExpression><![CDATA[$V{r_enPoder} + " en su poder"
+					   + ($V{r_folios} != null && $V{r_folios}.intValue() > 0 ? "  ·  " + $V{r_folios} + " folios" : "")
+					   + ($V{r_maxDias} != null ? "  ·  el mas antiguo lleva " + $V{r_maxDias} + " dias" : "")
+					   + ($V{r_devueltos} != null && $V{r_devueltos}.intValue() > 0 ? "  ·  " + $V{r_devueltos} + " devueltos" : "")
+					   + ($V{r_cerrados} != null && $V{r_cerrados}.intValue() > 0 ? "  ·  " + $V{r_cerrados} + " cerrados" : "")]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+
+	<title>
+		<band height="56">
+			<textField>
+				<reportElement x="0" y="0" width="620" height="20" uuid="b1c7e2a4-0001-0006-0000-000000000001"/>
+				<textElement><font size="15" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Custodia de talonarios"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="21" width="620" height="13" uuid="b1c7e2a4-0001-0006-0000-000000000002"/>
+				<textElement><font size="9" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{subtitulo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="34" width="620" height="12" uuid="b1c7e2a4-0001-0006-0000-000000000003"/>
+				<textElement><font size="7" isItalic="true"/></textElement>
+				<text><![CDATA[«Dias en poder» cuenta dias sin evento de cierre, no custodia efectiva. Un asterisco marca la entrega que se registro mas de una semana despues del hecho.]]></text>
+			</staticText>
+			<!-- La fecha de corte es un parametro: decir "al dia de hoy" seria
+			     falso si alguien lo pide a una fecha pasada. -->
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="632" y="2" width="170" height="14" uuid="b1c7e2a4-0001-0006-0000-000000000004"/>
+				<textElement textAlignment="Right"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{fechaCorte} == null ? new java.util.Date() : $P{fechaCorte}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="632" y="16" width="170" height="12" uuid="b1c7e2a4-0001-0006-0000-000000000005"/>
+				<textElement textAlignment="Right"><font size="7" isItalic="true"/></textElement>
+				<text><![CDATA[fecha de corte]]></text>
+			</staticText>
+			<line>
+				<reportElement style="talRegla" x="0" y="50" width="802" height="3" uuid="b1c7e2a4-0001-0006-0000-000000000006"/>
+			</line>
+		</band>
+	</title>
+
+	<columnHeader>
+		<band height="18">
+			<staticText>
+				<reportElement style="talCabecera" x="0" y="0" width="75" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000001"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="6"/></textElement>
+				<text><![CDATA[TALONARIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="75" y="0" width="130" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000002"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[TIPO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="205" y="0" width="105" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000003"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[FOLIOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="310" y="0" width="68" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000004"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[ENTREGADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="378" y="0" width="145" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000005"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[REGISTRADO POR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="523" y="0" width="45" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000006"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<text><![CDATA[DIAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="568" y="0" width="85" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000007"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[SITUACION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="653" y="0" width="149" height="16" uuid="b1c7e2a4-0004-0006-0000-000000000008"/>
+				<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[OBSERVACION DE LA ENTREGA]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+
+	<detail>
+		<band height="14">
+			<frame>
+				<reportElement style="talFila" x="0" y="0" width="802" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000000"/>
+				<textField>
+					<reportElement x="0" y="0" width="75" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA[$F{nroTalonario}]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="75" y="0" width="130" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{datoTipo}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="205" y="0" width="105" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000003"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{rangoFolios}]]></textFieldExpression>
+				</textField>
+				<!-- El asterisco avisa que se tipeo mucho despues del hecho. -->
+				<textField isBlankWhenNull="true">
+					<reportElement x="310" y="0" width="68" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000004"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[($F{fechaEntrega} == null ? "" : new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{fechaEntrega}))
+					   + ($F{esCargaRetroactiva} != null && $F{esCargaRetroactiva}.intValue() == 1 ? " *" : "")]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="378" y="0" width="145" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000005"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{registradoPor}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="talDias" x="523" y="0" width="45" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000006"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{diasEnPoder}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="568" y="0" width="85" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000007"/>
+					<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[($F{sigueEnPoder} != null && $F{sigueEnPoder}.intValue() == 1)
+					   ? "EN SU PODER"
+					   : (($F{datoRetorno} == null || $F{datoRetorno}.trim().length() == 0) ? "cerrado" : $F{datoRetorno})]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="653" y="0" width="149" height="13" uuid="b1c7e2a4-0005-0006-0000-000000000008"/>
+					<textElement verticalAlignment="Middle"><font size="7"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{observacionEntrega}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+
+	<pageFooter>
+		<band height="16">
+			<textField>
+				<reportElement x="0" y="2" width="440" height="12" uuid="b1c7e2a4-0006-0006-0000-000000000001"/>
+				<textElement><font size="7" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA["RptTalCustodia · «Registrado por» es quien cargo el evento en el sistema, no necesariamente quien entrego"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="602" y="2" width="160" height="12" uuid="b1c7e2a4-0006-0006-0000-000000000002"/>
+				<textElement textAlignment="Right"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="764" y="2" width="38" height="12" uuid="b1c7e2a4-0006-0006-0000-000000000003"/>
+				<textElement><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+
+	<summary>
+		<band height="46">
+			<line>
+				<reportElement style="talRegla" x="0" y="2" width="802" height="2" uuid="b1c7e2a4-0007-0006-0000-000000000001"/>
+			</line>
+			<textField>
+				<reportElement style="talTotal" x="0" y="6" width="802" height="20" uuid="b1c7e2a4-0007-0006-0000-000000000002"/>
+				<textElement verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph leftIndent="6"/></textElement>
+				<textFieldExpression><![CDATA["TOTAL:  " + $V{g_enPoder} + " talonarios en poder de terceros"
+				   + ($V{g_devueltos} != null && $V{g_devueltos}.intValue() > 0 ? "   ·   " + $V{g_devueltos} + " devueltos" : "")
+				   + ($V{g_cerrados} != null && $V{g_cerrados}.intValue() > 0 ? "   ·   " + $V{g_cerrados} + " cerrados" : "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="28" width="802" height="14" uuid="b1c7e2a4-0007-0006-0000-000000000003"/>
+				<textElement><font size="8" isItalic="true"/><paragraph leftIndent="6"/></textElement>
+				<textFieldExpression><![CDATA[$V{g_retro} != null && $V{g_retro}.intValue() > 0
+				   ? ($V{g_retro} + " de las " + $V{REPORT_COUNT} + " entregas se registraron mas de una semana despues del hecho (marcadas con *): en esos casos la fecha de entrega es la que informo el usuario, no la de carga.")
+				   : ""]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

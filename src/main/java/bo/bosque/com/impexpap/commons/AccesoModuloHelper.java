@@ -51,7 +51,7 @@ public class AccesoModuloHelper
 {
 
     private static final Logger log = LoggerFactory.getLogger(AccesoModuloHelper.class);
-
+ 
     /** El puente {@code login → codUsuario / codEmpleado}. Ver el javadoc de la clase. */
     private final IProgramador programadorDao;
     /** El ACL de botones: {@code p_list_UsuarioBtn @ACCION='A'}. */

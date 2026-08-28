@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Conciliacion contra SAP — salidas de materiales.
+
+     Migra RptMntoTalSalidaGlobalV2, apoyado en p_SAP_Rpt_tmntoSalidTalonario,
+     que ya esta en produccion y lee SAP por OPENROWSET. No se toco ese SP.
+
+     Es el gemelo estructural de RptTalConciliacionSapCobros y comparte sus
+     cuatro acciones: 'A' conciliados con filtro, 'B' conciliados sin filtro,
+     'C' conciliados renumerados, 'D' documentos de salida que no matchean
+     ningun talonario. Van en dos .jrxml y no en uno solo porque son dos stored
+     procedures distintos —con nombres de parametro distintos (@parametros vs
+     @cadSel) y tipos de campo distintos (DocNum String aca, Integer alla)— y un
+     .jrxml admite un unico <queryString>. La union se hace en la pantalla, que
+     los presenta como dos caras del mismo reporte.
+
+     DOS COSAS QUE SE VERIFICARON Y NO ERAN COMO SE HABIA ESCRITO ACA:
+
+     1. La rama 'D' devuelve UN solo result set, no dos. Pero ese select final
+        lee @tablaTotalTemp ENTERA, que ya venia cargada por el insert semilla
+        con los documentos que SI cuadran. O sea que 'D' trae conciliados y
+        huerfanos mezclados, mientras el titulo promete solo huerfanos. Se
+        recorta aca con filterExpression sobre codTalonario = 0, que es el
+        centinela de las filas sin talonario. Jasper filtra antes de agrupar y
+        de acumular, asi que los subtotales cierran.
+
+     2. @codGrupo se usa SOLO en el join de la semilla (s.sql L53). Los
+        bloques que arman los talonarios habilitados tienen 'codGrupo = 2'
+        escrito a mano (L88, L100, L267), y en esta base el grupo 2 existe pero
+        no tiene ningun tipo asignado: alcanza cero talonarios.
+
+        Dos consecuencias, las dos verificadas contra los datos:
+        - Hay que mandarle 1, no 2. Con 2 la semilla se queda sin nada con que
+          emparejar y TODO documento de SAP saldria como huerfano.
+        - Como los habilitados salen del grupo 2, esa tabla queda vacia y el
+          bucle de relleno de folios de este SP nunca llega a ejecutarse. Por
+          eso las filas 'sin utilizar' no aparecen en este reporte aunque el
+          codigo para generarlas este ahi.
+
+     NOTA DE SEGURIDAD: igual que su gemelo, el SP concatena usuario y password
+     de SAP en texto plano dentro del OPENROWSET. Conviene moverlo a un linked
+     server con credenciales guardadas. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptTalConciliacionSapSalidas" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b1c7e2a4-1f10-4c8e-9a11-3d5f7c210005" whenNoDataType="AllSectionsNoDetail">
+	<property name="ireport.zoom" value="1.0"/>
+	<style name="talCabecera" mode="Opaque" backcolor="#1F3A5F" forecolor="#FFFFFF"/>
+	<style name="talRegla" mode="Opaque" backcolor="#1F3A5F"/>
+	<style name="talGrupo" mode="Opaque" backcolor="#DCE6F1" forecolor="#1F3A5F"/>
+	<style name="talTotal" mode="Opaque" backcolor="#C5D3E8" forecolor="#1F3A5F"/>
+	<!-- El motivo se pinta segun que tan grave es, para poder barrer el reporte
+	     de un vistazo y atacar primero lo que importa:
+	       3 rojo   el codigo no existe (o SAP no lo cargo) -> dato inventado
+	       2 ambar  existe pero con espacios de mas -> se corrige en SAP
+	       1 azul   el codigo esta bien; fallo el rango de folios o la empresa -->
+	<style name="talMotivo" forecolor="#1F3A5F">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{gravedad} != null && $V{gravedad}.intValue() == 3]]></conditionExpression>
+			<style forecolor="#B00020" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{gravedad} != null && $V{gravedad}.intValue() == 2]]></conditionExpression>
+			<style forecolor="#8A5A00" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="talFila" mode="Opaque">
+		<conditionalStyle>
+			<conditionExpression><![CDATA["Y".equals($F{CANCELED})]]></conditionExpression>
+			<style mode="Opaque" backcolor="#FBE0E0" forecolor="#8B1A1A"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F2F5F9"/>
+		</conditionalStyle>
+	</style>
+
+	<parameter name="user" class="java.lang.Integer" isForPrompting="false"/>
+	<parameter name="acc" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["A"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="codG" class="java.lang.Integer" isForPrompting="false">
+		<defaultValueExpression><![CDATA[Integer.valueOf(1)]]></defaultValueExpression>
+	</parameter>
+	<parameter name="gs" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["X"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="cadS" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[","]]></defaultValueExpression>
+	</parameter>
+	<parameter name="subtitulo" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+
+	<!-- Periodo sobre DocDate: el SP no acepta fechas y esta es la unica que
+	     traen las filas sin talonario. -->
+	<parameter name="fechaDocDesde" class="java.util.Date" isForPrompting="false"/>
+	<parameter name="fechaDocHasta" class="java.util.Date" isForPrompting="false"/>
+
+	<!-- Nombre de empresa TAL COMO LO MANDA SAP. En la accion 'D' el codEmpresa
+	     de las filas es un centinela (1000), asi que este texto es lo unico con
+	     que se puede acotar por empresa. Por eso la pantalla lo rotula
+	     «Empresa (segun SAP)» y no «Empresa» a secas: si SAP escribe el nombre
+	     distinto que el Bosque, no va a matchear, y conviene que se note. -->
+	<parameter name="empresaSap" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<!-- ",CODIGO|desde a hasta," de todos los talonarios del Bosque. -->
+	<parameter name="rangosConocidos" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="talonariosConocidos" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+
+	<queryString>
+		<![CDATA[EXEC dbo.p_SAP_Rpt_tmntoSalidTalonario @Accion = $P{acc}, @audUsuario = $P{user}, @codGrupo = $P{codG}, @grupoSeleccion = $P{gs}, @parametros = $P{cadS}]]>
+	</queryString>
+
+	<field name="DocEntry" class="java.lang.Integer"/>
+	<field name="DocNum" class="java.lang.String"/>
+	<field name="U_nroRecibo" class="java.lang.String"/>
+	<field name="NumAtCard" class="java.lang.String"/>
+	<field name="CANCELED" class="java.lang.String"/>
+	<field name="DocDate" class="java.sql.Date"/>
+	<field name="DocTotal" class="java.math.BigDecimal"/>
+	<field name="Comments" class="java.lang.String"/>
+	<field name="CardCode" class="java.lang.String"/>
+	<field name="CardName" class="java.lang.String"/>
+	<field name="datoEmpresa" class="java.lang.String"/>
+	<!-- El nombre de empresa del lado Bosque. Es la columna confiable: en las
+	     filas de relleno el SP deja datoEmpresa en cadena vacia y pone el
+	     nombre solo aca, asi que agrupando por datoEmpresa esos talonarios
+	     caian bajo "(sin empresa)" teniendo su empresa bien cargada. -->
+	<field name="datoEmpresaB" class="java.lang.String"/>
+	<field name="datoSerie" class="java.lang.String"/>
+	<field name="nroTalonario" class="java.lang.String"/>
+	<field name="datoTipoB" class="java.lang.String"/>
+	<field name="datoEstado" class="java.lang.String"/>
+	<!-- El codigo de talonario que SAP trae escrito en el documento. Ojo con la
+	     'c' minuscula: asi lo devuelve el SP. Es la columna que explica por que
+	     una fila quedo huerfana. -->
+	<field name="U_codigoTalonario" class="java.lang.String"/>
+	<!-- Centinela: 0 en las filas sin talonario. Solo se usa para filtrar. -->
+	<field name="codTalonario" class="java.lang.Long"/>
+
+	<sortField name="datoEmpresa"/>
+	<sortField name="U_codigoTalonario"/>
+	<sortField name="U_nroRecibo"/>
+
+	<!-- Derivados del codigo que manda SAP. Van como variables y no repetidos
+	     dentro de cada expresion para que el motivo se pueda leer.
+
+	     OJO CON LAS MAYUSCULAS: el collation de SQL Server NO las distingue, asi
+	     que el SP empareja 'ir1307' con 'IR1307' sin problema. Java si las
+	     distingue, y comparando crudo se acusaba de "mal escrito" a codigos que
+	     el SP habia emparejado bien. Por eso existeCrudo compara en mayusculas:
+	     replica lo que hace SQL. Los ESPACIOS si rompen el match, y esos son los
+	     que valen la pena reportar. -->
+	<variable name="codSap" class="java.lang.String" resetType="None">
+		<variableExpression><![CDATA[$F{U_codigoTalonario} == null ? "" : $F{U_codigoTalonario}.trim()]]></variableExpression>
+	</variable>
+	<variable name="codNorm" class="java.lang.String" resetType="None">
+		<variableExpression><![CDATA[$F{U_codigoTalonario} == null ? "" : $F{U_codigoTalonario}.replace(" ", "").toUpperCase()]]></variableExpression>
+	</variable>
+	<!-- true = el SP lo habria emparejado por codigo; entonces lo que fallo es
+	     el rango de folios o la empresa. -->
+	<variable name="existeCrudo" class="java.lang.Boolean" resetType="None">
+		<variableExpression><![CDATA[Boolean.valueOf($V{codSap}.length() > 0
+		  && $P{talonariosConocidos}.indexOf("," + $V{codSap}.toUpperCase() + ",") >= 0)]]></variableExpression>
+	</variable>
+	<variable name="existeNorm" class="java.lang.Boolean" resetType="None">
+		<variableExpression><![CDATA[Boolean.valueOf($V{codNorm}.length() > 0
+		  && $P{talonariosConocidos}.indexOf("," + $V{codNorm} + ",") >= 0)]]></variableExpression>
+	</variable>
+	<!-- El rango de folios del talonario, para poder decir cual es el correcto
+	     en vez de dejar al lector buscarlo. Formato del parametro:
+	     ",IR1307|10301 a 10350,ER1001|1 a 50," -->
+	<variable name="posRango" class="java.lang.Integer" resetType="None">
+		<variableExpression><![CDATA[Integer.valueOf($P{rangosConocidos} == null ? -1
+		  : $P{rangosConocidos}.indexOf("," + $V{codNorm} + "|"))]]></variableExpression>
+	</variable>
+	<variable name="rangoTxt" class="java.lang.String" resetType="None">
+		<variableExpression><![CDATA[$V{posRango}.intValue() < 0 ? ""
+		  : $P{rangosConocidos}.substring($V{posRango}.intValue() + $V{codNorm}.length() + 2,
+		      $P{rangosConocidos}.indexOf(",", $V{posRango}.intValue() + 1))]]></variableExpression>
+	</variable>
+	<variable name="gravedad" class="java.lang.Integer" resetType="None">
+		<variableExpression><![CDATA[($F{nroTalonario} != null && $F{nroTalonario}.trim().length() > 0) ? Integer.valueOf(0)
+		  : $V{codSap}.length() == 0                 ? Integer.valueOf(3)
+		  : $V{existeCrudo}.booleanValue()           ? Integer.valueOf(1)
+		  : $V{existeNorm}.booleanValue()            ? Integer.valueOf(2)
+		  :                                            Integer.valueOf(3)]]></variableExpression>
+	</variable>
+	<variable name="tal_docs" class="java.lang.Integer" resetType="Group" resetGroup="gTalonario" calculation="Count">
+		<variableExpression><![CDATA[$F{DocEntry}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="tal_total" class="java.math.BigDecimal" resetType="Group" resetGroup="gTalonario" calculation="Sum">
+		<variableExpression><![CDATA[$F{DocTotal} == null ? java.math.BigDecimal.ZERO : $F{DocTotal}]]></variableExpression>
+		<initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+	</variable>
+	<variable name="tal_anul" class="java.lang.Integer" resetType="Group" resetGroup="gTalonario" calculation="Sum">
+		<variableExpression><![CDATA["Y".equals($F{CANCELED}) ? Integer.valueOf(1) : Integer.valueOf(0)]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="emp_docs" class="java.lang.Integer" resetType="Group" resetGroup="gEmpresa" calculation="Count">
+		<variableExpression><![CDATA[$F{DocEntry}]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+	<variable name="emp_total" class="java.math.BigDecimal" resetType="Group" resetGroup="gEmpresa" calculation="Sum">
+		<variableExpression><![CDATA[$F{DocTotal} == null ? java.math.BigDecimal.ZERO : $F{DocTotal}]]></variableExpression>
+		<initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+	</variable>
+	<variable name="gen_total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DocTotal} == null ? java.math.BigDecimal.ZERO : $F{DocTotal}]]></variableExpression>
+		<initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+	</variable>
+	<variable name="gen_anul" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA["Y".equals($F{CANCELED}) ? Integer.valueOf(1) : Integer.valueOf(0)]]></variableExpression>
+		<initialValueExpression><![CDATA[Integer.valueOf(0)]]></initialValueExpression>
+	</variable>
+
+	<!-- Tres recortes, los tres exclusivos de la accion 'D':
+	     - codTalonario = 0 deja solo los huerfanos. Hace falta porque el select
+	       final de esa rama lee la tabla temporal entera, que ya venia cargada
+	       con los que SI cuadran, mientras el titulo promete solo huerfanos.
+	     - DocDate y empresa: en las otras acciones el rango de fechas significa
+	       fecha de alta y ya se aplico al armar la lista de talonarios; volver a
+	       aplicarlo aca contra una fecha de SAP vaciaba el reporte. -->
+	<filterExpression><![CDATA[!"D".equals($P{acc})
+	  || ( ( $F{codTalonario} == null || $F{codTalonario}.longValue() == 0L )
+	    && ( $P{fechaDocDesde} == null || ( $F{DocDate} != null && !$F{DocDate}.before($P{fechaDocDesde}) ) )
+	    && ( $P{fechaDocHasta} == null || ( $F{DocDate} != null && !$F{DocDate}.after($P{fechaDocHasta}) ) )
+	    && ( $P{empresaSap} == null || $P{empresaSap}.trim().length() == 0
+	         || ( $F{datoEmpresa} != null
+	              && $F{datoEmpresa}.trim().equalsIgnoreCase($P{empresaSap}.trim()) ) ) )]]></filterExpression>
+
+	<group name="gEmpresa" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[($F{datoEmpresaB} != null && $F{datoEmpresaB}.trim().length() > 0)
+		  ? $F{datoEmpresaB}.trim()
+		  : (($F{datoEmpresa} != null && $F{datoEmpresa}.trim().length() > 0) ? $F{datoEmpresa}.trim() : "(sin empresa)")]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<textField>
+					<reportElement style="talGrupo" x="0" y="2" width="802" height="18" uuid="b1c7e2a4-0002-0004-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="11" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA[("D".equals($P{acc}) ? "Empresa s/SAP:  " : "Empresa:  ") + (($F{datoEmpresaB} != null && $F{datoEmpresaB}.trim().length() > 0)
+		  ? $F{datoEmpresaB}.trim()
+		  : (($F{datoEmpresa} != null && $F{datoEmpresa}.trim().length() > 0) ? $F{datoEmpresa}.trim() : "(sin empresa)"))]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="talMotivo" x="8" y="14" width="794" height="13" uuid="b1c7e2a4-0003-0004-0000-0000000000ff"/>
+					<textElement verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+					<textFieldExpression><![CDATA[$V{gravedad} == null || $V{gravedad}.intValue() == 0 ? ""
+					   : $V{gravedad}.intValue() == 1
+					       ? ("El codigo existe en el Bosque" + ($V{rangoTxt}.length() > 0 ? " y va del folio " + $V{rangoTxt} : "") + ". Lo que no cuadro fue el folio o la empresa del documento.")
+					   : $V{gravedad}.intValue() == 2
+					       ? ("Mal escrito en SAP: sobran espacios. En el Bosque es «" + $V{codNorm} + "»" + ($V{rangoTxt}.length() > 0 ? ", folios " + $V{rangoTxt} : "") + ". Corregirlo en SAP y concilia solo.")
+					   : ($V{codSap}.length() == 0
+					       ? "SAP no cargo el campo de talonario en este documento."
+					       : "No existe ningun talonario con ese codigo en el Bosque. Revisar como se tipeo en SAP.")]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="22">
+				<textField>
+					<reportElement style="talTotal" x="0" y="0" width="564" height="18" uuid="b1c7e2a4-0002-0004-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph leftIndent="6"/></textElement>
+					<textFieldExpression><![CDATA["Total " + (($F{datoEmpresaB} != null && $F{datoEmpresaB}.trim().length() > 0)
+		  ? $F{datoEmpresaB}.trim()
+		  : (($F{datoEmpresa} != null && $F{datoEmpresa}.trim().length() > 0) ? $F{datoEmpresa}.trim() : "(sin empresa)")) + ":  " + $V{emp_docs} + " documentos"]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement style="talTotal" x="564" y="0" width="68" height="18" uuid="b1c7e2a4-0002-0004-0000-000000000003"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$V{emp_total}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="talTotal" x="632" y="0" width="170" height="18" uuid="b1c7e2a4-0002-0004-0000-000000000004"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+
+	<group name="gTalonario" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[($F{nroTalonario} == null || $F{nroTalonario}.trim().length() == 0)
+		  ? "sap:" + ($F{U_codigoTalonario} == null ? "" : $F{U_codigoTalonario}.trim())
+		  : $F{nroTalonario}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<textField>
+					<reportElement x="8" y="0" width="600" height="14" uuid="b1c7e2a4-0003-0004-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+					<textFieldExpression><![CDATA[($F{nroTalonario} != null && $F{nroTalonario}.trim().length() > 0)
+					   ? ("Talonario " + $F{nroTalonario}
+					      + ($F{datoTipoB} == null || "-".equals($F{datoTipoB}.trim()) ? "" : "   ·   " + $F{datoTipoB})
+					      + ($F{datoEstado} == null || "-".equals($F{datoEstado}.trim()) ? "" : "   ·   " + $F{datoEstado}))
+					   : (($F{U_codigoTalonario} == null || $F{U_codigoTalonario}.trim().length() == 0)
+					        ? "El documento no trae codigo de talonario cargado en SAP"
+					        : "Talonario s/SAP:  «" + $F{U_codigoTalonario} + "»")]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="17">
+				<textField>
+					<reportElement x="8" y="0" width="556" height="14" uuid="b1c7e2a4-0003-0004-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+					<textFieldExpression><![CDATA["Subtotal:  " + $V{tal_docs} + " documentos" + ($V{tal_anul} != null && $V{tal_anul}.intValue() > 0 ? "   ·   " + $V{tal_anul} + " anulados" : "")]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="564" y="0" width="68" height="14" uuid="b1c7e2a4-0003-0004-0000-000000000003"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$V{tal_total}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="15" width="802" height="1" forecolor="#B0BEC5" uuid="b1c7e2a4-0003-0004-0000-000000000004"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+
+	<title>
+		<band height="52">
+			<textField>
+				<reportElement x="0" y="0" width="600" height="20" uuid="b1c7e2a4-0001-0004-0000-000000000001"/>
+				<textElement><font size="15" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Conciliacion con SAP — salidas" + ("D".equals($P{acc}) ? ": documentos sin talonario" : "")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="21" width="600" height="13" uuid="b1c7e2a4-0001-0004-0000-000000000002"/>
+				<textElement><font size="9" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{subtitulo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement x="620" y="4" width="182" height="14" uuid="b1c7e2a4-0001-0004-0000-000000000003"/>
+				<textElement textAlignment="Right"><font size="8"/></textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="620" y="20" width="182" height="12" uuid="b1c7e2a4-0001-0004-0000-000000000004"/>
+				<textElement textAlignment="Right"><font size="7" isItalic="true"/></textElement>
+				<text><![CDATA[Fondo rojo = documento anulado en SAP]]></text>
+			</staticText>
+			<line>
+				<reportElement style="talRegla" x="0" y="46" width="802" height="3" uuid="b1c7e2a4-0001-0004-0000-000000000005"/>
+			</line>
+		</band>
+	</title>
+
+	<columnHeader>
+		<band height="18">
+			<staticText>
+				<reportElement style="talCabecera" x="0" y="0" width="58" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000000"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[FOLIO S/SAP]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="58" y="0" width="70" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000001"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[TAL. S/SAP]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="128" y="0" width="55" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000002"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[DOC. SAP N°]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="183" y="0" width="64" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000003"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[FECHA DOC. SAP]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="247" y="0" width="60" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000004"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[REF. CLIENTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="307" y="0" width="50" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000005"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[COD. SN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="357" y="0" width="145" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000006"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[SOCIO DE NEGOCIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="502" y="0" width="62" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000007"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[SERIE SAP]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="564" y="0" width="68" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000008"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<text><![CDATA[IMPORTE SAP]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="632" y="0" width="30" height="16" uuid="b1c7e2a4-0004-0004-0000-000000000009"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[ANUL.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="talCabecera" x="662" y="0" width="140" height="16" uuid="b1c7e2a4-0004-0004-0000-00000000000a"/>
+				<textElement verticalAlignment="Middle"><font size="7" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<text><![CDATA[COMENTARIO SAP]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+
+	<detail>
+		<band height="14">
+			<frame>
+				<reportElement style="talFila" x="0" y="0" width="802" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000000"/>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="58" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000000"/>
+					<textElement verticalAlignment="Middle"><font size="8" isBold="true"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{U_nroRecibo}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="58" y="0" width="70" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000001"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{U_codigoTalonario}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="128" y="0" width="55" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000002"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{DocNum}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="183" y="0" width="64" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000003"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{DocDate}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="247" y="0" width="60" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000004"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{NumAtCard}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="307" y="0" width="50" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000005"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{CardCode}]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="357" y="0" width="145" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000006"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{CardName}]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="502" y="0" width="62" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000007"/>
+					<textElement verticalAlignment="Middle"><font size="8"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{datoSerie}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="564" y="0" width="68" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000008"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/><paragraph rightIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{DocTotal}]]></textFieldExpression>
+				</textField>
+				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+					<reportElement x="662" y="0" width="140" height="13" uuid="b1c7e2a4-0005-0004-0000-000000000009"/>
+					<textElement verticalAlignment="Middle"><font size="7"/><paragraph leftIndent="4"/></textElement>
+					<textFieldExpression><![CDATA[$F{Comments}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="632" y="0" width="30" height="13" uuid="b1c7e2a4-0005-0004-0000-0000000000fe"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+					<textFieldExpression><![CDATA["Y".equals($F{CANCELED}) ? "SI" : ""]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+
+	<pageFooter>
+		<band height="16">
+			<textField>
+				<reportElement x="0" y="2" width="400" height="12" uuid="b1c7e2a4-0006-0004-0000-000000000001"/>
+				<textElement><font size="7" isItalic="true"/></textElement>
+				<textFieldExpression><![CDATA["RptTalConciliacionSapSalidas · accion " + $P{acc}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="602" y="2" width="160" height="12" uuid="b1c7e2a4-0006-0004-0000-000000000002"/>
+				<textElement textAlignment="Right"><font size="7"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="764" y="2" width="38" height="12" uuid="b1c7e2a4-0006-0004-0000-000000000003"/>
+				<textElement><font size="7"/></textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+
+	<summary>
+		<band height="30">
+			<line>
+				<reportElement style="talRegla" x="0" y="2" width="802" height="2" uuid="b1c7e2a4-0007-0004-0000-000000000001"/>
+			</line>
+			<textField>
+				<reportElement style="talTotal" x="0" y="6" width="564" height="20" uuid="b1c7e2a4-0007-0004-0000-000000000002"/>
+				<textElement verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph leftIndent="6"/></textElement>
+				<textFieldExpression><![CDATA["TOTAL GENERAL:  " + $V{REPORT_COUNT} + " documentos" + ($V{gen_anul} != null && $V{gen_anul}.intValue() > 0 ? "   ·   " + $V{gen_anul} + " anulados" : "")]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement style="talTotal" x="564" y="6" width="68" height="20" uuid="b1c7e2a4-0007-0004-0000-000000000003"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph rightIndent="4"/></textElement>
+				<textFieldExpression><![CDATA[$V{gen_total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="talTotal" x="632" y="6" width="170" height="20" uuid="b1c7e2a4-0007-0004-0000-000000000004"/>
+				<textElement verticalAlignment="Middle"><font size="10" isBold="true"/><paragraph leftIndent="4"/></textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

@@ -4,6 +4,9 @@ import bo.bosque.com.impexpap.utils.ApiResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -88,6 +91,44 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(
                         "Parámetro requerido ausente: '" + ex.getParameterName() + "'.",
                         null, HttpStatus.BAD_REQUEST.value()));
+    }
+
+    /**
+     * El body no se pudo leer: JSON roto, o un valor que no entra en el tipo del DTO.
+     *
+     * <p>Sin este handler caía en el catch-all y salía un <b>500 "Error interno del
+     * servidor"</b> con el stack completo en el log como "Error crítico no controlado".
+     * Es engañoso: el servidor está bien, lo que vino mal es el pedido. Va 400.
+     *
+     * <p>El caso que lo destapó: un número de 11 dígitos en un campo {@code int} del DTO
+     * ({@code Numeric value (10000000000) out of range of int}). Jackson deja el nombre
+     * del campo en el mensaje, así que se extrae para que el usuario sepa cuál corregir.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<?>> handleBodyIlegible(HttpMessageNotReadableException ex) {
+        String campo = campoDelError(ex);
+        String detalle = ex.getMostSpecificCause().getMessage();
+
+        logger.warn("Body ilegible{}: {}", campo == null ? "" : " (campo " + campo + ")", detalle);
+
+        String mensaje = campo == null
+                ? "El pedido tiene un formato inválido."
+                : "El valor enviado en '" + campo + "' no es válido.";
+
+        return ResponseEntity.badRequest()
+                .body(new ApiResponse<>(mensaje, null, HttpStatus.BAD_REQUEST.value()));
+    }
+
+    /** Saca el nombre del campo del "reference chain" que arma Jackson, si está. */
+    private String campoDelError(HttpMessageNotReadableException ex) {
+        Throwable causa = ex.getCause();
+        if (causa instanceof JsonMappingException) {
+            List<JsonMappingException.Reference> ruta = ((JsonMappingException) causa).getPath();
+            if (ruta != null && !ruta.isEmpty()) {
+                return ruta.get(ruta.size() - 1).getFieldName();
+            }
+        }
+        return null;
     }
 
     /**
