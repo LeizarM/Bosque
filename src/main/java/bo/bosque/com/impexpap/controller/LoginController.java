@@ -27,6 +27,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
+import bo.bosque.com.impexpap.security.ClienteIp;
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import bo.bosque.com.impexpap.security.model.Jwt;
 import bo.bosque.com.impexpap.model.Login;
@@ -47,8 +48,9 @@ public class LoginController {
     private final IVistaUsuario vistaUsuarioDao;
     private final IEmpleado empleadoDao;
     private final IUsuarioBtn usuarioBtnDao;
+    private final ClienteIp clienteIp;
 
-    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao){
+    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao, ClienteIp clienteIp){
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
@@ -56,6 +58,7 @@ public class LoginController {
         this.vistaUsuarioDao = vistaUsuarioDao;
         this.empleadoDao = empleadoDao;
         this.usuarioBtnDao = usuarioBtnDao;
+        this.clienteIp = clienteIp;
     }
 
 
@@ -97,7 +100,7 @@ public class LoginController {
             // Ya NO se le manda la contraseña al SP: no la usaba y viajaba en claro.
             Login loginTemp = this.ldao.verifyUser(
                     login.getUsername(),
-                    request.getRemoteAddr()
+                    clienteIp.de(request)
             );
 
             // Paso 2: Verificar diferentes estados de autenticación.
@@ -111,12 +114,12 @@ public class LoginController {
             // respuestas son ahora idénticas, byte por byte.
             if (loginTemp.getCodUsuario() < 0) {
                 log.warn("Login rechazado (cuenta bloqueada): usuario '{}' desde {}",
-                        login.getUsername(), request.getRemoteAddr());
+                        login.getUsername(), clienteIp.de(request));
                 return credencialesInvalidas(response);
 
             } else if (loginTemp.getCodUsuario() == 0) {
                 log.warn("Login rechazado (usuario inexistente): '{}' desde {}",
-                        login.getUsername(), request.getRemoteAddr());
+                        login.getUsername(), clienteIp.de(request));
                 return credencialesInvalidas(response);
             }
 
@@ -132,7 +135,7 @@ public class LoginController {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 // IMPORTANTE: Registrar el intento exitoso en la bitácora
-                this.ldao.registerSuccessfulLogin(login.getUsername(), request.getRemoteAddr());
+                this.ldao.registerSuccessfulLogin(login.getUsername(), clienteIp.de(request));
 
                 // Generación del token JWT
                 String jwt = jwtProvider.generateToken(authentication, loginTemp);
@@ -163,13 +166,13 @@ public class LoginController {
             } catch (BadCredentialsException e) {
                 // Contraseña incorrecta - Registrar intento fallido
                 log.warn("Login rechazado (contraseña incorrecta): usuario '{}' desde {}",
-                        login.getUsername(), request.getRemoteAddr());
+                        login.getUsername(), clienteIp.de(request));
 
                 // Registramos el intento fallido. El resultado dice si la cuenta quedó
                 // bloqueada por este intento, y eso se anota en el log — pero NO cambia
                 // la respuesta: decirle al que está probando contraseñas que acaba de
                 // bloquear la cuenta le confirma que el usuario existe.
-                Login updatedLogin = this.ldao.registerFailedAttempt(login.getUsername(), request.getRemoteAddr());
+                Login updatedLogin = this.ldao.registerFailedAttempt(login.getUsername(), clienteIp.de(request));
                 if (updatedLogin != null && updatedLogin.getCodUsuario() < 0) {
                     log.warn("La cuenta '{}' quedó bloqueada por intentos fallidos", login.getUsername());
                 }
@@ -242,7 +245,7 @@ public class LoginController {
         // este endpoint funcionara igual es la prueba de que el SP nunca verificó ese
         // parámetro. Ahora directamente no se manda. Quien verifica es el
         // authenticationManager de tres líneas más abajo, como siempre.
-        Login loginTemp = this.ldao.verifyUser(login.getUsername(), request.getRemoteAddr());
+        Login loginTemp = this.ldao.verifyUser(login.getUsername(), clienteIp.de(request));
 
         if( loginTemp.getCodUsuario() <= 0 ){
             response.put("error", "Error al reconocer el usuario");
