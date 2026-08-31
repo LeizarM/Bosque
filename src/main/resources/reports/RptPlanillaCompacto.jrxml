@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptPlanillaCompacto" printOrder="Horizontal" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1ecf9fc5-91c8-4955-8e69-8c44e4f56741">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="BOSQUE-2_0"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -8,9 +8,6 @@
 	<parameter name="RUTA_LOGOS" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[$P{UPLOADS_DIR}]]></defaultValueExpression>
 	</parameter>
-	<!-- La ACCION R2 de p_list_PlanillaDetalle no devuelve codEmpresa (R3, la de
-	     la papeleta, si). Llega como parametro desde PlanillaController; si viene
-	     nulo el logo no existe y se imprime $F{Empresa} en su lugar. -->
 	<parameter name="codEmpresa" class="java.lang.Integer" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[EXEC p_list_PlanillaDetalle @ACCION = 'R2', @codPlanilla = $P{codPlanilla}]]>
@@ -270,7 +267,7 @@
 				<text><![CDATA[N° Empleador Ministerio de Trabajo:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="780" y="50" width="188" height="20" uuid="85e0372f-8f60-4e78-b1c1-bd8552410d95"/>
+				<reportElement x="770" y="50" width="198" height="20" uuid="85e0372f-8f60-4e78-b1c1-bd8552410d95"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
@@ -1043,28 +1040,10 @@ G - K]]></text>
 	</detail>
 	<pageFooter>
 		<band height="54" splitType="Stretch">
-			<!-- ================== LOGO POR EMPRESA ==================
-			     Mismo patron que RptPapeletaPago.jrxml:711 — el archivo se arma como
-			     <RUTA_LOGOS>logos/<codEmpresa>.png, con RUTA_LOGOS cayendo en
-			     UPLOADS_DIR, que JasperReportExport entrega con la barra final.
-			     'logos' en MINUSCULAS: asi se llama el directorio en el volumen.
-
-			     Va en el unico hueco libre de la banda: todo lo demas arranca en
-			     x=181 ("NOMBRE DEL EMPLEADOR"). El recuadro queda centrado en ese
-			     hueco — 30px a cada lado en horizontal, 5px arriba y abajo — y
-			     RetainShape + Center/Middle centra la imagen adentro, que hace falta
-			     porque los logos tienen proporciones distintas (1.png 400x155,
-			     5.png 1417x850).
-
-			     onErrorType="Blank": si a una empresa le falta el .png el PDF sale
-			     igual en vez de reventar.
-			     ====================================================== -->
 			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
 				<reportElement x="30" y="5" width="121" height="44" uuid="3c1a5e60-9001-4a10-b7d2-5f0000000001"/>
 				<imageExpression><![CDATA[new java.io.File($P{RUTA_LOGOS} + "logos/" + $P{codEmpresa} + ".png")]]></imageExpression>
 			</image>
-			<!-- Respaldo: el mismo recuadro con el nombre de la empresa, solo cuando
-			     el .png no esta. Nunca salen los dos, nunca ninguno. -->
 			<textField textAdjust="ScaleFont">
 				<reportElement x="30" y="5" width="121" height="44" uuid="3c1a5e60-9001-4a10-b7d2-5f0000000002">
 					<printWhenExpression><![CDATA[!new java.io.File($P{RUTA_LOGOS} + "logos/" + $P{codEmpresa} + ".png").exists()]]></printWhenExpression>
@@ -1105,7 +1084,7 @@ G - K]]></text>
 				<reportElement x="601" y="34" width="138" height="1" uuid="46eb54ac-411c-4bdd-ae91-944a5ed53259"/>
 			</line>
 			<textField textAdjust="ScaleFont" pattern="#,##0.00">
-				<reportElement x="870" y="34" width="98" height="20" uuid="45a6cfd0-6f69-49a8-b2f2-19f6c6d25160">
+				<reportElement x="820" y="34" width="148" height="20" uuid="45a6cfd0-6f69-49a8-b2f2-19f6c6d25160">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="fab9705a-e19c-4e53-bc4e-85d063de4482"/>
 				</reportElement>
 				<box>
