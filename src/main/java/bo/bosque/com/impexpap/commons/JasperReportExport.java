@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.commons;
 
 import net.sf.jasperreports.engine.*;
 
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -134,6 +135,88 @@ public class JasperReportExport {
         }
     }
 
+
+    /**
+     * Compila y llena un reporte a partir de una COLECCIÓN JAVA, no de una
+     * consulta SQL embebida en el {@code .jrxml}.
+     *
+     * <p>Todos los demás métodos de esta clase asumen un {@code <queryString>}
+     * dentro del reporte y una {@code Connection} para ejecutarlo — sirve
+     * cuando el reporte es una consulta directa. Acá no: el reporte
+     * biométrico depende de una lógica que ya vive en Java
+     * ({@code BiometricoController.reporteMensual}, no una sola consulta), así
+     * que el {@code .jrxml} no tiene {@code <queryString>} — sus
+     * {@code <field>} se llenan por reflexión desde los getters de cada
+     * elemento de {@code datos}, vía {@link JRBeanCollectionDataSource}.
+     *
+     * @param nombreReporte nombre sin extensión, dentro de resources/reports
+     * @param datos         una fila por elemento (getters == nombre de {@code <field>})
+     * @param params        parámetros del reporte (título, filtros, etc.)
+     */
+    public byte[] exportPDFDesdeColeccion(String nombreReporte, java.util.Collection<?> datos,
+                                           Map<String, Object> params) {
+        try {
+            JasperReport reporte = compileMainReport(REPORT_FOLDER + "/" + nombreReporte + JRXML);
+
+            Map<String, Object> paramsCopy = new HashMap<>(params);
+            paramsCopy.putIfAbsent(JRParameter.REPORT_LOCALE, new java.util.Locale("es"));
+
+            JasperPrint print = JasperFillManager.fillReport(
+                    reporte, paramsCopy, new JRBeanCollectionDataSource(datos));
+            return JasperExportManager.exportReportToPdf(print);
+
+        } catch (Exception e) {
+            logger.error("Error generando el reporte {} desde colección", nombreReporte, e);
+            throw new RuntimeException("No se pudo generar el reporte " + nombreReporte
+                    + ": " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Igual que {@link #exportPDFDesdeColeccion}, pero para VARIOS lotes de
+     * datos con el mismo {@code .jrxml} — lo compila una sola vez y lo llena
+     * una vez por lote, uniendo todos los PDFs resultantes en uno solo.
+     *
+     * <p>Pensado para "el reporte detallado, pero de todos los empleados a
+     * la vez" ({@code BiometricoController.reporteMensualDetalladoTodosPdf}):
+     * cada lote es el mes de UN empleado, y como cada llenado produce su
+     * propio {@link JasperPrint}, cada empleado arranca en página nueva sin
+     * tener que agregarle un {@code <group>} al `.jrxml` (que sigue siendo
+     * el reporte de un solo empleado, sin cambios).
+     *
+     * @param nombreReporte nombre sin extensión, dentro de resources/reports
+     * @param lotes         un elemento por empleado — las filas de ESE empleado
+     * @param paramsPorLote mismo orden que {@code lotes} — los parámetros (nombreEmpleado, mesAnio) de ESE empleado
+     */
+    public byte[] exportPDFDesdeColeccionesMultiples(String nombreReporte,
+                                                       java.util.List<? extends java.util.Collection<?>> lotes,
+                                                       java.util.List<Map<String, Object>> paramsPorLote) {
+        try {
+            JasperReport reporte = compileMainReport(REPORT_FOLDER + "/" + nombreReporte + JRXML);
+
+            java.util.List<JasperPrint> prints = new java.util.ArrayList<>(lotes.size());
+            for (int i = 0; i < lotes.size(); i++) {
+                Map<String, Object> paramsCopy = new HashMap<>(paramsPorLote.get(i));
+                paramsCopy.putIfAbsent(JRParameter.REPORT_LOCALE, new java.util.Locale("es"));
+                prints.add(JasperFillManager.fillReport(
+                        reporte, paramsCopy, new JRBeanCollectionDataSource(lotes.get(i))));
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            JRPdfExporter exporter = new JRPdfExporter();
+            // SimpleExporterInput no tiene constructor List<JasperPrint> en esta
+            // versión — sólo la fábrica estática getInstance(List<JasperPrint>).
+            exporter.setExporterInput(SimpleExporterInput.getInstance(prints));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+            exporter.exportReport();
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            logger.error("Error generando el reporte {} (todos los empleados)", nombreReporte, e);
+            throw new RuntimeException("No se pudo generar el reporte " + nombreReporte
+                    + ": " + e.getMessage(), e);
+        }
+    }
 
     /**
      * Compila el reporte principal

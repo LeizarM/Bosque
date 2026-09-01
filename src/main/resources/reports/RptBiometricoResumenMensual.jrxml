@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptBiometricoResumenMensual" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="net.sf.jasperreports.default.text.field.blank.when.null" value="true"/>
+	<!-- Franjas alternadas por fila — con ~400 empleados posibles, ayuda a no
+	     perder la fila al leer de izquierda a derecha. -->
+	<style name="filaZebra" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue() % 2 == 0)]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F5F7FA"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="mesAnio" class="java.lang.String"/>
+	<field name="nombreEmpleado" class="java.lang.String"/>
+	<field name="diasAsignados" class="java.lang.Integer"/>
+	<field name="diasNoMarcados" class="java.lang.Integer"/>
+	<field name="minutosAtraso" class="java.lang.Integer"/>
+	<field name="observaciones" class="java.lang.String"/>
+	<variable name="totalDiasNoMarcados" class="java.lang.Integer" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{diasNoMarcados}]]></variableExpression>
+	</variable>
+	<variable name="totalMinutosAtraso" class="java.lang.Integer" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{minutosAtraso}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="46" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="572" height="24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Resumen Mensual de Asistencia Biométrica]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="26" width="572" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Período: " + $P{mesAnio}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="44" width="572" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#37474F"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="18" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="200" height="18" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Empleado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="200" y="0" width="70" height="18" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Días Asignados]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="270" y="0" width="80" height="18" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Días NO Marcados]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="350" y="0" width="70" height="18" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Atrasos]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="420" y="0" width="152" height="18" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Observaciones]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement style="filaZebra" x="0" y="0" width="200" height="15"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreEmpleado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="filaZebra" x="200" y="0" width="70" height="15"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasAsignados}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="filaZebra" x="270" y="0" width="80" height="15"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diasNoMarcados} > 0 ? $F{diasNoMarcados}.toString() : "0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="filaZebra" x="350" y="0" width="70" height="15"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{minutosAtraso}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="filaZebra" x="420" y="0" width="152" height="15"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{observaciones} == null ? "" : $F{observaciones}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="472" y="0" width="100" height="14"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="30" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="4" width="572" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#37474F"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="0" y="10" width="280" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total días no marcados: " + $V{totalDiasNoMarcados}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="10" width="280" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total minutos de atraso: " + $V{totalMinutosAtraso}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

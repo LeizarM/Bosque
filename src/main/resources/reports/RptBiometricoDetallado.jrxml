@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptBiometricoDetallado" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="net.sf.jasperreports.export.pdf.force.linebreak.policy" value="true"/>
+	<!-- Sin esto, un $F{...} nulo (día sin marcación real, sin horario, minutosAtraso
+	     todavía sin calcular, etc.) se imprime como el texto literal "null" en vez de
+	     la celda vacía. Confirmado insuficiente por sí solo — cada <textField> nulificable
+	     lleva además isBlankWhenNull="true" explícito. -->
+	<property name="net.sf.jasperreports.default.text.field.blank.when.null" value="true"/>
+	<!-- Color de fondo de la fila según estado — mismo criterio que colorDeAsistencia()
+	     en el front (tokens_bosque.dart): FALTA es el único que llama la atención de
+	     verdad (es un problema real), feriado/permiso/vacación/no-le-toca-sábado
+	     comparten un tono neutro de "día justificado", sin horario queda gris apagado. -->
+	<style name="filaEstado" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("FALTA".equals($F{estado}))]]></conditionExpression>
+			<style mode="Opaque" backcolor="#FBE4E1"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("SIN_HORARIO".equals($F{estado}))]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F1F1F1"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("FERIADO".equals($F{estado}) || "SABADO_LIBRE".equals($F{estado}) || "PERMISO".equals($F{estado}) || "VACACION".equals($F{estado}))]]></conditionExpression>
+			<style mode="Opaque" backcolor="#E7F1FB"/>
+		</conditionalStyle>
+	</style>
+	<!-- Marc. Ingreso/Marc. Salida sólo tienen contenido en TRABAJADO (FALTA
+	     y el resto quedan en blanco) — así que a diferencia de filaEstado
+	     estas dos no necesitan repetir las tres variantes de fondo por
+	     estado, sólo la base blanca de siempre + el resaltado condicional. -->
+	<style name="marcaEntradaManual" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean(Boolean.TRUE.equals($F{entradaManual}))]]></conditionExpression>
+			<style forecolor="#B8860B" fontName="SansSerif" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="marcaSalidaManual" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean(Boolean.TRUE.equals($F{salidaManual}))]]></conditionExpression>
+			<style forecolor="#B8860B" fontName="SansSerif" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<!-- A diferencia de las dos de arriba, Min. Atraso SÍ puede caer en
+	     cualquier estado (FALTA siempre tiene atraso > 0 por diseño — ver
+	     AsistenciaDiaDto.minutosAtraso), así que repite las tres condiciones
+	     de fondo de filaEstado (JasperReports no permite dos "style=" a la
+	     vez en un mismo elemento) y les agrega una cuarta: negrita + rojo
+	     cuando el atraso es real, encima del fondo que ya le tocaba. -->
+	<style name="minutosAtrasoDestacado" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("FALTA".equals($F{estado}))]]></conditionExpression>
+			<style mode="Opaque" backcolor="#FBE4E1"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("SIN_HORARIO".equals($F{estado}))]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F1F1F1"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("FERIADO".equals($F{estado}) || "SABADO_LIBRE".equals($F{estado}) || "PERMISO".equals($F{estado}) || "VACACION".equals($F{estado}))]]></conditionExpression>
+			<style mode="Opaque" backcolor="#E7F1FB"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($F{minutosAtraso} != null && $F{minutosAtraso} > 0)]]></conditionExpression>
+			<style forecolor="#C0392B" fontName="SansSerif" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="nombreEmpleado" class="java.lang.String"/>
+	<parameter name="mesAnio" class="java.lang.String"/>
+	<field name="fecha" class="java.util.Date"/>
+	<field name="estado" class="java.lang.String"/>
+	<field name="motivo" class="java.lang.String"/>
+	<field name="horaEntradaEsperada" class="java.util.Date"/>
+	<field name="horaSalidaEsperada" class="java.util.Date"/>
+	<field name="horaEntradaReal" class="java.util.Date"/>
+	<field name="horaSalidaReal" class="java.util.Date"/>
+	<field name="horaInicioPermiso" class="java.util.Date"/>
+	<field name="horaFinPermiso" class="java.util.Date"/>
+	<field name="minutosAtraso" class="java.lang.Integer"/>
+	<field name="entradaManual" class="java.lang.Boolean"/>
+	<field name="salidaManual" class="java.lang.Boolean"/>
+	<variable name="totalTrabajados" class="java.lang.Integer" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA["TRABAJADO".equals($F{estado}) ? 1 : 0]]></variableExpression>
+	</variable>
+	<variable name="totalFaltas" class="java.lang.Integer" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA["FALTA".equals($F{estado}) ? 1 : 0]]></variableExpression>
+	</variable>
+	<variable name="totalSinExigencia" class="java.lang.Integer" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[("FALTA".equals($F{estado}) || "TRABAJADO".equals($F{estado})) ? 0 : 1]]></variableExpression>
+	</variable>
+	<variable name="totalMinutosAtraso" class="java.lang.Integer" resetType="Report" calculation="Sum">
+		<variableExpression><![CDATA[$F{minutosAtraso}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<!-- Comprimido de 60 a 42: con 31 filas el reporte no entraba en una sola
+		     página (60+18+31*15+40+16 = 599 > 572 útiles), y cada empleado tiene
+		     que caber en una hoja — cada uno es un JasperPrint aparte cuando se
+		     genera "todos los empleados" (ver JasperReportExport.exportPDFDesde
+		     ColeccionesMultiples), así que una página de más ahí se multiplica
+		     por cada persona. -->
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="752" height="18"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Reporte Detallado de Asistencia Biométrica]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="19" width="376" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Empleado: " + $P{nombreEmpleado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="376" y="19" width="376" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Período: " + $P{mesAnio}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="35" width="752" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#37474F"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="16" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="60" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="60" y="0" width="60" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Día]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="120" y="0" width="52" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hr Ingreso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="172" y="0" width="52" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hr Salida]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="224" y="0" width="58" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hr Inicio Permiso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="282" y="0" width="58" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hr Fin Permiso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="340" y="0" width="58" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Marc. Ingreso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="398" y="0" width="58" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Marc. Salida]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="456" y="0" width="52" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Min. Atraso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="508" y="0" width="68" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="576" y="0" width="176" height="16" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Obs.]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement style="filaEstado" x="0" y="0" width="60" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEE">
+				<reportElement style="filaEstado" x="60" y="0" width="60" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement style="filaEstado" x="120" y="0" width="52" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaEntradaEsperada}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement style="filaEstado" x="172" y="0" width="52" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaSalidaEsperada}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement style="filaEstado" x="224" y="0" width="58" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaInicioPermiso}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement style="filaEstado" x="282" y="0" width="58" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaFinPermiso}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement style="marcaEntradaManual" x="340" y="0" width="58" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaEntradaReal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement style="marcaSalidaManual" x="398" y="0" width="58" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaSalidaReal}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="minutosAtrasoDestacado" x="456" y="0" width="52" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{minutosAtraso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="filaEstado" x="508" y="0" width="68" height="13"/>
+				<box><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["TRABAJADO".equals($F{estado}) ? "Trabajó" :
+"FALTA".equals($F{estado}) ? "Falta" :
+"FERIADO".equals($F{estado}) ? "Feriado" :
+"SABADO_LIBRE".equals($F{estado}) ? "No le tocaba" :
+"PERMISO".equals($F{estado}) ? "Permiso" :
+"VACACION".equals($F{estado}) ? "Vacación" :
+"SIN_HORARIO".equals($F{estado}) ? "Sin horario" :
+$F{estado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="filaEstado" x="576" y="0" width="176" height="13"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#CCCCCC"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{motivo} == null ? "" : $F{motivo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="652" y="0" width="100" height="14"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="40" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="4" width="752" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#37474F"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="0" y="12" width="180" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Trabajados: " + $V{totalTrabajados}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="188" y="12" width="180" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Faltas: " + $V{totalFaltas}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="376" y="12" width="180" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Días sin exigencia: " + $V{totalSinExigencia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="564" y="12" width="188" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total Atraso: " + $V{totalMinutosAtraso} + " min ("
++ ($V{totalMinutosAtraso} / 60) + "h " + ($V{totalMinutosAtraso} % 60) + "m)"]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

@@ -85,7 +85,7 @@ public class SpHelper {
                     (java.sql.Connection con) -> con.prepareStatement(sql.toString()),
                     (PreparedStatement ps) -> {
                         for (int i = 0; i < inputValues.size(); i++) {
-                            ps.setObject(i + 1, inputValues.get(i));
+                            ps.setObject(i + 1, aFechaSql(inputValues.get(i)));
                         }
                         // execute() soporta batches multi-sentencia correctamente
                         boolean hasResult = ps.execute();
@@ -126,6 +126,25 @@ public class SpHelper {
             logger.error("Error inesperado procesando Map para SP {}", spName, ex);
             throw new RuntimeException("Error interno procesando parámetros.", ex);
         }
+    }
+
+    /**
+     * jTDS no sabe convertir un {@code java.util.Date} genérico vía
+     * {@code PreparedStatement.setObject()} sin una pista de tipo SQL —
+     * revienta con "Unable to convert between java.util.Date and
+     * JAVA_OBJECT". {@code java.sql.Date}/{@code java.sql.Timestamp} sí
+     * los reconoce, así que cualquier {@code java.util.Date} que no sea ya
+     * uno de esos dos se convierte a {@code Timestamp} antes de bindear.
+     *
+     * <p>Sólo hace falta acá: {@code ejecutarAbm} pasa por
+     * {@code SimpleJdbcCall}/{@code MapSqlParameterSource}, que sí resuelve
+     * el tipo SQL real vía metadata del SP.
+     */
+    private static Object aFechaSql(Object valor) {
+        if (valor instanceof java.util.Date && !(valor instanceof java.sql.Date) && !(valor instanceof java.sql.Timestamp)) {
+            return new java.sql.Timestamp(((java.util.Date) valor).getTime());
+        }
+        return valor;
     }
 
     /**
