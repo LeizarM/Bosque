@@ -16,6 +16,18 @@ import java.util.Date;
  * {@code p_abm_BioCHECKINOUT ACCION='B'} — ver {@link bo.bosque.com.impexpap.dao.BioCheckInOutDao}).
  * Nombres de columna tal cual vienen del dispositivo (mayúsculas incluidas) para no
  * introducir un mapeo que se pueda desalinear con el SP.
+ *
+ * <p><b>{@code @JsonProperty} en USERID/CHECKTIME/CHECKTYPE/VERIFYCODE/SENSORID
+ * agregado 2026-09-01</b> — bug real confirmado en {@link BioCheckInOutAdicional}
+ * (mismo problema, mismo origen): sin la anotación, Jackson serializa
+ * {@code getUSERID()} como {@code "userid"} (todo minúscula), no
+ * {@code "USERID"}, al revés de lo que dice el comentario de arriba sobre
+ * "nombres tal cual vienen del dispositivo". Acá nunca se notó en vivo
+ * porque nada en el frontend consume {@code /biometrico/marcaciones/listar}
+ * directamente — esta clase sólo se usa server-side dentro de
+ * {@code calcularReporte}, que lee los valores vía getters de Java, no JSON
+ * — pero el defecto es idéntico y hubiera reventado el día que alguien
+ * conectara ese endpoint a una pantalla.
  */
 @Getter
 @Setter
@@ -24,10 +36,19 @@ import java.util.Date;
 @AllArgsConstructor
 public class BioCheckInOut implements Serializable {
 
+    @JsonProperty("USERID")
     private int USERID;
+
+    @JsonProperty("CHECKTIME")
     private Date CHECKTIME;
+
+    @JsonProperty("CHECKTYPE")
     private String CHECKTYPE;
+
+    @JsonProperty("VERIFYCODE")
     private Integer VERIFYCODE;
+
+    @JsonProperty("SENSORID")
     private String SENSORID;
 
     @JsonProperty("Memoinfo")

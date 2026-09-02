@@ -692,19 +692,34 @@ public class BiometricoController {
             throw new SpBusinessException("Indique empleado, año y mes válidos.");
         }
 
+        // Instrumentación de tiempos (2026-09-01, pedido del usuario — "note
+        // mucha latencia en esa pantalla"): sin perfilar antes, no hay forma
+        // de saber si el cuello de botella es una de las ~7-8 idas y vueltas
+        // a la BD que hace este método (cada una un round-trip real si la
+        // app corre contra una BD remota) o específicamente diasNoHabiles/
+        // kardex (las dos únicas llamadas acá que no son de este módulo —
+        // van a IPermiso, sobre trh_*/trs_*, con una SP/función que esta
+        // sesión nunca leyó). Un log por corrida da el desglose real la
+        // próxima vez que se note lento, en vez de seguir adivinando.
+        long t0 = System.currentTimeMillis();
+
         List<BioEmplBosqEmpl> cruce = emplBosqEmplDao.listar(mapa("idEmpleado", req.getCodEmpleado()));
         if (cruce.isEmpty()) {
             throw new SpBusinessException("El empleado no está enlazado a un usuario del biométrico.");
         }
-        int userIdBiometrico = (int) cruce.get(0).getIdEmpleadBio();
+        long tCruce = System.currentTimeMillis();
 
         LocalDate desdeLd = LocalDate.of(req.getAnio(), req.getMes(), 1);
         LocalDate hastaLd = desdeLd.withDayOfMonth(desdeLd.lengthOfMonth());
         Date desde = toDate(desdeLd);
         Date hasta = toDate(hastaLd);
 
+        int userIdBiometrico = elegirUserIdBiometrico(cruce, desdeLd, hastaLd);
+        long tElegirUserId = System.currentTimeMillis();
+
         // ── horario: todas las asignaciones del empleado, elegimos la vigente día a día ──
         List<BioHrEmpleado> asignaciones = hrEmpleadoDao.listar(mapa("idEmplead", req.getCodEmpleado()));
+        long tAsignaciones = System.currentTimeMillis();
 
         Map<Long, List<BioHrSemanalDetalle>> detallePorSemanal = new HashMap<>();
         Map<Long, BioHrs> hrsPorId = new HashMap<>();
@@ -720,6 +735,7 @@ public class BiometricoController {
         filtroMarcas.put("fechaIni", java.sql.Timestamp.valueOf(desdeLd.atStartOfDay()));
         filtroMarcas.put("fechaFin", java.sql.Timestamp.valueOf(hastaLd.plusDays(1).atStartOfDay()));
         List<BioCheckInOut> marcas = checkInOutDao.listar(filtroMarcas);
+        long tMarcas = System.currentTimeMillis();
         // Se agrupa el objeto completo (no sólo CHECKTIME) — hace falta
         // CHECKTYPE más abajo para distinguir entrada de salida en vez de
         // adivinarlo por orden cronológico.
@@ -743,6 +759,7 @@ public class BiometricoController {
         // 02_optimizar_p_list_BioCHECKINOUT.sql le hizo a la otra.
         List<BioCheckInOutAdicional> marcasAdicionales =
                 checkInOutAdicionalDao.listar(mapa("USERID", userIdBiometrico));
+        long tAdicionales = System.currentTimeMillis();
         Map<LocalDate, List<Date>> marcasManualesPorDia = marcasAdicionales.stream()
                 .filter(m -> m.getCHECKTIME() != null)
                 .collect(Collectors.groupingBy(m -> toLocalDate(m.getCHECKTIME()),
@@ -751,9 +768,11 @@ public class BiometricoController {
         // ── feriados y sábados que no le tocan — ya resueltos por IPermiso ──
         Map<LocalDate, DiaNoHabilDto> noHabilesPorDia = permisoDao.diasNoHabiles(req.getCodEmpleado(), desde, hasta)
                 .stream().collect(Collectors.toMap(d -> toLocalDate(d.getFecha()), d -> d, (a, b) -> a));
+        long tNoHabiles = System.currentTimeMillis();
 
         // ── permisos/vacaciones del empleado, filtramos overlap con el mes en Java ──
         List<PermisoKardexDto> permisos = permisoDao.kardex(req.getCodEmpleado(), null, null, null, null, null);
+        long tKardex = System.currentTimeMillis();
 
         List<AsistenciaDiaDto> resultado = new ArrayList<>();
         for (LocalDate dia = desdeLd; !dia.isAfter(hastaLd); dia = dia.plusDays(1)) {
@@ -888,6 +907,15 @@ public class BiometricoController {
 
             resultado.add(fila);
         }
+        long tFin = System.currentTimeMillis();
+
+        log.info(
+                "calcularReporte empleado={} {}/{}: cruce={}ms elegirUserId={}ms asignaciones={}ms "
+                        + "marcas={}ms adicionales={}ms diasNoHabiles={}ms kardex={}ms loop={}ms TOTAL={}ms",
+                req.getCodEmpleado(), req.getMes(), req.getAnio(),
+                tCruce - t0, tElegirUserId - tCruce, tAsignaciones - tElegirUserId,
+                tMarcas - tAsignaciones, tAdicionales - tMarcas, tNoHabiles - tAdicionales,
+                tKardex - tNoHabiles, tFin - tKardex, tFin - t0);
 
         return resultado;
     }
@@ -951,6 +979,54 @@ public class BiometricoController {
             porEmpleado.putIfAbsent(e.getIdEmpleado(), e);
         }
         return new ArrayList<>(porEmpleado.values());
+    }
+
+    /**
+     * Cuál {@code idEmpleadBio} usar para leer marcaciones, cuando el
+     * empleado tiene MÁS de un enlace en {@code tbio_bioEmplBosqEmpl} (el
+     * mismo caso de {@link #distintosPorEmpleado}, pero acá SÍ importa cuál
+     * se elija).
+     *
+     * <p>Caso real, confirmado 2026-09-01: un empleado con dos enlaces (re-
+     * enrolamiento en el reloj que dejó el vínculo viejo sin desenlazar)
+     * mostraba TODOS los días del mes como Falta — {@code cruce.get(0)}
+     * (el primero que devuelva la consulta, sin ningún criterio) resolvía
+     * al {@code idEmpleadBio} VIEJO, que ya no recibe marcaciones del
+     * reloj; las marcaciones reales de ese mes estaban todas bajo el OTRO
+     * enlace, que el reporte nunca miraba. Con un solo enlace no hay nada
+     * que decidir — se usa ese, siempre (ni una consulta extra).
+     *
+     * <p>Con más de uno, se prefiere el que tenga marcaciones ESE mes — no
+     * "el más recientemente usado en general", el que de verdad tiene datos
+     * para el período que se está por calcular. Si ninguno tiene (o hay
+     * empate), cae a {@code cruce.get(0)} — determinístico, no cambia de
+     * mes a mes por casualidad.
+     *
+     * <p>No es un fix de los datos — el enlace duplicado sigue en
+     * {@code tbio_bioEmplBosqEmpl} hasta que alguien lo desenlace desde la
+     * pestaña Empleados. Esto sólo hace que el reporte no se equivoque de
+     * dispositivo mientras tanto.
+     */
+    private int elegirUserIdBiometrico(List<BioEmplBosqEmpl> cruce, LocalDate desdeLd, LocalDate hastaLd) {
+        if (cruce.size() == 1) {
+            return (int) cruce.get(0).getIdEmpleadBio();
+        }
+        BioEmplBosqEmpl mejor = cruce.get(0);
+        long masMarcas = -1;
+        for (BioEmplBosqEmpl candidato : cruce) {
+            Map<String, Object> filtro = new HashMap<>();
+            filtro.put("USERID", (int) candidato.getIdEmpleadBio());
+            filtro.put("fechaIni", java.sql.Timestamp.valueOf(desdeLd.atStartOfDay()));
+            filtro.put("fechaFin", java.sql.Timestamp.valueOf(hastaLd.plusDays(1).atStartOfDay()));
+            long cantidad = checkInOutDao.listar(filtro).stream()
+                    .filter(m -> m.getCHECKTIME() != null)
+                    .count();
+            if (cantidad > masMarcas) {
+                masMarcas = cantidad;
+                mejor = candidato;
+            }
+        }
+        return (int) mejor.getIdEmpleadBio();
     }
 
     /** Tolerancia por pierna (entrada tarde / salida temprano) — ver el javadoc de {@code AsistenciaDiaDto.minutosAtraso}. */
