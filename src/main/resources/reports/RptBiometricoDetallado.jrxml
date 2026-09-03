@@ -305,7 +305,7 @@
 				<textFieldExpression><![CDATA["TRABAJADO".equals($F{estado}) ? "Trabajó" :
 "FALTA".equals($F{estado}) ? "Falta" :
 "FERIADO".equals($F{estado}) ? "Feriado" :
-"SABADO_LIBRE".equals($F{estado}) ? "No le tocaba" :
+"SABADO_LIBRE".equals($F{estado}) ? "Descanso" :
 "PERMISO".equals($F{estado}) ? "Permiso" :
 "VACACION".equals($F{estado}) ? "Vacación" :
 "SIN_HORARIO".equals($F{estado}) ? "Sin horario" :

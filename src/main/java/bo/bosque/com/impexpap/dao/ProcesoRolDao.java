@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -91,6 +92,39 @@ public class ProcesoRolDao implements IProcesoRol {
         });
     }
 
+    /**
+     * Resuelve el idRol de un alcance puntual (anio + empresa + sucursal) via
+     * {@code p_list_trs_Rol @ACCION='A'}, en vez de leer dbo.trs_Rol con un
+     * SELECT suelto.
+     *
+     * <p>Igual que en {@link #ejecutarProceso}, los parametros se atan a mano
+     * con {@code setObject}: {@code codEmpresa}/{@code codSucursal} pueden
+     * venir en null, y dejar que {@code jdbcTemplate.queryForObject(sql,
+     * Class, Object...)} les adivine el tipo dispara el mismo
+     * {@code NoClassDefFoundError} de ANTLR documentado arriba.
+     */
+    private Long obtenerIdRol(int anio, Long codEmpresa, Long codSucursal) {
+        return jdbcTemplate.execute(
+            "EXEC dbo.p_list_trs_Rol @ACCION='A', @anio=?, @codEmpresa=?, @codSucursal=?",
+            (PreparedStatementCallback<Long>) ps -> {
+                ps.setObject(1, anio);
+                ps.setObject(2, codEmpresa);
+                ps.setObject(3, codSucursal);
+
+                Long idRol = null;
+                if (ps.execute()) {
+                    try (ResultSet rs = ps.getResultSet()) {
+                        if (rs.next()) {
+                            long valor = rs.getLong("idRol");
+                            idRol = rs.wasNull() ? null : valor;
+                        }
+                    }
+                }
+                drenar(ps);
+                return idRol;
+            });
+    }
+
     /** Consume todo lo que haya dejado el SP: resultsets y contadores. */
     private void drenar(PreparedStatement ps) throws SQLException {
         // El corte del contrato JDBC: no hay mas resultados cuando getMoreResults()
@@ -126,30 +160,14 @@ public class ProcesoRolDao implements IProcesoRol {
                 dto.getAplicaAsuetoCumple(), dto.getAudUsuario(), modo,
                 dto.getTodosPrimerSabadoTrimestre());
 
-            /* El SP no devuelve el id. Se lo busca por el MISMO criterio de
-               alcance que usa el SP para decidir si el rol ya existe: anio +
-               version 1 + empresa + sucursal.
-
-               El -1 se resuelve ACA y no se manda NULL a proposito. Cuando un
-               parametro va en null, Spring no sabe de que tipo es y le pregunta
-               los metadatos al driver; el de SQL Server implementa eso PARSEANDO
-               el SQL con ANTLR, y antlr4-runtime es una dependencia opcional que
-               este proyecto no trae. Resultado: NoClassDefFoundError despues de
-               que el SP ya hizo todo su trabajo.
-
-               Mandar -1 es ademas exactamente el mismo criterio que usa el SP
-               adentro, asi que no cambia la semantica.                         */
-            final long empresa =
-                dto.getCodEmpresa() == null ? -1L : dto.getCodEmpresa();
-            final long sucursal =
-                dto.getCodSucursal() == null ? -1L : dto.getCodSucursal();
-
-            Long idRol = jdbcTemplate.queryForObject(
-                "SELECT idRol FROM dbo.trs_Rol"
-              + " WHERE anio = ? AND version = 1"
-              + "   AND ISNULL(codEmpresa,-1)  = ?"
-              + "   AND ISNULL(codSucursal,-1) = ?",
-                Long.class, dto.getAnio(), empresa, sucursal);
+            /* El SP no devuelve el id: se lo busca aparte, por el MISMO
+               criterio de alcance que usa el SP para decidir si el rol ya
+               existe (anio + version 1 + empresa + sucursal). Va por SP y no
+               por un SELECT suelto contra dbo.trs_Rol: este modulo no admite
+               SQL crudo contra tablas desde el DAO. p_list_trs_Rol
+               @ACCION='A' expone ese mismo criterio -- a diferencia de
+               @ACCION='L', que trata NULL/0 como "todas".                   */
+            Long idRol = obtenerIdRol(dto.getAnio(), dto.getCodEmpresa(), dto.getCodSucursal());
 
             return idRol == null ? 0L : idRol;
 

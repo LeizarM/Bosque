@@ -221,6 +221,52 @@ public class SpHelper {
     }
 
     /**
+     * Igual que {@link #ejecutarListado(String, Object, String, Class)}, pero
+     * además de null/Collection/Map también quita los {@code Number} en 0.
+     *
+     * <p><b>Cuándo usar esta y no la otra:</b> los SPs {@code p_list_tac_*} (módulo
+     * Tareas Rutinarias) tratan {@code @param IS NULL} como el ÚNICO "sin filtro" —
+     * un 0 es un filtro real, no un comodín (a diferencia de otros SPs de esta
+     * casa donde 0 sí significa "todos"). El campo PK de estos modelos queda
+     * primitivo por convención (no {@code Long}), así que Jackson siempre lo manda
+     * en 0 cuando el cliente no filtra por id — y como {@link #ejecutarListado(String,
+     * Object, String, Class)} conserva los 0 a propósito (ver su propio javadoc),
+     * cualquier "listame todo" terminaba filtrando {@code id=0} y devolviendo cero
+     * filas. Encontrado en code-review (2026-09-02): reproducible en vivo — el
+     * front nunca manda cuerpo vacío de verdad, {@code BaseApiRepository.
+     * postAndReturnList} por defecto manda {@code {}}, que Jackson bindea a un
+     * modelo con todos los primitivos en 0, no a {@code null}.
+     *
+     * <p>Ningún id de este módulo es legítimamente 0 (todas son IDENTITY desde 1),
+     * así que quitar los Number==0 acá es seguro para los 19 listar() de tac_*.
+     * No usar para SPs de otros módulos sin confirmar que ninguno trata 0 como
+     * filtro real.
+     *
+     * <p><b>Trade-off aceptado a propósito:</b> un futuro "filtrar por estado=0
+     * (inactivos)" en alguno de estos catálogos dejaría de funcionar con este
+     * método — hoy ningún proveedor Flutter de este módulo manda ese filtro
+     * (todos piden la lista completa sin cuerpo), así que no es un caso real
+     * todavía. Si llega a serlo, ese caso puntual debe armar su Map a mano
+     * (como ya hace {@code obtenerPorId} en cada DAO) en vez de usar este
+     * método genérico.
+     */
+    public <T> List<T> ejecutarListadoSinCero(String spName, Object model, String accion, Class<T> clazz) {
+        Map<String, Object> params = model != null
+                ? objectMapper.convertValue(model, new TypeReference<Map<String, Object>>() {})
+                : new HashMap<>();
+
+        params.entrySet().removeIf(entry -> {
+            Object val = entry.getValue();
+            return val == null
+                    || val instanceof Collection
+                    || val instanceof Map
+                    || (val instanceof Number && ((Number) val).doubleValue() == 0);
+        });
+
+        return ejecutarListado(spName, params, accion, clazz);
+    }
+
+    /**
      * Ejecuta un SP de listado recibiendo un Map con EXACTAMENTE los parámetros
      * que se quieren enviar al SP.  No se aplica ninguna limpieza.
      *
@@ -306,6 +352,82 @@ public class SpHelper {
         } catch (DataAccessException ex) {
             logger.error("Error de DB al ejecutar SP dinámico {}", spName, ex);
             throw new RuntimeException("Error al consultar los datos dinámicos en la base de datos.", ex);
+        }
+    }
+
+    /**
+     * Ejecuta un SP que SIEMPRE produce exactamente 2 resultsets: (1) las filas
+     * del listado (mapeadas a T vía BeanPropertyRowMapper) y (2) una única fila
+     * de estado con columnas autorizado (bit), error (int), errormsg (varchar).
+     * Ver ListadoConEstado y p_list_tac_dependientesJefe — se creó porque ni
+     * ejecutarListado (solo lee filas, sin outputs) ni ejecutarAbmMap (solo lee
+     * un SELECT final fijo de 3 columnas y descarta cualquier otro resultset)
+     * sirven para esta forma mixta, y mezclar un resultset real con parámetros
+     * OUTPUT verdaderos no es confiable con jTDS.
+     */
+    public <T> ListadoConEstado<T> ejecutarListadoConEstado(String spName, Map<String, Object> params, Class<T> clazz) {
+        final StringBuilder sql = new StringBuilder("EXEC ").append(spName);
+        final List<Object> values = new ArrayList<>(params.size());
+        boolean first = true;
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            sql.append(first ? " " : ", ").append("@").append(entry.getKey()).append("=?");
+            values.add(entry.getValue());
+            first = false;
+        }
+
+        logger.debug("ejecutarListadoConEstado → SP={}, params={}", spName, params.keySet());
+
+        try {
+            return jdbcTemplate.execute(
+                    (java.sql.Connection con) -> con.prepareStatement(sql.toString()),
+                    (PreparedStatement ps) -> {
+                        for (int i = 0; i < values.size(); i++) {
+                            ps.setObject(i + 1, aFechaSql(values.get(i)));
+                        }
+
+                        boolean hasResult = ps.execute();
+
+                        // Resultset 1: filas del listado
+                        List<T> filas = new ArrayList<>();
+                        if (hasResult) {
+                            BeanPropertyRowMapper<T> mapper = BeanPropertyRowMapper.newInstance(clazz);
+                            try (ResultSet rs = ps.getResultSet()) {
+                                int rowNum = 0;
+                                while (rs.next()) {
+                                    filas.add(mapper.mapRow(rs, rowNum++));
+                                }
+                            }
+                        }
+
+                        // Avanzar hasta el resultset 2 (estado)
+                        hasResult = ps.getMoreResults();
+                        while (!hasResult) {
+                            if (ps.getUpdateCount() == -1) break;
+                            hasResult = ps.getMoreResults();
+                        }
+
+                        boolean autorizado = false;
+                        int error = 0;
+                        String errormsg = "";
+
+                        if (hasResult) {
+                            try (ResultSet rs = ps.getResultSet()) {
+                                if (rs.next()) {
+                                    autorizado = rs.getBoolean("autorizado");
+                                    error = rs.getInt("error");
+                                    errormsg = rs.getString("errormsg");
+                                }
+                            }
+                        } else {
+                            logger.warn("El SP {} no retornó el resultset de estado esperado.", spName);
+                        }
+
+                        return new ListadoConEstado<>(filas, autorizado, error, errormsg);
+                    }
+            );
+        } catch (DataAccessException ex) {
+            logger.error("Error de DB al ejecutar SP de listado con estado {}", spName, ex);
+            throw new RuntimeException("Error al consultar los datos en la base de datos.", ex);
         }
     }
 }
