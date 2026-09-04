@@ -110,6 +110,10 @@
 	<field name="bd" class="java.lang.Integer"/>
 	<field name="fechaDoc" class="java.sql.Date"/>
 	<field name="idVendedor" class="java.lang.Long"/>
+	<!-- Nombre en vivo contra tcom_vendedorSAP -no se congela en tcom_pagadoItem-.
+	     NULL cuando el vendedor ya no esta en tcom_vendedorSAP: ahi se cae a
+	     "vendedor " + idVendedor, como antes. -->
+	<field name="nombreVendedor" class="java.lang.String"/>
 	<field name="itemCode" class="java.lang.String"/>
 	<field name="itemName" class="java.lang.String"/>
 	<field name="itmsGrpCod" class="java.lang.Integer"/>
@@ -186,7 +190,8 @@
 					<reportElement style="itmNota" mode="Transparent" x="6" y="1" width="300" height="12" uuid="0d000111-0000-4000-8002-000000000111"/>
 					<textElement verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
 					<textFieldExpression><![CDATA["Nota " + $F{docNum} + "   ·   " + $F{origen}
-						+ "   ·   vendedor " + $F{idVendedor}]]></textFieldExpression>
+						+ "   ·   " + ($F{nombreVendedor} != null && $F{nombreVendedor}.length() > 0
+							? $F{nombreVendedor} : ("vendedor " + $F{idVendedor}))]]></textFieldExpression>
 				</textField>
 				<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 					<reportElement style="itmNota" mode="Transparent" x="306" y="1" width="120" height="12" uuid="0d000112-0000-4000-8002-000000000112"/>
