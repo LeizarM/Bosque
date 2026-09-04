@@ -1,10 +1,12 @@
 package bo.bosque.com.impexpap.controller;
 
 import bo.bosque.com.impexpap.commons.AccesoModuloHelper;
+import bo.bosque.com.impexpap.commons.ExcusaHorarioService;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.dto.ConvocarBloqueDto;
+import bo.bosque.com.impexpap.dto.ExcusaHorarioDto;
 import bo.bosque.com.impexpap.dto.GenerarRolDto;
 import bo.bosque.com.impexpap.dto.MiEquipoDto;
 import bo.bosque.com.impexpap.dto.PuenteVacacionDto;
@@ -124,6 +126,16 @@ public class RolSabadosController {
     private final IRrhh rrhhDao;
 
     /**
+     * El cruce con Biométrico (tbio_) — ver {@code /refrescar-excusas-horario}. El cálculo
+     * en sí vive en {@link ExcusaHorarioService} y no acá; este controlador sólo resuelve
+     * la identidad de quien llama y le pasa el resto al servicio. Lo dispara
+     * automáticamente el Flutter apenas alguien entra al módulo
+     * ({@code aplicarExcusasHorarioAlEntrarProvider}) — no hay job de backend ni botón que
+     * alguien tenga que apretar.
+     */
+    private final ExcusaHorarioService excusaHorarioService;
+
+    /**
      * Sólo para el PDF. {@link JasperReportExport} necesita una {@code Connection} viva
      * para pasársela a {@code JasperFillManager}, porque el SQL del reporte vive dentro
      * del {@code .jasper} y no pasa por los DAOs. Es la única razón por la que este
@@ -147,6 +159,7 @@ public class RolSabadosController {
                                 IProcesoRol procesoRolDao,
                                 IPermisoSabado permisoSabadoDao,
                                 IRrhh rrhhDao,
+                                ExcusaHorarioService excusaHorarioService,
                                 JdbcTemplate jdbcTemplate,
                                 AccesoModuloHelper acceso) {
         this.estadoTurnoDao  = estadoTurnoDao;
@@ -161,6 +174,7 @@ public class RolSabadosController {
         this.procesoRolDao   = procesoRolDao;
         this.permisoSabadoDao = permisoSabadoDao;
         this.rrhhDao         = rrhhDao;
+        this.excusaHorarioService = excusaHorarioService;
         this.jdbcTemplate    = jdbcTemplate;
         this.acceso          = acceso;
     }
@@ -252,6 +266,34 @@ public class RolSabadosController {
         return respuestaOk(soloInformar
                 ? "Simulación ejecutada; no se escribió nada."
                 : "Vacaciones y permisos aplicados a la grilla.");
+    }
+
+    /**
+     * Corre {@link ExcusaHorarioService} para todo el rol. El Flutter lo llama SOLO,
+     * apenas alguien entra al módulo (ver {@code aplicarExcusasHorarioAlEntrarProvider}
+     * en {@code rol_sabados_provider.dart}) — no hay botón que RR.HH. tenga que apretar
+     * ni job de backend corriendo de madrugada: fue justamente lo que el usuario pidió
+     * sacar el 04/09/2026 ("que sea en cuanto entre al módulo, ese job no es necesario").
+     * Este endpoint también sirve para forzar una corrida a mano si hiciera falta (Postman,
+     * pruebas), pero nadie del front lo necesita para que la excusa se aplique.
+     *
+     * <p>{@code soloInformar=true} (en {@code observacion} del body) no escribe nada:
+     * devuelve a quién le tocaría excusar, mismo criterio que
+     * {@code /refrescar-feriados}/{@code /refrescar-permisos}. <b>ROLE_ADM o RR.HH.</b>
+     *
+     * @param mb Rol con {@code idRol}; {@code observacion='INFORMAR'} para simular
+     */
+    @PostMapping("/refrescar-excusas-horario")
+    public ResponseEntity<ApiResponse<?>> refrescarExcusasHorario(
+            @RequestBody Rol mb, Authentication auth) {
+        exigirAdminORrhh(auth);
+        boolean soloInformar = "INFORMAR".equalsIgnoreCase(mb.getObservacion());
+        MiEquipoDto yo = miPermiso(auth);
+        List<ExcusaHorarioDto> resultado = excusaHorarioService.calcular(
+                mb.getIdRol(), soloInformar,
+                yo.getCodEmpleado(), esAdmin(auth) ? 1 : 0, yo.getCodUsuario());
+        return procesarLista(resultado,
+                "Nadie cumple hoy la condición para excusarse por horario (o ya está todo aplicado).");
     }
 
     /**
