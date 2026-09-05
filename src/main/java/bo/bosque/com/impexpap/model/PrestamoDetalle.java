@@ -22,10 +22,13 @@ public class PrestamoDetalle {
     private float montoPago;
     private float debe;
     private float haber;
+    private Double haberAnterior;
     private float saldo;
     private Date fechaPago;
 
     private Long audUsuario;
     private Date audFecha;
     private Integer mostrarAnulados;
+    private Long transIdSAP_pago;
+    private String xmlPagos;
 }

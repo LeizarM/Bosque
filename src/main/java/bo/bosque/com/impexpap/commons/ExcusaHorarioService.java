@@ -203,7 +203,17 @@ public class ExcusaHorarioService {
                     LocalDate dia = lunes.plusDays(i);
                     BioHrEmpleado vigente = horarioVigente(asignacionesBio, dia);
                     if (vigente == null) continue;
-                    if (vigente.getIdHrEmpleado() != base.getIdHrEmpleado()) huboRotacion = true;
+                    // Comparar por PLANTILLA (idHrSemanal), no por fila (idHrEmpleado).
+                    // Confirmado en producción con MORALES CHIPANA EDWIN (04/09/2026):
+                    // una alternancia semanal PERMANENTE entre dos horarios reasigna
+                    // "ADM CONT 1" con un idHrEmpleado NUEVO cada vez que vuelve a
+                    // tocarle (fila 3 la primera vez, fila 103 la siguiente...) aunque
+                    // sea la MISMA plantilla que el horario base. Comparando por fila,
+                    // esas semanas "de vuelta a la normalidad" se leían igual que una
+                    // semana rotada de verdad -- sólo no rompía nada porque además
+                    // sumaMin quedaba por debajo de la cuota, pero era casualidad, no
+                    // la regla funcionando.
+                    if (vigente.getIdHrSemanal() != base.getIdHrSemanal()) huboRotacion = true;
                     sumaMin += minutosDelDia(vigente.getIdHrSemanal(), dia.getDayOfWeek().getValue(),
                             detallePorSemanal, hrsPorId);
                 }

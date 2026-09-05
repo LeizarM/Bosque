@@ -28,6 +28,11 @@ public class Prestamo implements Serializable {
     private String nombreEmpleadoAsignado;
     private Double saldoPendiente;
 
+    // Campos originales del préstamo para filas de tipo pago
+    private Double montoOriginalPrestamo;
+    private String fechaDesembolsoOriginal;
+    private String conceptoOriginal;
+
     // Parametros para asignación masiva
     private Long transIdSAP;
     private Double montoPrestamo;
@@ -35,14 +40,18 @@ public class Prestamo implements Serializable {
     private String fecIniPago;
     private Double numCuotas;
     private String xmlEmpleados;
+    private String xmlPagos;
     private String fechaDesembolso;
     private String observacion;
     private Long audUsuarioI;
+    private String tipoCalculo;
+    private String xmlCuotas;
 
     // Campos faltantes para el SP p_abm_Prestamo
     private String tipoPago;
     private String tipoEstado;
     private Double cuotaReferencia;
+    private Double montoCuota;  // Calculado en SQL: para MONTO_FIJO = monto/nCuotas, para CUOTAS = nCuotas
     private Long transTypeSAP;
     private Long lineIdSAP;
     private Long docEntrySAP;
@@ -53,7 +62,7 @@ public class Prestamo implements Serializable {
     // Filtros de busqueda
     @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
     private Date fechaDesde;
-    
+
     @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
     private Date fechaHasta;
 

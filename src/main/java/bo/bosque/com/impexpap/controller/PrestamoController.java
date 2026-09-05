@@ -46,6 +46,34 @@ public class PrestamoController {
                 .body(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
     }
 
+    @PostMapping("/listarVigentes")
+    public ResponseEntity<ApiResponse<?>> listarVigentes(@RequestBody Prestamo p) {
+        List<Prestamo> lista = prestamoDao.obtenerVigentes(p);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/listarVigentesPorEmpleado")
+    public ResponseEntity<ApiResponse<?>> listarVigentesPorEmpleado(@RequestBody Prestamo p) {
+        List<Prestamo> lista = prestamoDao.obtenerVigentesPorEmpleado(p);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/totalPrestamos")
+    public ResponseEntity<ApiResponse<?>> totalPrestamos(@RequestBody Prestamo p) {
+        List<Tipos> lista = prestamoDao.obtenerTotalPrestamos(p);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
+    }
+
+    @PostMapping("/totalPrestamosSAP")
+    public ResponseEntity<ApiResponse<?>> totalPrestamosSAP(@RequestBody Prestamo p) {
+        List<Tipos> lista = prestamoDao.obtenerTotalPrestamosSAP(p);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(SUCCESS_MESSAGE, lista, HttpStatus.OK.value()));
+    }
+
     @PostMapping("/estados")
     public ResponseEntity<ApiResponse<?>> listarEstadosPrestamo(@RequestBody Prestamo p) {
         List<Tipos> rs = prestamoDao.listEstadosPrestamo(p);
@@ -73,6 +101,30 @@ public class PrestamoController {
         // Si no hay error (si hay error, SpHelper lanza SpBusinessException)
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(rs.getErrormsg(), Collections.emptyList(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * Asignación Masiva de Pagos via XML
+     */
+    @PostMapping("/asignar-pagos-masivo")
+    public ResponseEntity<ApiResponse<?>> asignarPagosMasivo(@RequestBody PrestamoDetalle p) {
+        RespuestaSp rs = prestamoDao.registrarPagoMasivo(p, "XP");
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(rs.getErrormsg(), Collections.emptyList(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * Revierte un pago masivo asignado por error.
+     */
+    @PostMapping("/revertirPagoMasivo")
+    public ResponseEntity<ApiResponse<?>> revertirPagoMasivo(@RequestBody PrestamoDetalle p) {
+        RespuestaSp rs = prestamoDao.revertirPagoMasivo(p);
+        if (rs.getError() != 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(rs.getErrormsg(), Collections.emptyList(), HttpStatus.BAD_REQUEST.value()));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new ApiResponse<>(rs.getErrormsg(), Collections.emptyList(), HttpStatus.OK.value()));
     }
 
     /**
@@ -158,6 +210,27 @@ public class PrestamoController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>(rs.getErrormsg(), Collections.emptyList(), HttpStatus.OK.value()));
+    }
+
+    /**
+     * Asigna un pago recibido de SAP a múltiples préstamos
+     * 
+     * @param pagos Lista de pagos a asignar (montoPago, fechaPago, audUsuario, codPrestamo, transIdSAP_pago)
+     * @return
+     */
+    @PostMapping("/asignarPagos")
+    public ResponseEntity<ApiResponse<?>> asignarPagos(@RequestBody List<PrestamoDetalle> pagos) {
+        
+        for (PrestamoDetalle pago : pagos) {
+            RespuestaSp rs = prestamoDao.adelantarCuota(pago, "AD");
+            if (rs.getError() != 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse<>("Error al asignar pago: " + rs.getErrormsg(), Collections.emptyList(), HttpStatus.BAD_REQUEST.value()));
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>("Pagos asignados correctamente", Collections.emptyList(), HttpStatus.OK.value()));
     }
 
     @PostMapping("/anularPrestamo")

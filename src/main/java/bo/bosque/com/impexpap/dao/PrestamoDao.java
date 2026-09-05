@@ -32,8 +32,37 @@ public class PrestamoDao implements IPrestamo {
     }
 
     @Override
+    public List<Prestamo> obtenerVigentes(Prestamo p) {
+        return this.spHelper.ejecutarListado("p_list_Prestamo", p, "L3", Prestamo.class);
+    }
+
+    @Override
+    public List<Prestamo> obtenerVigentesPorEmpleado(Prestamo p) {
+        return this.spHelper.ejecutarListado("p_list_Prestamo", p, "L4", Prestamo.class);
+    }
+
+    @Override
+    public List<Tipos> obtenerTotalPrestamos(Prestamo p) {
+        return this.spHelper.ejecutarListado("p_list_Prestamo", p, "S1", Tipos.class);
+    }
+
+    @Override
+    public List<Tipos> obtenerTotalPrestamosSAP(Prestamo p) {
+        return this.spHelper.ejecutarListado("p_list_Prestamo", p, "S2", Tipos.class);
+    }
+
+    @Override
     public RespuestaSp registrarPrestamo(Prestamo p, String acc) {
         return this.spHelper.ejecutarAbm("p_abm_Prestamo", p, acc);
+    }
+    
+    @Override
+    public RespuestaSp registrarPagoMasivo(PrestamoDetalle p, String acc) {
+        return this.spHelper.ejecutarAbm("p_abm_PrestamoDetalle", p, acc);
+    }
+
+    public RespuestaSp revertirPagoMasivo(PrestamoDetalle p) {
+        return this.spHelper.ejecutarAbm("p_abm_PrestamoDetalle", p, "RX");
     }
 
     @Override

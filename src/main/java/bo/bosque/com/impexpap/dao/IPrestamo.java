@@ -18,9 +18,23 @@ public interface IPrestamo {
     List<Prestamo> obtenerPrestamosSAP(Prestamo p);
 
     /**
+     * Obtiene los préstamos vigentes locales (Pestaña 2)
+     */
+    List<Prestamo> obtenerVigentes(Prestamo p);
+    List<Prestamo> obtenerVigentesPorEmpleado(Prestamo p);
+    List<Tipos> obtenerTotalPrestamos(Prestamo p);
+    List<Tipos> obtenerTotalPrestamosSAP(Prestamo p);
+
+    /**
      * Registra prestamos (ej: asignacion masiva desde SAP)
      */
     RespuestaSp registrarPrestamo(Prestamo p, String acc);
+    
+    /**
+     * Registra pagos masivos desde XML
+     */
+    RespuestaSp registrarPagoMasivo(PrestamoDetalle p, String acc);
+    RespuestaSp revertirPagoMasivo(PrestamoDetalle p);
 
     List<PrestamoDetalle> previsualizarCuotas(Prestamo p);
 
