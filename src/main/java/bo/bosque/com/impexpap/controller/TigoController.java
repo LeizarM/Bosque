@@ -127,8 +127,16 @@ public class TigoController {
                 try (InputStream fis = Files.newInputStream(rutaArchivo);
                      Workbook workbook = WorkbookFactory.create(fis)) {
 
-                    // Busca la hoja por nombre
+                    // Busca la hoja por nombre (insensible a mayúsculas/minúsculas)
                     Sheet sheet = workbook.getSheet("DETALLE DEUDA");
+                    if (sheet == null) {
+                        for (int s = 0; s < workbook.getNumberOfSheets(); s++) {
+                            if (workbook.getSheetName(s).trim().equalsIgnoreCase("DETALLE DEUDA")) {
+                                sheet = workbook.getSheetAt(s);
+                                break;
+                            }
+                        }
+                    }
                     if (sheet == null) {
                         response.put("msg", "No se encontró la hoja 'DETALLE DEUDA'");
                         response.put("ok", "error");
@@ -136,16 +144,6 @@ public class TigoController {
                     }
 
                     // Detecta automáticamente la fila de encabezado
-                    String[] columnas = {
-                            "N° Factura",
-                            "Tipo Servicio",
-                            "N° Contrato",
-                            "N° Cuenta",
-                            "Período Cobrado",
-                            "Descripción del Plan",
-                            "Total cobrado por Cuenta Bs."
-                    };
-
                     Row headerRow = null;
                     int headerRowIndex = -1;
                     for (int fila = 0; fila <= sheet.getLastRowNum(); fila++) {
@@ -153,15 +151,19 @@ public class TigoController {
                         if (row == null) continue;
                         int coincidencias = 0;
                         for (Cell cell : row) {
-                            String valor = getCellValue(cell);
-                            for (String esperado : columnas) {
-                                if (valor.equalsIgnoreCase(esperado)) {
-                                    coincidencias++;
-                                    break;
-                                }
+                            String norm = normalizar(getCellValue(cell));
+                            if (norm.isEmpty()) continue;
+                            if (norm.contains("servicio") ||
+                                norm.contains("contrato") ||
+                                norm.contains("cuenta") ||
+                                norm.contains("periodo") ||
+                                norm.contains("plan") ||
+                                norm.contains("cobrado") ||
+                                norm.contains("factura")) {
+                                coincidencias++;
                             }
                         }
-                        if (coincidencias >= 5) { // umbral ajustable
+                        if (coincidencias >= 4) { // umbral flexible
                             headerRow = row;
                             headerRowIndex = fila;
                             break;
@@ -174,27 +176,67 @@ public class TigoController {
                         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                     }
 
-                    // Mapea los nombres de columna a su índice
-                    Map<String, Integer> colIndex = new HashMap<>();
+                    // Mapea las columnas encontradas según su significado
+                    Integer colFactura = null;
+                    Integer colTipoServicio = null;
+                    Integer colContrato = null;
+                    Integer colCuenta = null;
+                    Integer colPeriodo = null;
+                    Integer colPlan = null;
+                    Integer colTotal = null;
+
                     for (Cell cell : headerRow) {
-                        String colName = getCellValue(cell);
-                        colIndex.put(colName, cell.getColumnIndex());
+                        String norm = normalizar(getCellValue(cell));
+                        int cIdx = cell.getColumnIndex();
+                        // ORDEN IMPORTANTE: de más específico a menos específico
+                        // "Periodo Cobrado" contiene "cobrado" → debe verificarse ANTES que "cobrado" suelto
+                        // "Total cobrado por Cuenta Bs." contiene "cuenta" → "cuenta" debe ir AL FINAL
+                        if (norm.contains("total") && norm.contains("cobrado")) {
+                            // "Total cobrado por Cuenta Bs." — más específico: las dos palabras juntas
+                            colTotal = cIdx;
+                        } else if (norm.contains("factura")) {
+                            colFactura = cIdx;
+                        } else if (norm.contains("contrato")) {
+                            colContrato = cIdx;
+                        } else if (norm.contains("periodo")) {
+                            // "Periodo Cobrado" — ANTES que el check de "cobrado" suelto
+                            colPeriodo = cIdx;
+                        } else if (norm.contains("cobrado")) {
+                            // fallback: si sólo dice "cobrado" sin "total"
+                            colTotal = cIdx;
+                        } else if (norm.contains("plan") || norm.contains("descripcion")) {
+                            colPlan = cIdx;
+                        } else if (norm.contains("servicio")) {
+                            colTipoServicio = cIdx;
+                        } else if (norm.contains("cuenta")) {
+                            // AL FINAL: "Total cobrado por Cuenta Bs." también contiene "cuenta"
+                            // pero ya fue capturada arriba por la condición total+cobrado
+                            colCuenta = cIdx;
+                        }
                     }
-                    // --- NUEVO: PASO 1 - ENCONTRAR EL PERIODO MÁS RECIENTE ---
+
+                    if (colContrato == null || colCuenta == null || colPeriodo == null || colTotal == null) {
+                        response.put("msg", "No se encontraron las columnas requeridas (Contrato, Cuenta, Periodo, Total cobrado) en la hoja 'DETALLE DEUDA'");
+                        response.put("ok", "error");
+                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+                    }
+
+                    // --- PASO 1 - ENCONTRAR EL PERIODO MÁS RECIENTE ---
                     String periodoMasReciente = "";
                     for (int fila = headerRowIndex + 1; fila <= sheet.getLastRowNum(); fila++) {
                         Row row = sheet.getRow(fila);
                         if (row == null) continue;
 
-                        // Filtro inicial: Evitar filas vacías o de totales
-                        String primerValor = getCellValue(row.getCell(colIndex.get("N° Factura")));
-                        if (primerValor == null || primerValor.trim().isEmpty() || primerValor.trim().equalsIgnoreCase("Total")) continue;
+                        String primerValor = colFactura != null ? getCellString(row, colFactura) : "";
+                        String tipoServicio = colTipoServicio != null ? getCellString(row, colTipoServicio) : "";
+                        if (primerValor.equalsIgnoreCase("Total") || tipoServicio.equalsIgnoreCase("Total")) continue;
 
                         // Filtro de Contrato: Solo buscamos el periodo para este contrato
-                        Integer nroContrato = parseIntCell(row, colIndex.get("N° Contrato"));
-                        if (nroContrato == null || nroContrato != 9268908) continue;
+                        Integer nroContrato = parseIntCell(row, colContrato);
+                        if (nroContrato != 9268908) continue;
 
-                        String periodo = getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", "");
+                        String periodo = getCellString(row, colPeriodo).replace(" ", "");
+                        if (periodo.isEmpty()) continue;
 
                         // Comparamos para encontrar el periodo mayor (YYYY-MM)
                         if (periodo.compareTo(periodoMasReciente) > 0) {
@@ -209,26 +251,30 @@ public class TigoController {
                         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                     }
 
-                    // --- INICIO DEL CAMBIO: Agrupación en Java ---
+                    // --- PASO 2: Agrupación en Java ---
                     Map<Integer, FacturaTigo> facturasAgrupadas = new HashMap<>();
 
                     for (int fila = headerRowIndex + 1; fila <= sheet.getLastRowNum(); fila++) {
                         Row row = sheet.getRow(fila);
                         if (row == null) continue;
 
-                        String primerValor = getCellValue(row.getCell(colIndex.get("N° Factura")));
-                        if (primerValor == null || primerValor.trim().isEmpty() || primerValor.trim().equalsIgnoreCase("Total")) continue;
+                        String primerValor = colFactura != null ? getCellString(row, colFactura) : "";
+                        String tipoServicio = colTipoServicio != null ? getCellString(row, colTipoServicio) : "";
+                        if (primerValor.equalsIgnoreCase("Total") || tipoServicio.equalsIgnoreCase("Total")) continue;
 
-                        Integer nroContrato = parseIntCell(row, colIndex.get("N° Contrato"));
-                        if (nroContrato == null || nroContrato != 9268908) continue;
+                        Integer nroContrato = parseIntCell(row, colContrato);
+                        if (nroContrato != 9268908) continue;
+
                         // Extraer periodo de la fila actual
-                        String periodoFila = getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", "");
+                        String periodoFila = getCellString(row, colPeriodo).replace(" ", "");
 
                         // 🔍 FILTRO CLAVE: Si la fila es de un mes antiguo, se ignora
                         if (!periodoFila.equals(periodoMasReciente)) continue;
 
-                        Integer nroCuenta = parseIntCell(row, colIndex.get("N° Cuenta"));
-                        float montoFila = parseFloatCell(row, colIndex.get("Total cobrado por Cuenta Bs."));
+                        Integer nroCuenta = parseIntCell(row, colCuenta);
+                        if (nroCuenta == 0) continue;
+
+                        float montoFila = parseFloatCell(row, colTotal);
 
                         if (facturasAgrupadas.containsKey(nroCuenta)) {
                             // Si la cuenta ya existe en el mapa, sumamos el monto
@@ -238,11 +284,11 @@ public class TigoController {
                             // Si es nueva, creamos el objeto completo
                             FacturaTigo nuevaFactura = new FacturaTigo();
                             nuevaFactura.setNroFactura(primerValor);
-                            nuevaFactura.setTipoServicio(getCellValue(row.getCell(colIndex.get("Tipo Servicio"))));
+                            nuevaFactura.setTipoServicio(colTipoServicio != null ? getCellString(row, colTipoServicio) : "");
                             nuevaFactura.setNroContrato(nroContrato);
                             nuevaFactura.setNroCuenta(nroCuenta);
-                            nuevaFactura.setPeriodoCobrado(getCellValue(row.getCell(colIndex.get("Período Cobrado"))).replace(" ", ""));
-                            nuevaFactura.setDescripcionPlan(getCellValue(row.getCell(colIndex.get("Descripción del Plan"))));
+                            nuevaFactura.setPeriodoCobrado(periodoFila);
+                            nuevaFactura.setDescripcionPlan(colPlan != null ? getCellString(row, colPlan) : "");
                             nuevaFactura.setTotalCobradoXCuenta(montoFila);
                             nuevaFactura.setAudUsuarioI(audUsuario);
                             nuevaFactura.setEstado("No ejecutado");
@@ -279,19 +325,34 @@ public class TigoController {
 
 
 
+    private static String normalizar(String s) {
+        if (s == null) return "";
+        return java.text.Normalizer.normalize(s.trim().toLowerCase(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replaceAll("[^a-z0-9]", "");
+    }
+
+    private Cell getCell(Row row, Integer index) {
+        if (row == null || index == null || index < 0) return null;
+        return row.getCell(index);
+    }
+
+    private String getCellString(Row row, Integer index) {
+        return getCellValue(getCell(row, index));
+    }
+
     private int parseIntCell(Row row, Integer index) {
-        if (index == null) return 0;
-        Cell cell = row.getCell(index);
+        Cell cell = getCell(row, index);
         if (cell == null) return 0;
         switch (cell.getCellType()) {
             case NUMERIC:
-                return (int) cell.getNumericCellValue();
+                return (int) Math.round(cell.getNumericCellValue());
             case STRING:
                 String val2 = cell.getStringCellValue().trim();
                 try { return Integer.parseInt(val2); } catch (Exception e) { return 0; }
             case FORMULA:
                 if (cell.getCachedFormulaResultType() == CellType.NUMERIC) {
-                    return (int) cell.getNumericCellValue();
+                    return (int) Math.round(cell.getNumericCellValue());
                 } else if (cell.getCachedFormulaResultType() == CellType.STRING) {
                     String val3 = cell.getStringCellValue().trim();
                     try { return Integer.parseInt(val3); } catch (Exception e) { return 0; }
@@ -303,7 +364,26 @@ public class TigoController {
     }
 
     private float parseFloatCell(Row row, Integer index) {
-        String val = getCellValue(row.getCell(index)).replace(",", "."); // Por si hay coma decimal
+        Cell cell = getCell(row, index);
+        if (cell == null) return 0f;
+        switch (cell.getCellType()) {
+            case NUMERIC:
+                return (float) cell.getNumericCellValue();
+            case FORMULA:
+                if (cell.getCachedFormulaResultType() == CellType.NUMERIC) {
+                    return (float) cell.getNumericCellValue();
+                }
+                break;
+            default:
+                break;
+        }
+        String val = getCellValue(cell).trim();
+        if (val.isEmpty()) return 0f;
+        if (val.contains(".") && val.contains(",")) {
+            val = val.replace(".", "").replace(",", ".");
+        } else if (val.contains(",")) {
+            val = val.replace(",", ".");
+        }
         try { return Float.parseFloat(val); } catch (Exception e) { return 0f; }
     }
 
