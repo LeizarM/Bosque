@@ -94,7 +94,7 @@ public class ContactoClienteSapResolver implements ContactoClienteResolver {
     /**
      * Valida la configuración y precompila una consulta por empresa.
      *
-     * <p>Se hace acá y no en cada llamada para que un error de configuración se vea al
+     * <p>Se hace aquí y no en cada llamada para que un error de configuración se vea al
      * arrancar —en el log, una sola vez— y no como avisos que fallan de a uno en silencio.
      * Una entrada mal formada se descarta con WARN en vez de tumbar el arranque: perder el
      * aviso de una empresa es molesto, no levantar el backend es un incidente.
@@ -159,7 +159,7 @@ public class ContactoClienteSapResolver implements ContactoClienteResolver {
      * avisar es una molestia, avisarle al que no es expone datos de un cliente a otro.
      *
      * <p>Nunca lanza: ante cualquier problema devuelve {@code null} y el aviso simplemente
-     * no se manda. La entrega ya está registrada mucho antes de llegar acá.
+     * no se manda. La entrega ya está registrada mucho antes de llegar aquí.
      */
     @Override
     public String resolverChatId(String cardCode, String db) {
@@ -229,7 +229,7 @@ public class ContactoClienteSapResolver implements ContactoClienteResolver {
         // que es justo lo que el timeout viene a evitar. Se fuerza un piso.
         acotado.setQueryTimeout(timeoutSegundos > 0 ? timeoutSegundos : TIMEOUT_POR_DEFECTO);
         // queryForList NO lanza EmptyResultDataAccessException: devuelve lista vacía. (Esa la
-        // tira queryForObject/queryForMap.) Por eso acá no hay catch de ese tipo.
+        // tira queryForObject/queryForMap.) Por eso aquí no hay catch de ese tipo.
         return acotado.queryForList(consulta, new Object[] { cardCode });
     }
 

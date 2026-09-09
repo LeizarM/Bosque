@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Payload de {@code trs_sp_generarRol}, el SP que arma el rol entero: la cabecera,
  * los ~52 sábados y todos los participantes con su grupo A/B.
  *
- * <p>No es un {@code Rol}: acá no hay {@code idRol} ni {@code estado}, porque el rol
+ * <p>No es un {@code Rol}: aquí no hay {@code idRol} ni {@code estado}, porque el rol
  * todavía no existe. Lo que viaja son los parámetros de la generación.
  *
  * <p><b>{@code modo} es el campo que importa:</b>

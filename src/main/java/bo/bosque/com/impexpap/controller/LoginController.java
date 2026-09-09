@@ -154,6 +154,19 @@ public class LoginController {
                         login.getLogin(),
                         loginTemp.getVersionApp(),
                         loginTemp.getCodSucursal(),
+                        // Antes el login no mandaba el nombre de la sucursal (solo el
+                        // código) — el panel de contexto de Arqueo/Coches/Caja Fuerte
+                        // (Encargado/Cargo/Sucursal/Fecha) quedaba con "Sucursal" en
+                        // blanco.
+                        //
+                        // OJO: no sirve bajar por getEmpleado()...getSucursal(): en
+                        // Login todos los objetos anidados nacen con `= new X()`, así
+                        // que esa rama es no-nula pero VACÍA y devuelve "" sin fallar.
+                        // LoginDaoImpl.verifyUser mapea la columna 5 del SP a
+                        // login.nombreSucursal (plano), no al grafo de objetos — solo
+                        // el cargo (columna 8) va al grafo. Se lee de donde el DAO
+                        // realmente escribe.
+                        loginTemp.getNombreSucursal(),
                         userDetails.getAuthorities()
                 );
 

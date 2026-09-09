@@ -7,7 +7,7 @@ import bo.bosque.com.impexpap.dto.GenerarRolDto;
  * Los SPs de PROCESO del módulo — los que mueven muchas filas de una vez y no
  * responden a una tabla sola, así que no tienen ABM propio.
  *
- * <p>Cuatro de los siete no se alcanzan por ningún ABM y por eso están acá.
+ * <p>Cuatro de los siete no se alcanzan por ningún ABM y por eso están aquí.
  * Los otros tres ya tienen puerta de entrada:
  * <ul>
  *   <li>{@code trs_sp_marcarSabadoEspecial} → {@code p_abm_trs_Sabado @ACCION='U'}</li>

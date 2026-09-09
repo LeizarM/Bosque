@@ -33,7 +33,7 @@ import java.util.Locale;
 /**
  * Entrada de los eventos de openWA (webhook público) y reportes de las calificaciones de entrega.
  *
- * <p>Tres endpoints que no se parecen en nada entre sí, y conviven acá porque son las tres puntas
+ * <p>Tres endpoints que no se parecen en nada entre sí, y conviven aquí porque son las tres puntas
  * del mismo feature:</p>
  * <ul>
  *   <li>{@code POST /whatsapp/webhook} — <b>público</b>, sin JWT, autenticado por firma HMAC.
@@ -45,7 +45,7 @@ import java.util.Locale;
  *
  * <h2>1. Cómo se registra el webhook contra openWA</h2>
  * Hay que hacerlo UNA vez por sesión de openWA (y de nuevo si la sesión se recrea). No hay UI:
- * es un POST al propio openWA. El {@code secret} que se manda acá tiene que ser EXACTAMENTE el
+ * es un POST al propio openWA. El {@code secret} que se manda aquí tiene que ser EXACTAMENTE el
  * mismo valor de {@code openwa.webhook.secret} / variable de entorno
  * {@code OPENWA_WEBHOOK_SECRET} del backend, porque es con ese string que se firma y se verifica
  * cada request.
@@ -144,9 +144,9 @@ import java.util.Locale;
  * <ol>
  *   <li><b>Content-Type</b>. Si openWA mandara {@code application/x-www-form-urlencoded},
  *       Tomcat parsea y CONSUME el body al primer {@code getParameterMap()} — que lo hace el WAF,
- *       antes del controlador — y acá llega vacío. La firma nunca podría coincidir. Tiene que ser
+ *       antes del controlador — y aquí llega vacío. La firma nunca podría coincidir. Tiene que ser
  *       {@code application/json}.</li>
- *   <li><b>Sobre qué se firma</b>. Acá se prueba el body crudo y, si viene un header de
+ *   <li><b>Sobre qué se firma</b>. Aquí se prueba el body crudo y, si viene un header de
  *       timestamp, también {@code timestamp + "." + body} y {@code timestamp + body}, que son las
  *       variantes habituales. Si openWA usara otro esquema, hay que agregarlo en
  *       {@link #firmaValida(byte[], String, String)}.</li>
@@ -162,7 +162,7 @@ public class WhatsAppWebhookController {
     private static final Logger LOG = LoggerFactory.getLogger(WhatsAppWebhookController.class);
 
     /**
-     * Parser propio, y no el {@code ObjectMapper} de Spring, porque acá se lee JSON de origen
+     * Parser propio, y no el {@code ObjectMapper} de Spring, porque aquí se lee JSON de origen
      * desconocido a un árbol genérico: no hace falta —ni conviene— arrastrar la configuración de
      * fechas de {@code config.JacksonConfig}. {@code ObjectMapper} es thread-safe para lectura.
      */
@@ -302,7 +302,7 @@ public class WhatsAppWebhookController {
             return;
         }
         LOG.warn("Webhook de WhatsApp ACTIVO en POST /whatsapp/webhook, con verificación HMAC-SHA256. "
-               + "Recordá que la ruta tiene que estar en permitAll de MainSecurity. Bot: {}.", chatIdBot);
+               + "Recuerda que la ruta tiene que estar en permitAll de MainSecurity. Bot: {}.", chatIdBot);
     }
 
     // =====================================================================
@@ -371,7 +371,7 @@ public class WhatsAppWebhookController {
             return respuesta(HttpStatus.UNAUTHORIZED, "Firma inválida", null);
         }
 
-        // 4. A partir de acá SIEMPRE se responde 200: el request es auténtico, y devolver un
+        // 4. A partir de aquí SIEMPRE se responde 200: el request es auténtico, y devolver un
         //    error solo lograría que openWA lo reintente hasta retryCount veces.
         try {
             return procesarEventoFirmado(cuerpoCrudo, ip);
@@ -435,7 +435,7 @@ public class WhatsAppWebhookController {
         }
         if (chat.toLowerCase(Locale.ROOT).endsWith("@g.us")) {
             // Una encuesta es siempre un chat individual. CalificacionService lo volvería a
-            // rechazar, pero cortarlo acá evita una consulta y deja el motivo en el log.
+            // rechazar, pero cortarlo aquí evita una consulta y deja el motivo en el log.
             LOG.debug("Mensaje de grupo ({}) en el webhook: se ignora.", chat);
             return respuesta(HttpStatus.OK, "Mensaje de grupo", "ignorado");
         }
@@ -449,7 +449,7 @@ public class WhatsAppWebhookController {
     }
 
     // Los endpoints de reporte (/entregas/calificaciones y /calificaciones-resumen) NO viven
-    // acá: están en EntregaChoferController, que ya tiene @RequestMapping("/entregas") de clase
+    // aquí: están en EntregaChoferController, que ya tiene @RequestMapping("/entregas") de clase
     // y el resto del módulo. Tenerlos duplicados en los dos controllers hacía que Spring fallara
     // al arrancar con "Ambiguous mapping" — un choque que el compilador no ve, porque las dos
     // clases compilan perfecto y el conflicto recién aparece al registrar los handlers.

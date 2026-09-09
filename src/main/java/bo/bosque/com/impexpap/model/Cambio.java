@@ -10,7 +10,7 @@ import java.util.Date;
  * <p>SPs: {@code p_abm_trs_Cambio} (I/U/D/<b>A</b>) · {@code p_list_trs_Cambio} (L).
  *
  * <p>El estado 'C' del catálogo tiene {@code requiereCambio=1}, o sea que una celda en
- * 'C' SIN su fila acá es una incoherencia.
+ * 'C' SIN su fila aquí es una incoherencia.
  *
  * <p><b>{@code ACCION='A'} (aprobar) es lo que de verdad mueve la grilla:</b> son TRES
  * escrituras de celda que van juntas en una transacción — el titular pasa a 'C', el

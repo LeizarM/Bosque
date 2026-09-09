@@ -20,7 +20,7 @@ import java.math.RoundingMode;
  *
  * <p><b>Consecuencia a mirar en la revisión con RR.HH.:</b> la misma magnitud se va a leer
  * distinta en dos pantallas del mismo sistema, y eso se parece a un bug aunque no lo sea. Si
- * RR.HH. prefiere una sola forma, se cambia SÓLO acá (15 líneas: pasar a octavos de día) y
+ * RR.HH. prefiere una sola forma, se cambia SÓLO aquí (15 líneas: pasar a octavos de día) y
  * los tres DTO se enteran solos. No se toca el SP.
  */
 public final class Fmt {

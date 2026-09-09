@@ -1608,7 +1608,7 @@ public class RrhhController {
      * {@code @Secured}: caía en {@code anyRequest().authenticated()} y cualquiera de los 134
      * usuarios se bajaba el detalle de permisos y vacaciones de <b>toda la empresa</b>.
      *
-     * <p>Acá no hay carve-out posible por "es mi dato": el reporte es de todos, así que el único
+     * <p>Aquí no hay carve-out posible por "es mi dato": el reporte es de todos, así que el único
      * criterio es el ACL. Con {@code nivelAcceso=1}, {@code btnReportesPYV} lo tienen <b>4
      * usuarios</b> más los 6 {@code ROLE_ADM} <i>(verificado en la base)</i>.
      * <b>Es un cambio de comportamiento visible</b> —hoy pasan 134, después pasan 10— y ese es

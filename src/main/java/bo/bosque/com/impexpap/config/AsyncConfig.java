@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  *
  * <p><b>Por qué un pool propio y no el default.</b> El executor por defecto de Spring
  * ({@code SimpleAsyncTaskExecutor}) crea un hilo NUEVO por cada tarea, sin límite: con
- * openWA caído y muchas entregas seguidas, eso es una fábrica de hilos colgados. Acá el
+ * openWA caído y muchas entregas seguidas, eso es una fábrica de hilos colgados. Aquí el
  * pool está acotado a mano (2 hilos base, 4 en pico, cola de 500) y, cuando se llena,
  * DESCARTA el aviso.
  *
@@ -84,7 +84,7 @@ public class AsyncConfig implements AsyncConfigurer {
 
     /**
      * Red de contención final: si algún {@code @Async} que devuelve {@code void} llegara a
-     * dejar escapar una excepción, se loguea acá en vez de morir en un stacktrace suelto
+     * dejar escapar una excepción, se loguea aquí en vez de morir en un stacktrace suelto
      * del pool.
      *
      * <p>{@code NotificacionEntregaService} ya atrapa {@code Throwable} adentro de cada
@@ -107,7 +107,7 @@ public class AsyncConfig implements AsyncConfigurer {
      * default de {@link AsyncConfigurer}) no manda los {@code @Async} anónimos al executor
      * de Spring: manda a {@code AsyncExecutionAspectSupport.getDefaultExecutor()} a hacer
      * {@code beanFactory.getBean(TaskExecutor.class)}, y como {@code notificacionesExecutor}
-     * es el ÚNICO {@code TaskExecutor} de la aplicación, todos caerían justamente acá.
+     * es el ÚNICO {@code TaskExecutor} de la aplicación, todos caerían justamente aquí.
      * Peor: declarar un bean {@code Executor} hace que {@code TaskExecutionAutoConfiguration}
      * se retire ({@code @ConditionalOnMissingBean(Executor.class)}), así que
      * {@code applicationTaskExecutor} ni siquiera existe como alternativa.
@@ -127,7 +127,7 @@ public class AsyncConfig implements AsyncConfigurer {
      * Política de rechazo: descarta la tarea y deja constancia.
      *
      * <p>Equivale a {@code ThreadPoolExecutor.DiscardPolicy}, pero esa tira la tarea en
-     * absoluto silencio y entonces nadie se entera nunca de que se perdieron avisos. Acá
+     * absoluto silencio y entonces nadie se entera nunca de que se perdieron avisos. Aquí
      * se loguea un WARN con el estado del pool, que es el dato que sirve para decidir si
      * hay que agrandarlo o si openWA está colgado.
      */

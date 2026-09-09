@@ -4,11 +4,13 @@ import bo.bosque.com.impexpap.commons.SincronizacionEntregasService;
 import bo.bosque.com.impexpap.commons.WhatsAppService;
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.IEntregaChofer;
+import bo.bosque.com.impexpap.dao.IGeneradorTareasRutinarias;
 import bo.bosque.com.impexpap.dao.IProcesoRol;
 import bo.bosque.com.impexpap.dao.IRol;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.EntregaChofer;
 import bo.bosque.com.impexpap.model.Rol;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,19 +33,22 @@ public class DatabaseTaskScheduler {
     private final IProcesoRol procesoRolDao;
     private final IRol rolDao;
     private final SincronizacionEntregasService sincronizacionEntregasService;
+    private final IGeneradorTareasRutinarias generadorTareasRutinariasDao;
 
     public DatabaseTaskScheduler(IEntregaChofer entregaChoferDao,
                                  IEmpleado empleadoDao,
                                  WhatsAppService whatsAppService,
                                  IProcesoRol procesoRolDao,
                                  IRol rolDao,
-                                 SincronizacionEntregasService sincronizacionEntregasService) {
+                                 SincronizacionEntregasService sincronizacionEntregasService,
+                                 IGeneradorTareasRutinarias generadorTareasRutinariasDao) {
         this.entregaChoferDao = entregaChoferDao;
         this.empleadoDao = empleadoDao;
         this.whatsAppService = whatsAppService;
         this.procesoRolDao = procesoRolDao;
         this.rolDao = rolDao;
         this.sincronizacionEntregasService = sincronizacionEntregasService;
+        this.generadorTareasRutinariasDao = generadorTareasRutinariasDao;
     }
 
     /**
@@ -82,6 +87,61 @@ public class DatabaseTaskScheduler {
     @Scheduled(fixedDelay = 120000L, initialDelay = 30000L)
     public void sincronizarEntregasConSap() {
         this.sincronizacionEntregasService.sincronizarAhora("programada");
+    }
+
+    /**
+     * Genera las ocurrencias del día ({@code tac_bitTareaRuti}) para todas las
+     * tareas rutinarias de todos los cargos activos, a las 00:05.
+     *
+     * <h3>Por qué reemplaza el modelo legacy</h3>
+     * En Bosque v2 (JSF) la generación era JIT por usuario: solo se creaban
+     * ocurrencias para quien tuviera la sesión abierta y abriera la pestaña de
+     * "Tareas Rutinarias" — si nadie entraba un día, ese día no se generaba
+     * nada para nadie, y no había forma de ver "quién no hizo su tarea de hoy"
+     * a nivel organización. Este job corre para todos de una sola pasada,
+     * todos los días, sin depender de que alguien inicie sesión.
+     *
+     * <h3>Lo que ya NO genera</h3>
+     * Las tareas marcadas con {@code tac_tareaRutinaria.esARequerimiento = 1}
+     * quedan fuera: Caja Fuerte, Coches, Caja Chica y Cierre de Operaciones
+     * pasaron a ser submódulos de la vista 87, donde la ocurrencia se crea
+     * recién cuando alguien entra a hacer el trabajo
+     * ({@code p_abm_tac_BitTareaRuti} ACCION='A'). El filtro vive en el SP y no
+     * aquí porque el generador es una sola pasada de SQL; meter la lista de
+     * excepciones en Java obligaría a traer y descartar filas del otro lado.
+     *
+     * <h3>Por qué 00:05 y no otra hora</h3>
+     * Los otros jobs de esta clase corren a las 06:40 (rol de sábados, solo
+     * 22-31/12), 08:00 (cumpleaños) y 23:58:59 (cierre de entregas) — 00:05 no
+     * choca con ninguno. Corre apenas empieza el día para que, para cuando
+     * alguien abra la app en la mañana, las tareas de hoy ya existan; el proc
+     * usa {@code GETDATE()} para decidir qué es "hoy", así que conviene que
+     * corra bien temprano en la ventana del nuevo día, no a medianoche justa
+     * (evita cualquier ambigüedad de reloj entre el server de la app y el de
+     * SQL Server).
+     *
+     * <h3>Frecuencia cambiante</h3>
+     * El SP ({@code p_generar_tac_bitTareaRuti}) lee
+     * {@code tac_tareaRutinaria.idFrec} en vivo en cada corrida — si alguien
+     * cambió la frecuencia de una tarea ayer (vía
+     * {@code p_abm_tac_TareaRutinaria}, que además limpia las bitácoras futuras
+     * pendientes que hubieran quedado con la frecuencia vieja), esta corrida ya
+     * usa la frecuencia nueva sin nada adicional aquí.
+     *
+     * <p>Nunca relanza: si la base no responde una noche, el hilo del scheduler
+     * no muere y la corrida siguiente lo intenta de nuevo. El proc además es
+     * idempotente (cada bloque de frecuencia hace un {@code EXCEPT} contra lo ya
+     * generado), así que una corrida repetida o atrasada no duplica filas.
+     */
+    @Scheduled(cron = "0 5 0 * * *")
+    public void generarOcurrenciasTareasRutinarias() {
+        logger.info("Iniciando generación de ocurrencias de tareas rutinarias");
+        try {
+            RespuestaSp res = generadorTareasRutinariasDao.generarOcurrencias();
+            logger.info("Generación de ocurrencias de tareas rutinarias completada: {}", res.getErrormsg());
+        } catch (Exception e) {
+            logger.error("Error al generar ocurrencias de tareas rutinarias: {}", e.getMessage(), e);
+        }
     }
 
     /**
@@ -171,7 +231,7 @@ public class DatabaseTaskScheduler {
      * nunca en enero, el {@code +1} de adentro no puede equivocarse aunque el reloj
      * del servidor tenga drift.
      *
-     * <p><b>Dispara diez veces y nueve no hace nada.</b> La idempotencia se lee acá
+     * <p><b>Dispara diez veces y nueve no hace nada.</b> La idempotencia se lee aquí
      * arriba: si ya hay un rol de ese año, sale por el primer {@code return} — sin
      * tocar la base y sin mandar WhatsApp. El SP tiene la misma guarda adentro (y el
      * UNIQUE de {@code trs_Rol} atrás de todo, por si dos instancias del backend

@@ -136,7 +136,7 @@ public class SpHelper {
      * los reconoce, así que cualquier {@code java.util.Date} que no sea ya
      * uno de esos dos se convierte a {@code Timestamp} antes de bindear.
      *
-     * <p>Sólo hace falta acá: {@code ejecutarAbm} pasa por
+     * <p>Sólo hace falta aquí: {@code ejecutarAbm} pasa por
      * {@code SimpleJdbcCall}/{@code MapSqlParameterSource}, que sí resuelve
      * el tipo SQL real vía metadata del SP.
      */
@@ -238,7 +238,7 @@ public class SpHelper {
      * modelo con todos los primitivos en 0, no a {@code null}.
      *
      * <p>Ningún id de este módulo es legítimamente 0 (todas son IDENTITY desde 1),
-     * así que quitar los Number==0 acá es seguro para los 19 listar() de tac_*.
+     * así que quitar los Number==0 aquí es seguro para los 19 listar() de tac_*.
      * No usar para SPs de otros módulos sin confirmar que ninguno trata 0 como
      * filtro real.
      *
@@ -318,7 +318,7 @@ public class SpHelper {
      * <p>El SP la parte adentro con XML y no con {@code STRING_SPLIT} porque el motor es SQL
      * Server 2008 (nivel de compatibilidad 100) y {@code STRING_SPLIT} recién existe desde 2016.
      *
-     * <p>Son {@code Long}, no texto que venga del usuario: no hay nada que escapar acá.
+     * <p>Son {@code Long}, no texto que venga del usuario: no hay nada que escapar aquí.
      */
     public static String listaDeIds(Collection<Long> ids) {
         StringBuilder sb = new StringBuilder(ids.size() * 6);

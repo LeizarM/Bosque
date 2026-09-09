@@ -13,7 +13,7 @@ import java.util.Date;
  * {@code desde}/{@code hasta}. Tres clases de un campo cada una serían tres archivos para
  * mantener sincronizados con el mismo controlador.
  *
- * <p><b>SUPUESTO D4 — pendiente de confirmación de RR.HH. (ver plan §5).</b> Acá NO viaja
+ * <p><b>SUPUESTO D4 — pendiente de confirmación de RR.HH. (ver plan §5).</b> Aquí NO viaja
  * quién está preguntando. La identidad del actor sale de {@code Authentication} (el token),
  * nunca del body: si el cliente pudiera afirmar quién es, el ACL de botones no valdría nada.
  * Por eso este DTO no tiene {@code codUsuario} ni {@code audUsuario} y no hay que agregárselos.
@@ -67,7 +67,7 @@ public class PermisoRrhhFiltroDto implements Serializable {
      * El combo de tipo de permiso. {@code null}, vacío o {@code "0"} (lo que manda la opción
      * "Todos") = todos los tipos.
      *
-     * <p>Declarado acá porque Jackson descarta en silencio lo que el DTO no declara: sin este campo
+     * <p>Declarado aquí porque Jackson descarta en silencio lo que el DTO no declara: sin este campo
      * la grilla saldría sin filtrar y nadie vería un error.
      */
     private String tipoPermiso;
@@ -85,7 +85,7 @@ public class PermisoRrhhFiltroDto implements Serializable {
      *
      * <p>El cliente manda la clave y <b>no</b> las fechas: {@code fecIniPenUl} lo resuelve el
      * servidor con la misma consulta que produjo el monto, así el detalle no puede discrepar del
-     * total. Declarado acá porque Jackson descarta en silencio lo que el DTO no declara.
+     * total. Declarado aquí porque Jackson descarta en silencio lo que el DTO no declara.
      */
     private String claveTramo;
 

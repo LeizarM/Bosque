@@ -14,13 +14,18 @@ import java.util.Date;
 public class TarRuXCargo implements Serializable {
 
     // ── campos de la tabla tac_tarRuXCargo ─────────────────────────────────
+    // Solo idTarXCargo (PK) y audUsuario son NOT NULL de verdad — el resto
+    // son Long/Integer envoltorio: p_abm_tac_TarRuXCargo/p_list_tac_TarRuXCargo
+    // los declaran todos NULL-ables. Mismo bug ya corregido en las 18 tablas
+    // hermanas de este scaffold; encontrado aquí recién en el loop de
+    // auditoría continua, 2026-09-07 (se había saltado en el pase original).
     private long idTarXCargo;
-    private long idTarRuti;
-    private long codCargo;
-    private int estado;
+    private Long idTarRuti;
+    private Long codCargo;
+    private Integer estado;
     private long audUsuario;
     private Date audFecha;
-    // Long, no long: NULL es un valor real y documentado acá ("aplica al
+    // Long, no long: NULL es un valor real y documentado aquí ("aplica al
     // cargo en TODAS sus sucursales"), no la ausencia de dato — un primitivo
     // hace que BeanPropertyRowMapper reviente al mapear cualquier fila NULL,
     // y que Jackson silencie un null entrante a 0 (que en cambio SÍ es un

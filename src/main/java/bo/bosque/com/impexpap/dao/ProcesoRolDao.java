@@ -265,7 +265,7 @@ public class ProcesoRolDao implements IProcesoRol {
 
     /**
      * Separa el rechazo de negocio del fallo tecnico, que es la unica decision
-     * que importa acá: de un lado un texto que el usuario tiene que leer entero
+     * que importa aquí: de un lado un texto que el usuario tiene que leer entero
      * y una operacion que no hizo falta hacer; del otro, algo roto que él no
      * puede arreglar y que Sistemas tiene que ver con stack y todo.
      *
@@ -304,7 +304,7 @@ public class ProcesoRolDao implements IProcesoRol {
 
         /* Se loguea el contexto —qué se estaba haciendo—, que es lo unico que
            el handler generico no sabe. El stack lo imprime él, asi que no se
-           duplica acá.                                                         */
+           duplica aquí.                                                         */
         log.error("{}: fallo tecnico (errorCode={})", contexto,
                   sql != null ? sql.getErrorCode() : null);
         return ex;

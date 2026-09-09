@@ -68,7 +68,7 @@ public class NotificacionEntregaService {
 
     /**
      * Firma que va al pie del mensaje al CLIENTE. Es lo único de la redacción que puede
-     * querer cambiar quien administre el negocio; se deja acá para no tener que buscarlo
+     * querer cambiar quien administre el negocio; se deja aquí para no tener que buscarlo
      * entre los StringBuilder.
      */
     private static final String FIRMA_EMPRESA = "Bosque";
@@ -123,7 +123,7 @@ public class NotificacionEntregaService {
      *
      * <p>Es una lista blanca y no una lista negra a propósito: si mañana la sincronización con
      * SAP empieza a traer un tipo nuevo, lo seguro es NO avisarle a nadie hasta que alguien lo
-     * agregue acá, en vez de mandar un WhatsApp a un destinatario que nadie previó.
+     * agregue aquí, en vez de mandar un WhatsApp a un destinatario que nadie previó.
      */
     @Value("${openwa.entregas.tipos-con-aviso:Factura,Orden Venta}")
     private String tiposConAviso;
@@ -157,7 +157,7 @@ public class NotificacionEntregaService {
      * cliente reciba nada.
      *
      * <p><b>No hace falta encender {@code notificar-cliente} para usarlo.</b> Alcanza con
-     * poner un número acá. Es deliberado: nadie debería tener que activar el flag que manda a
+     * poner un número aquí. Es deliberado: nadie debería tener que activar el flag que manda a
      * clientes reales para hacer una prueba.
      */
     @Value("${openwa.entregas.telefono-prueba:}")
@@ -387,7 +387,7 @@ public class NotificacionEntregaService {
                         + "───────────────\n\n" + mensaje;
             }
 
-            // Última barrera antes de que algo salga hacia afuera. Va acá abajo, y no arriba,
+            // Última barrera antes de que algo salga hacia afuera. Va aquí abajo, y no arriba,
             // justamente para que la simulación ejerza TODO el camino: la consulta, el filtro
             // por tipo, la resolución del teléfono en SAP y el armado del texto. Lo único que
             // no ocurre es la llamada HTTP.
@@ -405,13 +405,13 @@ public class NotificacionEntregaService {
 
             // La marca de dedupe se pone SOLO si openWA aceptó el mensaje. Si se marcara
             // antes, un openWA caído consumiría el único intento: el chofer reintenta el
-            // POST un minuto después (mala señal en la calle es lo normal acá), openWA ya
+            // POST un minuto después (mala señal en la calle es lo normal aquí), openWA ya
             // se recuperó, y el cliente igual se quedaría sin aviso durante toda la ventana.
             if (whatsAppService.enviarMensajeACliente(chatId, mensaje)) {
                 marcarAvisado(docEntry, db);
                 logger.info("Aviso de entrega enviado al cliente {} (docEntry={} db={}).",
                             dto.getCardCode(), docEntry, dbFila);
-                // Recién acá: la fila que espera la calificación se abre SOLO si la pregunta
+                // Recién aquí: la fila que espera la calificación se abre SOLO si la pregunta
                 // efectivamente salió. Registrarla antes del envío dejaría pendientes todas las
                 // entregas de un openWA caído, y el reporte por chofer contaría como "enviada"
                 // una encuesta que el cliente nunca vio.
@@ -423,7 +423,7 @@ public class NotificacionEntregaService {
             }
 
         } catch (Throwable t) {
-            // Techo absoluto: la entrega ya está registrada y devuelta al chofer. Acá no
+            // Techo absoluto: la entrega ya está registrada y devuelta al chofer. Aquí no
             // se relanza nada bajo ninguna circunstancia.
             logger.error("Error al notificar la entrega docEntry={} db={}: {}", docEntry, db, t.getMessage(), t);
         }

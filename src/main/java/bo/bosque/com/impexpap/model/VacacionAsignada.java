@@ -14,7 +14,7 @@ import java.util.Date;
  *
  * <h3>Nunca como filtro de {@code SpHelper.ejecutarListado}</h3>
  * El overload de MODELO serializa TODOS los campos a {@code @campo=?}, y los cuatro auxiliares de
- * acá abajo no son parámetros de {@code p_list_vacacionAsignada}: el {@code EXEC} fallaría con
+ * aquí abajo no son parámetros de {@code p_list_vacacionAsignada}: el {@code EXEC} fallaría con
  * "too many arguments". Los DAO de este módulo mandan siempre parámetros explícitos.
  *
  * <h3>Qué escribe cada ACCION del SP</h3>

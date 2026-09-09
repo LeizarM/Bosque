@@ -6,7 +6,7 @@ package bo.bosque.com.impexpap.config;
  * ({@link GlobalExceptionHandler}).
  *
  * <p><b>Por qué no alcanzaba con {@link SpBusinessException}.</b> Esa está mapeada a 400 y sólo a
- * 400 — "mandaste mal la pregunta". Acá la pregunta está bien: el que está mal es el dato. La
+ * 400 — "mandaste mal la pregunta". Aquí la pregunta está bien: el que está mal es el dato. La
  * diferencia importa porque el cliente no puede corregir un 409 reintentando con otros
  * parámetros, y porque un 400 en el log de RR.HH. se lee como "el módulo nuevo falla" en vez de
  * "hay un empleado con dos contratos activos".

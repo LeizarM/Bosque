@@ -54,7 +54,7 @@ public class Asignacion implements Serializable {
     /*
      * NUNCA se leen del body. El controlador los pisa con los del token antes de
      * llamar al DAO, igual que /programar hace con codEmpleadoProgramador. Si se
-     * aceptaran del cliente, mentir sobre quién sos sería cambiar un número en el
+     * aceptaran del cliente, mentir sobre quién eres sería cambiar un número en el
      * JSON y todo el control del SP no valdría nada.
      *
      * Viajan al SP porque p_abm_trs_Asignacion los declara: con esAdmin=0 y un

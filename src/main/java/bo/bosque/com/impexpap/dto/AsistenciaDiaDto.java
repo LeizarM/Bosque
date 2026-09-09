@@ -81,7 +81,7 @@ public class AsistenciaDiaDto {
      *   <li><b>Corrección deliberada sobre el legacy, pedida explícitamente por el usuario:</b> el
      *       legacy aplica esta fórmula incluso en sábados que el rol dice "no le toca" (siempre
      *       muestra el turno de 9 a 12 aunque nadie deba marcar), inflando el atraso con sentinelas
-     *       de 180/510 en días que no eran una falta real. Acá el atraso se fuerza a 0 en cualquier
+     *       de 180/510 en días que no eran una falta real. Aquí el atraso se fuerza a 0 en cualquier
      *       día cuyo {@link #estado} no sea TRABAJADO ni FALTA.</li>
      * </ul>
      */

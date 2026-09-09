@@ -21,7 +21,7 @@ public interface ICambio {
      * {@code idSabadoReposicion} (el sábado que se devuelve); una {@code COBERTURA} no.
      *
      * <p>'U' y 'D' rebotan si el cambio ya está APROBADO: sus celdas ya se
-     * escribieron y deshacerlas por acá dejaría la grilla mintiendo. Ese caso se
+     * escribieron y deshacerlas por aquí dejaría la grilla mintiendo. Ese caso se
      * corrige celda por celda con {@code trs_sp_corregirCelda}.
      *
      * @param cambio Datos del cambio

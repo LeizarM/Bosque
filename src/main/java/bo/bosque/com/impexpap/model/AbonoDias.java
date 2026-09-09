@@ -33,7 +33,7 @@ public class AbonoDias {
     /** IDENTITY. {@code 0} en un alta. */
     private long codAbonoDias;
     private long codEmpleado;
-    /** {@code float} de SQL. Acá el cero NO es válido: el mínimo real medido es 0,5. */
+    /** {@code float} de SQL. Aquí el cero NO es válido: el mínimo real medido es 0,5. */
     private double diasAbonados;
     /** {@code date}. En la edición no se toca (el legacy deshabilita el calendario). */
     private Date fecha;

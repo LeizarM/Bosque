@@ -69,7 +69,7 @@ public class ProgramadorDao implements IProgramador {
         Map<String, Object> filtro = new HashMap<>();
         filtro.put("codEmpleado", codEmpleado);
         filtro.put("codSucursal", codSucursal);
-        // Se normaliza acá y no se confía en el default del SP: cualquier cosa
+        // Se normaliza aquí y no se confía en el default del SP: cualquier cosa
         // que no sea SUBARBOL es DIRECTOS, el mismo criterio que usa el árbol.
         filtro.put("alcance", "SUBARBOL".equals(alcance) ? "SUBARBOL" : "DIRECTOS");
         filtro.put("idRol", idRol);
@@ -80,7 +80,7 @@ public class ProgramadorDao implements IProgramador {
     // "SU EQUIPO" — la identidad la resuelve el servidor, no el cliente
     // ══════════════════════════════════════════════════════════════════════
 
-    // ── E: quién sos y si podés programar ─────────────────────────────────
+    // ── E: quién eres y si puedes programar ─────────────────────────────────
     // El login vacío se manda igual (como cadena vacía, nunca NULL): el driver no sabe
     // qué tipo darle a un parámetro NULL, y el SP ya trata '' como "no resuelve".
     @Override
@@ -91,9 +91,9 @@ public class ProgramadorDao implements IProgramador {
         List<MiEquipoDto> r = spHelper.ejecutarListado(SP_LIST, filtro, "E", MiEquipoDto.class);
         if (!r.isEmpty()) return r.get(0);
 
-        // Nunca null: /mi-equipo responde 200 siempre y "no sos programador" es una
+        // Nunca null: /mi-equipo responde 200 siempre y "no eres programador" es una
         // respuesta legítima. Si devolviéramos null, el front tendría que distinguir
-        // entre "no tenés permiso" y "se cayó la consulta", que no es lo mismo.
+        // entre "no tienes permiso" y "se cayó la consulta", que no es lo mismo.
         log.warn("La accion E de {} no devolvio ninguna fila para el login '{}'", SP_LIST, login);
         MiEquipoDto sinPermiso = new MiEquipoDto();
         sinPermiso.setEsProgramador(0);

@@ -113,7 +113,7 @@ public class Participante implements Serializable {
      * sucursal}, {@code ca.descripcion AS cargo}) y este modelo no las tenía, así
      * que {@code BeanPropertyRowMapper} las descartaba <b>en silencio</b>: sin
      * error, sin log, sin nada. Es el modo de falla clásico de esta capa —
-     * agregar una columna al SELECT no alcanza, hay que declararla acá.
+     * agregar una columna al SELECT no alcanza, hay que declararla aquí.
      *
      * <p>{@code empresa} sale de la sucursal ({@code tb_sucursal.codEmpresa}) y no
      * de una columna propia: la empresa de una persona ES la de su sucursal, y
@@ -133,13 +133,13 @@ public class Participante implements Serializable {
      *   FUERA DE LA EMPRESA   activo=0; tapa a todo lo demás, es otra conversación
      * </pre>
      *
-     * <p><b>Se deriva en el SQL y no acá</b> por la misma razón que
+     * <p><b>Se deriva en el SQL y no aquí</b> por la misma razón que
      * {@code situacionAsueto}: son cuatro combinaciones de dos fechas y un bit
      * contra la fecha de HOY, y si cada pantalla las arma por su cuenta terminan
      * diciendo cosas distintas — el front las calcularía además contra el reloj
      * del teléfono.
      *
-     * <p>Y como todo lo que sale del SELECT, hay que declararlo acá o
+     * <p>Y como todo lo que sale del SELECT, hay que declararlo aquí o
      * {@code BeanPropertyRowMapper} lo descarta EN SILENCIO.
      */
     private String situacion;

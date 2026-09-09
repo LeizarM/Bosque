@@ -66,7 +66,7 @@ public class Documento implements Serializable {
      * <p><b>No indica anulación.</b> La anulación vive en
      * {@code tcr_documentoAnulado} y llega en {@link #esAnulado}. Se hizo así
      * para no moverle la cuenta al módulo JSF, que numera contando las filas
-     * con {@code estado='V'}: marcar la anulación acá le hacía reutilizar
+     * con {@code estado='V'}: marcar la anulación aquí le hacía reutilizar
      * números ya emitidos.
      */
     private String estado;

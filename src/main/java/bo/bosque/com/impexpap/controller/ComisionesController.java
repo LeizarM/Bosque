@@ -369,7 +369,7 @@ public class ComisionesController {
      * duplicados es un {@code DocNum not in (select docNum from tcom_noPagado ...)},
      * o sea leer y después insertar. Dos llamadas simultáneas ven las dos que la nota
      * falta y las dos la insertan; en PRUEBA hay 3 notas duplicadas de la carga del
-     * 21/08, y duplicar acá se paga dos veces. Además reescribe el 82 % de la tabla
+     * 21/08, y duplicar aquí se paga dos veces. Además reescribe el 82 % de la tabla
      * en cada corrida —89.945 de 109.824 filas el 22/08—, así que tampoco puede
      * correr cada vez que alguien entra a la pestaña.
      *
@@ -445,7 +445,7 @@ public class ComisionesController {
     //
     // Define qué porcentaje se paga según cuántos días tardó el cliente en
     // pagar. La usa la rama K del cálculo. Tocarla cambia lo que se paga en
-    // todos los períodos que se calculen de acá en adelante, así que el
+    // todos los períodos que se calculen de aquí en adelante, así que el
     // mantenimiento queda restringido a ROLE_ADM.
     //
     // La comisión de esta tabla va en BASE 1: 0.008 es 0,8%. No confundir con
@@ -869,7 +869,7 @@ public class ComisionesController {
      * <p>
      * El SP divide entre {@code @tc} sin protección: con cero o nulo da error de
      * división por cero, o devuelve importes en dólares vacíos. Es preferible
-     * cortar acá con un mensaje que el usuario entienda.
+     * cortar aquí con un mensaje que el usuario entienda.
      */
     private static final String[] SIN_SUBREPORTES = new String[0];
 

@@ -127,7 +127,7 @@ public class RolSabadosController {
 
     /**
      * El cruce con Biométrico (tbio_) — ver {@code /refrescar-excusas-horario}. El cálculo
-     * en sí vive en {@link ExcusaHorarioService} y no acá; este controlador sólo resuelve
+     * en sí vive en {@link ExcusaHorarioService} y no aquí; este controlador sólo resuelve
      * la identidad de quien llama y le pasa el resto al servicio. Lo dispara
      * automáticamente el Flutter apenas alguien entra al módulo
      * ({@code aplicarExcusasHorarioAlEntrarProvider}) — no hay job de backend ni botón que
@@ -145,9 +145,9 @@ public class RolSabadosController {
     private final JdbcTemplate jdbcTemplate;
 
     /**
-     * Quién sos y qué podés tocar. Los cuatro métodos de identidad de este controlador
+     * Quién eres y qué puedes tocar. Los cuatro métodos de identidad de este controlador
      * ({@code esAdmin}, {@code loginDelToken}, {@code miPermiso}, {@code exigirAdminORrhh})
-     * viven ahora acá y se comparten con el módulo de Permisos de RR.HH.; abajo quedan como
+     * viven ahora aquí y se comparten con el módulo de Permisos de RR.HH.; abajo quedan como
      * delegaciones de una línea para no tocar las ~20 llamadas que ya funcionan.
      */
     private final AccesoModuloHelper acceso;
@@ -195,7 +195,7 @@ public class RolSabadosController {
      * persona contra {@code trs_Participante.codSucursal}.
      *
      * <p><b>ROLE_ADM o RR.HH.</b> Es la escritura más ancha del módulo: rehace el año de
-     * las 85 personas de una. Hasta acá no tenía control propio, o sea que cualquier
+     * las 85 personas de una. Hasta aquí no tenía control propio, o sea que cualquier
      * usuario autenticado podía rehacer el rol entero — el {@code @PreAuthorize} de la
      * clase acepta los dos únicos roles que existen, así que no separa a nadie. Ver
      * {@link #exigirAdminORrhh}.
@@ -375,7 +375,7 @@ public class RolSabadosController {
      *       la llave puesta en la puerta de al lado.
      *   <li><b>Reabrir a BORRADOR es la única llave de la regeneración.</b>
      *       {@code trs_sp_generarRol} rechaza REGENERAR sobre un rol PUBLICADO y
-     *       en el mensaje manda justamente acá. Quien puede regenerar tiene que
+     *       en el mensaje manda justamente aquí. Quien puede regenerar tiene que
      *       poder reabrir, o el permiso no sirve para nada.
      * </ul>
      *
@@ -549,7 +549,7 @@ public class RolSabadosController {
      *
      * <p>Se cierra la ventana ({@code fechaBaja}) y {@code activo} NO se toca — esa
      * columna la reconcilia sólo REGENERAR contra la relación laboral, y escribirla
-     * acá era lo que hacía que la baja se deshiciera sola en la próxima regeneración.
+     * aquí era lo que hacía que la baja se deshiciera sola en la próxima regeneración.
      *
      * <p><b>Los sábados que ya pasaron quedan como están</b>; de los que vienen se
      * borran las celdas generadas, pero las que programó un jefe ('P') o corrigió
@@ -589,7 +589,7 @@ public class RolSabadosController {
      * refilón los cambios de grupo que hubiera pendientes.
      *
      * <p>Rebota si ya no figura en la relación laboral vigente: eso se arregla
-     * corriendo REGENERAR, no desde acá.
+     * corriendo REGENERAR, no desde aquí.
      *
      * <p><b>ROLE_ADM o RR.HH.</b>, la contracara de {@link #eliminarParticipante}: quien
      * puede cerrar la ventana tiene que poder volver a abrirla, o una baja hecha por
@@ -758,7 +758,7 @@ public class RolSabadosController {
      * mira antes de apretar «Dar de alta».
      *
      * <p>Sale del MISMO árbol con el que {@code trs_sp_programar} valida después
-     * ({@code fn_trs_DependientePorCargo}), así que lo que se ve acá es exactamente lo
+     * ({@code fn_trs_DependientePorCargo}), así que lo que se ve aquí es exactamente lo
      * que el sistema va a aceptar. Si fueran dos recorridos distintos, la pantalla
      * prometería un equipo y el sistema aceptaría otro.
      *
@@ -783,14 +783,14 @@ public class RolSabadosController {
     }
 
     /**
-     * <b>"Su Equipo":</b> quién sos y a quiénes podés programar. Es lo primero que pide
-     * esa pestaña, y de acá sale si se muestra o no.
+     * <b>"Su Equipo":</b> quién eres y a quiénes puedes programar. Es lo primero que pide
+     * esa pestaña, y de aquí sale si se muestra o no.
      *
      * <p><b>Sin body a propósito.</b> La identidad la resuelve el servidor desde el token
      * ({@code login → tb_usuario → trs_Programador}); el cliente no la afirma. Si la
      * mandara él, cambiar un número en el JSON alcanzaría para programar la gente de otro.
      *
-     * <p><b>Siempre 200, nunca 204.</b> "No sos programador" ({@code esProgramador=0}, el
+     * <p><b>Siempre 200, nunca 204.</b> "No eres programador" ({@code esProgramador=0}, el
      * equipo vacío) es una respuesta completa y correcta, no un resultado vacío — el front
      * necesita ese dato para esconder la pestaña. Por eso no pasa por
      * {@code procesarObjeto}: manda 204, y un 204 con cuerpo lo descarta el cliente HTTP.
@@ -820,7 +820,7 @@ public class RolSabadosController {
      * no es el dueño lo anota en {@code trs_Programacion.codEmpleadoEjecutor}. Mandar el
      * codEmpleado del titular haría desaparecer esa traza: nadie sabría quién decidió.
      *
-     * <p>La letra se valida acá y no sólo en el SP porque este endpoint es la puerta del
+     * <p>La letra se valida aquí y no sólo en el SP porque este endpoint es la puerta del
      * jefe: '1' y 'L' y nada más. Ver {@code LETRAS_DE_JEFE}.
      */
     @PostMapping("/programar")
@@ -850,7 +850,7 @@ public class RolSabadosController {
      * que la programación sea TUYA antes de anularla, y esa comprobación no vale nada si el
      * dueño lo declara el mismo que pide la anulación.
      *
-     * <p>Acá no se corta antes por {@code esProgramador}: quién puede anular qué lo decide
+     * <p>Aquí no se corta antes por {@code esProgramador}: quién puede anular qué lo decide
      * el SP, que además mira si la programación sigue vigente y si el sábado ya pasó.
      */
     @PostMapping("/anular-programacion")
@@ -903,7 +903,7 @@ public class RolSabadosController {
      *
      * <p><b>Quién puede.</b> El SP decide, con la identidad que le pasa ESTE método
      * desde el token: ROLE_ADM y RR.HH. corrigen la celda de cualquiera; un jefe
-     * programador, sólo la de su propia gente y sólo entre '1' y 'L'. Antes acá no se
+     * programador, sólo la de su propia gente y sólo entre '1' y 'L'. Antes aquí no se
      * validaba nada: alcanzaba con estar logueado, así que cualquiera de los usuarios
      * ROLE_LIM podía cambiarle el sábado a cualquier persona y firmarlo con el
      * {@code audUsuario} que quisiera. Era la puerta de atrás de {@code /programar}.
@@ -983,8 +983,8 @@ public class RolSabadosController {
      * la escribió otro.
      *
      * <p>Que alguien no tenga {@code codEmpleado} (un usuario de sistema sin ficha) no
-     * se corta acá: se manda en 0 y el SP responde con su propio mensaje, que explica
-     * qué hacer. Cortar acá daría un error genérico sin pista.
+     * se corta aquí: se manda en 0 y el SP responde con su propio mensaje, que explica
+     * qué hacer. Cortar aquí daría un error genérico sin pista.
      */
     private void firmarConElToken(Asignacion mb, Authentication auth) {
         MiEquipoDto yo = miPermiso(auth);
@@ -1116,7 +1116,7 @@ public class RolSabadosController {
 
     /**
      * Anula la solicitud. Rebota si ya está APROBADA: sus celdas ya se escribieron y
-     * deshacerlas por acá dejaría la grilla mintiendo — ese caso se arregla con
+     * deshacerlas por aquí dejaría la grilla mintiendo — ese caso se arregla con
      * {@link #corregirCelda}.
      */
     @PostMapping("/anular-cambio")
@@ -1161,7 +1161,7 @@ public class RolSabadosController {
      *
      * <p><b>Sale de un solo lugar</b>, {@code p_list_trs_Asignacion @ACCION='R'}: el SQL
      * vive dentro del {@code .jasper} y {@link JasperReportExport#exportPDFStatic} le pasa
-     * la conexión. Por eso acá sólo viaja el {@code idSabado}.
+     * la conexión. Por eso aquí sólo viaja el {@code idSabado}.
      *
      * <p><b>Ojo con el .jasper.</b> {@code exportPDFStatic} NO compila el {@code .jrxml}:
      * carga el {@code .jasper} precompilado de {@code resources/reports/}. Si se toca el
@@ -1204,7 +1204,7 @@ public class RolSabadosController {
      * puente login → codEmpleado lo hace {@code tb_usuario}, del lado del SQL.
      *
      * <p>Si esto viene vacío es que el token no se validó y el request llegó igual, así
-     * que se corta acá antes de escribir nada.
+     * que se corta aquí antes de escribir nada.
      */
     private String loginDelToken(Authentication auth) {
         return acceso.loginDelToken(auth);
@@ -1216,7 +1216,7 @@ public class RolSabadosController {
      * <p>Trae el permiso <b>sin</b> la lista de dependientes: los endpoints que escriben
      * sólo necesitan la identidad, y de la pertenencia al equipo ya se ocupa
      * {@code trs_sp_programar} con su EXISTS contra {@code fn_trs_ProgramadorDependiente()}.
-     * Cargar el equipo entero acá sería una consulta al pedo en cada click.
+     * Cargar el equipo entero aquí sería una consulta al pedo en cada click.
      */
     private MiEquipoDto miPermiso(Authentication auth) {
         return acceso.miPermiso(auth);
@@ -1242,7 +1242,7 @@ public class RolSabadosController {
      * paso ("corra REGENERAR", "quedó sin sucursal"), así que conviene mostrarlo tal cual.
      *
      * <p>Si el SP devuelve error, {@code SpHelper} ya lanzó {@code SpBusinessException}
-     * y el handler global respondió 400: acá sólo llegan los casos exitosos.
+     * y el handler global respondió 400: aquí sólo llegan los casos exitosos.
      */
     private ResponseEntity<ApiResponse<?>> respuestaEscritura(RespuestaSp res) {
         HttpStatus status = res.getError() == 0 ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;

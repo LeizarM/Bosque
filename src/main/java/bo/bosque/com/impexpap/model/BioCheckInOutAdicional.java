@@ -27,7 +27,7 @@ import java.util.Date;
  * entrantes (sin tirar error — {@code FAIL_ON_UNKNOWN_PROPERTIES} está
  * deshabilitado por defecto en Spring Boot), dejando los campos en su
  * default (0/null). Mismo bug que {@link BioCheckInOut} ya corrigió para
- * {@code Memoinfo}/{@code WorkCode}/{@code UserExtFmt} — nunca se aplicó acá.
+ * {@code Memoinfo}/{@code WorkCode}/{@code UserExtFmt} — nunca se aplicó aquí.
  */
 @Getter
 @Setter

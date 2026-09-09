@@ -13,7 +13,7 @@ import java.util.Date;
  * mostrando cuáles son los otros 3 y el motivo de cada uno. Antes el usuario veía sólo el total
  * y tenía que confiar.
  *
- * <p><b>Los domingos no vienen acá.</b> El cliente los sabe solo a partir de la fecha, y mandarlos
+ * <p><b>Los domingos no vienen aquí.</b> El cliente los sabe solo a partir de la fecha, y mandarlos
  * por la red sería llenar la respuesta con lo único que no hace falta explicar.
  */
 @Getter

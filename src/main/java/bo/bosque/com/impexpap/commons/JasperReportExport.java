@@ -142,7 +142,7 @@ public class JasperReportExport {
      *
      * <p>Todos los demás métodos de esta clase asumen un {@code <queryString>}
      * dentro del reporte y una {@code Connection} para ejecutarlo — sirve
-     * cuando el reporte es una consulta directa. Acá no: el reporte
+     * cuando el reporte es una consulta directa. Aquí no: el reporte
      * biométrico depende de una lógica que ya vive en Java
      * ({@code BiometricoController.reporteMensual}, no una sola consulta), así
      * que el {@code .jrxml} no tiene {@code <queryString>} — sus

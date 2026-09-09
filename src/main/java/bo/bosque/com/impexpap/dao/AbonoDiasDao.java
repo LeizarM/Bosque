@@ -33,7 +33,7 @@ import java.util.Map;
  *
  * <h3>Las dos consultas de lote</h3>
  * Resolver la relación laboral activa de un lote de empleados ({@code @ACCION='R'}) y ver quién ya
- * tiene un abono en esa fecha ({@code @ACCION='F'}) son ACCIONes de {@code p_list_AbonoDias}: acá
+ * tiene un abono en esa fecha ({@code @ACCION='F'}) son ACCIONes de {@code p_list_AbonoDias}: aquí
  * no se arma SQL. Las dos reciben el lote en {@code @codEmpleados}, separado por comas.
  */
 @Slf4j
@@ -89,7 +89,7 @@ public class AbonoDiasDao implements IAbonoDias {
     @Override
     public List<AbonoDias> historial(long codEmpleado, Long codRelEmplEmpr) {
         // La relación puede no venir: el cliente todavía no consultó la ficha, o directamente no
-        // tiene por qué saberla. Se resuelve acá, con la MISMA consulta que usa el alta, en vez de
+        // tiene por qué saberla. Se resuelve aquí, con la MISMA consulta que usa el alta, en vez de
         // devolver un 400 que obliga a la pantalla a pedir la ficha primero.
         long codRel = (codRelEmplEmpr != null && codRelEmplEmpr > 0)
                 ? codRelEmplEmpr
@@ -191,7 +191,7 @@ public class AbonoDiasDao implements IAbonoDias {
         if (actual == null) {
             throw new SpBusinessException("No se encontró el registro; puede que ya lo hayan borrado.");
         }
-        // El SP borra por id sin mirar de quién es la fila: la pertenencia se comprueba acá.
+        // El SP borra por id sin mirar de quién es la fila: la pertenencia se comprueba aquí.
         if (codEmpleado > 0 && actual.getCodEmpleado() != codEmpleado) {
             throw new SpBusinessException(
                     "Ese registro no es del empleado que está viendo; refresque la pantalla.");
@@ -329,7 +329,7 @@ public class AbonoDiasDao implements IAbonoDias {
     /**
      * La carga, TODO O NADA.
      *
-     * <p>{@code @Transactional} acá y no en el controlador porque es acá donde está el bucle, y el
+     * <p>{@code @Transactional} aquí y no en el controlador porque es aquí donde está el bucle, y el
      * precedente de un DAO transaccional ya existe ({@link CombustibleControlDao}). El precedente
      * vivo del módulo —{@code trs_sp_puenteVacacion}— hace su {@code BEGIN TRANSACTION} dentro del
      * SP; con estos SP de 2016, que no se pueden tocar, la única transacción disponible es ésta.
@@ -372,7 +372,7 @@ public class AbonoDiasDao implements IAbonoDias {
     // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * <b>Cero NO es válido acá</b>, a diferencia de la vacación asignada: el legacy valida
+     * <b>Cero NO es válido aquí</b>, a diferencia de la vacación asignada: el legacy valida
      * {@code > 0} estricto ("No la cantidad de dia es menor o igual a cero") y el mínimo real de la
      * tabla es 0,5.
      */
@@ -540,7 +540,7 @@ public class AbonoDiasDao implements IAbonoDias {
 
     /**
      * Quién del lote ya tiene un abono en esa fecha. Misma excepción documentada que
-     * {@link #relacionesActivas}: {@code p_list_AbonoDias} filtra por un empleado a la vez y acá
+     * {@link #relacionesActivas}: {@code p_list_AbonoDias} filtra por un empleado a la vez y aquí
      * serían 85 viajes.
      *
      * @return id → descripción corta del abono que ya existe

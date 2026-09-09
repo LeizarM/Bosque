@@ -63,7 +63,7 @@ public class EntregaChoferController {
      * que se refresca a mano cada dos por tres, así que es el endpoint más llamado del módulo.
      *
      * <p><b>El contrato con el Flutter no cambia:</b> mismo verbo, misma ruta, mismo body, misma
-     * respuesta. Todo lo de acá abajo es interno.
+     * respuesta. Todo lo de aquí abajo es interno.
      *
      * <h3>Por qué se sincroniza ANTES y se lee DESPUÉS</h3>
      * Antes, la ACCIÓN 'A' hacía las dos cosas en una sola llamada: sincronizaba
@@ -76,7 +76,7 @@ public class EntregaChoferController {
      *       1,4 s para devolver igual la foto vieja, y el beneficio se lo llevaría el chofer
      *       siguiente.</li>
      *   <li><b>Si está sincronizando otro hilo</b>, {@code asegurarSincronizado()} vuelve en el
-     *       acto sin esperarlo y acá se lee lo que haya en la tabla — como mucho, de un intervalo
+     *       acto sin esperarlo y aquí se lee lo que haya en la tabla — como mucho, de un intervalo
      *       atrás. Esperar al otro hilo sería reconstruir el problema original: quince choferes en
      *       fila detrás de una consulta a SAP, ahora en serie en vez de en paralelo.</li>
      * </ul>
@@ -153,7 +153,7 @@ public class EntregaChoferController {
                 // Cero filas = la entrega YA estaba marcada. Es el caso normal cuando el chofer
                 // toca "Marcar" dos veces, o cuando reintenta tras una respuesta perdida: el
                 // primer POST llegó, la respuesta se perdió, y el segundo encuentra el trabajo
-                // hecho. Responder error acá le pintaría una alarma roja sobre una entrega
+                // hecho. Responder error aquí le pintaría una alarma roja sobre una entrega
                 // perfectamente registrada, y lo empujaría a reintentar de nuevo.
                 //
                 // Se responde ÉXITO —la operación es idempotente y el estado final es el que el
@@ -165,7 +165,7 @@ public class EntregaChoferController {
             }
             // Aviso de WhatsApp: solo con la entrega YA registrada, y con su propio try/catch.
             // notificarEntregaCompletada es @Async, pero eso solo mueve el CUERPO del método a
-            // otro hilo: el encolado sigue corriendo acá, en el hilo del request del chofer, y
+            // otro hilo: el encolado sigue corriendo aquí, en el hilo del request del chofer, y
             // puede tirar (TaskRejectedException si el executor está saturado porque openWA no
             // responde, o cualquier fallo del proxy). Sin este catch esa excepción caería en el
             // catch(Exception) de abajo y devolvería 500 por una entrega que ya quedó grabada:

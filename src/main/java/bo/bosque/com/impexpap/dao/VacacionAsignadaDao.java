@@ -100,7 +100,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
         // `@fechaBase <= @fecha` y el filtro de las filas reales es `fecha <= @fecha`. Con NULL las
         // dos condiciones dan falso y el empleado parece no tener ni un aniversario.
         Date corte = fechaCorte != null ? fechaCorte : new Date();
-        // Y sin relación, ídem: se resuelve la vigente acá en vez de devolver un 400 que obliga a
+        // Y sin relación, ídem: se resuelve la vigente aquí en vez de devolver un 400 que obliga a
         // la pantalla a consultar la ficha primero. Misma consulta que usa el alta.
         long codRel = (codRelEmplEmpr != null && codRelEmplEmpr > 0)
                 ? codRelEmplEmpr
@@ -147,7 +147,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
      * nunca se les cargó la asignación. Ahí el alta corresponde, y es el único lugar donde la
      * pantalla la ofrece.
      *
-     * <p>Se corrige acá y no en el SP porque {@code p_list_vacacionAsignada} lo comparte el ERP
+     * <p>Se corrige aquí y no en el SP porque {@code p_list_vacacionAsignada} lo comparte el ERP
      * viejo, que sigue vivo: cambiarlo movería la grilla de {@code permiso.xhtml} en la misma
      * jugada. El arreglo de fondo —que el {@code WHILE} compare por año— sigue en el backlog del
      * DBA (plan §D3, prioridad media).
@@ -192,7 +192,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
      * <p>Las dos fechas son opcionales: el SP compara {@code fecha >= @fecha} y
      * {@code fecha <= @fechaBase}, así que sin ninguna devuelve todo el historial. El legacy manda
      * siempre {@code @diasAsignados} en 0, que su propio {@code (@x IS NULL OR @x = col)} traduce a
-     * "sólo las de cero días" — acá directamente no se manda.
+     * "sólo las de cero días" — aquí directamente no se manda.
      */
     @Override
     public List<VacacionAsignada> buscarPorRango(long codEmpleado, Long codRelEmplEmpr,
@@ -311,7 +311,7 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
         if (actual == null) {
             throw new SpBusinessException("No se encontró el registro; puede que ya lo hayan borrado.");
         }
-        // El SP borra por id sin mirar de quién es la fila: la pertenencia se comprueba acá.
+        // El SP borra por id sin mirar de quién es la fila: la pertenencia se comprueba aquí.
         if (codEmpleado > 0 && actual.getCodEmpleado() != codEmpleado) {
             throw new SpBusinessException(
                     "Ese registro no es del empleado que está viendo; refresque la pantalla.");
@@ -420,14 +420,14 @@ public class VacacionAsignadaDao implements IVacacionAsignada {
      * La fecha de un alta NO es libre: tiene que ser uno de los aniversarios que arma la ACCION
      * 'B' recorriendo de año en año desde {@code tb_relEmplEmpr.fechaIni} de
      * {@code codRelBeneficios}. En el legacy el campo va {@code disabled} y la fecha sale de la
-     * fila sintética; acá se comprueba, porque un POST puede traer cualquier cosa.
+     * fila sintética; aquí se comprueba, porque un POST puede traer cualquier cosa.
      *
      * <h3>Duplicado, en dos niveles</h3>
      * <ul>
      *   <li><b>Doble toque</b> — ya hay una fila IDÉNTICA cargada hace menos de
      *       {@link #VENTANA_DOBLE_TOQUE_MS}: se rechaza con 409 <b>aunque venga confirmado</b>. El
      *       segundo toque del teléfono manda exactamente el mismo cuerpo, confirmación incluida,
-     *       así que respetar el flag acá sería no proteger nada.</li>
+     *       así que respetar el flag aquí sería no proteger nada.</li>
      *   <li><b>Repetición deliberada</b> — ya hay una fila en ese aniversario, pero vieja o
      *       distinta: se pide confirmación (400) y se deja pasar. No se bloquea a ciegas porque el
      *       histórico tiene 215 grupos legítimamente repetidos por (empleado, relación, fecha),

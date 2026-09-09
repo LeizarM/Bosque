@@ -11,7 +11,7 @@ import java.util.Date;
  *
  * <p><b>Los nombres de los 10 primeros campos son los alias del SELECT del SP, tal cual.</b>
  * {@code SpHelper.ejecutarListado} usa {@code BeanPropertyRowMapper}, que mapea POR NOMBRE de
- * columna. Renombrar un campo acá lo deja en 0/null sin que nada falle — el bug más silencioso
+ * columna. Renombrar un campo aquí lo deja en 0/null sin que nada falle — el bug más silencioso
  * posible. El DAO legacy leía estas columnas por índice; este DTO existe justamente para que
  * reordenar el SELECT no rompa nada.
  *
@@ -49,7 +49,7 @@ public class FichaSaldoDto implements Serializable {
     private String datoCargo;
     /**
      * String, NO fecha: el SP devuelve {@code CONVERT(varchar(11), fechaIni, 103)} —o sea
-     * {@code "01/03/2015"}— o el literal {@code "Sin Asignar"}. Parsearlo acá para volver a
+     * {@code "01/03/2015"}— o el literal {@code "Sin Asignar"}. Parsearlo aquí para volver a
      * formatearlo sólo agregaría una forma de romperlo.
      */
     private String datoFechaBeneficio;
@@ -68,7 +68,7 @@ public class FichaSaldoDto implements Serializable {
     /** {@code SUM(trh_abonoDias.diasAbonados)}, misma restricción por relación activa (D0). */
     private double diasAbonados;
     /**
-     * <b>El SP siempre manda {@code 0.0} acá</b> ({@code 0.0 as totalDias}, literal). Lo
+     * <b>El SP siempre manda {@code 0.0} aquí</b> ({@code 0.0 as totalDias}, literal). Lo
      * calcula el consumidor. En esta migración lo calcula el DAO —
      * {@code totalDias = diasNoUsados + diasAbonados} — igual que hacía
      * {@code PermisoManagedBean} en el legacy, para que el número no dependa del cliente.

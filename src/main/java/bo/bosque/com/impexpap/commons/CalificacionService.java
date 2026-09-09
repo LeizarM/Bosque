@@ -39,16 +39,16 @@ import java.util.regex.Pattern;
  * </ol>
  *
  * <h3>La regla que manda sobre todo lo demás (heredada de NotificacionEntregaService)</h3>
- * <b>Nada de acá puede romper ni demorar el registro de una entrega, ni tumbar el webhook.</b>
+ * <b>Nada de aquí puede romper ni demorar el registro de una entrega, ni tumbar el webhook.</b>
  * Los dos métodos públicos atrapan {@code Throwable} y no relanzan NADA:
  * {@link #registrarEnvio} cuelga del hilo asíncrono del aviso al chofer, y
  * {@link #procesarRespuesta} cuelga de un endpoint público al que le escribe cualquiera. El DAO
- * ya promete no lanzar (ver {@link ICalificacionEntrega}); el {@code catch} de acá es la segunda
+ * ya promete no lanzar (ver {@link ICalificacionEntrega}); el {@code catch} de aquí es la segunda
  * red, por si el bean viene null o el SP todavía no está desplegado.
  *
  * <h3>Qué NO hace este servicio</h3>
  * No manda el pedido de calificación: ese texto va pegado al aviso de entrega que arma
- * {@code NotificacionEntregaService.armarMensajeCliente(...)}. Acá solo se registra la fila
+ * {@code NotificacionEntregaService.armarMensajeCliente(...)}. Aquí solo se registra la fila
  * pendiente y se interpreta la respuesta. La razón es que el cliente tiene que recibir UN solo
  * mensaje, no dos.
  *
@@ -115,7 +115,7 @@ public class CalificacionService {
      * Largo máximo del mensaje cuando la calificación viene en ESTRELLAS.
      *
      * <p>Las estrellas no sufren el problema de arriba: nadie escribe {@code "⭐⭐⭐⭐⭐"} en el
-     * medio de una frase salvo para calificar. Por eso acá el techo es amplio y
+     * medio de una frase salvo para calificar. Por eso aquí el techo es amplio y
      * {@code "muchas gracias, todo excelente y muy rápido ⭐⭐⭐⭐⭐"} se entiende igual. El límite
      * sigue existiendo solo para no barrer un mensaje enorme buscando estrellas.
      */
@@ -130,7 +130,7 @@ public class CalificacionService {
     /**
      * Largo al que se recortan el nombre del cliente y el del chofer antes de congelarlos en la
      * fila. {@code cardName} viene del request del chofer y no de un catálogo, así que puede venir
-     * de cualquier largo; recortarlo acá evita que el SP falle por truncamiento.
+     * de cualquier largo; recortarlo aquí evita que el SP falle por truncamiento.
      */
     private static final int MAX_LARGO_NOMBRE = 100;
 
@@ -159,12 +159,12 @@ public class CalificacionService {
      * Respuestas del tipo "4/5", "5 de 5", "4 sobre 5".
      *
      * <p>Tiene que evaluarse ANTES que el barrido genérico de dígitos, porque para ese barrido
-     * {@code "4/5"} son dos números distintos y la regla de "no adivinar" lo descartaría. Acá el
+     * {@code "4/5"} son dos números distintos y la regla de "no adivinar" lo descartaría. Aquí el
      * segundo 5 no es un candidato: es el denominador de la escala.
      *
      * <p>El patrón exige coincidencia COMPLETA ({@code matches()}) con {@code \D*} a los lados,
      * o sea que ningún otro número puede aparecer en el texto. Eso es lo que impide que una fecha
-     * como {@code "5/5/2026"} entre por acá.
+     * como {@code "5/5/2026"} entre por aquí.
      */
     private static final Pattern PATRON_FRACCION =
             Pattern.compile("^\\D*([1-5])\\s*(?:/|de|sobre)\\s*5\\D*$");
@@ -215,7 +215,7 @@ public class CalificacionService {
      * Interruptor del feature. APAGADO por defecto: encenderlo cambia el texto que reciben
      * clientes reales y empieza a escribir filas en {@code trch_EntregaCalificacion}.
      *
-     * <p>Se lee también acá, y no solo en {@code NotificacionEntregaService}, para que ninguna
+     * <p>Se lee también aquí, y no solo en {@code NotificacionEntregaService}, para que ninguna
      * fila pendiente nazca por un llamado que se olvidó de consultar el flag.
      */
     @Value("${openwa.entregas.pedir-calificacion:false}")
@@ -252,7 +252,7 @@ public class CalificacionService {
      * Interruptor maestro de salida hacia clientes, el mismo que mira
      * {@code NotificacionEntregaService}.
      *
-     * <p>Está acá porque el acuse de recibo es un mensaje que sale de la empresa hacia afuera
+     * <p>Está aquí porque el acuse de recibo es un mensaje que sale de la empresa hacia afuera
      * igual que el aviso de entrega, y sin esta guarda se escapaba por un costado: alcanzaba
      * con que llegara una respuesta al webhook para que el bot le contestara a un cliente real
      * aunque {@code notificar-cliente} estuviera en false. Todo camino que termine en un
@@ -304,7 +304,7 @@ public class CalificacionService {
      * <p><b>El {@code chatId} que se guarda tiene que ser EL MISMO al que se envió el mensaje.</b>
      * Es la única clave por la que el webhook puede después encontrar esta fila. En modo prueba
      * ({@code openwa.entregas.telefono-prueba}) el aviso se redirige al teléfono del tester, así
-     * que lo que hay que pasar acá es el chatId de PRUEBA y no el del cliente; si se guardara el
+     * que lo que hay que pasar aquí es el chatId de PRUEBA y no el del cliente; si se guardara el
      * del cliente, el "5" que responde el tester no encontraría ninguna encuesta y el feature
      * parecería roto sin serlo.
      *
@@ -355,7 +355,7 @@ public class CalificacionService {
                             dto.getDocEntry(), dto.getDb(), chat);
             }
         } catch (Throwable t) {
-            // Techo absoluto: la entrega ya está registrada y el aviso ya salió. Acá no se
+            // Techo absoluto: la entrega ya está registrada y el aviso ya salió. Aquí no se
             // relanza nada bajo ninguna circunstancia.
             logger.error("Error al registrar la encuesta de calificación (docEntry={}): {}",
                          dto == null ? null : dto.getDocEntry(), t.getMessage(), t);
@@ -509,7 +509,7 @@ public class CalificacionService {
      * escribir "estoy llegando en 5 minutos" son infinitas y las de escribir una calificación
      * son cuatro. Enumerar lo permitido es lo único que se puede mantener.
      *
-     * <p>Los números en letra ("cinco") no van acá: los resuelve su propio paso y se descuentan
+     * <p>Los números en letra ("cinco") no van aquí: los resuelve su propio paso y se descuentan
      * antes de esta comprobación.
      */
     private static final java.util.Set<String> PALABRAS_OK = new java.util.HashSet<String>(
@@ -695,7 +695,7 @@ public class CalificacionService {
      * así que se instancia uno por llamada. Es una vez por entrega: no hay nada que optimizar.
      *
      * @return la fecha, o {@code null} si venía vacía o con otro formato (el SP la deja lista, así
-     *         que un null acá significa que alguien cambió la ACCIÓN 'G')
+     *         que un null aquí significa que alguien cambió la ACCIÓN 'G')
      */
     private static Date parsearFechaEntrega(String valor) {
         if (valor == null || valor.trim().isEmpty()) {

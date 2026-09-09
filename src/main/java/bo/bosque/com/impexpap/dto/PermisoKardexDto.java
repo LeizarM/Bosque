@@ -22,7 +22,7 @@ import java.util.Date;
  *       convención del módulo es {@code model/} = forma de tabla, {@code dto/} = forma calculada.</li>
  * </ul>
  *
- * <h3>Las columnas que el SP devuelve y acá NO están</h3>
+ * <h3>Las columnas que el SP devuelve y aquí NO están</h3>
  * <ul>
  *   <li><b>{@code diasAdeudados}</b> — las columnas "Deuda En Día(s)" / "Deuda En Hr(s)" del
  *       legacy. La fórmula del SP es

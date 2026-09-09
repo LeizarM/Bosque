@@ -44,7 +44,7 @@ import java.util.Map;
  * único que usa el overload de modelo es {@link #diasDisponibles}, que es de producción y ya
  * andaba así.
  *
- * <h3>La escritura vive acá y no en un DAO nuevo</h3>
+ * <h3>La escritura vive aquí y no en un DAO nuevo</h3>
  * El padrón es otra ACCION del mismo {@code p_list_Permiso}, la simulación es una lectura y la
  * aplicación es un método. Un cuarto DAO con su interfaz sería dos archivos más para mantener
  * sincronizados, y el controlador ya inyecta {@link IPermiso} — o sea que el
@@ -132,7 +132,7 @@ public class PermisoDao implements IPermiso{
     /**
      * DIAS TOTALES DISPONIBLES DE VACACION EMPLEADO
      *
-     * <p><b>NO TOCAR el modelo {@link Permiso}.</b> Acá se usa el overload de MODELO, que
+     * <p><b>NO TOCAR el modelo {@link Permiso}.</b> Aquí se usa el overload de MODELO, que
      * serializa los 15 campos a {@code @campo=?}. Los 15 son parámetros declarados por el SP;
      * uno de más y el {@code EXEC} falla con "too many arguments", tirando abajo este endpoint
      * de producción. Todo lo que necesite campos nuevos va en un DTO, como los de abajo.
@@ -153,7 +153,7 @@ public class PermisoDao implements IPermiso{
      * @param codEmpleado único filtro real de esta acción.
      *
      * <p>NOTA 1: la columna {@code totalDias} del SP llega siempre {@code 0.0} (es un literal en
-     *         el SELECT); se calcula acá — {@code diasNoUsados + diasAbonados} — igual que hacía
+     *         el SELECT); se calcula aquí — {@code diasNoUsados + diasAbonados} — igual que hacía
      *         {@code PermisoManagedBean} en el legacy, para que el número no dependa del cliente.
      * <p>NOTA 2: el join a {@code tb_relEmplEmpr ... esActivo=1} no tiene {@code TOP(1)}. Si el
      *         SP devuelve más de una fila, el empleado tiene 2+ relaciones activas → 409, nunca
@@ -192,7 +192,7 @@ public class PermisoDao implements IPermiso{
      * ACCION 'D' — el saldo desglosado en 5 tramos.
      *
      * <p>El SP devuelve los tramos APLANADOS (5 columnas de etiqueta + 5 de monto, emparejadas
-     * sólo por el orden del SELECT); acá se vuelven a juntar de a pares y se calculan los
+     * sólo por el orden del SELECT); aquí se vuelven a juntar de a pares y se calculan los
      * totales. Las etiquetas se copian <b>literales</b>: las arma el propio SP con {@code UPDATE}s
      * y el criterio de aceptación #4 las compara carácter por carácter contra el modal del ERP
      * legacy — traen un espacio antes del paréntesis de cierre, dos espacios después de
@@ -306,7 +306,7 @@ public class PermisoDao implements IPermiso{
      * ACCION 'G' — de quién es la boleta.
      *
      * <p>Se lee con {@code ejecutarListadoDinamico} y no con un {@code BeanPropertyRowMapper}
-     * sobre {@link Permiso} a propósito: de las 12 columnas que devuelve esa ACCION acá sólo
+     * sobre {@link Permiso} a propósito: de las 12 columnas que devuelve esa ACCION aquí sólo
      * interesa una, y mapear el resto ataría un gate de seguridad a los tipos primitivos del
      * modelo (un {@code audUsuarioI} en NULL haría reventar el mapeo y, con él, la descarga del
      * reporte). Ojo: ese método NO agrega {@code @ACCION} solo, va en el Map.
@@ -333,7 +333,7 @@ public class PermisoDao implements IPermiso{
      *
      * <p><b>El SP reusa {@code @codPermiso} como filtro de EMPRESA</b>
      * ({@code WHERE @codPermiso IS NULL OR @codPermiso = te.codEmpresa}). Es un defecto suyo, de
-     * 2016, y no se puede tocar: acá se traduce y se documenta, para que nadie mande el código de
+     * 2016, y no se puede tocar: aquí se traduce y se documenta, para que nadie mande el código de
      * un permiso creyendo que filtra por permiso.
      *
      * <p>Se lee con {@code ejecutarListadoDinamico} y no con un {@code BeanPropertyRowMapper}
@@ -387,7 +387,7 @@ public class PermisoDao implements IPermiso{
      *
      * <p><b>El "cantidadDias &ge; 0,5" del legacy va al final y no en el medio</b>, y es a
      * propósito: allá el número lo traía el formulario y se podía mirar antes de saber a quiénes se
-     * lo iban a aplicar. Acá el servidor lo CALCULA, y lo calcula por persona, así que no existe
+     * lo iban a aplicar. Aquí el servidor lo CALCULA, y lo calcula por persona, así que no existe
      * hasta que hay padrón. Se comprueba igual —si a nadie le llega a medio día, el lote se
      * rechaza— pero después de resolver a quiénes.
      *
@@ -401,7 +401,7 @@ public class PermisoDao implements IPermiso{
     public List<EmpleadoColectivoDto> simularVacacionColectiva(List<Long> codEmpleados, Date desde,
                                                                Date hasta, String motivo) {
         validarRango(desde, hasta);
-        validarMotivo(motivo);   // corta acá; el valor recortado lo usa el que escribe
+        validarMotivo(motivo);   // corta aquí; el valor recortado lo usa el que escribe
         return evaluar(codEmpleados, desde, hasta);
     }
 
@@ -498,7 +498,7 @@ public class PermisoDao implements IPermiso{
     /**
      * La carga, TODO O NADA.
      *
-     * <p>{@code @Transactional} acá y no en el controlador porque es acá donde está el bucle, igual
+     * <p>{@code @Transactional} aquí y no en el controlador porque es aquí donde está el bucle, igual
      * que {@code AbonoDiasDao.aplicarGrupal}. Dos consecuencias que hay que respetar: el
      * controlador inyecta {@link IPermiso} (la transacción vive en el proxy, no en el objeto) y
      * <b>nadie puede envolver esta llamada en un try/catch que se trague la excepción</b>, porque
@@ -593,7 +593,7 @@ public class PermisoDao implements IPermiso{
      *
      * <p><b>Es la misma regla que aplica {@code f_CalcularDiasHabilesPermiso}</b>, que es la que
      * de verdad graba los días. Si las dos se separan, la pantalla explicaría una resta distinta
-     * de la que se guarda: cualquier cambio en la función se replica acá y al revés.
+     * de la que se guarda: cualquier cambio en la función se replica aquí y al revés.
      *
      * <p>Sale de {@code p_list_Permiso @ACCION='N1'}, que es donde vive la regla: ni una línea de
      * este cálculo se arma en Java.
@@ -630,7 +630,7 @@ public class PermisoDao implements IPermiso{
      *
      * <p>Reemplaza al cronograma del sistema anterior, cuyos tres reportes Jasper quedaron sin
      * datos: los alimentaba una colección Java desde {@code cronogramaBackBean}, que no existe en
-     * el código fuente. Acá el dato sale del SP y no de un bean perdido.
+     * el código fuente. Aquí el dato sale del SP y no de un bean perdido.
      */
     @Override
     public List<PermisoKardexDto> quienEstaFuera(Date fecRango, Date desde, Date hasta) {
@@ -781,13 +781,13 @@ public class PermisoDao implements IPermiso{
      * permiso", "Total días de vacación") mientras el usuario mueve las fechas — y lo que decide si
      * el botón Guardar tiene sentido: si vuelve {@code entra = false}, {@code detalle} dice por qué.
      *
-     * <p><b>No calcula nada acá.</b> Es {@link #evaluar}, o sea la misma
+     * <p><b>No calcula nada aquí.</b> Es {@link #evaluar}, o sea la misma
      * {@code f_CalcularDiasHabilesPermiso} que graba el alta. El legacy tenía dos motores en Java
      * ({@code calcularDiasHrsSolicitadas} para el permiso y {@code calcularHrsPorEmpleado} para la
      * vacación) que ni siquiera coincidían entre sí ni con la función SQL; reimplementar cualquiera
      * de los dos sería una tercera cifra sobre el mismo número.
      *
-     * <p><b>El radio "Horario Estándar / Continuo" no llega hasta acá y no es un descuido:</b> la
+     * <p><b>El radio "Horario Estándar / Continuo" no llega hasta aquí y no es un descuido:</b> la
      * función lo deduce de la hora de fin ({@code IF CAST(@hasta AS TIME) > '17:30'} conmuta a tope
      * de 600 min/día y una hora de almuerzo). En la pantalla el radio elige la ventana que ofrece
      * el reloj, no el motor de cálculo. Si viajara como parámetro habría que ignorarlo —radio que
@@ -854,13 +854,13 @@ public class PermisoDao implements IPermiso{
      * <p>Cuatro diferencias con las otras dos altas, todas heredadas de {@code savePagoDiasVacac}:
      * <ol>
      *   <li>{@code hasta = desde} — lo forzaba el legacy y por eso las 32 filas históricas tienen
-     *       las dos fechas iguales. Se fuerza acá también.</li>
+     *       las dos fechas iguales. Se fuerza aquí también.</li>
      *   <li><b>Los días los tipea el usuario</b>: {@code f_CalcularDiasHabilesPermiso} no aplica
      *       (no hay rango horario que medir). Sin motor de cálculo, las validaciones de abajo son
      *       toda la defensa que hay.</li>
      *   <li>El cruce de rangos <b>no protege</b>: con {@code desde == hasta} el rango es de ancho
      *       cero y {@code @desde &lt; p.hasta AND @hasta &gt; p.desde} nunca da verdadero contra sí
-     *       mismo. Por eso acá sí hace falta la ventana del doble toque.</li>
+     *       mismo. Por eso aquí sí hace falta la ventana del doble toque.</li>
      *   <li>Se compara contra el saldo. El legacy no lo hacía: hay una fila histórica de 247 días
      *       pagados.</li>
      * </ol>
@@ -900,8 +900,8 @@ public class PermisoDao implements IPermiso{
     }
 
     // "Buscar Vac Ganadas" del kardex —la vacación ASIGNADA por rango de fechas,
-    // p_list_vacacionAsignada ACCION 'D'— NO vive acá: es IVacacionAsignada.buscarPorRango, en el
-    // DAO que ya es dueño de trh_vacacionAsignada. Esta nota está para que nadie la busque acá.
+    // p_list_vacacionAsignada ACCION 'D'— NO vive aquí: es IVacacionAsignada.buscarPorRango, en el
+    // DAO que ya es dueño de trh_vacacionAsignada. Esta nota está para que nadie la busque aquí.
 
     // ==================================================================
     // Auxiliares
@@ -920,7 +920,7 @@ public class PermisoDao implements IPermiso{
      *
      * <p><b>La sucursal que se muestra es la que USÓ la función</b>, resuelta por
      * {@code trh_empleadoCargo.codCargoSucursal}. Ojo: el padrón ({@code ACCION 'E'}) muestra la
-     * de {@code codCargoSucPlanilla}, que puede ser otra. Acá manda la de la función, porque es la
+     * de {@code codCargoSucPlanilla}, que puede ser otra. Aquí manda la de la función, porque es la
      * que explica por qué a esta persona le tocaron 4,5 días y no 5.
      *
      * <p>El chequeo de cruce es el mismo {@code @desde &lt; p.hasta AND @hasta &gt; p.desde} que
@@ -1003,7 +1003,7 @@ public class PermisoDao implements IPermiso{
      * después desaparecía de la grilla —la ACCION {@code 'Q'} hace JOIN con {@code v_tipos}—: la
      * fila descontaba días y no se veía en ningún lado.
      *
-     * <p>{@code pva} se rechaza acá aunque exista: el pago de vacación tiene su propio método,
+     * <p>{@code pva} se rechaza aquí aunque exista: el pago de vacación tiene su propio método,
      * con el control de saldo y de doble toque que este camino no hace.
      */
     private String validarTipoPermiso(String tipoPermiso) {
@@ -1033,7 +1033,7 @@ public class PermisoDao implements IPermiso{
     }
 
     /**
-     * Días a pagar. Son días PAGADOS y el SP acepta cualquier número, así que acá está todo lo que
+     * Días a pagar. Son días PAGADOS y el SP acepta cualquier número, así que aquí está todo lo que
      * separa un pago legítimo de un error de tipeo.
      *
      * @param confirmado si el usuario ya confirmó un valor fuera del rango histórico.
@@ -1247,7 +1247,7 @@ public class PermisoDao implements IPermiso{
      * {@code CONVERT(datetime, ...)} porque el {@code CONVERT} cambia un modo de
      * fallar por otro: {@code datetime} arranca en 1753 y {@code date} en 0001,
      * así que una fila con una fecha anterior pasaría de castear mal a explotar
-     * en la base. Acá lo peor que puede pasar es que el rótulo salga sin fecha.
+     * en la base. Aquí lo peor que puede pasar es que el rótulo salga sin fecha.
      *
      * <p>Devuelve {@code null} cuando no hay nada que interpretar: el rótulo de
      * alcance sabe vivir sin la fecha, y una ficha sin rótulo es infinitamente
@@ -1255,7 +1255,7 @@ public class PermisoDao implements IPermiso{
      */
     static Date aFecha(Object valor) {
         if (valor == null) return null;
-        // java.sql.Date y java.sql.Timestamp entran por acá: los dos SON Date.
+        // java.sql.Date y java.sql.Timestamp entran por aquí: los dos SON Date.
         if (valor instanceof Date) return (Date) valor;
 
         final String texto = valor.toString().trim();

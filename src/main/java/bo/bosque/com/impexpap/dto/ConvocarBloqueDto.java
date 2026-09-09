@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Payload de {@code trs_sp_convocar} — convocar o excusar en BLOQUE para el sábado
  * de un evento.
  *
- * <p>Distinto de {@code p_abm_trs_Convocatoria}, que trabaja de a UNA persona. Acá se
+ * <p>Distinto de {@code p_abm_trs_Convocatoria}, que trabaja de a UNA persona. Aquí se
  * elige el conjunto con <b>uno</b> de estos tres criterios:
  * <ul>
  *   <li>{@code codEmpleado} — una persona (equivale al ABM).</li>
@@ -19,7 +19,7 @@ import java.io.Serializable;
  *
  * <p>Sólo funciona en sábados con {@code alcanceEvento IS NOT NULL}: primero se declara
  * el evento ({@code p_abm_trs_Sabado @ACCION='U'}) y recién después se convoca. Las
- * ausencias de un sábado normal no van por acá — van por {@code trs_Programacion}.
+ * ausencias de un sábado normal no van por aquí — van por {@code trs_Programacion}.
  */
 @Getter
 @Setter

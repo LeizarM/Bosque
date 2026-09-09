@@ -8,6 +8,7 @@ import bo.bosque.com.impexpap.dto.BitacoraDto;
 import bo.bosque.com.impexpap.dto.DiaNoHabilDto;
 import bo.bosque.com.impexpap.dto.HorarioVigenteEmpleadoDto;
 import bo.bosque.com.impexpap.dto.PermisoKardexDto;
+import bo.bosque.com.impexpap.dto.ReporteBiometricoRangoRequest;
 import bo.bosque.com.impexpap.dto.ReporteBiometricoRequest;
 import bo.bosque.com.impexpap.dto.ResumenAsistenciaEmpleadoDto;
 import bo.bosque.com.impexpap.model.*;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
  * Controlador REST del módulo Biométrico (tablas {@code tbio_}).
  *
  * <p><b>Arquitectura:</b> igual que el resto del proyecto — sin JPA, todo por Stored
- * Procedures. Los endpoints CRUD de acá abajo son delgados: solo mapean HTTP a los
+ * Procedures. Los endpoints CRUD de aquí abajo son delgados: solo mapean HTTP a los
  * {@code Bio*Dao} ya existentes. Los 7 SP {@code p_abm_Bio*} con ABM real (no
  * {@code p_abm_BioCHECKINOUT}, que nunca fue un ABM) se migraron al contrato
  * {@code @error/@errormsg/@idGenerado OUTPUT} — ver
@@ -54,7 +55,7 @@ import java.util.stream.Collectors;
  * tocar ningún SP:
  * <ul>
  *   <li>el bug de {@code p_abm_BioHrXEmplExpandido ACCION='A'} que colapsaba los N
- *       horarios de un empleado en el mes a uno solo (acá se elige el horario vigente
+ *       horarios de un empleado en el mes a uno solo (aquí se elige el horario vigente
  *       día por día, no una vez por empleado);</li>
  *   <li>la falta de integración con el rol de sábados (antes un sábado "no le toca"
  *       salía como falta; {@code IPermiso.diasNoHabiles} ya resuelve eso, no hacía
@@ -176,11 +177,11 @@ public class BiometricoController {
     /**
      * {@code filtro} acepta la clave extra {@code soloActivos} (no es un parámetro
      * de {@code p_list_BioEmplBosqEmpl} — se saca del mapa antes de mandarlo al SP,
-     * que fallaría con un parámetro que no declara, y se aplica acá en Java): si
+     * que fallaría con un parámetro que no declara, y se aplica aquí en Java): si
      * viene {@code true}, se excluyen los enlazados a un empleado de Bosque que ya
      * no está activo. No es un estado guardado — se recalcula contra
      * {@link IEmpleado#obtenerListaEmpleados(int)} en cada llamada, así que si el
-     * empleado vuelve a estar activo en Bosque, reaparece solo, sin tocar nada acá.
+     * empleado vuelve a estar activo en Bosque, reaparece solo, sin tocar nada aquí.
      * Sin el flag (uso de la pestaña Empleados/Verificación) se sigue viendo el
      * padrón completo, activos e inactivos, para poder auditar/desenlazar cualquiera.
      */
@@ -403,6 +404,109 @@ public class BiometricoController {
     }
 
     /**
+     * El mismo {@code RptBiometricoDetallado.jrxml} de {@link #reporteMensualPdf},
+     * pero para UN empleado a lo largo de VARIOS meses seguidos en un solo PDF
+     * (un mes por página, igual que {@link #reporteMensualDetalladoTodosPdf}
+     * hace con varios empleados) — para pedidos tipo "las marcaciones de este
+     * empleado desde tal mes hasta hoy" sin tener que descargar un PDF por mes
+     * a mano. Reusa {@link #calcularReporte} sin cambios: no vuelve a calcular
+     * nada, sólo lo llama una vez por mes del rango.
+     *
+     * <p>Acotado a {@link #MAX_MESES_RANGO} meses (más de 8 años) para evitar
+     * un pedido accidentalmente enorme — un rango típico ("todo lo que hay
+     * desde que hay datos") entra cómodo bastante por debajo de eso.
+     */
+    @PostMapping("/reporte-detallado-rango-pdf")
+    public ResponseEntity<byte[]> reporteDetalladoRangoPdf(@RequestBody ReporteBiometricoRangoRequest req) {
+        if (req.getCodEmpleado() <= 0) {
+            throw new SpBusinessException("Indique un empleado.");
+        }
+        if (req.getAnioDesde() <= 0 || req.getMesDesde() < 1 || req.getMesDesde() > 12
+                || req.getAnioHasta() <= 0 || req.getMesHasta() < 1 || req.getMesHasta() > 12) {
+            throw new SpBusinessException("Indique un rango de meses válido.");
+        }
+
+        List<int[]> meses = new ArrayList<>();
+        int anio = req.getAnioDesde();
+        int mes = req.getMesDesde();
+        while (anio < req.getAnioHasta() || (anio == req.getAnioHasta() && mes <= req.getMesHasta())) {
+            meses.add(new int[]{anio, mes});
+            if (meses.size() > MAX_MESES_RANGO) {
+                throw new SpBusinessException("El rango pedido es demasiado largo (máximo " + MAX_MESES_RANGO + " meses).");
+            }
+            mes++;
+            if (mes > 12) {
+                mes = 1;
+                anio++;
+            }
+        }
+        if (meses.isEmpty()) {
+            throw new SpBusinessException("El mes de inicio es posterior al mes final.");
+        }
+
+        List<BioEmplBosqEmpl> cruce = emplBosqEmplDao.listar(mapa("idEmpleado", req.getCodEmpleado()));
+        String nombreEmpleado = cruce.isEmpty() ? "" : cruce.get(0).getDatoNombreBosq();
+
+        List<CompletableFuture<MesCalculado>> corridas = meses.stream()
+                .map(am -> CompletableFuture.supplyAsync(
+                        () -> calcularMesDelRango(req.getCodEmpleado(), am[0], am[1]), resumenExecutor))
+                .collect(Collectors.toList());
+
+        List<MesCalculado> calculados = corridas.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.<MesCalculado>comparingInt(m -> m.anio).thenComparingInt(m -> m.mes))
+                .collect(Collectors.toList());
+
+        List<java.util.Collection<?>> lotes = new ArrayList<>(calculados.size());
+        List<Map<String, Object>> paramsPorLote = new ArrayList<>(calculados.size());
+        for (MesCalculado m : calculados) {
+            lotes.add(m.dias);
+            Map<String, Object> params = new HashMap<>();
+            params.put("nombreEmpleado", nombreEmpleado);
+            params.put("mesAnio", MESES[m.mes - 1] + " " + m.anio);
+            paramsPorLote.add(params);
+        }
+
+        byte[] pdf = jasperReportExport.exportPDFDesdeColeccionesMultiples(
+                "RptBiometricoDetallado", lotes, paramsPorLote);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentLength(pdf.length);
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+    }
+
+    private static final int MAX_MESES_RANGO = 100;
+
+    /** Un mes del rango ya calculado, o {@code null} si {@link #calcularReporte} lo rechaza (mismo criterio que el resto de los "todos"). */
+    private MesCalculado calcularMesDelRango(long codEmpleado, int anio, int mes) {
+        ReporteBiometricoRequest porMes = new ReporteBiometricoRequest();
+        porMes.setCodEmpleado(codEmpleado);
+        porMes.setAnio(anio);
+        porMes.setMes(mes);
+        try {
+            return new MesCalculado(anio, mes, calcularReporte(porMes));
+        } catch (SpBusinessException ex) {
+            log.warn("Se omite del reporte por rango el mes {}/{} del empleado {}: {}", mes, anio, codEmpleado, ex.getMessage());
+            return null;
+        }
+    }
+
+    /** Un mes calculado del rango — el par que necesita cada lote de {@link JasperReportExport#exportPDFDesdeColeccionesMultiples}. */
+    private static final class MesCalculado {
+        final int anio;
+        final int mes;
+        final List<AsistenciaDiaDto> dias;
+
+        MesCalculado(int anio, int mes, List<AsistenciaDiaDto> dias) {
+            this.anio = anio;
+            this.mes = mes;
+            this.dias = dias;
+        }
+    }
+
+    /**
      * Un mes, todos los empleados enlazados: una fila con los totales de
      * cada uno (no el detalle día a día de los 400 a la vez — ver el
      * javadoc de la clase / CLAUDE.md sobre por qué esto es un resumen y no
@@ -539,7 +643,7 @@ public class BiometricoController {
      *
      * <p>Misma estrategia de paralelismo acotado que {@link #calcularResumen}
      * (mismo {@link #resumenExecutor}, mismo motivo: HikariCP sólo tiene 5
-     * conexiones para toda la app) — pero acá además se compila el
+     * conexiones para toda la app) — pero aquí además se compila el
      * {@code .jrxml} UNA sola vez y se llena una vez por empleado
      * ({@link JasperReportExport#exportPDFDesdeColeccionesMultiples}), no un
      * PDF por separado por persona.
@@ -697,7 +801,7 @@ public class BiometricoController {
         // de saber si el cuello de botella es una de las ~7-8 idas y vueltas
         // a la BD que hace este método (cada una un round-trip real si la
         // app corre contra una BD remota) o específicamente diasNoHabiles/
-        // kardex (las dos únicas llamadas acá que no son de este módulo —
+        // kardex (las dos únicas llamadas aquí que no son de este módulo —
         // van a IPermiso, sobre trh_*/trs_*, con una SP/función que esta
         // sesión nunca leyó). Un log por corrida da el desglose real la
         // próxima vez que se note lento, en vez de seguir adivinando.
@@ -744,10 +848,10 @@ public class BiometricoController {
                 .collect(Collectors.groupingBy(m -> toLocalDate(m.getCHECKTIME())));
 
         // ── marcaciones olvidadas registradas a mano (tbio_bioCHECKINOUTAdicinal) ──
-        // Hasta acá esta tabla se guardaba (pestaña Marcaciones Olvidadas /
+        // Hasta aquí esta tabla se guardaba (pestaña Marcaciones Olvidadas /
         // el botón del calendario) pero NUNCA se leía de vuelta — el reporte
         // sólo miraba tbio_bioCHECKINOUT, así que registrar una marcación
-        // olvidada no cambiaba nada: el día seguía en FALTA. Se mezclan acá
+        // olvidada no cambiaba nada: el día seguía en FALTA. Se mezclan aquí
         // con las del reloj, y se recuerda cuál de las dos (entrada/salida)
         // vino de esta tabla para poder marcarla en el reporte
         // (AsistenciaDiaDto.entradaManual/salidaManual).
@@ -888,9 +992,9 @@ public class BiometricoController {
                 fila.setEstado(AsistenciaDiaDto.TRABAJADO);
                 // TRABAJADO nunca trae motivo por ningún otro camino (sólo
                 // FERIADO/SABADO_LIBRE/PERMISO/VACACION lo setean arriba) —
-                // seguro pisarlo acá para que el reporte diga POR QUÉ el día
+                // seguro pisarlo aquí para que el reporte diga POR QUÉ el día
                 // quedó marcado como trabajado pese a faltarle una marca real
-                // del reloj — acá SÍ están las dos piernas, una o las dos
+                // del reloj — aquí SÍ están las dos piernas, una o las dos
                 // completadas a mano.
                 if (fila.isEntradaManual() || fila.isSalidaManual()) {
                     String pierna =
@@ -965,7 +1069,7 @@ public class BiometricoController {
      * {@code idEmpleado} y toma el primero que encuentra
      * ({@code cruce.get(0)}), sin importar cuál de las dos filas de
      * {@code tbio_bioEmplBosqEmpl} disparó el cálculo. El resultado nunca
-     * cambia según cuál enlace se use acá — sólo hace falta no procesar al
+     * cambia según cuál enlace se use aquí — sólo hace falta no procesar al
      * mismo empleado dos veces.
      *
      * <p>No es un fix de los datos: el enlace duplicado en
@@ -984,7 +1088,7 @@ public class BiometricoController {
     /**
      * Cuál {@code idEmpleadBio} usar para leer marcaciones, cuando el
      * empleado tiene MÁS de un enlace en {@code tbio_bioEmplBosqEmpl} (el
-     * mismo caso de {@link #distintosPorEmpleado}, pero acá SÍ importa cuál
+     * mismo caso de {@link #distintosPorEmpleado}, pero aquí SÍ importa cuál
      * se elija).
      *
      * <p>Caso real, confirmado 2026-09-01: un empleado con dos enlaces (re-
@@ -1102,7 +1206,7 @@ public class BiometricoController {
 
     private static final java.time.format.DateTimeFormatter FORMATO_HORA = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
 
-    /** {@code null} → {@code ""} (no "—", eso lo decide el llamador según el contexto: acá es un componente de un texto más largo). */
+    /** {@code null} → {@code ""} (no "—", eso lo decide el llamador según el contexto: aquí es un componente de un texto más largo). */
     private static String formatoHora(Date hora) {
         if (hora == null) return "";
         return hora.toInstant().atZone(ZoneId.systemDefault()).toLocalTime().format(FORMATO_HORA);

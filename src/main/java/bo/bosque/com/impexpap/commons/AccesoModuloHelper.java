@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * <b>Quién sos y qué podés tocar</b>, resuelto en el servidor a partir del token.
+ * <b>Quién eres y qué puedes tocar</b>, resuelto en el servidor a partir del token.
  *
  * <p>Nació como los métodos privados de identidad de {@code RolSabadosController} — que sigue
- * usándolos, ahora delegando acá — y suma la pieza que faltaba: el gate contra el ACL de
+ * usándolos, ahora delegando aquí — y suma la pieza que faltaba: el gate contra el ACL de
  * botones ({@link #exigirBoton}), que es lo que cierra la deuda D4 del plan de migración.
  *
  * <h3>De dónde sale la identidad</h3>
@@ -36,7 +36,7 @@ import java.util.List;
  * {@code p_list_Usuario} que resuelva login → codUsuario y cambiar sólo
  * {@link #miPermiso(Authentication)}.
  *
- * <h3>Las dos autorizaciones que viven acá NO son la misma</h3>
+ * <h3>Las dos autorizaciones que viven aquí NO son la misma</h3>
  * <ul>
  *   <li>{@link #exigirAdminORrhh(Authentication)} pregunta por {@code trs_Rrhh}, el padrón del
  *       módulo de SÁBADOS. No tiene nada que ver con el ACL de botones.</li>
@@ -90,7 +90,7 @@ public class AccesoModuloHelper
      * codEmpleado lo hace {@code tb_usuario}, del lado del SQL.
      *
      * <p>Si esto viene vacío es que el token no se validó y el request llegó igual, así que se
-     * corta acá antes de hacer nada.
+     * corta aquí antes de hacer nada.
      */
     public String loginDelToken(Authentication auth) {
         String login = auth != null ? auth.getName() : null;
@@ -106,7 +106,7 @@ public class AccesoModuloHelper
      *
      * <p>Trae el permiso <b>sin</b> la lista de dependientes: los que escriben sólo necesitan
      * la identidad, y de la pertenencia al equipo ya se ocupa {@code trs_sp_programar} con su
-     * EXISTS contra {@code fn_trs_ProgramadorDependiente()}. Cargar el equipo entero acá sería
+     * EXISTS contra {@code fn_trs_ProgramadorDependiente()}. Cargar el equipo entero aquí sería
      * una consulta al pedo en cada click.
      *
      * @return siempre un DTO, nunca {@code null}; con {@code esProgramador=0} si no lo es
@@ -150,13 +150,13 @@ public class AccesoModuloHelper
      * <h3>La identidad NUNCA sale del body</h3>
      * El {@code codUsuario} se resuelve desde el token, no se recibe. Ojo con el precedente
      * malo: {@code POST /view/vistaBtn} toma el {@code codUsuario} del JSON, o sea que
-     * cualquiera puede pedir los permisos de otro. Acá no.
+     * cualquiera puede pedir los permisos de otro. Aquí no.
      *
      * <h3>El fallback de administrador es del legacy, no un invento</h3>
      * {@code Loggin.autorizarBtn()} (Bosque v2, línea 385) hace exactamente esto: si el botón
      * no aparece o tiene permiso 0, igual autoriza cuando {@code tipoUsuario.equals("adm")}.
      * Se replica para no cambiar en la migración quién puede qué. La única diferencia es el
-     * ORDEN — acá el admin se resuelve primero, para ahorrarle dos consultas a los 6 usuarios
+     * ORDEN — aquí el admin se resuelve primero, para ahorrarle dos consultas a los 6 usuarios
      * de Sistemas; el resultado es el mismo.
      *
      * <h3>Falla cerrado</h3>
@@ -180,7 +180,7 @@ public class AccesoModuloHelper
      * ({@code tipoUsuario='lim'}) es uno de los 5 que <b>sí</b> tienen {@code btnDetalles} con
      * {@code nivelAcceso=1}, así que el criterio #9 se prueba tal cual está escrito.
      *
-     * @param auth        el {@code Authentication} del request; el {@code codUsuario} sale de acá
+     * @param auth        el {@code Authentication} del request; el {@code codUsuario} sale de aquí
      * @param codVista    {@code tb_vista.codVista} — 24 es "Permisos / Vacaciones / Abono Dias"
      * @param nombreBoton {@code tb_vistaBtn.nombreBtn}, p. ej. {@code "btnDetalles"}
      * @throws AccessDeniedException 403, con el mensaje fijo que pone {@code GlobalExceptionHandler}
@@ -195,7 +195,7 @@ public class AccesoModuloHelper
     /**
      * Lo mismo que {@link #exigirBoton}, pero <b>respondiendo en vez de cortar</b>.
      *
-     * <p>Existe para las autorizaciones que son un O: <i>"tenés el botón del ACL <b>o</b> el
+     * <p>Existe para las autorizaciones que son un O: <i>"tienes el botón del ACL <b>o</b> el
      * recurso es tuyo"</i>. Es el caso de la boleta de vacación — el empleado tiene que poder
      * bajar la suya aunque RR.HH. le saque el botón de la consola. Con sólo la versión que tira
      * excepción, ese O habría que escribirlo con un try/catch alrededor de un throw, que es

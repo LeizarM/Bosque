@@ -49,18 +49,18 @@ import java.util.Map;
  * La primera escribe {@code trh_vacacionAsignada}: son los días que la empresa te RECONOCE, el
  * <b>debe</b> del saldo. La segunda escribe {@code trh_permiso} con {@code tipoPermiso='vac'}: son
  * días GOZADOS, el <b>haber</b>. Confundirlas le suma días a la gente en vez de descontárselos, y
- * los nombres se parecen lo suficiente como para que valga la pena decirlo acá arriba.
+ * los nombres se parecen lo suficiente como para que valga la pena decirlo aquí arriba.
  *
  * <h3>Las escrituras mueven plata</h3>
  * Una vacación asignada vale de 15 a 30 días pagados y un abono son días libres cobrados. Por eso
  * <b>toda la validación de negocio vive en Java</b>: los tres {@code p_abm_} son de 2016, no
  * validan nada, no devuelven id generado ni envelope de error y no tienen transacción. Está toda en
- * {@link IVacacionAsignada} e {@link IAbonoDias}; acá arriba sólo queda el gate de permisos, la
+ * {@link IVacacionAsignada} e {@link IAbonoDias}; aquí arriba sólo queda el gate de permisos, la
  * identidad y la traducción a HTTP.
  *
  * <h3>Rutas en kebab-case</h3>
  * Sigue el precedente más reciente ({@code /rol-sabados/simular-puente-vacacion}). El resto del
- * backend usa camelCase; la inconsistencia queda documentada acá y el módulo es consistente
+ * backend usa camelCase; la inconsistencia queda documentada aquí y el módulo es consistente
  * puertas adentro.
  *
  * <h3>Todo POST con {@code @RequestBody}, nunca query params</h3>
@@ -68,15 +68,15 @@ import java.util.Map;
  * SQLi y devuelve 403 con su propio cuerpo ante un apóstrofo o una palabra como {@code select}.
  * Un {@code GET ?nombre=D'Angelo} daría un 403 que nadie sabría explicar.
  *
- * <h3>Los {@code @Transactional} de las cargas colectivas NO están acá</h3>
+ * <h3>Los {@code @Transactional} de las cargas colectivas NO están aquí</h3>
  * Están en {@code AbonoDiasDao.aplicarGrupal} y {@code PermisoDao.aplicarVacacionColectiva}, que es
- * donde está el bucle que inserta N filas; acá envolverlos sólo agregaría un segundo lugar donde
+ * donde está el bucle que inserta N filas; aquí envolverlos sólo agregaría un segundo lugar donde
  * mirar. Dos consecuencias que hay que respetar: este controlador inyecta las <b>interfaces</b>
  * ({@link IAbonoDias}, {@link IPermiso}), porque la transacción vive en el proxy y no en el objeto,
  * y ninguna llamada de escritura se envuelve en un {@code try/catch} — el rollback de Spring
  * depende de que la excepción salga.
  *
- * <h3>Los errores no se arman acá</h3>
+ * <h3>Los errores no se arman aquí</h3>
  * Se lanza la excepción que corresponde y {@code GlobalExceptionHandler} la convierte en el
  * envelope: {@code SpBusinessException} → 400, {@code SpConflictException} → 409,
  * {@code AccessDeniedException} → 403. Un {@code try/catch} en el controlador sería una segunda
@@ -179,7 +179,7 @@ public class PermisoRrhhController {
     private static final String BTN_VACACION_PAGADA = "btnNuevaVacPagada";
 
     /**
-     * El tipo de la vacación individual. Literal acá y no importado del DAO porque el controlador
+     * El tipo de la vacación individual. Literal aquí y no importado del DAO porque el controlador
      * inyecta la interfaz; si alguna vez dejara de ser el código de {@code v_tipos},
      * {@code validarTipoPermiso} lo rechaza con un 400 explícito, no en silencio.
      */
@@ -390,7 +390,7 @@ public class PermisoRrhhController {
      * devuelve la frase que arma {@code f_calcDiasLaborablesExt}. La UI la muestra rotulada como
      * orientativa.
      *
-     * <p><b>Las validaciones están acá porque el SP no valida nada.</b> No hace falta comprobar
+     * <p><b>Las validaciones están aquí porque el SP no valida nada.</b> No hace falta comprobar
      * el orden de las fechas: la función se autocorrige si vienen al revés.
      *
      * <p><b>Devuelve LISTA de una fila, no objeto</b> ({@code "data":[{"datoAntCalc": "..."}]}),
@@ -429,7 +429,7 @@ public class PermisoRrhhController {
      * REALES con las SINTÉTICAS ({@code sintetico = true}, {@code codVacacionAsignada = 0}) de los
      * años que todavía no tienen registro.
      *
-     * <p>De acá sale el "Nuevo" de la pantalla: <b>no hay alta libre</b>, se da de alta SOBRE uno
+     * <p>De aquí sale el "Nuevo" de la pantalla: <b>no hay alta libre</b>, se da de alta SOBRE uno
      * de estos aniversarios y la fecha la pone el servidor.
      *
      * <p>La relación laboral es <b>opcional</b>: si el cliente la manda (sale de
@@ -557,7 +557,7 @@ public class PermisoRrhhController {
     /**
      * Baja. Lo que el legacy creía que hacía y no hacía: su {@code eliminarAbonDia()} llama a
      * {@code registrar()}, que con el id cargado resuelve a ACCION {@code 'U'} y dispara un UPDATE
-     * con todo en NULL. Acá va con {@code 'D'}, y el trigger {@code dad_abonoDias} la archiva en
+     * con todo en NULL. Aquí va con {@code 'D'}, y el trigger {@code dad_abonoDias} la archiva en
      * {@code trh_abonoDiasEliminado}.
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
@@ -605,7 +605,7 @@ public class PermisoRrhhController {
      *
      * <p><b>El mensaje no se copia del legacy.</b> Aquél decía "Problema(s) al registrar N
      * empleado(s)" sobre un fondo de éxitos parciales, porque insertaba sin transacción y dejaba
-     * media carga escrita. Acá un fallo significa que no quedó ninguna fila, y el error tiene que
+     * media carga escrita. Aquí un fallo significa que no quedó ninguna fila, y el error tiene que
      * decir eso: copiar el texto viejo con la semántica nueva sería mentir.
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
@@ -702,7 +702,7 @@ public class PermisoRrhhController {
      * <p>Los filtros van todos en el mismo cuerpo y se combinan con AND: {@code tipoPermiso} vacío o
      * {@code "0"} es "Todos"; {@code desde}/{@code hasta} acotan el inicio y el fin del permiso; y
      * {@code fecRango} <b>no es un rango</b>, es "quién estaba de permiso el día X". El SP les da
-     * esa semántica y el DAO la respeta; acá no se traduce nada.
+     * esa semántica y el DAO la respeta; aquí no se traduce nada.
      *
      * <p><b>Sin columnas de deuda.</b> "Deuda En Día(s)" / "Deuda En Hr(s)" no se portaron: la
      * fórmula del SP depende de {@code trh_repper}, que tiene 0 filas, y devolvería el NEGATIVO de
@@ -810,14 +810,14 @@ public class PermisoRrhhController {
      * Modal <b>"Registro de permisos"</b>: un permiso a nombre del empleado, con el tipo del combo.
      * 201 con la fila releída.
      *
-     * <p>La vacación NO entra por acá aunque el tipo exista, y es una regla de ACL, no de forma:
+     * <p>La vacación NO entra por aquí aunque el tipo exista, y es una regla de ACL, no de forma:
      * este endpoint pide {@link #BTN_PROGRAMAR_PERMISO} (4 usuarios) y la vacación pide
      * {@link #BTN_PROGRAMAR_VACACION} (5). Sin este corte, un {@code tipoPermiso: "vac"} le daría a
      * los 4 una atribución que el ACL no les dio. Es el mismo criterio con el que el DAO rechaza
      * {@code pva}.
      *
      * <p>El resto de la validación —tipo contra {@code v_tipos}, rango, motivo, días > 0 y el cruce
-     * con un permiso ya cargado— vive en el DAO, que es donde está la transacción: acá sólo queda el
+     * con un permiso ya cargado— vive en el DAO, que es donde está la transacción: aquí sólo queda el
      * gate y la identidad.
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
@@ -864,7 +864,7 @@ public class PermisoRrhhController {
      * —hay una fila histórica de 247 días pagados— toda la defensa está en el DAO: piso de medio
      * día, múltiplos de 0,5, comparación contra el saldo y ventana de doble toque.
      *
-     * <p>Por eso {@code confirmado} importa acá más que en ninguna otra ruta: el primer POST vuelve
+     * <p>Por eso {@code confirmado} importa aquí más que en ninguna otra ruta: el primer POST vuelve
      * con un <b>400 {@code confirmable}</b> que dice el saldo antes y después, y sólo el segundo
      * —con la confirmación del usuario— escribe. El doble toque del teléfono es distinto y se
      * rechaza con <b>409 aunque {@code confirmado} venga en {@code true}</b>, porque el segundo

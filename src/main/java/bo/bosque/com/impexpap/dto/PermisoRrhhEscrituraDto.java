@@ -15,7 +15,7 @@ import java.util.List;
  * simplemente no viaja. Ocho clases de tres campos serían ocho archivos para mantener sincronizados
  * con el mismo controlador.
  *
- * <h3>Acá NO viaja quién escribe</h3>
+ * <h3>Aquí NO viaja quién escribe</h3>
  * Ni {@code codUsuario} ni {@code audUsuario}, y no es un olvido: el firmante de una escritura no
  * lo puede afirmar el cliente. Sale de {@code Authentication} y sólo de ahí. Si alguien agrega el
  * campo, el controlador lo va a seguir ignorando.
@@ -63,7 +63,7 @@ public class PermisoRrhhEscrituraDto implements Serializable {
      * Días asignados o abonados, según la ruta. Primitivo a propósito: si el JSON no lo trae llega
      * {@code 0}, y {@code 0} <b>es un alta válida de vacación asignada</b> ("este año no le
      * corresponde nada", 446 de las 1.424 filas reales), mientras que en abono el DAO lo rechaza
-     * por su propio umbral. Un wrapper obligaría a decidir acá lo que ya decide cada regla.
+     * por su propio umbral. Un wrapper obligaría a decidir aquí lo que ya decide cada regla.
      *
      * <h3>Los dos alias son una RED, no el contrato</h3>
      * La clave canónica es {@code dias} y es la que manda el cliente. Los alias existen porque el
@@ -133,7 +133,7 @@ public class PermisoRrhhEscrituraDto implements Serializable {
      *
      * <p><b>Cuidado con el SP:</b> {@code p_list_Permiso @ACCION='E'} filtra la empresa con el
      * parámetro {@code @codPermiso} ({@code WHERE @codPermiso IS NULL OR @codPermiso =
-     * te.codEmpresa}). Es un defecto del SP, no un renombre acá: el DAO traduce, y este campo se
+     * te.codEmpresa}). Es un defecto del SP, no un renombre aquí: el DAO traduce, y este campo se
      * llama por lo que significa.
      */
     private Long codEmpresa;
@@ -156,12 +156,12 @@ public class PermisoRrhhEscrituraDto implements Serializable {
      * "Programar vacación" —la única diferencia entre los dos modales— y {@code null} en todo lo
      * demás.
      *
-     * <p><b>Tiene que estar declarado acá:</b> Jackson descarta en silencio lo que el DTO no
+     * <p><b>Tiene que estar declarado aquí:</b> Jackson descarta en silencio lo que el DTO no
      * declara (no hay {@code FAIL_ON_UNKNOWN_PROPERTIES}), así que un {@code tipoPermiso} sin campo
      * no daría error — grabaría el permiso con el tipo en NULL y la fila desaparecería de la
      * nómina, que hace JOIN con {@code v_tipos}.
      *
-     * <p><b>{@code pva} no entra por acá</b>: el pago de vacación va por su propio endpoint,
+     * <p><b>{@code pva} no entra por aquí</b>: el pago de vacación va por su propio endpoint,
      * porque necesita el control de saldo y de doble toque que el alta común no hace.
      */
     private String tipoPermiso;

@@ -16,7 +16,7 @@ import java.util.Date;
  *
  * <p><b>Los 20 nombres son los alias del SP, calcados.</b> {@code BeanPropertyRowMapper} mapea
  * por NOMBRE. El DAO legacy leía las 16 primeras POR ÍNDICE: agregar una columna al SELECT le
- * corría todo. Acá reordenar el SELECT no rompe nada; renombrar un campo sí — y en silencio.
+ * corría todo. Aquí reordenar el SELECT no rompe nada; renombrar un campo sí — y en silencio.
  *
  * <p><b>Ojo con las etiquetas: se pasan LITERALES, sin {@code trim()} ni reformateo.</b> Las
  * arma el propio SP con {@code UPDATE}s y traen rarezas que el criterio de aceptación #4 exige

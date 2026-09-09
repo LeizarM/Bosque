@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
 
         // (a) El corte del cliente no siempre llega como ClientAbortException pelada: si alguna
         //     capa intermedia la envuelve, el handler específico de arriba no se elige y termina
-        //     cayendo acá. Se recorre la cadena de causas y se trata igual.
+        //     cayendo aquí. Se recorre la cadena de causas y se trata igual.
         if (esCorteDelCliente(ex)) {
             logger.debug("El cliente cortó la conexión antes de recibir la respuesta completa: {}",
                          ex.getMessage());

@@ -19,7 +19,7 @@ import java.util.Date;
  * El patrón {@code catch (DataAccessException) { return false; }} que usan {@code ColorDao} y
  * compañía es incompatible con {@code @Transactional}: Spring sólo hace rollback si sale una
  * excepción de Java, así que tragarla dejaría media carga colectiva escrita y el método diría que
- * todo salió bien. Acá se lanza {@link SpBusinessException}, que
+ * todo salió bien. Aquí se lanza {@link SpBusinessException}, que
  * {@code GlobalExceptionHandler} convierte en un 400 con el motivo.
  *
  * <h3>Y un rowcount de cero tampoco es benigno — salvo en el UPDATE</h3>
@@ -56,7 +56,7 @@ public final class SpEscritura {
      * Igual que {@link #ejecutar}, pero <b>sin tratar el rowcount 0 como error</b>. Es la que usan
      * las EDICIONES.
      *
-     * <h3>Por qué acá el cero no significa nada</h3>
+     * <h3>Por qué aquí el cero no significa nada</h3>
      * {@code trh_vacacionAsignada} y {@code trh_abonoDias} tienen un trigger <b>INSTEAD OF
      * UPDATE</b> ({@code dau_vacacionAsignada}, {@code dau_abonoDias}) y los dos abren con
      * {@code SET NOCOUNT ON}. El UPDATE real lo hace el trigger, con el conteo apagado: el driver

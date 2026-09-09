@@ -29,7 +29,7 @@ public interface IVacacionAsignada {
      * ({@code codVacacionAsignada = 0}, {@link VacacionAsignada#isSintetico()}) de los
      * aniversarios que todavía no tienen registro.
      *
-     * <p>De acá sale el "Nuevo" de la UI: no hay un botón suelto de alta, se da de alta SOBRE un
+     * <p>De aquí sale el "Nuevo" de la UI: no hay un botón suelto de alta, se da de alta SOBRE un
      * aniversario sintético y la fecha la pone el servidor.
      *
      * <p>Devuelve vacío si el empleado no tiene fecha de inicio de beneficio
@@ -39,7 +39,7 @@ public interface IVacacionAsignada {
      *                       resuelve el DAO contra la base. El cliente no está obligado a haber
      *                       consultado la ficha de saldo antes de abrir el historial.
      * @param fechaCorte hasta dónde llegar; {@code null} = hoy. <b>No es opcional para el SP</b>:
-     *                   con NULL devolvería la grilla vacía sin avisar, así que se sustituye acá.
+     *                   con NULL devolvería la grilla vacía sin avisar, así que se sustituye aquí.
      */
     List<VacacionAsignada> historial(long codEmpleado, Long codRelEmplEmpr, Date fechaCorte);
 
@@ -100,7 +100,7 @@ public interface IVacacionAsignada {
      * a {@code trh_vacacionAsignadaEliminado} con la fecha de borrado.
      *
      * <p>{@code codEmpleado} no es decorativo: el SP borra por id sin mirar de quién es la fila,
-     * así que acá se comprueba la pertenencia antes de llamarlo.
+     * así que aquí se comprueba la pertenencia antes de llamarlo.
      *
      * @param audUsuarioI quién borra, del token. <b>Se escribe en la fila con una 'U' previa</b>:
      *                    la ACCION 'D' no lo recibe, así que sin ese paso el trigger la archivaría

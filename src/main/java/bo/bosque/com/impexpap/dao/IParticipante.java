@@ -77,7 +77,7 @@ public interface IParticipante {
      * <p>Va por el camino del Map y no por el del modelo a propósito: el ABM
      * actualiza cada campo con {@code ISNULL(@campo, campo)}, así que mandar el
      * modelo entero pisaría con los valores por defecto de Java todo lo que no
-     * se cargó. Acá viajan tres parámetros y nada más.
+     * se cargó. Aquí viajan tres parámetros y nada más.
      *
      * <p>El cambio NO mueve la grilla: las celdas ya escritas siguen igual hasta
      * que se corra {@code REGENERAR}.

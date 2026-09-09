@@ -56,7 +56,7 @@ public class DesgloseSaldoDto implements Serializable {
      * quedan con los defaults del {@code INSERT}, con fechas {@code 01/01/1900}. Por eso la
      * UI tiene que mostrar un banner de advertencia y no simplemente pintar los números.
      *
-     * <p>Hoy 0 de 85 activos caen acá <i>(verificado)</i>, pero el camino existe.
+     * <p>Hoy 0 de 85 activos caen aquí <i>(verificado)</i>, pero el camino existe.
      */
     private boolean tieneFechaBeneficio;
 

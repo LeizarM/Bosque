@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * compilaron con iReport hace años y este backend corre JasperReports 6.21.2;
  * un {@code .jasper} es un objeto Java serializado, así que una diferencia de
  * versión revienta al deserializar y no hay forma de arreglarlo sin volver a
- * compilar. Acá se compilan los {@code .jrxml} —que son XML y sí son estables
+ * compilar. Aquí se compilan los {@code .jrxml} —que son XML y sí son estables
  * entre versiones— la primera vez que se pide cada reporte, y el resultado
  * queda cacheado en memoria.
  *
@@ -181,7 +181,7 @@ public class CartaCitePdfService {
      *
      * @param codEmpresa el parámetro {@code codEmpresa} del reporte, que puede
      *                   venir nulo: los formatos por documento no lo declaran y
-     *                   lo reciben sólo para elegir acá.
+     *                   lo reciben sólo para elegir aquí.
      */
     public InputStream membreteDe(Object codEmpresa) {
         if (codEmpresa instanceof Number) {

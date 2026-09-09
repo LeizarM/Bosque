@@ -66,7 +66,7 @@ public class TramoSaldoDto implements Serializable {
     /**
      * Un tramo de Fase 1: sin detalle y con el {@code montoTxt} ya resuelto.
      *
-     * <p>Está acá y no en el DAO para que los 5 tramos se armen todos igual — cinco bloques
+     * <p>Está aquí y no en el DAO para que los 5 tramos se armen todos igual — cinco bloques
      * copiados a mano son cinco oportunidades de olvidarse el {@code Fmt.dias} en uno solo.
      */
     public static TramoSaldoDto de(String clave, String etiqueta, double monto, String signo) {

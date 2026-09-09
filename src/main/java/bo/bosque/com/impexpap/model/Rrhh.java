@@ -21,7 +21,7 @@ import java.util.Date;
  *
  * <p><b>No confundir con {@code Programador}</b>, que es la otra mitad del control: un
  * programador tiene un árbol y una sucursal y sólo alcanza a su propia gente; quien está
- * acá no tiene límite de árbol ni de sucursal.
+ * aquí no tiene límite de árbol ni de sucursal.
  *
  * <p>La baja es LÓGICA ({@code estado='I'}): quién podía corregir celdas cuando se
  * corrigieron es justo lo que se va a querer mirar el día que alguien pregunte quién le

@@ -186,14 +186,14 @@ public class WhatsAppService {
             return minusculas;
         }
 
-        // Un id de GRUPO no puede salir de acá. Este método arma el chat individual de un
+        // Un id de GRUPO no puede salir de aquí. Este método arma el chat individual de un
         // cliente, y su resultado alimenta mensajes redactados para el cliente ("le
         // confirmamos que su pedido ya fue entregado"). Si un resolver mal configurado
         // devolviera el valor de openwa.groups, ese texto terminaría publicado en el grupo
-        // interno. Se corta acá, no en el llamador.
+        // interno. Se corta aquí, no en el llamador.
         if (minusculas.endsWith(SUFIJO_GRUPO)) {
             logger.warn("Se intentó usar un id de GRUPO como destinatario individual, se descarta: '{}'. "
-                      + "Para enviar a un grupo usá enviarNotificacionAGrupos().", telefonoCrudo);
+                      + "Para enviar a un grupo usa enviarNotificacionAGrupos().", telefonoCrudo);
             return null;
         }
 
@@ -297,7 +297,7 @@ public class WhatsAppService {
                 .collect(Collectors.toList());
 
         if (todos.size() > 2) {
-            logger.warn("⚠️ openwa.groups tiene {} grupos; solo se usaran los 2 primeros", todos.size());
+            logger.warn("openwa.groups tiene {} grupos; solo se usaran los 2 primeros", todos.size());
         }
 
         return todos.stream().limit(2).collect(Collectors.toList());

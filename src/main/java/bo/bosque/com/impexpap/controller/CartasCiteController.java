@@ -189,7 +189,7 @@ public class CartasCiteController {
     /**
      * Deja activa la gestión del año en curso, creándola si falta.
      *
-     * <p>El módulo JSF hacía esto cada vez que se abría el formulario. Acá es
+     * <p>El módulo JSF hacía esto cada vez que se abría el formulario. Aquí es
      * un endpoint explícito que la pantalla llama al entrar: sin él, el primer
      * documento de enero se numeraría dentro del correlativo del año anterior.
      */

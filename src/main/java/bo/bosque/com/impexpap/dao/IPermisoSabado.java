@@ -14,7 +14,7 @@ import java.util.List;
  * {@code trs_sp_puenteVacacion} para el puente.
  *
  * <p><b>Los permisos sueltos NO se cargan desde este módulo</b>: se cargan en RR.HH. y
- * acá sólo se leen y se aplican con {@code trs_sp_refrescarPermisos}. La única
+ * aquí sólo se leen y se aplican con {@code trs_sp_refrescarPermisos}. La única
  * excepción es el PUENTE, y lo es por una razón concreta: es un alta en lote para
  * decenas de personas que nace de una decisión de empresa, y el circuito de solicitudes
  * está construido para el caso contrario — una persona pidiendo, dos firmas aprobando.

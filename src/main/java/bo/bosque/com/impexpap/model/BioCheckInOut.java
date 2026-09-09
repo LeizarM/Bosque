@@ -22,7 +22,7 @@ import java.util.Date;
  * (mismo problema, mismo origen): sin la anotación, Jackson serializa
  * {@code getUSERID()} como {@code "userid"} (todo minúscula), no
  * {@code "USERID"}, al revés de lo que dice el comentario de arriba sobre
- * "nombres tal cual vienen del dispositivo". Acá nunca se notó en vivo
+ * "nombres tal cual vienen del dispositivo". Aquí nunca se notó en vivo
  * porque nada en el frontend consume {@code /biometrico/marcaciones/listar}
  * directamente — esta clase sólo se usa server-side dentro de
  * {@code calcularReporte}, que lee los valores vía getters de Java, no JSON

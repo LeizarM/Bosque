@@ -12,10 +12,10 @@ import java.util.List;
  *
  * <h3>El SP no valida NADA</h3>
  * Igual que su gemelo de vacación asignada: sin envelope de error, sin id generado, sin control de
- * duplicado y sin transacción. Todo eso está acá.
+ * duplicado y sin transacción. Todo eso está aquí.
  *
  * <h3>Umbral distinto al de vacación asignada</h3>
- * Acá los días son {@code > 0} ESTRICTO. Un abono de cero días no existe (el mínimo real medido es
+ * Aquí los días son {@code > 0} ESTRICTO. Un abono de cero días no existe (el mínimo real medido es
  * 0,5) y no significaría nada; en cambio una vacación asignada de cero días sí significa algo.
  */
 public interface IAbonoDias {
@@ -75,7 +75,7 @@ public interface IAbonoDias {
      * <p><b>Esto es lo que el legacy quiso hacer y no hace:</b> su {@code eliminarAbonDia()} llama
      * a {@code registrar()}, que con el id cargado resuelve a ACCION 'U' y dispara un UPDATE con
      * todo en NULL. No corrompe nada sólo porque la FK y el NOT NULL de {@code fecha} lo hacen
-     * fallar entero, y porque el botón está oculto. Acá va con ACCION 'D', que es lo que
+     * fallar entero, y porque el botón está oculto. Aquí va con ACCION 'D', que es lo que
      * corresponde.
      *
      * @param audUsuarioI quién borra, del token. <b>Se escribe en la fila con una 'U' previa</b>:
@@ -109,7 +109,7 @@ public interface IAbonoDias {
      * Lo aplica. <b>Todo o nada.</b>
      *
      * <p>El legacy insertaba en un bucle sin transacción, contaba las fallas y dejaba media carga
-     * escrita ("Problema(s) al registrar N empleado(s)"). Acá va con {@code @Transactional}: si
+     * escrita ("Problema(s) al registrar N empleado(s)"). Aquí va con {@code @Transactional}: si
      * falla la persona 40 de 85 no queda ninguna fila. <b>El mensaje de error tiene que decir eso
      * y no el del legacy</b>, que anunciaba éxitos parciales.
      *

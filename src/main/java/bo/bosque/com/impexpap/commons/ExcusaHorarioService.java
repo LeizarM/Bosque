@@ -73,12 +73,12 @@ import java.util.stream.Collectors;
  *
  * <p><b>Por qué escribe {@code 'E'} y no {@code 'L'}:</b> {@code trs_sp_corregirCelda}
  * trata {@code 'L'} como "borrar la fila", sin ningún rastro de la decisión — para una
- * corrección humana puntual está bien, pero acá el motivo lo calculó el sistema y tiene
+ * corrección humana puntual está bien, pero aquí el motivo lo calculó el sistema y tiene
  * que quedar auditable. Por eso {@code p_list_Permiso @ACCION='N1'} (que decide si el
  * reporte biométrico marca un sábado como SABADO_LIBRE en vez de FALTA) tuvo que ampliarse
  * — ver {@code sql/18_biometrico_excusa_horas.sql}: antes sólo miraba "no existe fila";
  * ahora también cuenta una fila {@code 'E'}. Sin ese cambio, esto dejaría al empleado
- * excusado acá pero marcado FALTA en el biométrico.
+ * excusado aquí pero marcado FALTA en el biométrico.
  *
  * <p><b>Si alguien de verdad tiene que venir pese a haber cumplido la cuota</b> (un caso
  * excepcional), RR.HH. lo corrige a mano con el editor de celda de siempre — poniéndola en
@@ -295,7 +295,7 @@ public class ExcusaHorarioService {
      * posterior al día. Copia intencional de {@code BiometricoController.horarioVigente} —
      * es la misma regla ("temporal", día por día) que ya se usa para el reporte biométrico
      * y para la franja "Cómo se repartió" del front; este módulo no depende de esa clase,
-     * así que se repite acá en vez de acoplar dos controladores por un método de cuatro
+     * así que se repite aquí en vez de acoplar dos controladores por un método de cuatro
      * líneas.
      */
     private static BioHrEmpleado horarioVigente(List<BioHrEmpleado> asignaciones, LocalDate dia) {

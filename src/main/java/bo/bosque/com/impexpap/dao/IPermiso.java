@@ -19,7 +19,7 @@ import java.util.List;
  * <p><b>Un método por ACCION.</b> En ese SP los parámetros CAMBIAN DE SIGNIFICADO según la
  * ACCION —{@code @codPermiso} es el código de la empresa en algunas, el código del permiso en
  * otras—, así que un método genérico que reciba el modelo entero es una trampa. Cada método de
- * acá manda su {@code Map} explícito con los parámetros que esa ACCION realmente usa.
+ * aquí manda su {@code Map} explícito con los parámetros que esa ACCION realmente usa.
  */
 public interface IPermiso {
     /**
@@ -68,7 +68,7 @@ public interface IPermiso {
      * vacación). Devuelve {@link EmpleadoColectivoDto} con {@code dias = 0} y {@code entra = true}:
      * todavía no hay rango que calcular ni motivo por el que excluir a nadie.
      *
-     * <p><b>DEFECTO DEL SP, documentado y traducido acá:</b> esa ACCION filtra la empresa con el
+     * <p><b>DEFECTO DEL SP, documentado y traducido aquí:</b> esa ACCION filtra la empresa con el
      * parámetro {@code @codPermiso} ({@code WHERE @codPermiso IS NULL OR @codPermiso =
      * te.codEmpresa}), no con un {@code @codEmpresa}. El nombre del parámetro miente; el DAO manda
      * {@code codEmpresa} en {@code @codPermiso} y este método se llama por lo que significa. No se

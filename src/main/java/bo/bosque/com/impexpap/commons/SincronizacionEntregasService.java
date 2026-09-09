@@ -135,7 +135,7 @@ public class SincronizacionEntregasService {
      * El candado. {@code true} significa "hay un hilo sincronizando ahora mismo".
      *
      * <p>Se toma con {@code compareAndSet(false, true)} y nunca con espera. No es un
-     * {@code synchronized} ni un {@code ReentrantLock.lock()} a propósito: acá el que no consigue
+     * {@code synchronized} ni un {@code ReentrantLock.lock()} a propósito: aquí el que no consigue
      * el candado tiene que <b>irse</b>, no formarse en la fila.
      */
     private final AtomicBoolean sincronizando = new AtomicBoolean(false);
@@ -218,7 +218,7 @@ public class SincronizacionEntregasService {
      * <p>Solo el hilo que encuentra el intervalo vencido <i>y</i> gana el candado paga la
      * sincronización, y la paga completa: cuando este método vuelve, si fue él quien sincronizó,
      * los datos nuevos ya están comprometidos en la tabla. Por eso el controlador lee
-     * <b>después</b> de llamar acá y no antes.
+     * <b>después</b> de llamar aquí y no antes.
      */
     public void asegurarSincronizado() {
         try {
@@ -230,7 +230,7 @@ public class SincronizacionEntregasService {
                 return;
             }
             if (!sincronizando.compareAndSet(false, true)) {
-                // Otro hilo está adentro. No se espera: se lee lo que haya. Esperar acá sería
+                // Otro hilo está adentro. No se espera: se lee lo que haya. Esperar aquí sería
                 // poner a los 14 choferes restantes en fila detrás de una consulta a SAP.
                 contadorOmitidaPorCandado.incrementAndGet();
                 logger.debug("Ya hay una sincronización con SAP en curso; este request no espera y lee la tabla "
@@ -338,7 +338,7 @@ public class SincronizacionEntregasService {
     }
 
     /**
-     * Corre la sincronización de verdad. Se entra acá <b>siempre</b> con el candado tomado.
+     * Corre la sincronización de verdad. Se entra aquí <b>siempre</b> con el candado tomado.
      *
      * <p>El reloj del intento se pisa ANTES de llamar a la base, no después. Mientras la
      * sincronización esté corriendo —y son más de mil milisegundos— el resto de los requests ven
@@ -389,7 +389,7 @@ public class SincronizacionEntregasService {
      * ¿Se puede usar la lectura sin sincronización en esta base?
      *
      * <p>Dos condiciones, y las dos se resuelven UNA sola vez: que el flag de configuración esté
-     * encendido, y que el script SQL esté efectivamente corrido acá. Lo segundo se le pregunta al
+     * encendido, y que el script SQL esté efectivamente corrido aquí. Lo segundo se le pregunta al
      * catálogo de la base — no se deduce de que una consulta haya venido vacía.
      *
      * <p><b>Por qué importa la diferencia.</b> Estos SP son una cadena de {@code IF @ACCION = ...}:
