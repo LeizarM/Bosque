@@ -18,7 +18,7 @@ import java.util.List;
  * codEmpleado → trs_Programador} y devuelve QUIÉN ES y A QUIÉNES puede tocar. El cliente
  * nunca afirma su identidad, la recibe.
  *
- * <p><b>Siempre viene una fila, nunca vacío.</b> "No sos programador" es una respuesta
+ * <p><b>Siempre viene una fila, nunca vacío.</b> "No eres programador" es una respuesta
  * válida ({@code esProgramador=0} y el equipo en cero), no un 204: la pestaña "Su Equipo"
  * necesita esa respuesta para saber que no tiene que mostrarse.
  *
@@ -45,17 +45,17 @@ import java.util.List;
 @AllArgsConstructor
 public class MiEquipoDto implements Serializable {
 
-    // ── quién sos (sale de tb_usuario, la tabla puente login → empleado) ──
+    // ── quién eres (sale de tb_usuario, la tabla puente login → empleado) ──
     private Long codUsuario;
     private Long codEmpleado;
 
-    // ── qué podés hacer ───────────────────────────────────────────────────
+    // ── qué puedes hacer ───────────────────────────────────────────────────
     /** 1 = figurás en {@code trs_Programador} activo, como titular o como reemplazo. */
     private int esProgramador;
-    /** 1 = entrás por {@code codEmpleadoReemplazo}: programás en lugar del titular. */
+    /** 1 = entrás por {@code codEmpleadoReemplazo}: programas en lugar del titular. */
     private int esReemplazo;
     /**
-     * 1 = figurás en {@code trs_Rrhh} activo, así que podés corregir la celda de
+     * 1 = figurás en {@code trs_Rrhh} activo, así que puedes corregir la celda de
      * CUALQUIERA, seas o no programador.
      *
      * <p>Viaja en esta misma respuesta y no en un endpoint aparte porque la pregunta
@@ -70,7 +70,7 @@ public class MiEquipoDto implements Serializable {
 
     // ── el permiso concreto que te habilita ───────────────────────────────
     private Long   idProgramador;
-    /** El jefe dueño del permiso. Si {@code esReemplazo=1}, NO sos vos. */
+    /** El jefe dueño del permiso. Si {@code esReemplazo=1}, NO eres vos. */
     private Long   codEmpleadoTitular;
     private String jefe;
     /** DIRECTOS = sólo tus reportes directos · SUBARBOL = todo tu árbol. */

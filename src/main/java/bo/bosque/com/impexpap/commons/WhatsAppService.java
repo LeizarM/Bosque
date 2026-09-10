@@ -99,6 +99,51 @@ public class WhatsAppService {
         }
         logger.info("WhatsAppService listo. openWA={}, prefijoPais={}, timeouts(connect/read)={}ms/{}ms",
                 openwaUrl, prefijoPaisEstatico, CONNECT_TIMEOUT_MS, READ_TIMEOUT_MS);
+        verificarSessionId();
+    }
+
+    /**
+     * Avisa fuerte si el {@code openwa.session-id} configurado no aparece en
+     * {@code GET /api/sessions}. El id cambia cuando se recrea el contenedor de
+     * openWA (o cuando se da de alta una sesion nueva), y sin este chequeo el
+     * unico sintoma es el {@code warn} de {@link #enviarTexto} en CADA envio
+     * fallido — facil de no notar entre el resto del log.
+     *
+     * <p>Nunca rompe el arranque: WhatsApp es accesorio (ver el comentario de
+     * clase). Si openWA esta caido, sin clave configurada o la respuesta no se
+     * puede leer, esto se loguea y listo — el {@code warn} por-envio sigue
+     * siendo la red de seguridad real.
+     *
+     * <p>El chequeo es un {@code contains} plano sobre el cuerpo de la
+     * respuesta en vez de parsear el JSON: no hay documentado el esquema exacto
+     * que devuelve esta version de openWA, y el id de sesion es un string lo
+     * bastante especifico (UUID) como para que una coincidencia de substring
+     * sea una prueba confiable de que aparece en la lista.
+     */
+    private void verificarSessionId() {
+        if (apiKey == null || apiKey.trim().isEmpty() || sessionId == null || sessionId.trim().isEmpty()) {
+            logger.debug("verificarSessionId: openwa.api-key o openwa.session-id sin configurar; se omite el chequeo.");
+            return;
+        }
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-API-Key", apiKey);
+            String url = openwaUrl + "/api/sessions";
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Void>(headers), String.class);
+            String cuerpo = response.getBody();
+            if (cuerpo == null || !cuerpo.contains(sessionId)) {
+                logger.error("openwa.session-id='{}' NO aparece en la respuesta de {}. Los envios de "
+                           + "WhatsApp van a fallar silenciosamente (solo un warn por mensaje) hasta que "
+                           + "se corrija OPENWA_SESSION_ID con un id que exista en esa sesion.",
+                             sessionId, url);
+            } else {
+                logger.debug("verificarSessionId: openwa.session-id='{}' encontrado en {}.", sessionId, url);
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo verificar openwa.session-id contra {}/api/sessions: {}. "
+                      + "El ERP sigue arrancando; los envios de WhatsApp podrian estar fallando.",
+                        openwaUrl, e.getMessage());
+        }
     }
 
     /**
