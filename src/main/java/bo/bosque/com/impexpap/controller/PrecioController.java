@@ -31,6 +31,7 @@ import bo.bosque.com.impexpap.dto.PorcentajeDto;
 import bo.bosque.com.impexpap.dto.ProductoDto;
 import bo.bosque.com.impexpap.dto.QuitarArticuloDto;
 import bo.bosque.com.impexpap.dto.ResolverPropuestaDto;
+import bo.bosque.com.impexpap.model.Autorizacion;
 import bo.bosque.com.impexpap.model.Porcentaje;
 import bo.bosque.com.impexpap.model.Producto;
 import bo.bosque.com.impexpap.security.jwt.DatosToken;
@@ -151,6 +152,8 @@ public class PrecioController {
 
     /** {@code tpr_autorizacion.esAprobada} = 1. Unico estado que aplica los precios. */
     private static final int ESTADO_APROBADA = 1;
+    private static final int ESTADO_RECHAZADA = 2;
+    private static final int ESTADO_EN_ESPERA = 3;
     private static final int TIPO_POR_ARTICULO = 2;
 
     private final IAutorizacion autDao;
@@ -852,13 +855,37 @@ public class PrecioController {
         return respuestaEscritura(res);
     }
 
-    /** Deja la propuesta en espera y se la devuelve a quien la genero. */
+    /**
+     * Manda la propuesta a autorizar: pasa a En Espera y queda a la vista de quien aprueba.
+     *
+     * <p>Solo desde Pendiente. Una propuesta Aprobada o No Aprobada ya salio del circuito:
+     * el rechazo es definitivo y quien la propuso arma una nueva. El JSF dejaba reenviar
+     * una rechazada ({@code esAprobada != 1 && != 3}); se cerro el 2026-09-28 a pedido del
+     * usuario, porque una propuesta rechazada volvia a quedar En Espera.
+     */
     @PostMapping("/marcarEnEspera")
     public ResponseEntity<ApiResponse<?>> marcarEnEspera(@RequestBody FiltroIdDto filtro,
                                                          Authentication auth) {
         pantallas.exigir(auth, AccesoPantallaPrecios.PROPUESTAS);
         acceso.exigirBoton(auth, VISTA_PRECIOS, BTN_EN_ESPERA);
         exigirPropuesta(filtro.getId());
+
+        Integer estado = null;
+        for (Autorizacion a : autDao.listarAutorizacion(null, filtro.getId(), null)) {
+            if (a.getEsAprobada() != null) estado = a.getEsAprobada();
+        }
+        if (estado != null && estado == ESTADO_APROBADA) {
+            throw new SpBusinessException("La propuesta " + filtro.getId()
+                    + " ya está aprobada: no vuelve a autorizarse.");
+        }
+        if (estado != null && estado == ESTADO_RECHAZADA) {
+            throw new SpBusinessException("La propuesta " + filtro.getId()
+                    + " fue rechazada: no vuelve a autorizarse. Arme una propuesta nueva.");
+        }
+        if (estado != null && estado == ESTADO_EN_ESPERA) {
+            throw new SpBusinessException("La propuesta " + filtro.getId()
+                    + " ya está En Espera de autorización.");
+        }
 
         return respuestaEscritura(autDao.marcarEnEspera(filtro.getId()));
     }
