@@ -35,23 +35,27 @@ public class ArticuloPrecioDisponibleDao implements  IArticuloPrecioDisponible {
             lstTemp = this.jdbcTemplate.query("execute p_list_articuloPrecioDisponible  @codCiudad = ? ,@ACCION=?",
                     new Object[]{ codCiudad, "E" },
                     new int[]{Types.INTEGER, Types.VARCHAR},
+                    // Por nombre, no por posición: si el SP agrega o reordena
+                    // columnas, el mapeo no se corre.
                     (rs, rowNum) -> {
                         ArticuloPrecioDisponible temp = new ArticuloPrecioDisponible();
 
-                        temp.setCodArticulo(rs.getString(1));
-                        temp.setDatoArt(rs.getString(2));
-                        temp.setListaPrecio(rs.getInt(3));
-                        temp.setPrecio(rs.getFloat(4));
-                        temp.setMoneda(rs.getString(5));
-                        temp.setCodigoFamilia(rs.getInt(6));
-                        temp.setDisponible(rs.getInt(7));
-                        temp.setUnidadMedida(rs.getString(8));
-                        temp.setCodCiudad( rs.getInt(9) );
-                        temp.setCodGrpFamiliaSap( rs.getInt(10));
-                        temp.setRuta( rs.getString(11));
-                        temp.setDb( rs.getString(12));
-                        temp.setCondicionPrecio(rs.getString(13));
-                        temp.setUtm(rs.getFloat(14));
+                        temp.setCodArticulo(rs.getString("codArticulo"));
+                        temp.setDatoArt(rs.getString("datoArt"));
+                        temp.setListaPrecio(rs.getInt("listaPrecio"));
+                        temp.setPrecio(rs.getFloat("precio"));
+                        temp.setMoneda(rs.getString("moneda"));
+                        temp.setCodigoFamilia(rs.getInt("codigoFamilia"));
+                        temp.setDisponible(rs.getInt("disponible"));
+                        temp.setUnidadMedida(rs.getString("unidadMedida"));
+                        temp.setCodCiudad(rs.getInt("codCiudad"));
+                        temp.setCodGrpFamiliaSap(rs.getInt("codGrpFamiliaSap"));
+                        temp.setRuta(rs.getString("ruta"));
+                        temp.setDb(rs.getString("db"));
+                        temp.setCondicionPrecio(rs.getString("condicionPrecio"));
+                        temp.setUtm(rs.getFloat("utm"));
+                        // IPX + ESP juntas (y todas las ciudades si no se envía codCiudad).
+                        temp.setDisponibleTotal(rs.getInt("disponibleTotal"));
 
                         return temp;
                     });

@@ -32,5 +32,8 @@ public class ArticuloPrecioDisponible implements Serializable {
     private String condicionPrecio;
     private String ciudad;
     private float utm;
+    // Disponible sumado de IPX + ESP (y de todas las ciudades si no se filtra).
+    // "disponible" sigue siendo el de la fila: por empresa y ciudad.
+    private int disponibleTotal;
 
 }
