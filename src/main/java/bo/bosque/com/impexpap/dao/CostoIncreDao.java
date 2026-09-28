@@ -1,85 +1,128 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.dto.CostoIncreCiudadDto;
+import bo.bosque.com.impexpap.dto.CostoIncreSucursalDto;
 import bo.bosque.com.impexpap.model.CostoIncre;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
+import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Acceso a tpr_costoIncre por procedimiento almacenado, via SpHelper.
+ *
+ * <p>Reemplaza al DAO legacy que armaba el EXEC a mano con jdbcTemplate, leia el
+ * resultset por indice de columna y se tragaba los errores devolviendo un
+ * boolean. Ahora las escrituras devuelven {@link RespuestaSp} (con el id
+ * generado y el mensaje de negocio del SP) y las lecturas se mapean por NOMBRE
+ * de columna con BeanPropertyRowMapper.
+ *
+ * <p>Todas las lecturas arman el Map de parametros a mano en vez de mandar el
+ * modelo: p_list_costoIncre usa "@parametro IS NULL" como "sin filtro", asi que
+ * un 0 que Jackson mande de relleno filtraria de verdad y devolveria cero filas.
+ */
 @Repository
-public class CostoIncreDao implements  ICostoIncre {
+public class CostoIncreDao implements ICostoIncre {
 
-    /**
-     * El Datasource
-     */
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    /** Nombre del SP de altas, bajas y modificaciones. */
+    private static final String SP_ABM = "p_abm_costoIncre";
 
+    /** Nombre del SP de listados. */
+    private static final String SP_LIST = "p_list_costoIncre";
 
-    /**
-     * Para registrar el costo incremento o costo de flete de transporte
-     *
-     * @param costoIncre
-     * @param acc
-     * @return
-     */
-    @Override
-    public boolean registrarCostoIncre(CostoIncre costoIncre, String acc) {
+    private final SpHelper spHelper;
 
-        int resp;
-        try{
-            resp = this.jdbcTemplate.update("execute p_abm_costoIncre @idIncre=?, @codSucursal=?, @idPropuesta=?, @valor=?,@audUsuario=?,  @ACCION=?",
-                    ps ->{
-                        ps.setInt(1, costoIncre.getIdIncre());
-                        ps.setInt(2, costoIncre.getCodSucursal());
-                        ps.setInt(3, costoIncre.getIdPropuesta());
-                        ps.setInt(4, costoIncre.getValor());
-                        ps.setInt(5, costoIncre.getAudUsuario());
-                        ps.setString(6, acc);
-                    });
-        }catch (BadSqlGrammarException e){
-            System.out.println("Error: CostoIncreDao en registrarCostoIncre, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            resp = 0;
-        }
-
-        return resp != 0;
+    public CostoIncreDao(SpHelper spHelper) {
+        this.spHelper = spHelper;
     }
 
     /**
-     * Listara costo de flete de transporte
-     * @return
+     * Invoca p_abm_costoIncre con ACCION 'I'.
+     *
+     * @return RespuestaSp; getIdGenerado() trae el idIncre nuevo (SCOPE_IDENTITY).
      */
-    public List<CostoIncre> costoTransporteCiudad() {
+    @Override
+    public RespuestaSp insertar(CostoIncre costoIncre) {
+        return this.spHelper.ejecutarAbm(SP_ABM, costoIncre, "I");
+    }
 
-        List<CostoIncre> lstTemp = new ArrayList<>();
+    /**
+     * Invoca p_abm_costoIncre con ACCION 'U'. El SP actualiza valor, audUsuario
+     * y audFecha de la fila identificada por idIncre.
+     *
+     * @return RespuestaSp; getIdGenerado() queda en 0 porque no hay alta.
+     */
+    @Override
+    public RespuestaSp actualizar(CostoIncre costoIncre) {
+        return this.spHelper.ejecutarAbm(SP_ABM, costoIncre, "U");
+    }
 
-        try{
-            lstTemp =  this.jdbcTemplate.query("execute p_list_costoIncre @ACCION=?",
-                        new Object[] { "C" },
-                        new int[] {Types.VARCHAR},
-                        ( rs, rowNum ) -> {
+    /**
+     * Invoca p_abm_costoIncre con ACCION 'D'.
+     *
+     * <p>Usa el overload de Map para mandar unicamente @idIncre: el resto de los
+     * parametros queda en su DEFAULT NULL y el SP no los mira en esta rama.
+     *
+     * @return RespuestaSp con error 0 si borro, o el error de negocio del SP.
+     */
+    @Override
+    public RespuestaSp eliminar(Long idIncre) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("idIncre", idIncre);
+        return this.spHelper.ejecutarAbmMap(SP_ABM, params, "D");
+    }
 
-                            CostoIncre temp = new CostoIncre();
-
-                            temp.setCodSucursal(rs.getInt(1));
-                            temp.setCodCiudad(rs.getInt(2));
-                            temp.setNombreSucursal(rs.getString(3));
-                            temp.setNombreCiudad(rs.getString(4));
-                            temp.setValor(rs.getInt(5));
-
-
-                            return temp;
-                        });
-        }catch ( BadSqlGrammarException e ){
-            System.out.println("Error: costoTransporteCiudad en CostoIncreDao, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            lstTemp = new ArrayList<>();
+    /**
+     * Invoca p_list_costoIncre con ACCION 'L'.
+     *
+     * @return filas planas de tpr_costoIncre mapeadas a {@link CostoIncre}.
+     */
+    @Override
+    public List<CostoIncre> listar(Long idIncre) {
+        Map<String, Object> filtro = new HashMap<>();
+        if (idIncre != null) {
+            filtro.put("idIncre", idIncre);
         }
+        return this.spHelper.ejecutarListado(SP_LIST, filtro, "L", CostoIncre.class);
+    }
 
-        return lstTemp;
+    /**
+     * Invoca p_list_costoIncre con ACCION 'B'.
+     *
+     * @return costos cargados con el nombre de la sucursal; el idIncre llega en
+     *         null porque esa rama no lo selecciona.
+     */
+    @Override
+    public List<CostoIncreSucursalDto> listarCostoPorSucursal() {
+        return this.spHelper.ejecutarListado(SP_LIST, new HashMap<String, Object>(), "B",
+                CostoIncreSucursalDto.class);
+    }
+
+    /**
+     * Invoca p_list_costoIncre con ACCION 'C'.
+     *
+     * @return sucursales con su ciudad y costo en 0, para la carga inicial de
+     *         los fletes de una propuesta.
+     */
+    @Override
+    public List<CostoIncreCiudadDto> listarSucursalesParaCarga() {
+        return this.spHelper.ejecutarListado(SP_LIST, new HashMap<String, Object>(), "C",
+                CostoIncreCiudadDto.class);
+    }
+
+    /**
+     * Invoca p_list_costoIncre con ACCION 'D'.
+     *
+     * @return costos de flete de la propuesta, con nombre de sucursal e idIncre
+     *         para poder editarlos despues.
+     */
+    @Override
+    public List<CostoIncreSucursalDto> listarPorPropuesta(Long idPropuesta) {
+        Map<String, Object> filtro = new HashMap<>();
+        filtro.put("idPropuesta", idPropuesta);
+        return this.spHelper.ejecutarListado(SP_LIST, filtro, "D", CostoIncreSucursalDto.class);
     }
 }

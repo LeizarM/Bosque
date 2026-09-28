@@ -1,50 +1,58 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.GrupoFamiliaSap;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
 
-import java.sql.SQLException;
+/**
+ * DAO legacy de tpr_grupoFamiliaSap. <b>No usar en codigo nuevo: usar
+ * {@link GrupoFamiliaSapDao}.</b>
+ *
+ * <p>Su version anterior armaba SQL crudo
+ * (<code>jdbcTemplate.update("execute @idGrpFamiliaSap=?, ...")</code>, sin nombre
+ * de procedimiento, por lo que siempre fallaba con BadSqlGrammarException y
+ * devolvia false silenciosamente) y mandaba los codigos SAP como int contra
+ * columnas varchar. Eso viola la regla de "nunca SQL crudo", asi que quedo solo
+ * como puente para cualquier llamador viejo mientras se migra.
+ *
+ * <p>Ya no es un bean de Spring ni implementa {@code IGrupoFamiliaSap}: tener dos
+ * {@code @Repository} sobre la misma interfaz hacia ambigua la inyeccion por tipo.
+ * No tiene ningun consumidor en el repositorio; <b>este archivo se puede borrar</b>
+ * (no lo elimino yo porque la operacion de borrado quedo fuera de mis permisos).
+ *
+ * @deprecated usar {@link GrupoFamiliaSapDao}.
+ */
+@Deprecated
+public class GrupoFamiliaDao {
 
-@Repository
-public class GrupoFamiliaDao implements IGrupoFamiliaSap{
+    private final GrupoFamiliaSapDao delegado;
+
+    public GrupoFamiliaDao(GrupoFamiliaSapDao delegado) {
+        this.delegado = delegado;
+    }
 
     /**
-     * El Datasource
-     */
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    /**
-     * Para registrar el grupo de familia SAP
+     * Puente con la firma vieja. Delega en el DAO nuevo, que va por
+     * p_abm_grupoFamiliaSap.
      *
-     * @param grupoFamiliaSap
-     * @param acc
-     * @return
+     * @param grupoFamiliaSap datos del grupo
+     * @param acc             'I', 'U' o 'D'
+     * @return true si el SP no devolvio error
+     * @deprecated usar {@link GrupoFamiliaSapDao#registrar(GrupoFamiliaSap)},
+     *             {@link GrupoFamiliaSapDao#actualizar(GrupoFamiliaSap)} o
+     *             {@link GrupoFamiliaSapDao#eliminar(Long)}.
      */
-    @Override
+    @Deprecated
     public boolean registrarGrupoFamiliaSap(GrupoFamiliaSap grupoFamiliaSap, String acc) {
-
-        int resp;
-
-        try{
-            resp = this.jdbcTemplate.update("execute @idGrpFamiliaSap=?, @codGrpFamSap=?,@codGrpFamSapEpp=?,@grpFam =?,@alias =?,@audUsuario =?,@ACCION  = ? ",
-                    ps-> {
-                        ps.setInt(1, grupoFamiliaSap.getIdGrpFamiliaSap());
-                        ps.setInt(2, grupoFamiliaSap.getCodGrpFamSap());
-                        ps.setInt(3, grupoFamiliaSap.getCodGrpFamSapEpp());
-                        ps.setString(4, grupoFamiliaSap.getGrpFam());
-                        ps.setString(5, grupoFamiliaSap.getAlias());
-                        ps.setInt(6, grupoFamiliaSap.getAudUsuario());
-                        ps.setString(7, acc);
-                    });
-        }catch(BadSqlGrammarException e){
-            System.out.println("Error: GrupoFamiliaDao en registrarGrupoFamiliaSap, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            resp = 0;
+        final RespuestaSp resp;
+        if ("I".equals(acc)) {
+            resp = delegado.registrar(grupoFamiliaSap);
+        } else if ("U".equals(acc)) {
+            resp = delegado.actualizar(grupoFamiliaSap);
+        } else if ("D".equals(acc)) {
+            resp = delegado.eliminar(grupoFamiliaSap.getIdGrpFamiliaSap());
+        } else {
+            throw new IllegalArgumentException("ACCION no soportada por p_abm_grupoFamiliaSap: " + acc);
         }
-
-        return resp != 0;
+        return resp.isExitoso();
     }
 }

@@ -132,9 +132,20 @@ public class AccesoModuloHelper
      * no paguen esa consulta.
      */
     public void exigirAdminORrhh(Authentication auth) {
-        if (esAdmin(auth)) return;
-        if (miPermiso(auth).getEsRrhh() == 1) return;
-        throw new AccessDeniedException("Solo Sistemas o RR.HH. administran estos permisos.");
+        if (!esAdminORrhh(auth)) {
+            throw new AccessDeniedException("Solo Sistemas o RR.HH. administran estos permisos.");
+        }
+    }
+
+    /**
+     * Lo mismo que {@link #exigirAdminORrhh}, pero respondiendo en vez de cortar.
+     *
+     * <p>Para los alcances que no son un sí o un no sino "todo o lo tuyo": la bitácora de
+     * tareas rutinarias muestra todo a Sistemas y a RR.HH. y el equipo propio a los demás
+     * (decisión de Marcelo, 2026-09-10).
+     */
+    public boolean esAdminORrhh(Authentication auth) {
+        return esAdmin(auth) || miPermiso(auth).getEsRrhh() == 1;
     }
 
     /**

@@ -74,6 +74,46 @@ public class Tipos {
     }
 
     /**
+     * ================= PARA EL MODULO DE GARANTIAS DE COBRANZA (tcbr) =================
+     *
+     * Copia literal de v_tipos grupos 28 y 29 (la vista esta hecha con literales dentro del
+     * CREATE VIEW). Los procedimientos p_abm_CbrDetalle y p_abm_AccionCbr validan el codigo
+     * contra v_tipos: si aqui aparece un codigo que la vista no tiene, el alta devuelve un
+     * error de negocio claro, no se graba basura. Mantener las dos fuentes iguales.
+     */
+    /**
+     * Tipos de garantia (v_tipos grupo 28): lo que respalda cada detalle.
+     */
+    public List<Tipos> lstTipoGarantiaCbr() {
+        List<Tipos> listaTemp = new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("CDS", "CONTRATO DE SUMINISTRO", 28));
+        listaTemp.add(new Tipos("FMI", "FORMULARIO INTERNO", 28));
+        listaTemp.add(new Tipos("INM", "INMUEBLE", 28));
+        listaTemp.add(new Tipos("LDC", "LETRA DE CAMBIO", 28));
+        listaTemp.add(new Tipos("MAQ", "MAQUINARIA", 28));
+        listaTemp.add(new Tipos("PAG", "PAGARE", 28));
+        listaTemp.add(new Tipos("QRG", "QUIROGRAFARIO", 28));
+        listaTemp.add(new Tipos("RDD", "RECONOCIMIENTO DE DEUDA", 28));
+        listaTemp.add(new Tipos("VEH", "VEHICULO", 28));
+        return listaTemp;
+    }
+
+    /**
+     * Estados de las acciones de una garantia (v_tipos grupo 29). Es el catalogo completo,
+     * para mostrar etiquetas: a mano solo se registran NOT y CER (REG y TRASP los crean los
+     * procedimientos, EXT la extension).
+     */
+    public List<Tipos> lstEstadoAccionCbr() {
+        List<Tipos> listaTemp = new ArrayList<Tipos>();
+        listaTemp.add(new Tipos("REG", "REGISTRADO BOSQUE", 29));
+        listaTemp.add(new Tipos("TRASP", "TRASPASO", 29));
+        listaTemp.add(new Tipos("EXT", "EXTENSION", 29));
+        listaTemp.add(new Tipos("NOT", "NOTA", 29));
+        listaTemp.add(new Tipos("CER", "CERRADO", 29));
+        return listaTemp;
+    }
+
+    /**
      * ====================== PARA EL MODULO DE PRECIOS ==============================
      */
     /**

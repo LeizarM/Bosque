@@ -1,0 +1,1022 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport isSummaryWithPageHeaderAndFooter="true" isFloatColumnFooter="true" xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenResourceMissingType="Empty" uuid="507db17b-6719-4b78-b066-4809437b3d9e">
+	<!-- rptPropuArt del JSF (Bosque v2/web/Bosque/reportes) con los cambios pedidos el 2026-09-24:
+	     cabecera simetrica con quien propuso, IVA e IT, observaciones y flete; un articulo por fila con celdas
+	     combinadas; la familia combinada sobre sus articulos y el costo en cada uno; el precio propuesto en
+	     verde si sube y en rojo si baja (sin leyenda si la propuesta ya no compara). Se llena desde FilaRptPropuestaFamiliaDto
+	     (ReportesPreciosService.filasCombinadas). Generado por
+	     herramientas/rptPropuArt_combinado.py: cambiar ahi y volver a generar. -->
+	<property name="ireport.zoom" value="1.3310000000000093"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="celdaFamilia">
+		<box leftPadding="2" rightPadding="2"><topPen lineWidth="0.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="0.0"/><rightPen lineWidth="1.0"/></box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf(($F{primeroDeFamilia} || $V{PAGE_COUNT}.intValue() == 1) && $F{ultimoDeFamilia})]]></conditionExpression>
+			<style><box leftPadding="2" rightPadding="2"><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box></style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf(($F{primeroDeFamilia} || $V{PAGE_COUNT}.intValue() == 1) && !$F{ultimoDeFamilia})]]></conditionExpression>
+			<style><box leftPadding="2" rightPadding="2"><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="0.0"/><rightPen lineWidth="1.0"/></box></style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf(!($F{primeroDeFamilia} || $V{PAGE_COUNT}.intValue() == 1) && $F{ultimoDeFamilia})]]></conditionExpression>
+			<style><box leftPadding="2" rightPadding="2"><topPen lineWidth="0.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box></style>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto1">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio1} != null && $F{cambio1}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio1} != null && $F{cambio1}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto2">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio2} != null && $F{cambio2}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio2} != null && $F{cambio2}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto3">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio3} != null && $F{cambio3}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio3} != null && $F{cambio3}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto4">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio4} != null && $F{cambio4}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio4} != null && $F{cambio4}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto5">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio5} != null && $F{cambio5}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio5} != null && $F{cambio5}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto6">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio6} != null && $F{cambio6}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio6} != null && $F{cambio6}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto7">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio7} != null && $F{cambio7}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio7} != null && $F{cambio7}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto8">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio8} != null && $F{cambio8}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio8} != null && $F{cambio8}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto9">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio9} != null && $F{cambio9}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio9} != null && $F{cambio9}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto10">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio10} != null && $F{cambio10}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio10} != null && $F{cambio10}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto11">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio11} != null && $F{cambio11}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio11} != null && $F{cambio11}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<style name="propuesto12">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio12} != null && $F{cambio12}.intValue() > 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" isBold="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf($F{cambio12} != null && $F{cambio12}.intValue() < 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" isBold="true"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="idPropuesta" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="logoEmpresa" class="java.io.InputStream"/>
+	<parameter name="titulo" class="java.lang.String"/>
+	<parameter name="propuestoPor" class="java.lang.String"/>
+	<parameter name="obs" class="java.lang.String"/>
+	<parameter name="fletes" class="java.lang.String"/>
+	<parameter name="iva" class="java.lang.String"/>
+	<parameter name="it" class="java.lang.String"/>
+	<parameter name="conComparacion" class="java.lang.Boolean"/>
+	<parameter name="itemsNoCreadosMensaje" class="java.lang.String"/>
+	<parameter name="familiasNoActualizadasMensaje" class="java.lang.String"/>
+	<parameter name="itemsNoCreados" class="java.util.List"/>
+	<parameter name="subRptItemsNoCreados" class="net.sf.jasperreports.engine.JasperReport"/>
+	<parameter name="familiasNoActualizadas" class="java.util.List"/>
+	<parameter name="subRptFamiliasNoActualizadas" class="net.sf.jasperreports.engine.JasperReport"/>
+	<field name="codigoFamilia" class="java.lang.Integer"/>
+	<field name="codArticulo" class="java.lang.String"/>
+	<field name="datoArt" class="java.lang.String"/>
+	<field name="utm" class="java.math.BigDecimal"/>
+	<field name="costoTM" class="java.math.BigDecimal"/>
+	<field name="primeroDeFamilia" class="java.lang.Boolean"/>
+	<field name="ultimoDeFamilia" class="java.lang.Boolean"/>
+	<field name="conFilaActual" class="java.lang.Boolean"/>
+	<field name="etiqueta1" class="java.lang.String"/>
+	<field name="etiqueta2" class="java.lang.String"/>
+	<field name="etiqueta3" class="java.lang.String"/>
+	<field name="por1" class="java.math.BigDecimal"/>
+	<field name="por2" class="java.math.BigDecimal"/>
+	<field name="por3" class="java.math.BigDecimal"/>
+	<field name="por4" class="java.math.BigDecimal"/>
+	<field name="por5" class="java.math.BigDecimal"/>
+	<field name="por6" class="java.math.BigDecimal"/>
+	<field name="por7" class="java.math.BigDecimal"/>
+	<field name="por8" class="java.math.BigDecimal"/>
+	<field name="por9" class="java.math.BigDecimal"/>
+	<field name="por10" class="java.math.BigDecimal"/>
+	<field name="por11" class="java.math.BigDecimal"/>
+	<field name="por12" class="java.math.BigDecimal"/>
+	<field name="act1" class="java.math.BigDecimal"/>
+	<field name="act2" class="java.math.BigDecimal"/>
+	<field name="act3" class="java.math.BigDecimal"/>
+	<field name="act4" class="java.math.BigDecimal"/>
+	<field name="act5" class="java.math.BigDecimal"/>
+	<field name="act6" class="java.math.BigDecimal"/>
+	<field name="act7" class="java.math.BigDecimal"/>
+	<field name="act8" class="java.math.BigDecimal"/>
+	<field name="act9" class="java.math.BigDecimal"/>
+	<field name="act10" class="java.math.BigDecimal"/>
+	<field name="act11" class="java.math.BigDecimal"/>
+	<field name="act12" class="java.math.BigDecimal"/>
+	<field name="pro1" class="java.math.BigDecimal"/>
+	<field name="pro2" class="java.math.BigDecimal"/>
+	<field name="pro3" class="java.math.BigDecimal"/>
+	<field name="pro4" class="java.math.BigDecimal"/>
+	<field name="pro5" class="java.math.BigDecimal"/>
+	<field name="pro6" class="java.math.BigDecimal"/>
+	<field name="pro7" class="java.math.BigDecimal"/>
+	<field name="pro8" class="java.math.BigDecimal"/>
+	<field name="pro9" class="java.math.BigDecimal"/>
+	<field name="pro10" class="java.math.BigDecimal"/>
+	<field name="pro11" class="java.math.BigDecimal"/>
+	<field name="pro12" class="java.math.BigDecimal"/>
+	<field name="cambio1" class="java.lang.Integer"/>
+	<field name="cambio2" class="java.lang.Integer"/>
+	<field name="cambio3" class="java.lang.Integer"/>
+	<field name="cambio4" class="java.lang.Integer"/>
+	<field name="cambio5" class="java.lang.Integer"/>
+	<field name="cambio6" class="java.lang.Integer"/>
+	<field name="cambio7" class="java.lang.Integer"/>
+	<field name="cambio8" class="java.lang.Integer"/>
+	<field name="cambio9" class="java.lang.Integer"/>
+	<field name="cambio10" class="java.lang.Integer"/>
+	<field name="cambio11" class="java.lang.Integer"/>
+	<field name="cambio12" class="java.lang.Integer"/>
+	<title>
+		<band height="144">
+			<image onErrorType="Blank" scaleImage="RetainShape" hAlign="Left" vAlign="Middle">
+				<reportElement x="18" y="0" width="125" height="50"/>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<textField isBlankWhenNull="true">
+				<reportElement x="148" y="6" width="452" height="24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="148" y="30" width="452" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+				<text><![CDATA[Propuesta de precios por familia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCCCCC" x="605" y="0" width="125" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<text><![CDATA[PROPUESTA N.º]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="605" y="16" width="125" height="34"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="20" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{idPropuesta}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCCCCC" x="18" y="58" width="100" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[PROPUESTO POR]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="58" width="372" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{propuestoPor}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCCCCC" x="490" y="58" width="50" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[IVA]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="540" y="58" width="70" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{iva}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCCCCC" x="610" y="58" width="50" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[IT]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="660" y="58" width="70" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{it}]]></textFieldExpression>
+			</textField>
+			<elementGroup>
+			<staticText>
+				<reportElement stretchType="RelativeToTallestObject" mode="Opaque" backcolor="#CCCCCC" x="18" y="74" width="100" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[OBSERVACIONES]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement x="118" y="74" width="612" height="16"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="8"/></textElement>
+				<textFieldExpression><![CDATA[$P{obs}]]></textFieldExpression>
+			</textField>
+			</elementGroup>
+			<staticText>
+				<reportElement isRemoveLineWhenBlank="true" positionType="Float" mode="Opaque" backcolor="#CCCCCC" x="18" y="90" width="100" height="16">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{fletes} != null && !$P{fletes}.trim().isEmpty())]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[FLETE (USD)]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement isRemoveLineWhenBlank="true" positionType="Float" x="118" y="90" width="612" height="16">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{fletes} != null && !$P{fletes}.trim().isEmpty())]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$P{fletes}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" isRemoveLineWhenBlank="true" x="420" y="112" width="106" height="12">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{conComparacion} != null && $P{conComparacion}.booleanValue())]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isItalic="true"/></textElement>
+				<text><![CDATA[Precio propuesto:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" isRemoveLineWhenBlank="true" mode="Opaque" forecolor="#006100" backcolor="#C6EFCE" x="530" y="112" width="100" height="12">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{conComparacion} != null && $P{conComparacion}.booleanValue())]]></printWhenExpression>
+				</reportElement>
+				<box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Mayor al precio actual]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" isRemoveLineWhenBlank="true" mode="Opaque" forecolor="#9C0006" backcolor="#FFC7CE" x="630" y="112" width="100" height="12">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{conComparacion} != null && $P{conComparacion}.booleanValue())]]></printWhenExpression>
+				</reportElement>
+				<box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[Menor al precio actual]]></text>
+			</staticText>
+			<subreport>
+				<reportElement positionType="Float" x="14" y="130" width="720" height="10" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="mensajeVacio">
+					<subreportParameterExpression><![CDATA[$P{itemsNoCreadosMensaje}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{itemsNoCreados})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{subRptItemsNoCreados}]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="82" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCCCCC" x="18" y="12" width="340" height="40"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+				<text><![CDATA[ARTÍCULOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCCCCC" x="358" y="12" width="372" height="20"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="14" isBold="true"/></textElement>
+				<text><![CDATA[LISTAS DE PRECIOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#FFFFFF" x="358" y="32" width="124" height="20"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[CENTRAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#FFFFFF" x="482" y="32" width="124" height="20"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[COCHABAMBA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#FFFFFF" x="606" y="32" width="124" height="20"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[SANTA CRUZ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="18" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+				<text><![CDATA[CODIGO FAMILIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="49" y="52" width="71" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<text><![CDATA[CODIGO ARTICULO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="120" y="52" width="109" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<text><![CDATA[DESCRIPCION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="229" y="52" width="44" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<text><![CDATA[UTM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="273" y="52" width="40" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<text><![CDATA[COSTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="313" y="52" width="45" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<text><![CDATA[DETALLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="358" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="389" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[2]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="420" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[3]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="451" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[4]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="482" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[5]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="513" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[6]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="544" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[7]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="575" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[8]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="606" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[9]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="637" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[10]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="668" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[11]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" backcolor="#CCFF00" x="699" y="52" width="31" height="29"/>
+				<box leftPadding="3" rightPadding="3"><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="12" isBold="true"/></textElement>
+				<text><![CDATA[12]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="60" splitType="Prevent">
+			<printWhenExpression><![CDATA[Boolean.valueOf($F{conFilaActual})]]></printWhenExpression>
+			<frame>
+				<reportElement style="celdaFamilia" x="18" y="0" width="31" height="60"/>
+			</frame>
+			<textField isBlankWhenNull="true">
+				<reportElement x="18" y="0" width="31" height="60">
+					<printWhenExpression><![CDATA[Boolean.valueOf(($F{primeroDeFamilia} || $V{PAGE_COUNT}.intValue() == 1))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{codigoFamilia}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="49" y="0" width="71" height="60"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6.5" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{codArticulo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="120" y="0" width="109" height="60"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6.5"/></textElement>
+				<textFieldExpression><![CDATA[$F{datoArt}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="229" y="0" width="44" height="60"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6.5"/></textElement>
+				<textFieldExpression><![CDATA[$F{utm}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="273" y="0" width="40" height="60"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{costoTM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="313" y="0" width="45" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{etiqueta1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="358" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="389" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="420" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por3}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="451" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por4}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="482" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por5}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="513" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por6}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="544" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por7}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="575" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por8}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="606" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por9}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="637" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por10}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="668" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por11}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="699" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por12}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="313" y="20" width="45" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{etiqueta2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="358" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="389" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="420" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act3}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="451" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act4}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="482" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act5}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="513" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act6}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="544" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act7}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="575" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act8}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="606" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act9}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="637" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act10}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="668" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act11}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="699" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{act12}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="313" y="40" width="45" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{etiqueta3}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto1" x="358" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto2" x="389" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto3" x="420" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro3}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto4" x="451" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro4}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto5" x="482" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro5}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto6" x="513" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro6}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto7" x="544" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro7}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto8" x="575" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro8}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto9" x="606" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro9}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto10" x="637" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro10}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto11" x="668" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro11}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement style="propuesto12" x="699" y="40" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro12}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="40" splitType="Prevent">
+			<printWhenExpression><![CDATA[Boolean.valueOf(!$F{conFilaActual})]]></printWhenExpression>
+			<frame>
+				<reportElement style="celdaFamilia" x="18" y="0" width="31" height="40"/>
+			</frame>
+			<textField isBlankWhenNull="true">
+				<reportElement x="18" y="0" width="31" height="40">
+					<printWhenExpression><![CDATA[Boolean.valueOf(($F{primeroDeFamilia} || $V{PAGE_COUNT}.intValue() == 1))]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{codigoFamilia}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="49" y="0" width="71" height="40"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6.5" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{codArticulo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="120" y="0" width="109" height="40"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6.5"/></textElement>
+				<textFieldExpression><![CDATA[$F{datoArt}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="229" y="0" width="44" height="40"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6.5"/></textElement>
+				<textFieldExpression><![CDATA[$F{utm}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="273" y="0" width="40" height="40"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="7" isBold="true"/></textElement>
+				<textFieldExpression><![CDATA[$F{costoTM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="313" y="0" width="45" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{etiqueta1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="358" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="389" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="420" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por3}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="451" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por4}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="482" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por5}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="513" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por6}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="544" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por7}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="575" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por8}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="606" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por9}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="637" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por10}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="668" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por11}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="699" y="0" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{por12}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="313" y="20" width="45" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{etiqueta2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="358" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="389" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="420" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro3}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="451" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro4}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="482" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro5}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="513" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro6}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="544" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro7}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="575" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro8}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="606" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro9}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="637" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro10}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="668" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro11}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" pattern="#,##0.00">
+				<reportElement x="699" y="20" width="31" height="20"/>
+				<box><pen lineWidth="0.75"/><topPen lineWidth="0.75"/><leftPen lineWidth="0.75"/><bottomPen lineWidth="0.75"/><rightPen lineWidth="0.75"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"><font size="6"/></textElement>
+				<textFieldExpression><![CDATA[$F{pro12}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="1">
+			<printWhenExpression><![CDATA[Boolean.valueOf(!$F{ultimoDeFamilia})]]></printWhenExpression>
+			<line>
+				<reportElement x="18" y="0" width="712" height="1"/>
+				<graphicElement><pen lineWidth="1.0"/></graphicElement>
+			</line>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="27">
+			<textField isBlankWhenNull="true" pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="18" y="7" width="200" height="16"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="9"/></textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="570" y="7" width="130" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"><font size="9"/></textElement>
+				<textFieldExpression><![CDATA["Pagina " + $V{PAGE_NUMBER} + " De"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" evaluationTime="Report">
+				<reportElement x="700" y="7" width="30" height="16"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"><font size="9"/></textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="14" splitType="Stretch">
+			<subreport>
+				<reportElement uuid="ad5359df-8016-442e-b564-ab67fa85edfb" x="97" y="4" width="555" height="10"/>
+				<subreportParameter name="idPropuesta">
+					<subreportParameterExpression><![CDATA[$P{idPropuesta}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mensajeVacio">
+					<subreportParameterExpression><![CDATA[$P{familiasNoActualizadasMensaje}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{familiasNoActualizadas})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{subRptFamiliasNoActualizadas}]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

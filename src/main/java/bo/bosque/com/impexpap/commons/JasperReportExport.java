@@ -173,6 +173,47 @@ public class JasperReportExport {
     }
 
     /**
+     * Igual que {@link #exportPDFDesdeColeccion}, pero compilando antes los subreportes
+     * indicados y pasandolos como parametro con su propio nombre (tipo
+     * {@code net.sf.jasperreports.engine.JasperReport}).
+     *
+     * <p>El {@code .jrxml} principal debe referenciar cada subreporte como
+     * {@code $P{nombreSubreporte}} y darle sus filas con un {@code dataSourceExpression}
+     * (por ejemplo {@code new JRBeanCollectionDataSource($F{detalles})}): aqui no hay
+     * {@code Connection}, asi que un subreporte con {@code <queryString>} propio no se
+     * llenaria. Lo usa el recibo de garantias (RptCobrRec + subRptCbrzDetalle).
+     *
+     * @param nombreReporte nombre sin extension, dentro de resources/reports
+     * @param datos         una fila por elemento (getters == nombre de {@code <field>})
+     * @param params        parametros del reporte
+     * @param subreportes   nombres de los subreportes, sin extension
+     */
+    public byte[] exportPDFDesdeColeccionConSubreportes(String nombreReporte, java.util.Collection<?> datos,
+                                                        Map<String, Object> params, String... subreportes) {
+        try {
+            Map<String, Object> paramsCopy = new HashMap<>(params);
+            for (String sub : subreportes) {
+                JasperReport compilado = compileSubreport(sub);
+                if (compilado == null) {
+                    throw new RuntimeException("Subreporte no encontrado: reports/" + sub + JRXML);
+                }
+                paramsCopy.put(sub, compilado);
+            }
+            paramsCopy.putIfAbsent(JRParameter.REPORT_LOCALE, new java.util.Locale("es"));
+
+            JasperReport reporte = compileMainReport(REPORT_FOLDER + "/" + nombreReporte + JRXML);
+            JasperPrint print = JasperFillManager.fillReport(
+                    reporte, paramsCopy, new JRBeanCollectionDataSource(datos));
+            return JasperExportManager.exportReportToPdf(print);
+
+        } catch (Exception e) {
+            logger.error("Error generando el reporte {} desde colección con subreportes", nombreReporte, e);
+            throw new RuntimeException("No se pudo generar el reporte " + nombreReporte
+                    + ": " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Igual que {@link #exportPDFDesdeColeccion}, pero para VARIOS lotes de
      * datos con el mismo {@code .jrxml} — lo compila una sola vez y lo llena
      * una vez por lote, uniendo todos los PDFs resultantes en uno solo.
