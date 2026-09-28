@@ -152,7 +152,7 @@
 	</columnHeader>
 	<detail>
 		<band height="21" splitType="Stretch">
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="a0766fb3-2497-4e34-9c95-cbf1ae744d59" x="0" y="0" width="68" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -180,7 +180,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{costoTM}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="beb9358c-854f-4e8b-8da4-b6664c64a52a" stretchType="RelativeToTallestObject" x="129" y="0" width="76" height="20" isPrintInFirstWholeBand="true"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -194,7 +194,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{proveedor}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="05215ece-533c-4fa9-bfd7-2517d26c0d43" x="205" y="0" width="67" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -208,7 +208,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{familia}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="41ffdc3e-5220-4f77-ba58-a647ac2e3745" x="272" y="0" width="75" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -222,7 +222,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{presentacion}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="a353c139-688f-4d56-aba9-c093c05743a1" x="347" y="0" width="43" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -236,7 +236,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="3cd4e00e-7822-4d73-bed1-f6f2a33a0035" x="390" y="0" width="61" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>
@@ -250,7 +250,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{rangoGram}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="09073333-42a5-4556-826f-3a4676eb782d" x="451" y="0" width="48" height="20"/>
 				<box>
 					<pen lineWidth="1.0"/>

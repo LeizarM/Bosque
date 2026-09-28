@@ -206,7 +206,7 @@
 	</columnHeader>
 	<detail>
 		<band height="24">
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="79a99efa-cc0d-4ac1-94cc-16fd6e59ae79" x="1" y="-1" width="83" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -220,7 +220,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ipxCode}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="01afadb0-9a03-498e-acc8-f87afd10ea80" x="84" y="-1" width="98" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -234,7 +234,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INameIPX}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="d678437e-0f06-482b-9aca-908440b43b24" x="182" y="-1" width="56" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -248,7 +248,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{codFamilia}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="361e25ed-7170-46c2-80fa-6a4d40f9c2a6" x="281" y="-1" width="83" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -262,7 +262,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{papCode}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="4e700e3f-a27a-4694-b0e6-359297e5a30e" x="364" y="-1" width="97" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -276,7 +276,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INamePAP}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="95ab0505-d5da-4104-969e-c937e84d27a3" x="461" y="-1" width="81" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -290,7 +290,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{eppCode}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="1a2e31d3-b788-4fe8-9fa2-af260941de9b" x="542" y="-1" width="98" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -304,7 +304,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{INameEPP}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement uuid="6b4f261b-7de0-48e7-bcb7-c5577c5e6151" x="238" y="-1" width="43" height="25"/>
 				<box>
 					<pen lineWidth="0.75"/>
