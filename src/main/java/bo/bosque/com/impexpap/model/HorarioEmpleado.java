@@ -17,4 +17,5 @@ public class HorarioEmpleado {
     private String horaIngreso;
     private String horaSalida;
     private Integer cantMinutos;
+
 }
