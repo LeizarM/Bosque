@@ -90,22 +90,35 @@ public class PaginaXAppController {
 
 
 
-    // ─── Gestion de ciudades por usuario (solo administradores) ─────────────
+    // ─── Gestion de ciudades por usuario ────────────────────────────────────
+    // ROLE_ADM o el boton btnCiudadesUsuario (CiudadesVentaHelper.exigirGestion).
+
+    /** Todas las ciudades de venta, para las casillas de la pantalla de gestion. */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/usuarioCiudad/ciudadesVenta")
+    public ResponseEntity<ApiResponse<List<CiudadVenta>>> ciudadesVenta( Authentication auth ) {
+
+        this.ciudadesVenta.exigirGestion( auth );
+        List<CiudadVenta> lista = this.usuarioCiudadDao.ciudadesVenta();
+        return ResponseEntity.ok( new ApiResponse<>( "OK", lista, HttpStatus.OK.value() ) );
+    }
 
     /** Todas las asignaciones de {@code tven_UsuarioCiudad}. */
-    @Secured({ "ROLE_ADM" })
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/usuarioCiudad/asignaciones")
-    public ResponseEntity<ApiResponse<List<CiudadVenta>>> asignaciones() {
+    public ResponseEntity<ApiResponse<List<CiudadVenta>>> asignaciones( Authentication auth ) {
 
+        this.ciudadesVenta.exigirGestion( auth );
         List<CiudadVenta> lista = this.usuarioCiudadDao.todasLasAsignaciones();
         return ResponseEntity.ok( new ApiResponse<>( "OK", lista, HttpStatus.OK.value() ) );
     }
 
     /** Asigna una ciudad a un usuario. {@code audUsuario} sale del token. */
-    @Secured({ "ROLE_ADM" })
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/usuarioCiudad/registrar")
     public ResponseEntity<ApiResponse<Long>> asignar( @RequestBody CiudadVenta cv, Authentication auth ) {
 
+        this.ciudadesVenta.exigirGestion( auth );
         RespuestaSp r = this.usuarioCiudadDao.asignar( cv.getCodUsuario(), cv.getCodCiudad(),
                 DatosToken.codUsuarioDe( auth ) );
         return new ResponseEntity<>( new ApiResponse<>( "Ciudad asignada", r.getIdGenerado(),
@@ -113,10 +126,11 @@ public class PaginaXAppController {
     }
 
     /** Quita una ciudad a un usuario. Si era la ultima, vuelve a ver su ciudad del login. */
-    @Secured({ "ROLE_ADM" })
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/usuarioCiudad/eliminar")
     public ResponseEntity<ApiResponse<Long>> quitar( @RequestBody CiudadVenta cv, Authentication auth ) {
 
+        this.ciudadesVenta.exigirGestion( auth );
         RespuestaSp r = this.usuarioCiudadDao.quitar( cv.getCodUsuario(), cv.getCodCiudad(),
                 DatosToken.codUsuarioDe( auth ) );
         return ResponseEntity.ok( new ApiResponse<>( "Ciudad quitada", r.getIdGenerado(),

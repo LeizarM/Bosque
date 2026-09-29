@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import bo.bosque.com.impexpap.dao.ILoginDao;
+import bo.bosque.com.impexpap.dao.IUsuarioBtn;
 import bo.bosque.com.impexpap.dao.IUsuarioCiudad;
 import bo.bosque.com.impexpap.dto.CiudadesPermitidasDto;
 import bo.bosque.com.impexpap.model.ArticuloPrecioDisponible;
@@ -45,18 +46,45 @@ public class CiudadesVentaHelper {
     /** "Todas" en el selector y en {@code p_list_articuloPrecioDisponible}. */
     public static final int TODAS = 0;
 
+    /**
+     * Boton del ACL ({@code tb_vistaBtn.nombreBtn}) que habilita la pantalla
+     * "Ciudades por usuario". Es el mismo que chequea el {@code PermissionWidget}
+     * de la app: por nombre, sin vista. El nombre es nuevo y unico.
+     */
+    public static final String BTN_GESTION = "btnCiudadesUsuario";
+
     /** La ciudad del login todavia no se consulto (no hizo falta). */
     private static final int SIN_CONSULTAR = -1;
 
     private final IUsuarioCiudad usuarioCiudadDao;
     private final ILoginDao loginDao;
     private final AccesoModuloHelper acceso;
+    private final IUsuarioBtn usuarioBtnDao;
 
     public CiudadesVentaHelper(IUsuarioCiudad usuarioCiudadDao, ILoginDao loginDao,
-                               AccesoModuloHelper acceso) {
+                               AccesoModuloHelper acceso, IUsuarioBtn usuarioBtnDao) {
         this.usuarioCiudadDao = usuarioCiudadDao;
         this.loginDao = loginDao;
         this.acceso = acceso;
+        this.usuarioBtnDao = usuarioBtnDao;
+    }
+
+    /**
+     * 403 si no puede gestionar ciudades por usuario. Misma regla que
+     * {@code tienePermisoDeBoton} de la app: {@code ROLE_ADM} siempre; el resto
+     * necesita {@link #BTN_GESTION} con {@code nivelAcceso != 0} en
+     * {@code tb_usuarioBtn}. Esconder el boton en la app no autoriza nada: el
+     * que decide es este metodo.
+     */
+    public void exigirGestion(Authentication auth) {
+        if (acceso.esAdmin(auth)) return;
+        int codUsuario = DatosToken.codUsuarioDe(auth);
+        boolean tiene = usuarioBtnDao.botonesXUsuario(codUsuario).stream()
+                .anyMatch(b -> BTN_GESTION.equals(b.getBoton()) && b.getPermiso() != 0);
+        if (!tiene) {
+            throw new AccessDeniedException(
+                    "No tiene habilitado '" + BTN_GESTION + "' para asignar ciudades.");
+        }
     }
 
     /** El Alto se trata como La Paz. */
