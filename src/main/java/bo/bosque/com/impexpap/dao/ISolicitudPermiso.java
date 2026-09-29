@@ -4,6 +4,7 @@ import bo.bosque.com.impexpap.model.ChipTigo;
 import bo.bosque.com.impexpap.model.SolicitudPermiso;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.Tipos;
+import bo.bosque.com.impexpap.model.HorarioEmpleado;
 
 import java.util.List;
 import java.util.Map;
@@ -36,4 +37,7 @@ public interface ISolicitudPermiso {
      * @return
      */
     List<Tipos>listTipoPermiso(SolicitudPermiso s);
+
+    /** Obtener horario del empleado (ACCION 'HR') */
+    List<HorarioEmpleado> obtenerHorario(SolicitudPermiso filtro);
 }

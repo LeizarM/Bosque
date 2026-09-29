@@ -277,4 +277,12 @@ public class VacacionController {
     public ResponseEntity<ApiResponse<?>> previsualizarSaldo(@RequestBody SolicitudPermiso filtro) {
         return procesarListaCambios(solicitudDao.previsualizarSaldo(filtro));
     }
+    /**
+     * OBTENER HORARIO DEL EMPLEADO (Acción 'HR')
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/obtener-horario")
+    public ResponseEntity<ApiResponse<?>> obtenerHorario(@RequestBody SolicitudPermiso filtro) {
+        return procesarListaCambios(solicitudDao.obtenerHorario(filtro));
+    }
 }

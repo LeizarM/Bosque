@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.SolicitudPermiso;
+import bo.bosque.com.impexpap.model.HorarioEmpleado;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
 import bo.bosque.com.impexpap.utils.Tipos;
@@ -124,5 +125,14 @@ public class SolicitudPermisoDao implements ISolicitudPermiso {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Override
+    public List<HorarioEmpleado> obtenerHorario(SolicitudPermiso filtro) {
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("codEmpleado", filtro.getCodEmpleado());
+        params.put("desde", filtro.getDesde()); // Timestamp nativo
+        params.put("hasta", filtro.getHasta()); // Timestamp nativo
+        return this.spHelper.ejecutarListado("p_list_SolicitudVacacion", params, "HR", HorarioEmpleado.class);
     }
 }
