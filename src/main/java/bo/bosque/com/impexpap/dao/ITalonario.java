@@ -18,13 +18,24 @@ public interface ITalonario {
      *
      * El UPDATE ignora a proposito costoBs, numeracionInicial, numeracionFinal
      * y codEmpresa: cambiar el rango de folios de un talonario que ya circulo
-     * invalidaria su historial.
+     * invalidaria su historial. La empresa se cambia con {@link #cambiarEmpresa}.
      *
      * El DELETE rebota si el talonario ya tiene movimientos.
      *
      * @param acc Accion ('I', 'U', 'D')
      */
     RespuestaSp registrarTalonario(Talonario mb, String acc);
+
+    /**
+     * Cambia la empresa de un talonario (ACCION 'E'), tenga o no movimientos.
+     * Idempotente: si ya esta en esa empresa no escribe nada y devuelve exito.
+     *
+     * Ojo: el reporte de SAP empareja cada recibo con su talonario por empresa
+     * + nroTalonario + folio, asi que cambiarla mueve los recibos ya emitidos
+     * de un reporte de conciliacion al otro. Ver el encabezado de
+     * p_abm_tmto_Talonario.
+     */
+    RespuestaSp cambiarEmpresa(long codTalonario, long codEmpresa, long audUsuario);
 
     /** Un talonario por su id, con su estado ya calculado. */
     List<Talonario> obtenerTalonario(long codTalonario);

@@ -7,6 +7,7 @@ import bo.bosque.com.impexpap.dao.ITalonarioDetalle;
 import bo.bosque.com.impexpap.dao.ITalonarioGrupo;
 import bo.bosque.com.impexpap.dao.ITalonarioPorGrupo;
 import bo.bosque.com.impexpap.dao.ITipoRecibo;
+import bo.bosque.com.impexpap.dto.CambioEmpresaLoteDto;
 import bo.bosque.com.impexpap.dto.EntregaLoteDto;
 import bo.bosque.com.impexpap.dto.ReporteTalonarioDto;
 import bo.bosque.com.impexpap.dto.TalonarioFiltroDto;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,9 +55,9 @@ import java.util.Set;
  * eventos. p_list_tmto_Talonario lo devuelve ya resuelto en estadoActual y
  * en los tres flags puedeEntregar / puedeDevolver / puedeCerrar.
  *
- * Las dos cargas en lote (alta masiva y entrega masiva) son @Transactional:
- * si falla una fila no queda ninguna. El legacy las hacia en un bucle sin
- * transaccion y dejaba media carga escrita.
+ * Las cargas en lote (alta masiva, entrega masiva y cambio de empresa) son
+ * @Transactional: si falla una fila no queda ninguna. El legacy las hacia en
+ * un bucle sin transaccion y dejaba media carga escrita.
  */
 @Slf4j
 @RestController
@@ -79,6 +81,13 @@ public class TalonariosController {
     private static final int MAX_CANTIDAD_LOTE = 1000;
     private static final int MAX_BLOQUE = 1_000_000;
     private static final int MAX_CORRELATIVO = 999_999;
+
+    /**
+     * Tope de talonarios por cambio de empresa. El modulo entero tiene del
+     * orden de mil, asi que esto no limita ningun uso real: solo evita una
+     * transaccion desmedida si llega una lista absurda.
+     */
+    private static final int MAX_CAMBIO_EMPRESA = 5_000;
 
     /** Ninguno de los reportes usa subreportes, pero el exportador pide el arreglo. */
     private static final String[] SIN_SUBREPORTES = new String[0];
@@ -358,6 +367,61 @@ public class TalonariosController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
                 "Se entregaron " + ids.size() + " talonarios.", ids, HttpStatus.CREATED.value()));
+    }
+
+    // ==================== CAMBIO DE EMPRESA ====================
+
+    /**
+     * Cambia la empresa de uno o varios talonarios. TODO O NADA.
+     *
+     * Un solo endpoint para los dos usos: el formulario de edicion manda un id
+     * y la grilla manda los tildados. Los que ya estan en esa empresa pasan sin
+     * escribir nada, asi que se puede mandar la seleccion completa.
+     *
+     * Mueve los recibos de SAP ya emitidos de un talonario al reporte de
+     * conciliacion de la otra empresa (ver p_abm_tmto_Talonario). Si corresponde
+     * o no lo decide quien llama: el SP no ve SAP.
+     *
+     * SpHelper ya lanza SpBusinessException ante error != 0, asi que aca se
+     * recoge para agregar cual talonario fallo; la @Transactional lo revierte
+     * todo igual.
+     */
+    @PostMapping("/cambiar-empresa-lote")
+    @Transactional
+    public ResponseEntity<ApiResponse<?>> cambiarEmpresaLote(@RequestBody CambioEmpresaLoteDto dto) {
+        if (dto.getCodTalonarios() == null || dto.getCodTalonarios().isEmpty()) {
+            throw new SpBusinessException("Debe seleccionar al menos un talonario.");
+        }
+        if (dto.getCodEmpresa() <= 0) {
+            throw new SpBusinessException("Debe indicar la empresa.");
+        }
+
+        // Sin repetidos y en el orden recibido.
+        Set<Long> codTalonarios = new LinkedHashSet<>(dto.getCodTalonarios());
+        if (codTalonarios.size() > MAX_CAMBIO_EMPRESA) {
+            throw new SpBusinessException(
+                    "No se puede cambiar la empresa de más de " + MAX_CAMBIO_EMPRESA
+                    + " talonarios a la vez.");
+        }
+
+        List<Long> ids = new ArrayList<>(codTalonarios.size());
+        for (Long codTalonario : codTalonarios) {
+            if (codTalonario == null || codTalonario <= 0) {
+                throw new SpBusinessException("La selección trae un talonario sin identificar.");
+            }
+            try {
+                RespuestaSp res = talonarioDao.cambiarEmpresa(
+                        codTalonario, dto.getCodEmpresa(), dto.getAudUsuario());
+                ids.add(res.getIdGenerado());
+            } catch (SpBusinessException e) {
+                throw new SpBusinessException(
+                        "No se cambió la empresa de ningún talonario. Falló el talonario con id "
+                        + codTalonario + ": " + e.getMessage());
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                "Empresa actualizada en " + ids.size() + " talonarios.", ids, HttpStatus.CREATED.value()));
     }
 
     // ==================== REPORTES ====================

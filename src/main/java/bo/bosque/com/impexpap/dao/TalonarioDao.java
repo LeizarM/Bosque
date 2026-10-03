@@ -24,6 +24,16 @@ public class TalonarioDao implements ITalonario {
         return spHelper.ejecutarAbm("p_abm_tmto_Talonario", mb, acc);
     }
 
+    /* Overload de Map: la ACCION 'E' solo necesita estos tres parametros. */
+    @Override
+    public RespuestaSp cambiarEmpresa(long codTalonario, long codEmpresa, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codTalonario", codTalonario);
+        params.put("codEmpresa", codEmpresa);
+        params.put("audUsuario", audUsuario);
+        return spHelper.ejecutarAbmMap("p_abm_tmto_Talonario", params, "E");
+    }
+
     /*
      * Overload de Map en todos los listados: p_list_tmto_Talonario usa NULL
      * como "sin filtro" y el overload de modelo conserva los 0 de los
