@@ -38,14 +38,19 @@ public class VistaUsuarioDao implements  IVistaUsuario{
      */
     @Override
     public boolean registrarVistaUsuario( VistaUsuario mb, String acc ) {
+        int resp = ejecutarAbmVistaUsuario( mb, acc );
 
+        // 'U' es solo UPDATE en el SP: si el usuario todavia no tiene fila para esa vista,
+        // no afecta ninguna (devuelve 0) y la fila hay que insertarla con 'I'.
+        if ( resp == 0 && "U".equals( acc ) ) {
+            resp = ejecutarAbmVistaUsuario( mb, "I" );
+        }
+        return resp != 0;
+    }
 
-
-
-        int resp;
-
-        try{
-            resp = this.jdbcTemplate.update("execute p_abm_VistaUsuario  @codUsuario = ?, @codVista = ?, @nivelAcceso = ?, @autorizador = ?,  @audUsuarioI = ?, @ACCION = ?",
+    private int ejecutarAbmVistaUsuario( VistaUsuario mb, String acc ) {
+        try {
+            return this.jdbcTemplate.update("execute p_abm_VistaUsuario  @codUsuario = ?, @codVista = ?, @nivelAcceso = ?, @autorizador = ?,  @audUsuarioI = ?, @ACCION = ?",
                     ps -> {
 
                         ps.setInt(1, mb.getCodUsuario());
@@ -56,13 +61,10 @@ public class VistaUsuarioDao implements  IVistaUsuario{
                         ps.setString(6, acc);
 
                     });
-
-        }catch ( BadSqlGrammarException e){
+        } catch ( BadSqlGrammarException e ) {
             System.out.println("Error: VistaUsuarioDao en registrarVistaUsuario, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            resp = 0;
+            return 0;
         }
-
-        return resp!=0;
     }
 
     /**
