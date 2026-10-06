@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subReporte01" pageWidth="547" pageHeight="802" whenNoDataType="NoDataSection" columnWidth="547" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" isIgnorePagination="true" uuid="40a0646d-1917-4549-a611-e7358cf070a5">
+	<property name="ireport.zoom" value="1.9487171000000019"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<field name="codDetalle" class="java.lang.Long"/>
+	<field name="codGarantia" class="java.lang.Long"/>
+	<field name="fecha" class="java.sql.Timestamp"/>
+	<field name="tipoGarantia" class="java.lang.String"/>
+	<field name="detalle" class="java.lang.String"/>
+	<field name="montoGarantiaParc" class="java.math.BigDecimal"/>
+	<field name="datoGarantia" class="java.lang.String"/>
+	<field name="fechaString" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="15" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="e159c2c0-5cfe-4556-997f-f342aa35bf09" x="0" y="0" width="545" height="14" forecolor="#CCCCCC" backcolor="#CCCCCC"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="f5012c31-6525-493f-86f9-7e225cca24b3" x="24" y="1" width="50" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d294f14d-9e1f-4e06-8550-52dac46e5842" x="82" y="0" width="80" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Garantia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6fc0ce26-06c2-4ca5-b0b5-759661964be3" x="165" y="0" width="380" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Detalle]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="505ce708-375a-4ec6-b1e4-962a4a6495dc" x="0" y="14" width="545" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="75" y="0" width="1" height="15"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="164" y="0" width="1" height="15"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="0" y="0" width="1" height="15"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="545" y="0" width="1" height="15"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement uuid="526aff13-f4d1-455d-a9a2-a868cf0b148c" x="25" y="0" width="50" height="13"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fechaString}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="4ab425c6-6dbf-4cf1-9c79-d413ab464d1c" x="78" y="0" width="84" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datoGarantia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="4f4f1260-61ad-4326-bb69-75fe2dee44f7" x="166" y="0" width="377" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{detalle}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="505ce708-375a-4ec6-b1e4-962a4a6495dc" x="0" y="14" width="545" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="75" y="0" width="1" height="15"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="164" y="0" width="1" height="15"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="0" y="0" width="1" height="15"/>
+			</line>
+			<line>
+				<reportElement uuid="60870fa8-3c0a-4293-8a0c-79ea269125a9" x="545" y="0" width="1" height="15"/>
+			</line>
+		</band>
+	</detail>
+	<noData>
+		<band height="15">
+			<staticText>
+				<reportElement uuid="cd13bfc2-befe-4c59-8f1c-511457577230" x="29" y="1" width="180" height="12"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[  *  No Tiene Registros  de Garantias (s)]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="505ce708-375a-4ec6-b1e4-962a4a6495dc" x="0" y="14" width="546" height="1"/>
+			</line>
+		</band>
+	</noData>
+</jasperReport>
