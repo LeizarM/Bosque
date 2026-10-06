@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Component;
@@ -312,6 +313,44 @@ public class SpHelper {
     }
 
     /**
+     * Igual que {@link #ejecutarListado(String, Map, String, Class)}, pero las columnas se leen
+     * <b>por posición</b> con un {@link RowMapper} en lugar de por nombre.
+     *
+     * <p><b>Cuándo usar esta:</b> los SP heredados del legacy cuyo {@code SELECT} no tiene alias —
+     * {@code CONVERT(date, a.fecha)}, {@code ISNULL(...)} — o repite nombres —
+     * {@code tm.descripcion}, {@code ttch.descripcion}, {@code te.descripcion} salen las tres como
+     * {@code descripcion}—. {@code BeanPropertyRowMapper} no puede mapear eso; el legacy los lee
+     * con {@code rs.getXxx(n)}, y aquí se hace igual. Es el mismo acoplamiento al orden de columnas
+     * que ya tenía el JSF, no uno nuevo. Ejemplo: {@code p_list_Cheque} ramas A, B y C.
+     *
+     * <p>Hace lo mismo que la versión por nombre: sólo manda los parámetros del {@code Map} más
+     * {@code @ACCION}, sin limpiar nada, y es una llamada {@code EXEC} (no arma SQL).
+     */
+    public <T> List<T> ejecutarListadoPorPosicion(String spName, Map<String, Object> params,
+                                                  String accion, RowMapper<T> mapper) {
+        try {
+            Map<String, Object> paramsCopy = new LinkedHashMap<>(params);
+            paramsCopy.put("ACCION", accion);
+
+            StringBuilder sql = new StringBuilder("EXEC ").append(spName);
+            List<Object> values = new ArrayList<>(paramsCopy.size());
+            boolean first = true;
+            for (Map.Entry<String, Object> entry : paramsCopy.entrySet()) {
+                sql.append(first ? " " : ", ")
+                   .append("@").append(entry.getKey()).append("=?");
+                values.add(entry.getValue());
+                first = false;
+            }
+
+            return jdbcTemplate.query(sql.toString(), mapper, values.toArray());
+
+        } catch (DataAccessException ex) {
+            logger.error("Error de DB al ejecutar SP de listado por posicion {}. Accion: {}", spName, accion, ex);
+            throw new RuntimeException("Error al consultar los datos en la base de datos.", ex);
+        }
+    }
+
+    /**
      * Un lote de ids como {@code "1,2,3"}, que es lo que esperan las ACCIONes que reciben un
      * parámetro de lista (por ejemplo {@code @codEmpleados}).
      *
@@ -428,6 +467,63 @@ public class SpHelper {
         } catch (DataAccessException ex) {
             logger.error("Error de DB al ejecutar SP de listado con estado {}", spName, ex);
             throw new RuntimeException("Error al consultar los datos en la base de datos.", ex);
+        }
+    }
+
+    /**
+     * Ejecuta un SP de escritura <b>por nombre y sin parámetros OUTPUT</b>: {@code EXEC spName @p1=?, ..., @ACCION=?}.
+     *
+     * <p><b>Cuándo usar esta y no {@link #ejecutarAbmMap}:</b> {@code ejecutarAbmMap} exige que el procedimiento declare
+     * {@code @error}, {@code @errormsg} y {@code @idGenerado}. Hay procedimientos compartidos que no se pueden alterar (por
+     * ejemplo {@code p_abm_SocioNegocio}, que Depositos llama en cada listado): se invocan tal como están y aquí no se
+     * lee ninguna salida. No devuelve nada: el procedimiento no dice cuánto hizo.
+     *
+     * <p>Se recorren <b>todos</b> los resultados que produzca el procedimiento (conteos de filas y result sets), no solo el
+     * primero: un error que el motor lanza después de un conteo llega al driver recién al pedir el siguiente resultado, y si no
+     * se pidiera la escritura parecería haber salido bien. Un error de base de datos sale como {@code RuntimeException} con la
+     * causa original ({@link DataAccessException}), igual que en los demás métodos.
+     */
+    public void ejecutarSinSalidas(String spName, Map<String, Object> params, String accion) {
+        final Map<String, Object> paramsCopy = new LinkedHashMap<>(params);
+        paramsCopy.put("ACCION", accion);
+
+        final StringBuilder sql = new StringBuilder("EXEC ").append(spName);
+        final List<Object> values = new ArrayList<>(paramsCopy.size());
+        boolean first = true;
+        for (Map.Entry<String, Object> entry : paramsCopy.entrySet()) {
+            sql.append(first ? " " : ", ").append("@").append(entry.getKey()).append("=?");
+            values.add(entry.getValue());
+            first = false;
+        }
+
+        logger.debug("ejecutarSinSalidas → SP={}, params={}", spName, paramsCopy.keySet());
+
+        try {
+            jdbcTemplate.execute(
+                    (java.sql.Connection con) -> con.prepareStatement(sql.toString()),
+                    (PreparedStatement ps) -> {
+                        for (int i = 0; i < values.size(); i++) {
+                            ps.setObject(i + 1, aFechaSql(values.get(i)));
+                        }
+                        boolean hayResultSet = ps.execute();
+                        while (true) {
+                            if (hayResultSet) {
+                                try (ResultSet rs = ps.getResultSet()) {
+                                    while (rs.next()) {
+                                        // las filas no interesan: solo hay que avanzar
+                                    }
+                                }
+                            } else if (ps.getUpdateCount() == -1) {
+                                break;
+                            }
+                            hayResultSet = ps.getMoreResults();
+                        }
+                        return null;
+                    }
+            );
+        } catch (DataAccessException ex) {
+            logger.error("Error de DB al ejecutar SP {} sin salidas. Acción: {}", spName, accion, ex);
+            throw new RuntimeException("Error de conexión o sintaxis en la base de datos.", ex);
         }
     }
 }

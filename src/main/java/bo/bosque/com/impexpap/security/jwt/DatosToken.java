@@ -40,18 +40,31 @@ public final class DatosToken {
     private final int codEmpleado;
     private final int codEmpresa;
     private final String tipoUsuario;
+    private final String nombreCompleto;
 
     public DatosToken(int codUsuario, int codEmpleado, int codEmpresa, String tipoUsuario) {
+        this(codUsuario, codEmpleado, codEmpresa, tipoUsuario, null);
+    }
+
+    /**
+     * @param nombreCompleto el claim {@code nombreCompleto} del token (nombre de la persona del usuario), solo
+     *                       para rotular lo que se imprime ("impreso por"); {@code null} en tokens viejos
+     */
+    public DatosToken(int codUsuario, int codEmpleado, int codEmpresa, String tipoUsuario, String nombreCompleto) {
         this.codUsuario  = codUsuario;
         this.codEmpleado = codEmpleado;
         this.codEmpresa  = codEmpresa;
         this.tipoUsuario = tipoUsuario;
+        this.nombreCompleto = nombreCompleto;
     }
 
     public int getCodUsuario()     { return codUsuario; }
     public int getCodEmpleado()    { return codEmpleado; }
     public int getCodEmpresa()     { return codEmpresa; }
     public String getTipoUsuario() { return tipoUsuario; }
+
+    /** Nombre de la persona para rotular reportes; vacio (nunca {@code null}) si el token no lo trae. */
+    public String getNombreCompleto() { return nombreCompleto == null ? "" : nombreCompleto; }
 
     /**
      * Los datos del que esta llamando, o 403.

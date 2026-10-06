@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subReporte" pageWidth="170" pageHeight="752" columnWidth="170" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="16bb8fda-7a71-4813-8970-2e8d5fc01664">
+	<property name="ireport.zoom" value="4.594972986357225"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="codCheq" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<field name="codCheque" class="java.lang.Integer"/>
+	<field name="notaRemision" class="java.lang.String"/>
+	<field name="nroFactura" class="java.lang.Integer"/>
+	<field name="fechaFactura" class="java.sql.Date"/>
+	<field name="fechaString" class="java.lang.String"/>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField>
+				<reportElement uuid="4ad8a53f-a36f-43a7-9d46-bf5102cf88ae" x="104" y="0" width="55" height="10"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{notaRemision}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="29a86966-f473-4a41-933b-e6726a5a1cec" x="52" y="0" width="45" height="10"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nroFactura}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="91c30792-62f0-45bb-8449-499e609c51f8" x="3" y="0" width="45" height="10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaFactura}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="a5ab00d8-4be3-4246-97b6-0ebe7c4cf102" x="0" y="10" width="170" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="d846ebd3-4946-4d84-adc7-111cf35889aa" x="50" y="0" width="1" height="11"/>
+			</line>
+			<line>
+				<reportElement uuid="d846ebd3-4946-4d84-adc7-111cf35889aa" x="102" y="0" width="1" height="11"/>
+			</line>
+		</band>
+	</detail>
+</jasperReport>

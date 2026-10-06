@@ -165,7 +165,8 @@ public class JwtProvider {
                 aEntero(c.getId()),
                 aEntero(c.get("codEmpleado")),
                 aEntero(c.get("codEmpresa")),
-                c.get("tipoUsuario", String.class));
+                c.get("tipoUsuario", String.class),
+                c.get("nombreCompleto", String.class));
     }
 
     /**

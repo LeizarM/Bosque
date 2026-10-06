@@ -54,6 +54,15 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(ex.getMessage(), null, HttpStatus.CONFLICT.value()));
     }
 
+    // 2.a Un permiso que falta, CON el motivo y que hacer -> 403 con SU mensaje (ver SinPermisoException).
+    //     Spring elige el handler del tipo mas especifico: los AccessDeniedException a secas siguen
+    //     respondiendo el texto fijo de abajo.
+    @ExceptionHandler(SinPermisoException.class)
+    public ResponseEntity<ApiResponse<?>> handleSinPermisoException(SinPermisoException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(ex.getMessage(), null, HttpStatus.FORBIDDEN.value()));
+    }
+
     // 2. Errores de Permisos (Spring Security) -> 403 Forbidden
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException ex) {

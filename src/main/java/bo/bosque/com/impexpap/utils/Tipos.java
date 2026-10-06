@@ -74,6 +74,83 @@ public class Tipos {
     }
 
     /**
+     * ================= PARA EL MODULO DE CHEQUES (tch) =================
+     *
+     * Copia de {@code v_tipos} grupos 21 a 24 (la vista esta hecha con literales dentro del CREATE
+     * VIEW) y de los combos por boton de {@code Tipos.java} de Bosque v2. Se conservan los codigos
+     * TAL COMO los escribe el legacy: la moneda se guarda {@code BS} / {@code SUS} (la vista dice
+     * {@code Bs}; el motor compara sin distinguir mayusculas).
+     *
+     * <p>El grupo 22 de la VISTA tiene 12 estados; el combo de edicion del legacy
+     * ({@code listChkAccsCompleto}) agrega {@code VER}. Aqui van los 13, que es lo que hace falta para
+     * poner nombre a cualquier fila del historial.
+     */
+    public List<Tipos> lstTipoCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("PAG", "PAGO", 21));
+        l.add(new Tipos("RES", "RESPALDO", 21));
+        return l;
+    }
+
+    public List<Tipos> lstMonedaCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("BS", "Bs", 24));
+        l.add(new Tipos("SUS", "$us", 24));
+        return l;
+    }
+
+    public List<Tipos> lstEstadoCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("PEN", "PENDIENTE", 23));
+        l.add(new Tipos("CER", "CERRADO", 23));
+        return l;
+    }
+
+    /** Todos los estados de accion de un cheque (grupo 22 mas VER). */
+    public List<Tipos> lstEstadoAccionCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("REC", "RECIBIDO", 22));
+        l.add(new Tipos("TRASP", "TRASPASO", 22));
+        l.add(new Tipos("CUS", "A COBRANZA", 22));
+        l.add(new Tipos("DEV", "DEVUELTO", 22));
+        l.add(new Tipos("COB", "COBRADO", 22));
+        l.add(new Tipos("VEN", "VENCIDO - POSTERGADO", 22));
+        l.add(new Tipos("DPB", "DEPOSITADO BANCO", 22));
+        l.add(new Tipos("DPR", "DEPOSITADO - RECHAZADO", 22));
+        l.add(new Tipos("CEF", "CANJEADO EFECTIVO", 22));
+        l.add(new Tipos("CCH", "CANJEADO CHEQUE", 22));
+        l.add(new Tipos("ADE", "ADELANTADO", 22));
+        l.add(new Tipos("PAP", "PAGO PARCIAL", 22));
+        l.add(new Tipos("VER", "VERIFICADO", 22));
+        return l;
+    }
+
+    /** Boton "Fecha Cobro": {@code listChkAccsFechaCobro}. */
+    public List<Tipos> lstAccionFechaCobroCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("VEN", "VENCIDO - POSTERGADO", 22));
+        l.add(new Tipos("ADE", "ADELANTADO", 22));
+        return l;
+    }
+
+    /** Boton "Cerrar con verificacion": {@code listChkAccsCierre}. */
+    public List<Tipos> lstAccionCierreConVerificacionCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("COB", "COBRADO", 22));
+        return l;
+    }
+
+    /** Boton "Cerrar sin verificacion": {@code listChkAccsCierreOtros}. */
+    public List<Tipos> lstAccionCierreSinVerificacionCheque() {
+        List<Tipos> l = new ArrayList<>();
+        l.add(new Tipos("CEF", "CANJEADO EFECTIVO", 22));
+        l.add(new Tipos("CCH", "CANJEADO CHEQUE", 22));
+        l.add(new Tipos("PAP", "PAGO PARCIAL", 22));
+        l.add(new Tipos("DPR", "DEPOSITADO BANCO - RECHAZADO", 22));
+        return l;
+    }
+
+    /**
      * ================= PARA EL MODULO DE GARANTIAS DE COBRANZA (tcbr) =================
      *
      * Copia literal de v_tipos grupos 28 y 29 (la vista esta hecha con literales dentro del
