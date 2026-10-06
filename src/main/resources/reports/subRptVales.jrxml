@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subRptVales" pageWidth="540" pageHeight="792" columnWidth="540" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenNoDataType="NoDataSection" uuid="1e52076c-296a-427f-beaf-d38ecb1d1a63">
+	<!-- Vales sin cerrar del arqueo, a todo el ancho del PDF (rediseno
+	     2026-10-05). El titulo vive aqui y no en el principal: sin vales sale
+	     una sola linea que lo dice, en vez de un titulo con una tabla vacia. -->
+	<!-- Terracota: plata que salio de la caja y todavia no volvio. Se distingue
+	     a primera vista del efectivo (verde) y de SAP (azul). -->
+	<style name="celda" fontSize="8">
+		<box leftPadding="4" rightPadding="4">
+			<pen lineWidth="0.5" lineColor="#D9B7A3"/>
+		</box>
+	</style>
+	<style name="encabezado" style="celda" mode="Opaque" forecolor="#FFFFFF" backcolor="#A04A1E" isBold="true"/>
+	<style name="fila" style="celda">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}.intValue() % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#FEF5EF"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="idAc" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[execute p_list_vale @idAc=$P{idAc}, @ACCION='A']]>
+	</queryString>
+	<field name="numVale" class="java.lang.Integer"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="monto" class="java.lang.Double"/>
+	<field name="fecha" class="java.sql.Date"/>
+	<field name="empresa" class="java.lang.String"/>
+	<field name="obs" class="java.lang.String"/>
+	<title>
+		<band height="16">
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="0" y="0" width="540" height="16" forecolor="#6E2E10" backcolor="#FBE5D8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VALES SIN CERRAR]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="14">
+			<staticText>
+				<reportElement style="encabezado" x="0" y="0" width="36" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Nº]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="36" y="0" width="150" height="14"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[NOMBRE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="186" y="0" width="58" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[FECHA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="244" y="0" width="78" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[EMPRESA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="322" y="0" width="138" height="14"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[OBSERVACIONES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="460" y="0" width="80" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[MONTO (Bs.)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="fila" stretchType="RelativeToTallestObject" x="0" y="0" width="36" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{numVale}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="fila" stretchType="RelativeToTallestObject" x="36" y="0" width="150" height="13"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement style="fila" stretchType="RelativeToTallestObject" x="186" y="0" width="58" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="fila" stretchType="RelativeToTallestObject" x="244" y="0" width="78" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{empresa}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="fila" stretchType="RelativeToTallestObject" x="322" y="0" width="138" height="13"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{obs}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="fila" stretchType="RelativeToTallestObject" x="460" y="0" width="80" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{monto}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<noData>
+		<band height="16">
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="0" y="0" width="160" height="16" forecolor="#6E2E10" backcolor="#FBE5D8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VALES SIN CERRAR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="celda" x="160" y="0" width="380" height="16" forecolor="#5F6B62"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[No hay vales sin cerrar.]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

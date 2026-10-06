@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="661" pageHeight="288" orientation="Landscape" columnWidth="661" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="cf30d86d-f955-4014-ba2f-21fa85c526af">
+	<property name="ireport.zoom" value="8.14027493868399"/>
+	<property name="ireport.x" value="2156"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="fecha" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[execute p_list_trapasoMovCaja @fecha=$P{fecha}, @ACCION='B']]>
+	</queryString>
+	<field name="idTrasp" class="java.lang.Long"/>
+	<field name="bd" class="java.lang.String"/>
+	<field name="fecha" class="java.sql.Date"/>
+	<field name="account" class="java.lang.String"/>
+	<field name="contraAct" class="java.lang.String"/>
+	<field name="acctName" class="java.lang.String"/>
+	<field name="tipoTransaccion" class="java.lang.String"/>
+	<field name="dolares" class="java.lang.Double"/>
+	<field name="bs" class="java.lang.Double"/>
+	<field name="fueVerificado" class="java.lang.String"/>
+	<field name="audUsuario" class="java.lang.Long"/>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="a15d8268-c580-4e8d-bfbf-c1ea041a9e19" mode="Opaque" x="0" y="0" width="51" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sistema]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="517eac7c-0f74-45bb-994e-90298d3018d5" mode="Opaque" x="51" y="0" width="61" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="712b84e2-122f-4389-aa7a-2ff3f0ba3d07" mode="Opaque" x="112" y="0" width="100" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cuenta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1f1ae267-37bb-4dab-9d0a-e8bb516656b1" mode="Opaque" x="212" y="0" width="88" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Contra Cuenta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2113cb3d-b005-44d9-97d4-185d8e1bf988" mode="Opaque" x="300" y="0" width="83" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre Cuenta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4f355334-2c98-48c4-948b-50880af57fe2" mode="Opaque" x="383" y="0" width="77" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo Transaccion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b9dd4336-e3f1-4819-b7b2-0860550c4db9" mode="Opaque" x="460" y="0" width="72" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dolares]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="66725d24-68e4-4271-9f0b-ecb20308e351" mode="Opaque" x="532" y="0" width="53" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[BS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cc74d151-1e94-424e-8c10-630dee2bf52b" mode="Opaque" x="585" y="0" width="76" height="20" backcolor="#CCCCCC"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fue Verificado]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement uuid="cdd42b1f-e543-4d89-9233-ab669f706963" x="0" y="0" width="51" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bd}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="11fb0b26-ef6a-4325-91a6-f9f7bedf9499" x="51" y="0" width="61" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cf01a023-1cb1-4aeb-ace9-9edd2ebe1bd8" x="112" y="0" width="100" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{account}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3346022d-2f5c-41b7-8ddb-9e8a9dc20b0f" x="212" y="0" width="88" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contraAct}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="c1f0f601-48b6-4b08-a2aa-10277a03f4e3" x="300" y="0" width="83" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{acctName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="4b2486a8-ec03-4024-afd2-813b56208f04" x="383" y="0" width="77" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipoTransaccion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="eb4bb3d0-a43a-4888-a7c8-0591271f51d2" x="460" y="0" width="72" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dolares}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="d9e89143-aa44-413d-ab4c-0294e9266ed8" x="532" y="0" width="53" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bs}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0eb8fa8d-0593-441c-8ac5-510919becd5f" x="585" y="0" width="76" height="12"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fueVerificado}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

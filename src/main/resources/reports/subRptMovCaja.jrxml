@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subRptMovCaja" pageWidth="540" pageHeight="792" columnWidth="540" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="89c8e286-36b9-43db-b241-9a39777b6247">
+	<!-- Movimiento de caja SAP guardado con el arqueo (tac_movCaja), a todo el
+	     ancho del PDF (rediseno 2026-10-05).
+
+	     Solo lo llenaba el sistema anterior: el arqueo de la app nueva guarda
+	     el saldo SAP como un numero (saldoMovSap), que el principal muestra en
+	     el resumen. Para esos arqueos este subreporte no trae filas y no
+	     imprime nada, ni siquiera el titulo: el principal lo colapsa. Antes
+	     dejaba un hueco en blanco arriba de los cortes. -->
+	<!-- Azul: el color de SAP en todo el PDF (tambien la caja "Saldo segun SAP"
+	     del resumen). Filas alternadas para seguir la linea con la vista. -->
+	<style name="celda" fontSize="8">
+		<box leftPadding="4" rightPadding="4">
+			<pen lineWidth="0.5" lineColor="#A7BCD3"/>
+		</box>
+	</style>
+	<style name="encabezado" style="celda" mode="Opaque" forecolor="#FFFFFF" backcolor="#1F4E79" isBold="true"/>
+	<style name="fila" style="celda">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}.intValue() % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F1F6FC"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="idAC" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[execute p_list_movCaja @idAC=$P{idAC}  ,@ACCION='A']]>
+	</queryString>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="nombreCaja" class="java.lang.String"/>
+	<field name="bd" class="java.lang.String"/>
+	<field name="montoBs" class="java.lang.Double"/>
+	<variable name="montoBs_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{montoBs}]]></variableExpression>
+	</variable>
+	<title>
+		<band height="16">
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="0" y="0" width="540" height="16" forecolor="#163A5C" backcolor="#DCE9F5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MOVIMIENTO DE CAJA SAP]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="14">
+			<staticText>
+				<reportElement style="encabezado" x="0" y="0" width="130" height="14"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[SUCURSAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="130" y="0" width="170" height="14"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[CAJA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="300" y="0" width="120" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[SOCIEDAD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="encabezado" x="420" y="0" width="120" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[MONTO (Bs.)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement style="fila" x="0" y="0" width="130" height="13"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="fila" x="130" y="0" width="170" height="13"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{nombreCaja}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="fila" x="300" y="0" width="120" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{bd}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="fila" x="420" y="0" width="120" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{montoBs}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="13">
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="0" y="0" width="420" height="13" forecolor="#163A5C" backcolor="#DCE9F5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL (Bs.)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement style="celda" mode="Opaque" x="420" y="0" width="120" height="13" forecolor="#163A5C" backcolor="#DCE9F5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{montoBs_1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptBitacoraCumplimiento" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="net.sf.jasperreports.default.text.field.blank.when.null" value="true"/>
+	<!-- Bitacora de cumplimiento de tareas rutinarias (archivo SQL 55, ACCION 'B').
+	     Se llena desde una coleccion (TareasRutinariasController.bitacoraCumplimientoPdf),
+	     no tiene queryString: cada field es un getter de BitacoraCumplimientoDto.
+
+	     La franja alternada va en un rectangulo detras de la fila y no en cada
+	     celda: asi la columna Estado puede tener su propio estilo de color sin
+	     pelearse con el de la franja. -->
+	<style name="filaZebra" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue() % 2 == 0)]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F5F7FA"/>
+		</conditionalStyle>
+	</style>
+	<style name="estado" forecolor="#607D8B" isBold="true">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("R".equals($F{cumplimiento}))]]></conditionExpression>
+			<style forecolor="#2E7D32"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("N".equals($F{cumplimiento}))]]></conditionExpression>
+			<style forecolor="#C62828"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean("P".equals($F{cumplimiento}))]]></conditionExpression>
+			<style forecolor="#B26A00"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="fechaGeneracion" class="java.util.Date"/>
+	<parameter name="rango" class="java.lang.String"/>
+	<parameter name="totales" class="java.lang.String"/>
+	<field name="fechaPresentacion" class="java.util.Date"/>
+	<field name="nombreEmpleado" class="java.lang.String"/>
+	<field name="descripcionCargo" class="java.lang.String"/>
+	<field name="nombreSucursal" class="java.lang.String"/>
+	<field name="nombreTareaRutinaria" class="java.lang.String"/>
+	<field name="descripcionFrecuencia" class="java.lang.String"/>
+	<field name="cumplimiento" class="java.lang.String"/>
+	<field name="estadoTexto" class="java.lang.String"/>
+	<field name="fechaCompletado" class="java.util.Date"/>
+	<field name="obs" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="64" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="752" height="24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Bitácora de cumplimiento de tareas rutinarias]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="25" width="752" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{rango}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="42" width="752" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totales}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="61" width="752" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#37474F"/>
+				</graphicElement>
+			</line>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="48" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="48" y="0" width="130" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Empleado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="178" y="0" width="105" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cargo en esa fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="283" y="0" width="70" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sucursal]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="353" y="0" width="215" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box leftPadding="3"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tarea y observación]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="568" y="0" width="50" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Frecuencia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="618" y="0" width="62" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="680" y="0" width="72" height="22" backcolor="#37474F" forecolor="#FFFFFF"/>
+				<box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Respondida]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Prevent">
+			<rectangle>
+				<reportElement style="filaZebra" stretchType="ContainerHeight" x="0" y="0" width="752" height="15"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="48" height="15"/>
+				<box leftPadding="3" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaPresentacion}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement stretchType="ContainerHeight" x="48" y="0" width="130" height="15"/>
+				<box leftPadding="3" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreEmpleado}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement stretchType="ContainerHeight" x="178" y="0" width="105" height="15"/>
+				<box leftPadding="3" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcionCargo}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement stretchType="ContainerHeight" x="283" y="0" width="70" height="15"/>
+				<box leftPadding="3" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreSucursal}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement stretchType="ContainerHeight" x="353" y="0" width="215" height="15"/>
+				<box leftPadding="3" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<!-- La observacion va debajo de la tarea y no en una columna propia:
+				     casi siempre esta vacia, y cuando no, es el motivo de un "No aplica"
+				     o de un "No cuadra", que solo se entiende junto a la tarea. -->
+				<textFieldExpression><![CDATA[$F{nombreTareaRutinaria} + ($F{obs} == null || $F{obs}.trim().isEmpty() ? "" : "\nObs.: " + $F{obs}.trim())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="568" y="0" width="50" height="15"/>
+				<box topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcionFrecuencia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="estado" stretchType="ContainerHeight" x="618" y="0" width="62" height="15"/>
+				<box topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estadoTexto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement stretchType="ContainerHeight" x="680" y="0" width="72" height="15"/>
+				<box topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaCompletado}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="300" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Generado: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{fechaGeneracion})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="602" y="0" width="110" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="712" y="0" width="40" height="14"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

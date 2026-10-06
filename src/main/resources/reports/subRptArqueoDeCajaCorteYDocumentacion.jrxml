@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subRptArqueoDeCajaCorteYDocumentacion" pageWidth="264" pageHeight="792" columnWidth="264" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="bf1d84ee-72bf-4ef0-be29-e7421828a097">
+	<!-- Cortes y documentacion de un arqueo, como media columna del PDF
+	     (rediseno 2026-10-05: que entre en una hoja y sea simetrico).
+
+	     El principal lo usa DOS veces, lado a lado, con el parametro grupo:
+	       BS    = solo los bolivianos, columna izquierda
+	       OTROS = dolares y documentacion, columna derecha
+	     Sin grupo trae todo, como antes.
+
+	     Las filas vienen de p_list_detArqueoCajaSucursales C, que desde el
+	     archivo SQL 74 trae el catalogo completo con 0 en lo no contado y
+	     ordenado por tipo. Los cortes en cero van en gris: se ve que se
+	     contaron y no habia nada, sin competir con los que si tienen. -->
+	<style name="celda" fontSize="8">
+		<box leftPadding="4" rightPadding="4">
+			<pen lineWidth="0.5" lineColor="#A9BFAE"/>
+		</box>
+	</style>
+	<!-- Colores (2026-10-05, "ponle mas colores que se diferencie bien"): cada
+	     grupo con su tono, el mismo en su titulo y en su subtotal. Bolivianos
+	     verde, dolares verde azulado, documentacion ambar. Filas alternadas
+	     dentro de cada grupo. -->
+	<style name="celdaDato" style="celda">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{tipo_COUNT}.intValue() % 2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F4F8F5"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{cantidad} != null && $F{cantidad}.intValue() == 0]]></conditionExpression>
+			<style forecolor="#8C8C8C"/>
+		</conditionalStyle>
+	</style>
+	<style name="grupo" style="celda" mode="Opaque" forecolor="#1F3D28" backcolor="#DCEBDF" isBold="true">
+		<conditionalStyle>
+			<conditionExpression><![CDATA["DOLARES".equals($F{tipoCorte})]]></conditionExpression>
+			<style forecolor="#13544C" backcolor="#D5EEEA"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA["DOCUMENTACION".equals($F{tipoCorte})]]></conditionExpression>
+			<style forecolor="#7A4E00" backcolor="#FCEBC7"/>
+		</conditionalStyle>
+	</style>
+	<style name="subtotal" style="celda" mode="Opaque" forecolor="#1F3D28" backcolor="#EEF5F0" isBold="true">
+		<conditionalStyle>
+			<conditionExpression><![CDATA["DOLARES".equals($F{tipoCorte})]]></conditionExpression>
+			<style forecolor="#13544C" backcolor="#ECF7F5"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA["DOCUMENTACION".equals($F{tipoCorte})]]></conditionExpression>
+			<style forecolor="#7A4E00" backcolor="#FEF6E4"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="idAC" class="java.lang.Integer"/>
+	<parameter name="grupo" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[execute p_list_detArqueoCajaSucursales @idAC=$P{idAC}, @ACCION='C']]>
+	</queryString>
+	<field name="tipoCorte" class="java.lang.String"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="corte" class="java.lang.String"/>
+	<field name="subTotal" class="java.lang.Double"/>
+	<variable name="subtotalTipo" class="java.lang.Double" resetType="Group" resetGroup="tipo" calculation="Sum">
+		<variableExpression><![CDATA[$F{subTotal}]]></variableExpression>
+	</variable>
+	<filterExpression><![CDATA[$P{grupo} == null
+    ? Boolean.TRUE
+    : Boolean.valueOf("BS".equals($P{grupo}) == "BOLIVIANOS".equals($F{tipoCorte}))]]></filterExpression>
+	<group name="tipo">
+		<groupExpression><![CDATA[$F{tipoCorte}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField>
+					<reportElement style="grupo" x="0" y="0" width="264" height="13"/>
+					<textElement verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["DOLARES".equals($F{tipoCorte}) ? "DÓLARES"
+    : "DOCUMENTACION".equals($F{tipoCorte}) ? "DOCUMENTACIÓN"
+    : $F{tipoCorte}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="17">
+				<staticText>
+					<reportElement style="subtotal" x="0" y="0" width="184" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Subtotal]]></text>
+				</staticText>
+				<textField pattern="#,##0.00">
+					<reportElement style="subtotal" x="184" y="0" width="80" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{subtotalTipo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<columnHeader>
+		<band height="14">
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="0" y="0" width="140" height="14" forecolor="#FFFFFF" backcolor="#2E5E3E"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CORTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="140" y="0" width="44" height="14" forecolor="#FFFFFF" backcolor="#2E5E3E"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CANT.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="celda" mode="Opaque" x="184" y="0" width="80" height="14" forecolor="#FFFFFF" backcolor="#2E5E3E"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUBTOTAL (Bs.)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement style="celdaDato" x="0" y="0" width="140" height="12"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{corte}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="celdaDato" x="140" y="0" width="44" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="celdaDato" x="184" y="0" width="80" height="12"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{subTotal}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

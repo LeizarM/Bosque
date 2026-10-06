@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptArqueoDeCaja" pageWidth="612" pageHeight="792" columnWidth="540" leftMargin="36" rightMargin="36" topMargin="28" bottomMargin="24" uuid="5393d093-cd98-422c-a47d-5392cd3ff6d8">
+	<!-- Arqueo de caja. Rediseno del 2026-10-05 (Marcelo: "mas compacta y
+	     entre en una hoja y mas simetrico"):
+	     . todo a un mismo ancho, 540, centrado en la hoja carta;
+	     . los cortes en DOS columnas: bolivianos a la izquierda, dolares y
+	       documentacion a la derecha (el mismo subreporte dos veces, con el
+	       parametro grupo);
+	     . el movimiento de caja SAP solo ocupa lugar si tiene filas; los
+	       arqueos de la app nueva no las guardan y dejaban un hueco;
+	     . el resumen en tres cajas iguales: total contado, saldo SAP y
+	       sobrante o faltante (el saldo SAP ya venia en los datos y no se
+	       mostraba, y es lo que explica la diferencia);
+	     . las firmas a continuacion del resumen y no al pie de la hoja.
+
+	     Portado a Bosque Spring (JasperReportExport.exportPDFConSubreportes):
+	     los 3 subreportes llegan ya compilados como parametro Java, no como
+	     ruta de archivo. SUBREPORT_DIR queda declarado pero sin uso real.
+	     OJO: sin guiones dobles sueltos en este comentario. XML no los permite
+	     dentro de un comentario, y este archivo estuvo con uno: el PDF del
+	     arqueo moria al parsear (2026-09-11). -->
+	<style name="celda" fontSize="8">
+		<box leftPadding="4" rightPadding="4">
+			<pen lineWidth="0.5" lineColor="#A9BFAE"/>
+		</box>
+	</style>
+	<style name="etiqueta" style="celda" mode="Opaque" forecolor="#1F3D28" backcolor="#E4EEE6" isBold="true"/>
+	<style name="valor" style="celda" fontSize="9"/>
+	<style name="cajaTitulo" style="celda" mode="Opaque" forecolor="#FFFFFF" backcolor="#2E5E3E" hTextAlign="Center" vTextAlign="Middle" isBold="true"/>
+	<style name="cajaValor" style="celda" mode="Opaque" forecolor="#1F3D28" backcolor="#F1F7F2" hTextAlign="Center" vTextAlign="Middle" fontSize="12" isBold="true"/>
+	<!-- Un color por caja del resumen (2026-10-05, Marcelo: "ponle mas colores
+	     que se diferencie bien"): el total contado en el verde del efectivo, el
+	     saldo SAP en el azul de su seccion y la diferencia segun lo que sea:
+	     rojo si falta, verde si sobra, gris si cuadra. -->
+	<style name="cajaTituloSap" style="cajaTitulo" backcolor="#1F4E79"/>
+	<style name="cajaValorSap" style="cajaValor" forecolor="#163A5C" backcolor="#EEF4FB">
+		<box>
+			<pen lineColor="#A7BCD3"/>
+		</box>
+	</style>
+	<style name="cajaTituloDif" style="cajaTitulo" backcolor="#5F6B62">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{diferencia} != null && $F{diferencia}.doubleValue() < -0.005]]></conditionExpression>
+			<style backcolor="#B3261E"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{diferencia} != null && $F{diferencia}.doubleValue() > 0.005]]></conditionExpression>
+			<style backcolor="#2E7D32"/>
+		</conditionalStyle>
+	</style>
+	<style name="diferencia" style="cajaValor" forecolor="#3D4A40" backcolor="#EEF0EE">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{diferencia} != null && $F{diferencia}.doubleValue() < -0.005]]></conditionExpression>
+			<style forecolor="#B3261E" backcolor="#FCE8E6"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{diferencia} != null && $F{diferencia}.doubleValue() > 0.005]]></conditionExpression>
+			<style forecolor="#2E7D32" backcolor="#E6F4EA"/>
+		</conditionalStyle>
+	</style>
+	<style name="etiquetaObs" style="etiqueta" forecolor="#2F3742" backcolor="#E9ECF1">
+		<box>
+			<pen lineColor="#B4BCC8"/>
+		</box>
+	</style>
+	<style name="celdaObs" style="celda">
+		<box>
+			<pen lineColor="#B4BCC8"/>
+		</box>
+	</style>
+	<parameter name="idAC" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="subRptMovCaja" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptArqueoDeCajaCorteYDocumentacion" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptVales" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<queryString>
+		<![CDATA[execute p_list_detArqueoCajaSucursales @idAC=$P{idAC}, @ACCION='B']]>
+	</queryString>
+	<field name="fecha" class="java.sql.Date"/>
+	<field name="hora" class="java.lang.String"/>
+	<field name="tc" class="java.lang.Double"/>
+	<field name="fechaAyer" class="java.sql.Date"/>
+	<field name="tcAyer" class="java.lang.Double"/>
+	<field name="saldoMovSap" class="java.lang.Double"/>
+	<field name="nombreCompleto" class="java.lang.String"/>
+	<field name="descripCargo" class="java.lang.String"/>
+	<field name="total" class="java.lang.Double"/>
+	<field name="diferencia" class="java.lang.Double"/>
+	<field name="obs" class="java.lang.String"/>
+	<title>
+		<band height="86" splitType="Stretch">
+			<staticText>
+				<reportElement style="cajaTitulo" x="0" y="0" width="540" height="24"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[ARQUEO DE CAJA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="etiqueta" x="0" y="30" width="84" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Encargado(a)]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="valor" x="84" y="30" width="246" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="etiqueta" x="330" y="30" width="84" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement style="valor" x="414" y="30" width="126" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="etiqueta" x="0" y="46" width="84" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Cargo]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="valor" x="84" y="46" width="246" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{descripCargo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="etiqueta" x="330" y="46" width="84" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Hora]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="valor" x="414" y="46" width="126" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{hora}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="etiqueta" x="0" y="62" width="84" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[T/C del día]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="valor" x="84" y="62" width="246" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{tc}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="etiqueta" x="330" y="62" width="84" height="16"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[T/C anterior]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="valor" x="414" y="62" width="126" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<!-- El del arqueo anterior, con su fecha: puede no ser ayer. -->
+				<textFieldExpression><![CDATA[$F{tcAyer} == null ? "-"
+    : new java.text.DecimalFormat("#,##0.00", java.text.DecimalFormatSymbols.getInstance($P{REPORT_LOCALE} == null ? java.util.Locale.getDefault() : $P{REPORT_LOCALE})).format($F{tcAyer})
+      + ($F{fechaAyer} == null ? "" : "  (" + new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{fechaAyer}) + ")")]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="4">
+			<!-- Sin filas no imprime nada y la linea se quita: no deja hueco. -->
+			<subreport>
+				<reportElement x="0" y="0" width="540" height="4" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="idAC">
+					<subreportParameterExpression><![CDATA[$P{idAC}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptMovCaja}]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="32" splitType="Prevent">
+			<staticText>
+				<reportElement style="etiqueta" x="0" y="4" width="540" height="16"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[EFECTIVO CONTADO Y DOCUMENTACIÓN]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="0" y="24" width="264" height="4"/>
+				<subreportParameter name="idAC">
+					<subreportParameterExpression><![CDATA[$P{idAC}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="grupo">
+					<subreportParameterExpression><![CDATA["BS"]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptArqueoDeCajaCorteYDocumentacion}]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="276" y="24" width="264" height="4"/>
+				<subreportParameter name="idAC">
+					<subreportParameterExpression><![CDATA[$P{idAC}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="grupo">
+					<subreportParameterExpression><![CDATA["OTROS"]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptArqueoDeCajaCorteYDocumentacion}]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="12">
+			<subreport>
+				<reportElement x="0" y="4" width="540" height="4"/>
+				<subreportParameter name="idAc">
+					<subreportParameterExpression><![CDATA[$P{idAC}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptVales}]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="12">
+			<textField>
+				<reportElement x="0" y="0" width="400" height="12" forecolor="#7A857C"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Arqueo de caja Nº " + $P{idAC} + "  ·  generado el " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="0" width="140" height="12" forecolor="#7A857C"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="168" splitType="Prevent">
+			<staticText>
+				<reportElement style="cajaTitulo" x="0" y="4" width="176" height="14"/>
+				<text><![CDATA[TOTAL CONTADO (Bs.)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="cajaValor" x="0" y="18" width="176" height="22"/>
+				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="cajaTituloSap" x="182" y="4" width="176" height="14"/>
+				<text><![CDATA[SALDO SEGÚN SAP (Bs.)]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="cajaValorSap" x="182" y="18" width="176" height="22"/>
+				<textFieldExpression><![CDATA[$F{saldoMovSap}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="cajaTituloDif" x="364" y="4" width="176" height="14"/>
+				<!-- Dice cual de las dos es: no hace falta leer el signo. -->
+				<textFieldExpression><![CDATA[$F{diferencia} == null ? "SOBRANTE / FALTANTE (Bs.)"
+    : $F{diferencia}.doubleValue() < -0.005 ? "FALTANTE (Bs.)"
+    : $F{diferencia}.doubleValue() > 0.005 ? "SOBRANTE (Bs.)"
+    : "SIN DIFERENCIA (Bs.)"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement style="diferencia" x="364" y="18" width="176" height="22"/>
+				<textFieldExpression><![CDATA[$F{diferencia}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="etiquetaObs" x="0" y="46" width="540" height="14"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[OBSERVACIONES]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="celdaObs" x="0" y="60" width="540" height="16"/>
+				<box topPadding="3" bottomPadding="3"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{obs} == null || $F{obs}.trim().isEmpty() ? "Sin observaciones." : $F{obs}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="84" width="540" height="18" forecolor="#3D4A40"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<text><![CDATA[COMO CONSTANCIA DEL ARQUEO Y RECEPCIÓN TOTAL DEL DINERO, ASÍ COMO DE LA DOCUMENTACIÓN RESPALDATORIA DEL PRESENTE ARQUEO, SE FIRMA AL FINAL.]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="Float" x="45" y="138" width="180" height="1" forecolor="#3D4A40"/>
+				<graphicElement>
+					<pen lineWidth="0.75"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement positionType="Float" x="315" y="138" width="180" height="1" forecolor="#3D4A40"/>
+				<graphicElement>
+					<pen lineWidth="0.75"/>
+				</graphicElement>
+			</line>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="25" y="141" width="220" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="25" y="153" width="220" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[ENCARGADO(A)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="295" y="141" width="220" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="295" y="153" width="220" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[V°B° SUPERVISOR DE CIERRE]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

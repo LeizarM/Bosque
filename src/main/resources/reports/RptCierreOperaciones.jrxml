@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f1ba2974-532f-4706-9933-afc3aea30877">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="456"/>
+	<parameter name="fecha" class="java.util.Date"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\Proyectos\\Bosque v2\\web\\Bosque\\reportes\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="codSucursal" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<!-- Los seis subreportes llegan YA COMPILADOS: JasperReportExport
+	     (exportPDFConSubreportes) los compila y los pone en los parametros con
+	     su propio nombre, porque dentro del JAR no hay ruta de archivo que
+	     resolver. Por eso hay que declararlos aca, igual que en
+	     RptArqueoDeCaja.jrxml y en los de comisiones. Sin estas seis lineas
+	     Jasper corta al compilar con "Parameter not found: subRptArqueosDeCaja"
+	     (2026-09-11, al pedir el PDF desde la revision del cierre).
+	     SUBREPORT_DIR queda declarado pero sin uso real. -->
+	<parameter name="subRptArqueosDeCaja" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptValesCO" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptCajaFuerte" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptTraspasoMovCaja" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptChequesCO" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<parameter name="subRptCocheCO" class="net.sf.jasperreports.engine.JasperReport" isForPrompting="false"/>
+	<queryString>
+		<![CDATA[execute p_list_bitTareaRuti @fechaPresentacion=$P{fecha}, @codSucursal=$P{codSucursal} ,@ACCION='G']]>
+	</queryString>
+	<field name="nombreCompleto" class="java.lang.String"/>
+	<field name="fecha" class="java.sql.Date"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="44" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="f765486d-6930-456e-a9fe-681e032de56f" x="530" y="2" width="132" height="19"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[M-AC-PC/REG-CO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f765486d-6930-456e-a9fe-681e032de56f" x="530" y="21" width="132" height="19"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERSION Nº4]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f765486d-6930-456e-a9fe-681e032de56f" x="106" y="21" width="424" height="19"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CIERRE DE OPERACIONES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f765486d-6930-456e-a9fe-681e032de56f" x="106" y="2" width="424" height="19"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REGISTRO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4494b5dd-422d-457d-b1d8-273e9185c4d3" x="25" y="2" width="81" height="39"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="8f0c9f30-70a2-4446-a6d0-181247f85277" x="29" y="13" width="77" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="72" splitType="Stretch">
+			<subreport>
+				<reportElement uuid="8b0b065c-bf17-448b-83cb-ad887c22db32" x="29" y="10" width="672" height="39"/>
+				<subreportParameter name="fecha">
+					<subreportParameterExpression><![CDATA[$P{fecha}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codSucursal">
+					<subreportParameterExpression><![CDATA[$P{codSucursal}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptArqueosDeCaja}]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="82">
+			<staticText>
+				<reportElement uuid="0957d2ff-ff3f-4cea-ba24-434b5b6d19b1" mode="Opaque" x="26" y="0" width="675" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERIFICAR LOS VALES]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="0f7ebff5-8950-4d2d-85bf-327e7f895489" x="26" y="30" width="670" height="43"/>
+				<subreportParameter name="fecha">
+					<subreportParameterExpression><![CDATA[$P{fecha}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptValesCO}]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="101">
+			<staticText>
+				<reportElement uuid="f404c4f1-3076-4f88-b93a-ab6543e3219d" mode="Opaque" x="29" y="11" width="670" height="19" forecolor="#FFFFFF" backcolor="#000000"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REGISTRO DE DEPOSITOS EN CAJA FUERTE]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="e58cea4d-f54e-4bed-ac97-ea9d13cceeee" x="29" y="44" width="672" height="45"/>
+				<subreportParameter name="fecha">
+					<subreportParameterExpression><![CDATA[$P{fecha}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="codSucursal">
+					<subreportParameterExpression><![CDATA[$P{codSucursal}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptCajaFuerte}]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="84">
+			<subreport>
+				<reportElement uuid="c0f3f4dc-7d24-4cc1-a624-b62432834daf" x="25" y="30" width="669" height="44"/>
+				<subreportParameter name="fecha">
+					<subreportParameterExpression><![CDATA[$P{fecha}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptTraspasoMovCaja}]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement uuid="f404c4f1-3076-4f88-b93a-ab6543e3219d" mode="Opaque" x="25" y="0" width="670" height="19" forecolor="#FFFFFF" backcolor="#000000"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERIFICAR LOS MONTOS DE TRASPASO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="97942ca0-a75c-493e-bfa2-d03bf011e61a" x="26" y="19" width="483" height="9" forecolor="#660066"/>
+				<textElement>
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Verificar que el monto del formulario manual de Caja AXA sea el mismo en el movimiento de las Cajas ESPPAPEL, PRODUCTIVA E IMPEXPAP]]></text>
+			</staticText>
+		</band>
+		<band height="100">
+			<staticText>
+				<reportElement uuid="f404c4f1-3076-4f88-b93a-ab6543e3219d" mode="Opaque" x="24" y="0" width="670" height="19" forecolor="#FFFFFF" backcolor="#000000"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERIFICACION DE SALIDA DE CHEQUES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="97942ca0-a75c-493e-bfa2-d03bf011e61a" x="26" y="19" width="483" height="9" forecolor="#660066"/>
+				<textElement>
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Verificar con reporte de "SALIDA DE CHEQUES" Bosque que los cheques estén registrados en el movimiento de caja]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="2b7c3424-856d-404f-9697-71df9a8ec76e" x="25" y="38" width="665" height="41"/>
+				<subreportParameter name="fecha">
+					<subreportParameterExpression><![CDATA[$P{fecha}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptChequesCO}]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="91">
+			<staticText>
+				<reportElement uuid="f404c4f1-3076-4f88-b93a-ab6543e3219d" mode="Opaque" x="25" y="0" width="670" height="19" forecolor="#FFFFFF" backcolor="#000000"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERIFICACION DE LLEGADA DE COCHES]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="b2a4c1f2-f5bb-4f5c-b14a-6055abf55d01" x="24" y="32" width="666" height="42"/>
+				<subreportParameter name="fecha">
+					<subreportParameterExpression><![CDATA[$P{fecha}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{subRptCocheCO}]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="28" splitType="Stretch">
+			<textField>
+				<reportElement uuid="e7767aa7-754f-4410-a331-4b7c15eedd4d" x="573" y="8" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="86e7d878-b759-490a-ad1d-efb0e016c9d6" x="653" y="8" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band height="50">
+			<staticText>
+				<reportElement uuid="6c5d833f-9842-47a2-a6fb-167606ff4820" x="281" y="22" width="191" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Top"/>
+				<text><![CDATA[.......................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="578115c6-2d42-4f71-8b8c-8cf73791c4bb" x="312" y="30" width="124" height="20"/>
+				<box topPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUPERVISOR CIERRE]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ae6d40b2-3c71-43ca-979e-865cf8a66686" x="230" y="16" width="279" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
+			</textField>
+		</band>
+	</lastPageFooter>
+</jasperReport>
