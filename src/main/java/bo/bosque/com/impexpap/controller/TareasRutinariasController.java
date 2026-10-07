@@ -1751,18 +1751,10 @@ public class TareasRutinariasController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                         new ApiResponse<>("Esta ocurrencia no está asignada a tu usuario.", null, HttpStatus.FORBIDDEN.value()));
             }
-            // Una tarea con pantalla propia (arqueo, traspasos, revisión del
-            // cierre…) que ya se hizo no vuelve a pendiente por este camino: sería
-            // la puerta para hacerla de nuevo. Lo único que admite es una
-            // observación (/agregar-observacion). Las simples no cambian: no
-            // tienen una segunda escritura detrás.
-            if (Integer.valueOf(13).equals(existente.getFueRealizado())
-                    && TIPOS_CON_PANTALLA_PROPIA.contains(existente.getIdATR())
-                    && !Integer.valueOf(13).equals(mb.getFueRealizado())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new ApiResponse<>("Esta tarea ya está hecha y no se vuelve a hacer. Solo puedes agregarle una observación.",
-                                null, HttpStatus.BAD_REQUEST.value()));
-            }
+            // Que una tarea con pantalla propia ya hecha no vuelva a pendiente
+            // lo decide el SP (p_abm_tac_BitTareaRuti 'U', error 45, archivo SQL
+            // 79). Las reglas de registro van en SQL para cambiarlas sin
+            // recompilar (Marcelo, 2026-10-06); aquí queda solo de quién es.
         }
         return respuestaEscritura(bitTareaRutiDao.registrar(mb, mb.getIdBitTarea() == 0 ? "I" : "U"));
     }
@@ -1773,36 +1765,18 @@ public class TareasRutinariasController {
      * ya no la vuelva hacer. Máximo agregar una observación").
      *
      * <p>Del body se leen solo {@code idBitTarea} y {@code obs}. La ocurrencia
-     * tiene que ser de quien llama (o tener btnEmpAll). Que esté respondida, el
-     * largo y el formato los resuelve el SP (p_abm_tac_BitTareaRuti 'O',
-     * archivo SQL 75): agrega al final, con fecha y hora, sin borrar lo que
-     * había.
+     * tiene que ser de quien llama (o tener btnEmpAll). Que no venga vacía, su
+     * largo máximo, que la tarea esté respondida y el formato los resuelve el
+     * SP (p_abm_tac_BitTareaRuti 'O', archivos SQL 75 y 79): agrega al final,
+     * con fecha y hora, sin borrar lo que había.
      */
     @PostMapping("/agregar-observacion")
     public ResponseEntity<ApiResponse<?>> agregarObservacion(@RequestBody BitTareaRuti mb, Authentication auth) {
         String obs = mb.getObs() == null ? "" : mb.getObs().trim();
-        if (obs.isEmpty()) {
-            throw new SpBusinessException("Escribe la observación que quieres agregar.");
-        }
-        if (obs.length() > MAX_OBSERVACION) {
-            throw new SpBusinessException("La observación puede tener hasta " + MAX_OBSERVACION + " caracteres.");
-        }
         exigirOcurrenciaPropia(auth, mb.getIdBitTarea());
         return respuestaEscritura(
                 bitTareaRutiDao.agregarObservacion(mb.getIdBitTarea(), obs, DatosToken.codUsuarioDe(auth)));
     }
-
-    /** Largo máximo de una observación agregada; la columna admite 2000 en total. */
-    private static final int MAX_OBSERVACION = 500;
-
-    /**
-     * Los idATR que se responden en una pantalla propia y no con Sí/No — los
-     * mismos que {@code TareaPendienteTile.tipoDeAccion} en la app: arqueo (2),
-     * cierre (3), caja fuerte (4), verificar cierre (5), coches (6), caja chica
-     * (7), TesBase (11) y Caja AXA (12).
-     */
-    private static final Set<Integer> TIPOS_CON_PANTALLA_PROPIA =
-            new HashSet<>(Arrays.asList(2, 3, 4, 5, 6, 7, 11, 12));
 
     /**
      * Elimina una bitácora de tarea rutinaria por su ID. Solo ROLE_ADM: a
