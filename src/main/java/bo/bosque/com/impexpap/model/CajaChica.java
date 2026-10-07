@@ -1,6 +1,7 @@
 // Destino final: D:\Proyectos\Bosque\Bosque Spring\src\main\java\bo\bosque\com\impexpap\model\CajaChica.java
 package bo.bosque.com.impexpap.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.io.Serializable;
@@ -34,4 +35,10 @@ public class CajaChica implements Serializable {
     private Long lote;
     private long audUsuario;
     private Date audFecha;
+
+    // ── solo de lectura: lo arma p_list_tac_CajaChica 'D' (archivo SQL 80) ──
+    // READ_ONLY: no se lee del body. Si llegara, el listado genérico lo
+    // mandaría como @nombreEmpDestino, un parámetro que el SP no tiene.
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String nombreEmpDestino;
 }
