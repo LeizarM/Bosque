@@ -5,5 +5,6 @@ import bo.bosque.com.impexpap.dto.RegistrarCajaFuerteRequest;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 
 public interface ICajaFuerte {
-    RespuestaSp registrar(RegistrarCajaFuerteRequest req, long audUsuario);
+    /** [R] La sucursal sale del cargo vigente de {@code codEmpleado} (archivo SQL 96). */
+    RespuestaSp registrar(RegistrarCajaFuerteRequest req, long idTarRuti, long codEmpleado, long audUsuario);
 }

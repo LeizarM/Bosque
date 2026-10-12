@@ -79,44 +79,9 @@ public class BitTareaRutiDao implements IBitTareaRuti {
         return resultado.isEmpty() ? null : resultado.get(0);
     }
 
-    // Mismo motivo que registrar(): ejecutarAbmMap y no ejecutarAbm. Aquí viajan
-    // solo TRES parámetros y el resto tiene que tomar su DEFAULT NULL — con
-    // ejecutarAbm (binding por metadatos) habría que mandarle un valor a los 15
-    // que el proc declara, que es exactamente lo que rompió este mismo proc
-    // cuando el archivo 27 le agregó @fecha y @traspasosXml.
-    //
-    // @fecha se omite a propósito: el SP resuelve "hoy" con GETDATE() del lado
-    // de SQL Server. Mandar la fecha desde Java metería el reloj del servidor de
-    // aplicación en la ecuación y, cerca de medianoche, podría abrir la
-    // ocurrencia de ayer.
-    @Override
-    public RespuestaSp abrirFlujoARequerimiento(long idTarRuti, long codEmpleado, long audUsuario) {
-        log.info("Abriendo flujo a requerimiento: tarea {}, empleado {}", idTarRuti, codEmpleado);
-        Map<String, Object> params = new HashMap<>();
-        params.put("idTarRuti", idTarRuti);
-        params.put("codEmpleado", codEmpleado);
-        params.put("audUsuario", audUsuario);
-        RespuestaSp r = spHelper.ejecutarAbmMap("p_abm_tac_BitTareaRuti", params, "A");
-
-        // Los bloques del proc son IF sueltos, sin ELSE final: un @ACCION que no
-        // conoce NO falla — sale por abajo con @error=0, @errormsg='' e
-        // idGenerado=0. O sea que si este backend se despliega sin haber corrido
-        // el archivo SQL 40, la pantalla abriría el submódulo con idBitTarea=0 y
-        // el flujo trabajaría contra una ocurrencia inexistente. La ACCION 'A'
-        // siempre deja id y mensaje, así que un id en 0 sin error solo puede
-        // significar eso.
-        if (r != null && r.getError() == 0 && r.getIdGenerado() <= 0) {
-            log.error("p_abm_tac_BitTareaRuti no reconoce ACCION='A': falta correr el script SQL 40.");
-            return new RespuestaSp(40,
-                    "Los submódulos a requerimiento todavía no están habilitados en la base de datos "
-                            + "(falta correr el script 40).", 0);
-        }
-        return r;
-    }
-
-    // Mismo motivo que abrirFlujoARequerimiento: ejecutarAbmMap con solo los
-    // parámetros de la rama, y la misma trampa de un @ACCION que el proc no
-    // conoce. La rama 'O' siempre devuelve el id en idGenerado.
+    // ejecutarAbmMap con solo los parámetros de la rama: con ejecutarAbm habría
+    // que mandar los 15 que el proc declara. Un @ACCION que el proc no conoce no
+    // falla, devuelve 0; la rama 'O' siempre devuelve el id en idGenerado.
     @Override
     public RespuestaSp agregarObservacion(long idBitTarea, String obs, long audUsuario) {
         log.info("Agregando observación a la ocurrencia {}", idBitTarea);

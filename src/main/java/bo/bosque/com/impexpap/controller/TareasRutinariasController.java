@@ -6,17 +6,23 @@ import bo.bosque.com.impexpap.commons.GeneracionAlInstante;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dao.*;
-import bo.bosque.com.impexpap.dto.CochesDelDiaRequest;
 import bo.bosque.com.impexpap.dto.DependientesJefeRequest;
 import bo.bosque.com.impexpap.dto.MarcarLlegadaCocheRequest;
-import bo.bosque.com.impexpap.dto.CajaChicaListarRequest;
-import bo.bosque.com.impexpap.dto.CerrarLoteCajaChicaRequest;
 import bo.bosque.com.impexpap.dto.ConfirmarCierreOperacionesRequest;
 import bo.bosque.com.impexpap.dto.ConfirmarVerificacionRequest;
-import bo.bosque.com.impexpap.dto.FinalizarCajaChicaRequest;
 import bo.bosque.com.impexpap.dto.MarcarArqueoRevisadoRequest;
 import bo.bosque.com.impexpap.dto.MarcarLlegadaVerificadaRequest;
 import bo.bosque.com.impexpap.dto.ObtenerDeHoyRequest;
+import bo.bosque.com.impexpap.dto.AnularFirmaRequest;
+import bo.bosque.com.impexpap.dto.FirmarSeccionRequest;
+import bo.bosque.com.impexpap.dto.TableroCierreRequest;
+import bo.bosque.com.impexpap.dto.SenalCargoDto;
+import bo.bosque.com.impexpap.dto.SenalesCargoRequest;
+import bo.bosque.com.impexpap.dto.ResponsableCierreRequest;
+import bo.bosque.com.impexpap.dto.SeccionCierreRequest;
+import bo.bosque.com.impexpap.dto.FuenteCierreRequest;
+import bo.bosque.com.impexpap.dto.FilaSeccionRequest;
+import bo.bosque.com.impexpap.dto.FilaSeccionDto;
 import bo.bosque.com.impexpap.dto.RegistrarArqueoRequest;
 import bo.bosque.com.impexpap.dto.RegistrarCajaFuerteRequest;
 import bo.bosque.com.impexpap.dto.RegistrarEgresoCajaChicaRequest;
@@ -50,9 +56,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Controlador REST para el módulo de Tareas Rutinarias (tac_*): definición y
@@ -155,6 +163,12 @@ public class TareasRutinariasController {
     private final GeneracionAlInstante generacionAlInstante;
     /** Las pantallas que cada usuario tiene en el menú ({@code p_list_VistaUsuario 'M'}) — ver {@link #tienePantalla}. */
     private final IVistaDao vistaDao;
+    /** Verificar Cierre por responsables: celdas, firmas y tablero (archivo SQL 81). */
+    private final IFirmaCierre firmaCierreDao;
+    /** Cargos por revisar: quién no hace sus tareas (archivo SQL 82). */
+    private final ISenalCargo senalCargoDao;
+    /** La matriz de responsables de Verificar Cierre (archivo SQL 81). */
+    private final IResponsableCierre responsableCierreDao;
 
     public TareasRutinariasController(
             IDocumentacion documentacionDao,
@@ -189,8 +203,14 @@ public class TareasRutinariasController {
             ITesBase tesBaseDao,
             JasperReportExport jasperReportExport,
             GeneracionAlInstante generacionAlInstante,
-            IVistaDao vistaDao) {
+            IVistaDao vistaDao,
+            IFirmaCierre firmaCierreDao,
+            ISenalCargo senalCargoDao,
+            IResponsableCierre responsableCierreDao) {
+        this.responsableCierreDao = responsableCierreDao;
         this.vistaDao = vistaDao;
+        this.firmaCierreDao = firmaCierreDao;
+        this.senalCargoDao = senalCargoDao;
         this.documentacionDao = documentacionDao;
         this.tareaRutinariaDao = tareaRutinariaDao;
         this.llegadaDao = llegadaDao;
@@ -326,76 +346,55 @@ public class TareasRutinariasController {
     }
 
     // ==================== FLUJO ESPECIAL: COCHES (idATR=6) ====================
-    // Reemplaza dlgCoches de WizardTareas.java. Corrige un bug real del legacy
-    // (confirmado leyendo WizardTareas.java#registrarRevisionCoche): ahí la
-    // tarea se cerraba al marcar CUALQUIER coche, no cuando se marcaban
-    // todos — ver p_coches_marcarLlegada, que solo cierra cuando ya no queda
-    // ningún llego pendiente para esa ocurrencia.
+    // Reemplaza dlgCoches de WizardTareas.java. Sin ocurrencia (archivo SQL 96):
+    // una lista por sucursal y día que comparten todos los de la sucursal.
 
     /**
-     * Lista los coches a revisar para una ocurrencia puntual (siembra una
-     * fila por coche activo de la sucursal la primera vez que se pide, si
-     * todavía no existe ninguna para ese idBitTarea).
+     * La lista de autos de hoy de la sucursal de quien llama. El SP la siembra
+     * la primera vez del día, con una fila por auto activo.
      */
     @PostMapping("/coches/listar-del-dia")
-    public ResponseEntity<ApiResponse<?>> listarCochesDelDia(
-            @RequestBody CochesDelDiaRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
+    public ResponseEntity<ApiResponse<?>> listarCochesDelDia(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_COCHES);
         return procesarLista(
-                cochesDao.listarDelDia(req.getIdTarRuti(), req.getIdBitTarea(), codUsuario),
-                "No se encontraron coches para esta ocurrencia.");
+                cochesDao.listarDelDia(TAREA_COCHES, codEmpleado, DatosToken.codUsuarioDe(auth)),
+                "No hay autos activos en tu sucursal.");
     }
 
-    /**
-     * Marca si un coche llegó o no. Cierra automáticamente la tarea rutinaria
-     * completa cuando esta marca deja a todos los coches de la ocurrencia con
-     * respuesta — el caller no necesita (ni puede) forzar el cierre aparte.
-     */
+    /** Marca si un auto llegó o no. El SP rechaza un auto de otra sucursal o de otro día. */
     @PostMapping("/coches/marcar-llegada")
     public ResponseEntity<ApiResponse<?>> marcarLlegadaCoche(
             @RequestBody MarcarLlegadaCocheRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
-        return respuestaEscritura(
-                cochesDao.marcarLlegada(req.getIdCo(), req.getLlego(), req.getObs(), codUsuario));
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_COCHES);
+        return respuestaEscritura(cochesDao.marcarLlegada(
+                req.getIdCo(), req.getLlego(), req.getObs(), codEmpleado, DatosToken.codUsuarioDe(auth)));
     }
 
     // ==================== FLUJO ESPECIAL: CAJA FUERTE (idATR=4) ====================
-    // Reemplaza dlgCajaFuerte de WizardTareas.java (el lado del submitter —
-    // el panel plCajaFuerte de idATR=5, solo lectura + verificación del
-    // supervisor, es un flujo aparte, no construido todavía).
+    // Reemplaza dlgCajaFuerte de WizardTareas.java (el lado de quien registra;
+    // la verificación es el panel de Verificar Cierre). Sin ocurrencia (archivo
+    // SQL 96): la sucursal es la del cargo vigente de quien registra.
 
-    /**
-     * Registra el lote de llegadas del día para caja fuerte y cierra la
-     * tarea, en una sola transacción. audUsuario se resuelve del JWT.
-     */
+    /** Registra las llegadas a caja fuerte, en una sola transacción. */
     @PostMapping("/caja-fuerte/registrar")
     public ResponseEntity<ApiResponse<?>> registrarCajaFuerte(
             @RequestBody RegistrarCajaFuerteRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
-        return respuestaEscritura(cajaFuerteDao.registrar(req, codUsuario));
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_FUERTE);
+        return respuestaEscritura(cajaFuerteDao.registrar(
+                req, TAREA_CAJA_FUERTE, codEmpleado, DatosToken.codUsuarioDe(auth)));
     }
 
     /**
-     * Lo que YA se registró hoy en caja fuerte, en la sucursal de esta
-     * ocurrencia (Marcelo, 2026-10-05: "que me aparezcan ya los registrados en
-     * el día"). Antes la pantalla solo mostraba el formulario vacío, así que
-     * después de guardar no quedaba rastro en pantalla de lo cargado.
-     * <p>
-     * Es la misma consulta del panel del supervisor
-     * ({@code p_list_tac_Llegada} ACCION='B'), con otra puerta: aquel exige el
-     * botón plCajaFuerte, que el chofer que carga las llegadas no tiene. Aquí
-     * alcanza con que la ocurrencia sea suya, igual que para registrarlas.
-     * <p>
-     * Siempre su sucursal y siempre hoy: esta pantalla es la carga del día, no
-     * un histórico — por eso no toma {@code fecha} ni el toggle de todas las
-     * sucursales, aunque el SP los acepte.
+     * Lo que ya se registró hoy en caja fuerte en la sucursal de quien llama
+     * (Marcelo, 2026-10-05: "que me aparezcan ya los registrados en el día").
+     * Es la consulta del panel del supervisor ({@code p_list_tac_Llegada} 'B'),
+     * siempre de hoy y de su sucursal.
      */
     @PostMapping("/caja-fuerte/del-dia")
-    public ResponseEntity<ApiResponse<?>> llegadasDeCajaFuerteDelDia(
-            @RequestBody ObtenerDeHoyRequest req, Authentication auth) {
-        exigirOcurrenciaPropia(auth, req.getIdBitTarea());
+    public ResponseEntity<ApiResponse<?>> llegadasDeCajaFuerteDelDia(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_FUERTE);
         return procesarLista(
-                llegadaDao.obtenerDelDia(req.getIdBitTarea(), false, null),
+                llegadaDao.obtenerDeHoyDe(codEmpleado),
                 "Todavía no hay llegadas registradas hoy.");
     }
 
@@ -500,51 +499,65 @@ public class TareasRutinariasController {
 
     /** Lista las filas del lote vigente de la sucursal, sembrando la fila de saldo inicial si hace falta. */
     @PostMapping("/caja-chica/listar-del-lote")
-    public ResponseEntity<ApiResponse<?>> listarCajaChicaDelLote(
-            @RequestBody CajaChicaListarRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
+    public ResponseEntity<ApiResponse<?>> listarCajaChicaDelLote(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
         return procesarLista(
-                cajaChicaFlujoDao.listarDelLote(req.getIdBitTarea(), codUsuario),
+                cajaChicaFlujoDao.listarDelLote(codEmpleado, DatosToken.codUsuarioDe(auth)),
                 "No se encontraron movimientos de caja chica.");
     }
 
-    /** Registra un egreso, validando saldo suficiente antes de guardar (nunca en silencio). */
+    /** Registra un egreso. Saldo, vale y talonario los valida el SP. */
     @PostMapping("/caja-chica/registrar-egreso")
     public ResponseEntity<ApiResponse<?>> registrarEgresoCajaChica(
             @RequestBody RegistrarEgresoCajaChicaRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
-        return respuestaEscritura(cajaChicaFlujoDao.registrarEgreso(req, codUsuario));
-    }
-
-    /** Marca la tarea de caja chica del día como completada. */
-    @PostMapping("/caja-chica/finalizar")
-    public ResponseEntity<ApiResponse<?>> finalizarCajaChica(
-            @RequestBody FinalizarCajaChicaRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
-        return respuestaEscritura(cajaChicaFlujoDao.finalizar(req.getIdBitTarea(), codUsuario));
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
+        return respuestaEscritura(cajaChicaFlujoDao.registrarEgreso(req, codEmpleado, DatosToken.codUsuarioDe(auth)));
     }
 
     /**
-     * Cierra el lote vigente de la sucursal (del cargo actual del empleado
-     * dueño de la ocurrencia) y abre el siguiente con su saldo inicial ya
-     * sembrado desde tac_montoCajaChicaXSuc — el gap real que el legacy
-     * cubría con "Generar PDF" ("esto reiniciara su caja chica"), sin la
-     * parte de reporte (migrada aparte). Acción independiente de
-     * {@link #finalizarCajaChica}: no cierra la tarea del día.
+     * Cierra el lote vigente de la sucursal y abre el siguiente con su saldo
+     * inicial ya sembrado desde tac_montoCajaChicaXSuc — el gap real que el
+     * legacy cubría con "Generar PDF" ("esto reiniciara su caja chica").
      */
     @PostMapping("/caja-chica/cerrar-lote")
-    public ResponseEntity<ApiResponse<?>> cerrarLoteCajaChica(
-            @RequestBody CerrarLoteCajaChicaRequest req, Authentication auth) {
-        long codUsuario = DatosToken.codUsuarioDe(auth);
-        return respuestaEscritura(cajaChicaFlujoDao.cerrarLote(req.getIdBitTarea(), codUsuario));
+    public ResponseEntity<ApiResponse<?>> cerrarLoteCajaChica(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
+        return respuestaEscritura(cajaChicaFlujoDao.cerrarLote(codEmpleado, DatosToken.codUsuarioDe(auth)));
     }
 
     /** "Ver Cajas Chicas" del legacy: histórico de lotes de la sucursal (lote/desde/hasta/total egresos). */
     @PostMapping("/caja-chica/historial-lotes")
-    public ResponseEntity<ApiResponse<?>> obtenerHistorialLotesCajaChica(@RequestBody CajaChicaListarRequest req) {
+    public ResponseEntity<ApiResponse<?>> obtenerHistorialLotesCajaChica(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
         return procesarLista(
-                cajaChicaFlujoDao.obtenerHistorialLotes(req.getIdBitTarea()),
+                cajaChicaFlujoDao.obtenerHistorialLotes(codEmpleado),
                 "No hay lotes de caja chica anteriores para esta sucursal.");
+    }
+
+    /**
+     * Talonarios de vales de caja chica de la sucursal (o de la persona), para
+     * proponer el vale que sigue. Quién puede usar qué vale lo decide el SP
+     * al registrar el egreso (archivo SQL 93).
+     */
+    @PostMapping("/caja-chica/talonarios")
+    public ResponseEntity<ApiResponse<?>> listarTalonariosCajaChica(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
+        return procesarLista(
+                cajaChicaFlujoDao.listarTalonarios(codEmpleado),
+                "La sucursal no tiene talonarios de vales de caja chica entregados.");
+    }
+
+    /**
+     * Las reglas del número de recibo, en palabras, para mostrarlas al
+     * registrar un egreso. Las escribe el SP con la misma configuración que
+     * aplica al registrar (archivo SQL 99): si cambia, el texto cambia solo.
+     */
+    @PostMapping("/caja-chica/reglas-recibo")
+    public ResponseEntity<ApiResponse<?>> reglasReciboCajaChica(Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
+        return procesarLista(
+                cajaChicaFlujoDao.reglasRecibo(codEmpleado),
+                "No se encontraron las reglas del número de recibo.");
     }
 
     /**
@@ -553,7 +566,7 @@ public class TareasRutinariasController {
      * no un id crudo tipeado a mano (confirmado leyendo Tareas.xhtml). Sin
      * el gate ROLE_ADM/ROLE_LIM del endpoint RRHH original: cualquier
      * usuario autenticado de este módulo puede buscar a quién le entregó
-     * el dinero.
+     * el dinero. La Bitácora usa el mismo buscador.
      */
     @PostMapping("/caja-chica/buscar-empleados")
     public ResponseEntity<ApiResponse<?>> buscarEmpleadosCajaChica(@RequestBody Empleado filtro) {
@@ -573,21 +586,27 @@ public class TareasRutinariasController {
      * confirmó vía sqlcmd de solo lectura que sigue existiendo y que sus
      * columnas coinciden 1 a 1 con los {@code <field>} del .jrxml).
      * <p>
-     * {@code lote} y {@code codSucursal} vienen ECHOED desde la fila del
-     * histórico que este mismo backend ya devolvió en
-     * {@link #obtenerHistorialLotesCajaChica} — la sucursal se resuelve ahí
-     * server-side a partir del cargo vigente del empleado dueño de la
-     * ocurrencia; aquí no se vuelve a resolver, solo se hace el round-trip de
-     * ese mismo valor (mismo criterio "contexto del registro, no de la
-     * sesión" que ya usa {@link #reporteArqueoDeCajaPdf}). Sin
-     * {@code @PreAuthorize}: mismo criterio que el resto de este flujo —
-     * cualquier usuario autenticado puede generar el PDF de un lote de SU
-     * sucursal.
+     * Del body solo se toma el {@code lote}. La sucursal sale del histórico de
+     * quien llama ({@link #obtenerHistorialLotesCajaChica}, la de su cargo
+     * vigente): un lote que no está ahí es de otra sucursal y no se imprime.
      */
     @PostMapping("/caja-chica/reporte-pdf")
-    public ResponseEntity<?> reporteCajaChicaPdf(@RequestBody Map<String, Object> body) {
-        int lote = ((Number) body.get("lote")).intValue();
-        String codSucursal = String.valueOf(((Number) body.get("codSucursal")).longValue());
+    public ResponseEntity<?> reporteCajaChicaPdf(@RequestBody Map<String, Object> body, Authentication auth) {
+        long codEmpleado = exigirSubmodulo(auth, PANTALLA_CAJA_CHICA);
+        Object loteRaw = body == null ? null : body.get("lote");
+        if (!(loteRaw instanceof Number)) {
+            throw new SpBusinessException("Falta indicar el lote.");
+        }
+        int lote = ((Number) loteRaw).intValue();
+        Object sucursalDelLote = cajaChicaFlujoDao.obtenerHistorialLotes(codEmpleado).stream()
+                .filter(f -> f.get("lote") instanceof Number && ((Number) f.get("lote")).intValue() == lote)
+                .map(f -> f.get("codSucursal"))
+                .filter(s -> s instanceof Number)
+                .findFirst().orElse(null);
+        if (sucursalDelLote == null) {
+            throw new SpBusinessException("Ese lote no es de la caja chica de tu sucursal.");
+        }
+        String codSucursal = String.valueOf(((Number) sucursalDelLote).longValue());
         Map<String, Object> p = new HashMap<>();
         p.put("lote", lote);
         p.put("codSucursal", codSucursal);
@@ -793,8 +812,14 @@ public class TareasRutinariasController {
     @PostMapping("/verificar-cierre/marcar-arqueo-revisado")
     public ResponseEntity<ApiResponse<?>> marcarArqueoRevisado(
             @RequestBody MarcarArqueoRevisadoRequest req, Authentication auth) {
-        exigirRevisionOBoton(auth, req.getIdBitTarea(), "cboFueRevisado");
+        boolean porMatriz = exigirRevisionOBoton(auth, req.getIdBitTarea(), "cboFueRevisado");
         long codUsuario = DatosToken.codUsuarioDe(auth);
+        if (porMatriz) {
+            // Desde la 39 el SP revisa que el arqueo sea de una celda propia y
+            // firma o anula la celda solo (archivo SQL 81).
+            return respuestaEscritura(firmaCierreDao.marcarFila(
+                    req.getIdBitTarea(), "A", req.getIdAC(), req.getFueRevisado(), codUsuario));
+        }
         if (req.getFueRevisado() != 0 && req.getFueRevisado() != 1) {
             throw new SpBusinessException("fueRevisado tiene que ser 1 (revisado) o 0 (quitar la marca).");
         }
@@ -811,11 +836,15 @@ public class TareasRutinariasController {
     @PostMapping("/verificar-cierre/marcar-llegada-verificada")
     public ResponseEntity<ApiResponse<?>> marcarLlegadaVerificada(
             @RequestBody MarcarLlegadaVerificadaRequest req, Authentication auth) {
-        exigirRevisionOBoton(auth, req.getIdBitTarea(), "plCajaFuerte");
+        boolean porMatriz = exigirRevisionOBoton(auth, req.getIdBitTarea(), "plCajaFuerte");
+        long codUsuario = DatosToken.codUsuarioDe(auth);
+        if (porMatriz) {
+            return respuestaEscritura(firmaCierreDao.marcarFila(
+                    req.getIdBitTarea(), "F", req.getIdRp(), req.getFueVerificado(), codUsuario));
+        }
         if (req.getFueVerificado() != 0 && req.getFueVerificado() != 1) {
             throw new SpBusinessException("fueVerificado tiene que ser 1 (verificada) o 0 (quitar la marca).");
         }
-        long codUsuario = DatosToken.codUsuarioDe(auth);
         return respuestaEscritura(
                 verificarCierreOperacionesDao.marcarLlegadaVerificada(req.getIdRp(), req.getFueVerificado(), codUsuario));
     }
@@ -834,6 +863,263 @@ public class TareasRutinariasController {
         exigirOcurrenciaDeCierre(auth, req.getIdBitTarea(), TAREAS_VERIFICAR_CIERRE);
         long codUsuario = DatosToken.codUsuarioDe(auth);
         return respuestaEscritura(verificarCierreOperacionesDao.confirmarVerificacion(req.getIdBitTarea(), codUsuario));
+    }
+
+    // ==================== VERIFICAR CIERRE POR RESPONSABLES (archivo SQL 81) ====================
+    // La 39 es una sola tarea que hacen varios: cada uno firma las secciones que
+    // la matriz le asigna. Qué ve, las reglas de la firma y los indicadores los
+    // decide el SQL; aquí solo se controla de quién es la ocurrencia.
+
+    /** Las celdas (sección + sucursal + día revisado) que le tocan a quien abre su 39, con su firma. */
+    @PostMapping("/verificar-cierre/mis-secciones")
+    public ResponseEntity<ApiResponse<?>> misSeccionesDelCierre(
+            @RequestBody ObtenerDeHoyRequest req, Authentication auth) {
+        exigirOcurrenciaDeCierre(auth, req.getIdBitTarea(), TAREAS_VERIFICAR_CIERRE);
+        return procesarLista(firmaCierreDao.misCeldas(req.getIdBitTarea()),
+                "Ese día no tienes secciones que revisar.");
+    }
+
+    /** Firma una celda. Con la última, la ocurrencia queda hecha (lo hace el SP). */
+    @PostMapping("/verificar-cierre/firmar-seccion")
+    public ResponseEntity<ApiResponse<?>> firmarSeccionDelCierre(
+            @RequestBody FirmarSeccionRequest req, Authentication auth) {
+        exigirOcurrenciaDeCierre(auth, req.getIdBitTarea(), TAREAS_VERIFICAR_CIERRE);
+        return respuestaEscritura(firmaCierreDao.firmar(req, DatosToken.codUsuarioDe(auth)));
+    }
+
+    /** Anula una firma. Que quien anula sea responsable de la celda lo revisa el SP. */
+    @PostMapping("/verificar-cierre/anular-firma")
+    public ResponseEntity<ApiResponse<?>> anularFirmaDelCierre(
+            @RequestBody AnularFirmaRequest req, Authentication auth) {
+        return respuestaEscritura(firmaCierreDao.anular(req.getIdFC(), req.getObs(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    /** El tablero: solo las celdas de quien mira; el completo, solo si la matriz le da todas. */
+    @PostMapping("/verificar-cierre/tablero")
+    public ResponseEntity<ApiResponse<?>> tableroDelCierre(
+            @RequestBody TableroCierreRequest req, Authentication auth) {
+        return procesarLista(
+                firmaCierreDao.tablero(req.getFechaIni(), req.getFechaFin(), DatosToken.codUsuarioDe(auth)),
+                "No tienes secciones de Verificar Cierre en esos días.");
+    }
+
+    /** El cumplimiento por persona de esas mismas celdas. */
+    @PostMapping("/verificar-cierre/tablero-resumen")
+    public ResponseEntity<ApiResponse<?>> resumenDelTableroDelCierre(
+            @RequestBody TableroCierreRequest req, Authentication auth) {
+        return procesarLista(
+                firmaCierreDao.resumen(req.getFechaIni(), req.getFechaFin(), DatosToken.codUsuarioDe(auth)),
+                "No tienes secciones de Verificar Cierre en esos días.");
+    }
+
+    // ==================== CARGOS POR REVISAR (archivo SQL 82) ====================
+    // Personas que no hacen ninguna de sus últimas N ocurrencias de una tarea:
+    // puede que les cambiaran las funciones sin actualizar su cargo. La lista
+    // completa la ve quien tiene la pantalla de RRHH; el jefe, la de su equipo.
+
+    private static final String PANTALLA_CARGOS_POR_REVISAR = "trhEstructuraOrganizacional/cargosPorRevisar";
+
+    /** Toda la empresa, para RRHH. */
+    @PostMapping("/senales-cargo/lista")
+    public ResponseEntity<ApiResponse<?>> senalesCargo(
+            @RequestBody(required = false) SenalesCargoRequest req, Authentication auth) {
+        if (!tienePantalla(auth, PANTALLA_CARGOS_POR_REVISAR)) {
+            throw new AccessDeniedException("No tiene habilitada la pantalla '" + PANTALLA_CARGOS_POR_REVISAR + "'.");
+        }
+        boolean verCalladas = req != null && req.isVerCalladas();
+        return procesarLista(senalCargoDao.listar(verCalladas), "Nadie dejó de hacer sus tareas.");
+    }
+
+    /** Las de quien llama como jefe (las mismas personas que "Mi equipo"). */
+    @PostMapping("/senales-cargo/de-mi-equipo")
+    public ResponseEntity<ApiResponse<?>> senalesCargoDeMiEquipo(Authentication auth) {
+        Set<Long> equipo = miEquipo(auth);
+        List<SenalCargoDto> filas = equipo.isEmpty()
+                ? Collections.<SenalCargoDto>emptyList()
+                : senalCargoDao.listar(false).stream()
+                        .filter(s -> equipo.contains(s.getCodEmpleado()))
+                        .collect(Collectors.toList());
+        return procesarLista(filas, "Tu equipo hace sus tareas.");
+    }
+
+    /** "Está bien así": la señal se calla unos días (los dice tac_configuracion). */
+    @PostMapping("/senales-cargo/esta-bien")
+    public ResponseEntity<ApiResponse<?>> senalCargoEstaBien(
+            @RequestBody SenalesCargoRequest req, Authentication auth) {
+        exigirPuedeRevisarSenal(auth, req.getCodEmpleado());
+        return respuestaEscritura(senalCargoDao.estaBien(
+                req.getCodEmpleado(), req.getIdTarRuti() == null ? 0 : req.getIdTarRuti(),
+                req.getObs(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    @PostMapping("/senales-cargo/volver-a-mostrar")
+    public ResponseEntity<ApiResponse<?>> senalCargoVolverAMostrar(
+            @RequestBody SenalesCargoRequest req, Authentication auth) {
+        exigirPuedeRevisarSenal(auth, req.getCodEmpleado());
+        return respuestaEscritura(senalCargoDao.volverAMostrar(
+                req.getIdSC() == null ? 0 : req.getIdSC(), req.getCodEmpleado(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    /** Los empleados del equipo de quien llama, con la regla de "Mi equipo". Vacío si no es jefe. */
+    private Set<Long> miEquipo(Authentication auth) {
+        ListadoConEstado<DependienteCargo> r =
+                dependientesJefeDao.listarDependientes(DatosToken.codUsuarioDe(auth), "T", "A");
+        if (!r.isAutorizado() || r.getFilas() == null) {
+            return Collections.emptySet();
+        }
+        return r.getFilas().stream()
+                .map(DependienteCargo::getCodEmpleadoActual)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    // ==================== RESPONSABLES DEL CIERRE (archivo SQL 81) ====================
+    // La matriz de Verificar Cierre: qué sección y de qué sucursal revisa cada
+    // cargo o persona. La deciden RRHH o un administrador desde el organigrama,
+    // con el mismo permiso que asignar tareas a un cargo.
+
+    @PostMapping("/verificar-cierre/responsables/lista")
+    public ResponseEntity<ApiResponse<?>> responsablesCierre(
+            @RequestBody ResponsableCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.listar(idTareaDe(req)), "Esta tarea todavía no tiene responsables.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/candidatos")
+    public ResponseEntity<ApiResponse<?>> candidatosCierre(
+            @RequestBody ResponsableCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.candidatos(idTareaDe(req)), "No hay cargos ocupados.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/sucursales")
+    public ResponseEntity<ApiResponse<?>> sucursalesCierre(Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.sucursales(), "No hay sucursales con caja.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/agregar")
+    public ResponseEntity<ApiResponse<?>> agregarResponsableCierre(
+            @RequestBody ResponsableCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.agregar(req, DatosToken.codUsuarioDe(auth)));
+    }
+
+    @PostMapping("/verificar-cierre/responsables/cambiar")
+    public ResponseEntity<ApiResponse<?>> cambiarResponsableCierre(
+            @RequestBody ResponsableCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.cambiar(req, DatosToken.codUsuarioDe(auth)));
+    }
+
+    @PostMapping("/verificar-cierre/responsables/quitar")
+    public ResponseEntity<ApiResponse<?>> quitarResponsableCierre(
+            @RequestBody ResponsableCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.quitar(
+                req.getIdRC() == null ? 0 : req.getIdRC(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    // ---- Secciones del cierre (archivo SQL 86): catálogo y fuentes ----
+
+    @PostMapping("/verificar-cierre/responsables/secciones")
+    public ResponseEntity<ApiResponse<?>> seccionesCierre(
+            @RequestBody ResponsableCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.secciones(idTareaDe(req)), "Falta correr el script 86.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/fuentes")
+    public ResponseEntity<ApiResponse<?>> fuentesCierre(Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.fuentes(), "Todavía no hay fuentes registradas.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/guardar-seccion")
+    public ResponseEntity<ApiResponse<?>> guardarSeccionCierre(
+            @RequestBody SeccionCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.guardarSeccion(req, DatosToken.codUsuarioDe(auth)));
+    }
+
+    @PostMapping("/verificar-cierre/responsables/quitar-seccion")
+    public ResponseEntity<ApiResponse<?>> quitarSeccionCierre(
+            @RequestBody SeccionCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.quitarSeccion(
+                req.getSeccion(), req.getEstado() == null ? -1 : req.getEstado(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    // ---- Fuentes del cierre (archivo SQL 87): el registro, desde la app ----
+
+    @PostMapping("/verificar-cierre/responsables/fuentes-todas")
+    public ResponseEntity<ApiResponse<?>> fuentesTodasCierre(Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.fuentesTodas(), "Todavía no hay fuentes registradas.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/fuentes-candidatas")
+    public ResponseEntity<ApiResponse<?>> fuentesCandidatasCierre(Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return procesarLista(responsableCierreDao.candidatasFuente(), "No hay consultas nuevas en la base.");
+    }
+
+    @PostMapping("/verificar-cierre/responsables/guardar-fuente")
+    public ResponseEntity<ApiResponse<?>> guardarFuenteCierre(
+            @RequestBody FuenteCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.guardarFuente(req, DatosToken.codUsuarioDe(auth)));
+    }
+
+    @PostMapping("/verificar-cierre/responsables/estado-fuente")
+    public ResponseEntity<ApiResponse<?>> estadoFuenteCierre(
+            @RequestBody FuenteCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.estadoFuente(
+                req.getFuente(), req.getEstado() == null ? -1 : req.getEstado(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    @PostMapping("/verificar-cierre/responsables/borrar-fuente")
+    public ResponseEntity<ApiResponse<?>> borrarFuenteCierre(
+            @RequestBody FuenteCierreRequest req, Authentication auth) {
+        accesoModuloHelper.exigirBoton(auth, 12, "btnTareasRutXCargo");
+        return respuestaEscritura(responsableCierreDao.borrarFuente(req.getFuente(), DatosToken.codUsuarioDe(auth)));
+    }
+
+    /** Las filas de una celda con fuente. Si la fuente falla, su motivo llega como 400. */
+    @PostMapping("/verificar-cierre/filas-seccion")
+    public ResponseEntity<ApiResponse<?>> filasSeccionCierre(
+            @RequestBody FilaSeccionRequest req, Authentication auth) {
+        exigirOcurrenciaDeCierre(auth, req.getIdBitTarea(), TAREAS_VERIFICAR_CIERRE);
+        ListadoConEstado<FilaSeccionDto> r = firmaCierreDao.filasSeccion(req, DatosToken.codUsuarioDe(auth));
+        if (!r.isAutorizado()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(r.getErrormsg(), null, HttpStatus.BAD_REQUEST.value()));
+        }
+        return procesarLista(r.getFilas(), "No hubo nada que revisar.");
+    }
+
+    /** Marca una fila de una celda con fuente; con la última, el SP firma solo. */
+    @PostMapping("/verificar-cierre/marcar-fila")
+    public ResponseEntity<ApiResponse<?>> marcarFilaSeccionCierre(
+            @RequestBody FilaSeccionRequest req, Authentication auth) {
+        exigirOcurrenciaDeCierre(auth, req.getIdBitTarea(), TAREAS_VERIFICAR_CIERRE);
+        return respuestaEscritura(firmaCierreDao.marcarFilaSeccion(req, DatosToken.codUsuarioDe(auth)));
+    }
+
+    /** Sin tarea, la 39: hoy es la única con matriz. */
+    private static long idTareaDe(ResponsableCierreRequest req) {
+        return req != null && req.getIdTarRuti() != null ? req.getIdTarRuti() : 39L;
+    }
+
+    /** RRHH (la pantalla) o el jefe de esa persona. */
+    private void exigirPuedeRevisarSenal(Authentication auth, Long codEmpleado) {
+        if (codEmpleado == null) {
+            throw new SpBusinessException("Indica la persona.");
+        }
+        if (!tienePantalla(auth, PANTALLA_CARGOS_POR_REVISAR) && !miEquipo(auth).contains(codEmpleado)) {
+            throw new AccessDeniedException("Esa persona no es de tu equipo.");
+        }
     }
 
     /** Subreportes que declara RptCierreOperaciones.jrxml, sin extensión — ver JasperReportExport.exportPDFConSubreportes. */
@@ -918,56 +1204,6 @@ public class TareasRutinariasController {
                 "RptCajaFuerteCO", SIN_SUBREPORTES_CAJA_FUERTE, p);
         if (bytes == null || bytes.length == 0) {
             throw new SpBusinessException("El reporte no devolvió datos para los filtros indicados.");
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentLength(bytes.length);
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
-    }
-
-    /**
-     * Mismo reporte de Caja Fuerte (RptCajaFuerteCO), pero para el CHOFER que
-     * acaba de registrar su kardex — no para el supervisor.
-     * <p>
-     * En el legacy el PDF era el paso con el que el movimiento entraba a
-     * archivo, y hoy Caja Fuerte solo lo ofrecía desde el panel del supervisor
-     * (plCajaFuerte), que un chofer no tiene (Marcelo, 2026-09-07: "mismo
-     * tratamiento para la caja fuerte que hacen algunos choferes"). Este
-     * endpoint es el mismo cuerpo sin ese botón, pero NO queda abierto: exige
-     * ser el dueño de la ocurrencia, o admin.
-     * <p>
-     * Se comprueba contra el REGISTRO ({@code tac_bitTareaRuti.codEmpleado} de
-     * ese {@code idBitTarea}) y no contra la sucursal de la sesión — mismo
-     * criterio que {@link #registrarBitTareaRuti}: sin eso, cualquiera podría
-     * pedir el kardex de caja fuerte de otra sucursal mandando un idBitTarea
-     * ajeno. La sucursal del reporte también sale del registro, vía
-     * {@code resolverCodSucursal}.
-     */
-    @PostMapping("/caja-fuerte/reporte-pdf")
-    public ResponseEntity<?> reporteCajaFuertePropio(
-            @RequestBody ObtenerDeHoyRequest req, Authentication auth) {
-        BitTareaRuti ocurrencia = bitTareaRutiDao.obtenerPorId(req.getIdBitTarea());
-        if (ocurrencia == null) {
-            throw new SpBusinessException("No existe la bitácora indicada.");
-        }
-        if (!accesoModuloHelper.esAdmin(auth)) {
-            Long miCodEmpleado = accesoModuloHelper.codEmpleadoDelToken(auth);
-            if (miCodEmpleado == null || !miCodEmpleado.equals(ocurrencia.getCodEmpleado())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                        new ApiResponse<>("Esta ocurrencia no está asignada a tu usuario.",
-                                null, HttpStatus.FORBIDDEN.value()));
-            }
-        }
-        // false: nunca "todas las sucursales" desde aquí — eso es del panel del
-        // supervisor, que tiene su propio endpoint y su propio botón.
-        int codSucursal = verificarCierreOperacionesDao.resolverCodSucursal(req.getIdBitTarea(), false);
-        Map<String, Object> p = new HashMap<>();
-        p.put("fecha", new java.util.Date());
-        p.put("codSucursal", codSucursal);
-        byte[] bytes = jasperReportExport.exportPDFConSubreportes(
-                "RptCajaFuerteCO", SIN_SUBREPORTES_CAJA_FUERTE, p);
-        if (bytes == null || bytes.length == 0) {
-            throw new SpBusinessException("No hay movimientos de caja fuerte de hoy para esta sucursal.");
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentLength(bytes.length);
@@ -1068,8 +1304,8 @@ public class TareasRutinariasController {
      * La pantalla de cada submódulo a requerimiento ({@code tb_vista.direccion},
      * creadas por el archivo SQL 44 bajo la 87). Es el único permiso: habilitar
      * la vista "Caja Chica" desde "Permisos del usuario" es lo que pone el ítem
-     * en el menú y lo que deja abrirla. Es, además, la lista blanca: un
-     * idTarRuti que no esté aquí se rechaza sin llegar al SP.
+     * en el menú y lo que deja usarla. Cada endpoint del submódulo la exige con
+     * {@link #exigirSubmodulo}.
      *
      * <p>Por dirección y no por codVista: {@code tb_vista.codVista} es IDENTITY
      * y cambia de una base a otra.
@@ -1085,14 +1321,13 @@ public class TareasRutinariasController {
      * <p>Cierre de Operaciones (tarea 2) no está: salió del menú con el archivo
      * SQL 63 y se abre con la ocurrencia de "Verificar Cierre de Operaciones".
      */
-    private static final Map<Long, String> PANTALLA_POR_FLUJO;
-    static {
-        Map<Long, String> m = new HashMap<>();
-        m.put(40L, "tacTareas/CajaFuerte");
-        m.put(41L, "tacTareas/Coches");
-        m.put(42L, "tacTareas/CajaChica");
-        PANTALLA_POR_FLUJO = Collections.unmodifiableMap(m);
-    }
+    private static final String PANTALLA_CAJA_FUERTE = "tacTareas/CajaFuerte";
+    private static final String PANTALLA_COCHES = "tacTareas/Coches";
+    private static final String PANTALLA_CAJA_CHICA = "tacTareas/CajaChica";
+
+    /** La tarea que queda en tac_llegada.idTarRuti y tac_cocheLlegadas.idTarRuti. */
+    private static final long TAREA_CAJA_FUERTE = 40L;
+    private static final long TAREA_COCHES = 41L;
 
     /**
      * Si quien llama tiene la pantalla en su menú, con la misma regla que usa
@@ -1117,56 +1352,22 @@ public class TareasRutinariasController {
     }
 
     /**
-     * Abre (o recupera) la ocurrencia de hoy de un flujo a requerimiento y
-     * devuelve su {@code idBitTarea} para que la pantalla trabaje con él.
+     * Caja Fuerte, Revisar Autos y Caja Chica ya no tienen ocurrencia (archivo
+     * SQL 96): el permiso es la vista del submódulo y el alcance, el empleado
+     * del token, nunca del body. Los SP sacan la sucursal de su cargo vigente.
      *
-     * <p>Caja Fuerte, Coches, Caja Chica y Cierre de Operaciones dejaron de ser
-     * tareas rutinarias: el Job ya no las genera todas las noches para todo el
-     * mundo. Ahora son submódulos con entrada propia en el menú, y la ocurrencia
-     * nace cuando alguien entra a hacer el trabajo. Todo lo que cuelga de ella
-     * —{@code tac_llegada}, {@code tac_cocheLlegadas}, {@code tac_cajaChica}—
-     * sigue funcionando igual, porque esas tablas usan el idBitTarea solamente
-     * para saber de quién es el trabajo.
-     *
-     * <p><b>El empleado sale del token, nunca del body.</b> Es la ocurrencia de
-     * quien está entrando: aceptar un codEmpleado del cliente dejaría abrir —y
-     * después completar— el flujo en nombre de otra persona.
-     *
-     * <p>Es idempotente: entrar dos veces el mismo día devuelve la misma
-     * ocurrencia. Y no sirve para adelantar las tareas que sí genera el Job — el
-     * SP las rechaza con error 31.
+     * @return el codEmpleado de quien llama
      */
-    @PostMapping("/abrir-flujo")
-    public ResponseEntity<ApiResponse<?>> abrirFlujoARequerimiento(
-            @RequestBody Map<String, Object> body, Authentication auth) {
-
-        Number idTarRutiRaw = body == null ? null : (Number) body.get("idTarRuti");
-        if (idTarRutiRaw == null) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(
-                    "Falta indicar qué flujo abrir.", null, HttpStatus.BAD_REQUEST.value()));
-        }
-        long idTarRuti = idTarRutiRaw.longValue();
-
-        String pantalla = PANTALLA_POR_FLUJO.get(idTarRuti);
-        if (pantalla == null) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(
-                    "Ese flujo no se abre a requerimiento.", null, HttpStatus.BAD_REQUEST.value()));
-        }
+    private long exigirSubmodulo(Authentication auth, String pantalla) {
         if (!tienePantalla(auth, pantalla)) {
             throw new AccessDeniedException("No tiene habilitada la pantalla '" + pantalla + "'.");
         }
-
         Long codEmpleado = accesoModuloHelper.codEmpleadoDelToken(auth);
         if (codEmpleado == null) {
-            // Un usuario sin empleado asociado no puede tener una ocurrencia: la
-            // bitácora es por persona. Es un dato mal cargado, no un permiso.
-            return ResponseEntity.badRequest().body(new ApiResponse<>(
-                    "Tu usuario no tiene un empleado asociado, así que no se puede abrir el flujo.",
-                    null, HttpStatus.BAD_REQUEST.value()));
+            // Un dato mal cargado, no un permiso: sin empleado no hay sucursal.
+            throw new SpBusinessException("Tu usuario no tiene un empleado asociado; no se puede usar este submódulo.");
         }
-
-        return respuestaEscritura(bitTareaRutiDao.abrirFlujoARequerimiento(
-                idTarRuti, codEmpleado, DatosToken.codUsuarioDe(auth)));
+        return codEmpleado;
     }
 
     // ==================== CATÁLOGOS Y ENTIDADES ESTÁNDAR ====================
@@ -1794,7 +1995,11 @@ public class TareasRutinariasController {
 
     /** Obtiene bitácoras de tarea rutinaria. Body null/vacío → retorna todas. */
     @PostMapping("/obtener-bit-tarea-ruti")
-    public ResponseEntity<ApiResponse<?>> obtenerBitTareaRuti(@RequestBody(required = false) BitTareaRuti mb) {
+    public ResponseEntity<ApiResponse<?>> obtenerBitTareaRuti(@RequestBody(required = false) BitTareaRuti mb,
+                                                              Authentication auth) {
+        // Al entrar a Mis tareas, las de hoy de quien entra (archivo SQL 90):
+        // no depende de que el Job de las 00:05 haya corrido.
+        generacionAlInstante.generarPara(accesoModuloHelper.codEmpleadoDelToken(auth));
         return procesarLista(bitTareaRutiDao.listar(mb), "No se encontraron bitácoras de tarea rutinaria.");
     }
 
@@ -2046,13 +2251,17 @@ public class TareasRutinariasController {
      * alcanza para leer y marcar las secciones del cierre. Sin ella (un
      * llamado viejo, que no manda idBitTarea) se cae al ACL de siempre, el
      * botón de la vista 78.
+     *
+     * @return true si la ocurrencia es de la 39: ahí las marcas pasan por la
+     *         matriz de responsables (archivo SQL 81).
      */
-    private void exigirRevisionOBoton(Authentication auth, long idBitTarea, String boton) {
+    private boolean exigirRevisionOBoton(Authentication auth, long idBitTarea, String boton) {
         if (idBitTarea > 0) {
-            exigirOcurrenciaDeCierre(auth, idBitTarea, TAREAS_REVISION_CIERRE);
-            return;
+            BitTareaRuti ocurrencia = exigirOcurrenciaDeCierre(auth, idBitTarea, TAREAS_REVISION_CIERRE);
+            return TAREAS_VERIFICAR_CIERRE.contains(ocurrencia.getIdTarRuti());
         }
         accesoModuloHelper.exigirBoton(auth, 78, boton);
+        return false;
     }
 
     /**

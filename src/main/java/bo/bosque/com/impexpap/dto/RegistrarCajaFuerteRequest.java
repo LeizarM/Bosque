@@ -12,9 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegistrarCajaFuerteRequest {
-    private long idTarRuti;
-    private long idBitTarea;
-    // codSucursal ya NO viaja aquí — el proc lo resuelve del cargo vigente
-    // del empleado dueño de la ocurrencia (paso 20, code-review 2026-09-03).
+    // Ni ocurrencia ni sucursal (archivo SQL 96): el SP la saca del cargo
+    // vigente del empleado del token.
     private List<LlegadaCajaFuerteDto> llegadas;
 }

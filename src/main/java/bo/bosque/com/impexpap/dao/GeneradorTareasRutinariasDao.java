@@ -24,4 +24,11 @@ public class GeneradorTareasRutinariasDao implements IGeneradorTareasRutinarias 
         // para que ejecutarAbmMap pueda invocarlo (siempre inyecta @ACCION).
         return spHelper.ejecutarAbmMap("p_generar_tac_bitTareaRuti", new HashMap<>(), "R");
     }
+
+    @Override
+    public RespuestaSp generarPara(long codEmpleado) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEmpleado", codEmpleado);
+        return spHelper.ejecutarAbmMap("p_generar_tac_bitTareaRuti", params, "R");
+    }
 }

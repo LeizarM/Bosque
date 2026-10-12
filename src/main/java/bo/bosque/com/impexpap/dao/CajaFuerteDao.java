@@ -29,10 +29,10 @@ public class CajaFuerteDao implements ICajaFuerte {
     }
 
     @Override
-    public RespuestaSp registrar(RegistrarCajaFuerteRequest req, long audUsuario) {
+    public RespuestaSp registrar(RegistrarCajaFuerteRequest req, long idTarRuti, long codEmpleado, long audUsuario) {
         Map<String, Object> params = new HashMap<>();
-        params.put("idTarRuti", req.getIdTarRuti());
-        params.put("idBitTarRuti", req.getIdBitTarea());
+        params.put("idTarRuti", idTarRuti);
+        params.put("codEmpleado", codEmpleado);
         params.put("llegadasXml", construirLlegadasXml(req.getLlegadas()));
         params.put("audUsuario", audUsuario);
 

@@ -44,4 +44,9 @@ public class BitTareaRuti implements Serializable {
     // contra el reloj del dispositivo.
     private Integer diasPlazo;
     private Date fechaLimite;
+
+    // 1 = la responde sola el arqueo (arqueoTareasEspejo, archivo SQL 84): la
+    // app no muestra Sí/No. Solo lectura, como las de arriba: el filtro de
+    // listar() la manda en null y no llega al SP.
+    private Integer respondeSola;
 }

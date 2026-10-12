@@ -32,35 +32,6 @@ public interface IBitTareaRuti {
     BitTareaRuti obtenerPorId(long idBitTarea);
 
     /**
-     * [A] Abre la ocurrencia de hoy de un flujo "a requerimiento" y devuelve su
-     * idBitTarea en {@code idGenerado}.
-     *
-     * <p>Caja Fuerte, Coches, Caja Chica y Cierre de Operaciones dejaron de ser
-     * tareas rutinarias (el Job ya no las genera, ver
-     * {@code tac_tareaRutinaria.esARequerimiento}) y viven como submódulos de la
-     * vista 87. Como todas sus tablas — {@code tac_llegada},
-     * {@code tac_cocheLlegadas}, {@code tac_cajaChica} — siguen colgando de una
-     * ocurrencia, la ocurrencia se crea aquí, en el momento en que alguien entra
-     * a hacer el trabajo. Así ni los procs ni los reportes ni el historial se
-     * enteran del cambio.
-     *
-     * <p>Es idempotente: entrar dos veces el mismo día devuelve la misma
-     * ocurrencia, no crea una segunda (el SP serializa con
-     * {@code sp_getapplock} por empleado+tarea+fecha, que es lo que evita que
-     * abrir desde el celular y la computadora a la vez cree dos).
-     *
-     * <p>El SP rechaza con error 31 cualquier tarea que NO esté marcada a
-     * requerimiento, para que este camino no pueda fabricar ocurrencias en
-     * paralelo a las que genera el Job.
-     *
-     * @param idTarRuti   la tarea del flujo (40 Caja Fuerte, 41 Coches,
-     *                    42 Caja Chica, 2 Cierre de Operaciones)
-     * @param codEmpleado de quién es la ocurrencia — del token, nunca del body
-     * @param audUsuario  usuario que audita
-     */
-    RespuestaSp abrirFlujoARequerimiento(long idTarRuti, long codEmpleado, long audUsuario);
-
-    /**
      * [O] Agrega una observación a una ocurrencia ya respondida (archivo SQL 75).
      *
      * <p>Es lo único que se puede hacer con una tarea hecha (Marcelo,

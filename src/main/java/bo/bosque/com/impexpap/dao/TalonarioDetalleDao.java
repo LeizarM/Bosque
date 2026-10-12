@@ -36,4 +36,12 @@ public class TalonarioDetalleDao implements ITalonarioDetalle {
         filtro.put("codTalonario", codTalonario);
         return spHelper.ejecutarListado("p_list_tmto_TalonarioDetalle", filtro, "T", TalonarioDetalle.class);
     }
+
+    @Override
+    public List<Map<String, Object>> usoEnCajaChica(long codTalonario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codTalonario", codTalonario);
+        params.put("ACCION", "T");
+        return spHelper.ejecutarListadoDinamico("p_list_tac_CajaChica", params);
+    }
 }

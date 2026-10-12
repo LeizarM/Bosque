@@ -10,9 +10,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegistrarEgresoCajaChicaRequest {
-    private long idBitTarea;
-    // codSucursal ya NO viaja aquí — el proc lo resuelve del cargo vigente
-    // del empleado dueño de la ocurrencia (paso 20, code-review 2026-09-03).
+    // Ni ocurrencia ni sucursal (archivo SQL 96): el SP la saca del cargo
+    // vigente del empleado del token.
     private double montoEg;
     private String descripcion;
     private long codEmpDestino;

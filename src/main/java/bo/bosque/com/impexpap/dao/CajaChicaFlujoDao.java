@@ -14,10 +14,10 @@ import java.util.Map;
 
 /**
  * DAO del flujo especial "Caja Chica" (idATR=7) — reemplaza dlgCajaChica de
- * WizardTareas.java. La lógica vive como ACCION='D'/'R'/'F' de los procs
- * genéricos p_list_tac_CajaChica / p_abm_tac_CajaChica (no en procs con
- * nombre propio — ver
- * sql/2026-09-03_tac_tareaRutinaria_24_flujos_especiales_sobre_procs_genericos.sql).
+ * WizardTareas.java. La lógica vive como ACCION='D'/'R'/'C'/'H'/'V' de los
+ * procs genéricos p_list_tac_CajaChica / p_abm_tac_CajaChica. Desde el archivo
+ * SQL 96 no hay ocurrencia: se manda {@code codEmpleado} y no
+ * {@code idBitTarRuti}.
  */
 @Slf4j
 @Repository
@@ -30,17 +30,17 @@ public class CajaChicaFlujoDao implements ICajaChicaFlujo {
     }
 
     @Override
-    public List<CajaChica> listarDelLote(long idBitTarea, long audUsuario) {
+    public List<CajaChica> listarDelLote(long codEmpleado, long audUsuario) {
         Map<String, Object> params = new HashMap<>();
-        params.put("idBitTarRuti", idBitTarea);
+        params.put("codEmpleado", codEmpleado);
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarListado("p_list_tac_CajaChica", params, "D", CajaChica.class);
     }
 
     @Override
-    public RespuestaSp registrarEgreso(RegistrarEgresoCajaChicaRequest req, long audUsuario) {
+    public RespuestaSp registrarEgreso(RegistrarEgresoCajaChicaRequest req, long codEmpleado, long audUsuario) {
         Map<String, Object> params = new HashMap<>();
-        params.put("idBitTarRuti", req.getIdBitTarea());
+        params.put("codEmpleado", codEmpleado);
         params.put("montoEg", req.getMontoEg());
         params.put("descripcion", req.getDescripcion());
         params.put("codEmpDestino", req.getCodEmpDestino());
@@ -52,26 +52,34 @@ public class CajaChicaFlujoDao implements ICajaChicaFlujo {
     }
 
     @Override
-    public RespuestaSp finalizar(long idBitTarea, long audUsuario) {
+    public RespuestaSp cerrarLote(long codEmpleado, long audUsuario) {
         Map<String, Object> params = new HashMap<>();
-        params.put("idBitTarRuti", idBitTarea);
-        params.put("audUsuario", audUsuario);
-        return spHelper.ejecutarAbmMap("p_abm_tac_CajaChica", params, "F");
-    }
-
-    @Override
-    public RespuestaSp cerrarLote(long idBitTarea, long audUsuario) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("idBitTarRuti", idBitTarea);
+        params.put("codEmpleado", codEmpleado);
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarAbmMap("p_abm_tac_CajaChica", params, "C");
     }
 
     @Override
-    public List<Map<String, Object>> obtenerHistorialLotes(long idBitTarea) {
+    public List<Map<String, Object>> obtenerHistorialLotes(long codEmpleado) {
         Map<String, Object> params = new HashMap<>();
-        params.put("idBitTarRuti", idBitTarea);
+        params.put("codEmpleado", codEmpleado);
         params.put("ACCION", "H");
+        return spHelper.ejecutarListadoDinamico("p_list_tac_CajaChica", params);
+    }
+
+    @Override
+    public List<Map<String, Object>> listarTalonarios(long codEmpleado) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEmpleado", codEmpleado);
+        params.put("ACCION", "V");
+        return spHelper.ejecutarListadoDinamico("p_list_tac_CajaChica", params);
+    }
+
+    @Override
+    public List<Map<String, Object>> reglasRecibo(long codEmpleado) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEmpleado", codEmpleado);
+        params.put("ACCION", "G");
         return spHelper.ejecutarListadoDinamico("p_list_tac_CajaChica", params);
     }
 }

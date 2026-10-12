@@ -41,4 +41,10 @@ public class CajaChica implements Serializable {
     // mandaría como @nombreEmpDestino, un parámetro que el SP no tiene.
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String nombreEmpDestino;
+    // ── solo de lectura: el talonario del vale (p_list_tac_CajaChica 'D', archivo SQL 94).
+    // Lo graba p_abm_tac_CajaChica 'R' después de validar el vale; nunca viene del body.
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long codTalonario;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String nroTalonario;
 }

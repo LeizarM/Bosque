@@ -322,6 +322,12 @@ public class TalonariosController {
         return procesarLista(talonarioDetalleDao.listarPorTalonario(mb.getCodTalonario()), SIN_DATOS);
     }
 
+    /** En que egreso de caja chica se uso cada vale. Vacio si no es un talonario de caja chica. */
+    @PostMapping("/uso-caja-chica")
+    public ResponseEntity<ApiResponse<?>> usoEnCajaChica(@RequestBody TalonarioDetalle mb) {
+        return procesarLista(talonarioDetalleDao.usoEnCajaChica(mb.getCodTalonario()), SIN_DATOS);
+    }
+
     // ==================== ENTREGA MASIVA ====================
 
     /**

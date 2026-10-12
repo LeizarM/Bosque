@@ -28,21 +28,23 @@ public class CochesDao implements ICoches {
         this.spHelper = spHelper;
     }
 
+    // Sin idBitTarRuti: es la lista de la sucursal, no de una ocurrencia.
     @Override
-    public List<CocheDelDia> listarDelDia(long idTarRuti, long idBitTarea, long audUsuario) {
+    public List<CocheDelDia> listarDelDia(long idTarRuti, long codEmpleado, long audUsuario) {
         Map<String, Object> params = new HashMap<>();
         params.put("idTarRuti", idTarRuti);
-        params.put("idBitTarRuti", idBitTarea);
+        params.put("codEmpleado", codEmpleado);
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarListado("p_list_tac_CocheLlegadas", params, "D", CocheDelDia.class);
     }
 
     @Override
-    public RespuestaSp marcarLlegada(long idCo, int llego, String obs, long audUsuario) {
+    public RespuestaSp marcarLlegada(long idCo, int llego, String obs, long codEmpleado, long audUsuario) {
         Map<String, Object> params = new HashMap<>();
         params.put("idCo", idCo);
         params.put("llego", llego);
         params.put("obs", obs);
+        params.put("codEmpleado", codEmpleado);
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarAbmMap("p_abm_tac_CocheLlegadas", params, "M");
     }

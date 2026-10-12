@@ -38,4 +38,10 @@ public interface ILlegada {
      *              parámetro existe desde el archivo SQL 60.
      */
     List<Map<String, Object>> obtenerDelDia(long idBitTarea, boolean todasSucursales, Date fecha);
+
+    /**
+     * [B] Las llegadas de hoy de la sucursal de {@code codEmpleado}, para la
+     * pantalla de Caja Fuerte, que ya no tiene ocurrencia (archivo SQL 96).
+     */
+    List<Map<String, Object>> obtenerDeHoyDe(long codEmpleado);
 }

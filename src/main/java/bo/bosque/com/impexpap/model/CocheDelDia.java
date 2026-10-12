@@ -30,4 +30,6 @@ public class CocheDelDia implements Serializable {
     private String placa;
     private String color;
     private Integer anio;
+    /** Quién marcó el auto en la lista de la sucursal (archivo SQL 96). */
+    private String quienMarco;
 }

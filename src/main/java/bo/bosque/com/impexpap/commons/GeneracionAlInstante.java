@@ -87,6 +87,24 @@ public class GeneracionAlInstante {
         });
     }
 
+    /**
+     * Genera las tareas de hoy de una persona, al entrar a Mis tareas
+     * (Marcelo, 2026-10-09: "cuando se ingrese a Mis tareas, que se inserte
+     * para la persona y ya"). Corre en el pedido y es rápido: solo esa
+     * persona, con el control de duplicados del SP (archivo SQL 90). Si falla,
+     * la lista sale igual con lo que haya.
+     */
+    public void generarPara(Long codEmpleado) {
+        if (codEmpleado == null || codEmpleado <= 0) return;
+        try {
+            RespuestaSp res = generador.generarPara(codEmpleado);
+            log.debug("Generación de la persona {}: {}", codEmpleado, res.getErrormsg());
+        } catch (Exception e) {
+            log.warn("Generación de la persona {} falló; la lista sale con lo que haya: {}",
+                    codEmpleado, e.getMessage());
+        }
+    }
+
     @PreDestroy
     void apagar() {
         hilo.shutdown();

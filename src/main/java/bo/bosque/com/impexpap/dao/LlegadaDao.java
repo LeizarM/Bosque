@@ -55,4 +55,13 @@ public class LlegadaDao implements ILlegada {
         params.put("ACCION", "B");
         return spHelper.ejecutarListadoDinamico("p_list_tac_Llegada", params);
     }
+
+    @Override
+    public List<Map<String, Object>> obtenerDeHoyDe(long codEmpleado) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEmpleado", codEmpleado);
+        params.put("todasSucursales", 0);
+        params.put("ACCION", "B");
+        return spHelper.ejecutarListadoDinamico("p_list_tac_Llegada", params);
+    }
 }

@@ -5,6 +5,13 @@ import bo.bosque.com.impexpap.utils.RespuestaSp;
 public interface IGeneradorTareasRutinarias {
 
     /**
+     * Corre p_generar_tac_bitTareaRuti solo para una persona (archivo SQL 90):
+     * las mismas reglas y el mismo control de duplicados, al entrar a Mis
+     * tareas. Así no depende de que el Job de las 00:05 haya corrido.
+     */
+    RespuestaSp generarPara(long codEmpleado);
+
+    /**
      * Corre p_generar_tac_bitTareaRuti — genera las ocurrencias del día para
      * TODOS los cargos activos, según la frecuencia vigente de cada tarea
      * rutinaria (lee tac_tareaRutinaria.idFrec en vivo, así que si una tarea

@@ -4,6 +4,7 @@ import bo.bosque.com.impexpap.model.TalonarioDetalle;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 
 import java.util.List;
+import java.util.Map;
 
 /** Log de eventos de los talonarios (tmto_talonarioDetalle). */
 public interface ITalonarioDetalle {
@@ -30,4 +31,11 @@ public interface ITalonarioDetalle {
 
     /** Historial completo de un talonario, del evento mas viejo al mas nuevo. */
     List<TalonarioDetalle> listarPorTalonario(long codTalonario);
+
+    /**
+     * Los vales de un talonario de caja chica, uno por numero, con el egreso
+     * en que se uso cada uno (p_list_tac_CajaChica 'T', archivo SQL 93).
+     * Vacio si el talonario no es del tipo de los vales de caja chica.
+     */
+    List<Map<String, Object>> usoEnCajaChica(long codTalonario);
 }
