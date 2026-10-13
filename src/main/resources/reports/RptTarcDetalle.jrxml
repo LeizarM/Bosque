@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptTarcDetalle" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="net.sf.jasperreports.default.text.field.blank.when.null" value="true"/>
+	<!-- Archivo de documentos: cada documento con su caja, ubicacion y sucursal (p_list_tarc_Contenido 'D').
+	     Se llena desde una coleccion de DetalleArchivoRptDto, sin queryString; el SP ya ordena por archivo y caja.
+	     Los dos grupos se repiten al cambiar de pagina para que una hoja suelta diga de que caja es. -->
+	<style name="filaZebra" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{caja_COUNT}.intValue() % 2 == 0)]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F5F7FA"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="titulo" class="java.lang.String"/>
+	<parameter name="filtros" class="java.lang.String"/>
+	<parameter name="totales" class="java.lang.String"/>
+	<parameter name="usuario" class="java.lang.String"/>
+	<parameter name="generado" class="java.lang.String"/>
+	<parameter name="logoEmpresa" class="java.io.InputStream"/>
+	<field name="codArchivo" class="java.lang.Long"/>
+	<field name="nombreArchivo" class="java.lang.String"/>
+	<field name="sucursalTexto" class="java.lang.String"/>
+	<field name="codCaja" class="java.lang.Long"/>
+	<field name="numeroCaja" class="java.lang.Integer"/>
+	<field name="ubicacionTexto" class="java.lang.String"/>
+	<field name="nombreTipoDocumento" class="java.lang.String"/>
+	<field name="detalle" class="java.lang.String"/>
+	<field name="gestionTexto" class="java.lang.String"/>
+	<field name="empresaTexto" class="java.lang.String"/>
+	<field name="observacion" class="java.lang.String"/>
+	<group name="archivo" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{codArchivo}]]></groupExpression>
+		<groupHeader>
+			<band height="30" splitType="Prevent">
+				<rectangle>
+					<reportElement mode="Opaque" x="0" y="6" width="752" height="22" backcolor="#E0F2F1"/>
+					<graphicElement>
+						<pen lineWidth="0.0"/>
+					</graphicElement>
+				</rectangle>
+				<rectangle>
+					<reportElement mode="Opaque" x="0" y="6" width="4" height="22" backcolor="#00796B"/>
+					<graphicElement>
+						<pen lineWidth="0.0"/>
+					</graphicElement>
+				</rectangle>
+				<textField isBlankWhenNull="true">
+					<reportElement x="10" y="6" width="736" height="22" forecolor="#00695C"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="11" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{sucursalTexto} + "   ·   Archivo " + $F{nombreArchivo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="caja" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{codCaja}]]></groupExpression>
+		<groupHeader>
+			<band height="42" splitType="Prevent">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="6" width="90" height="16" forecolor="#4E342E"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Caja " + $F{numeroCaja}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="caja">
+					<reportElement x="90" y="6" width="662" height="16" forecolor="#455A64"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ubicacionTexto} + "   ·   " + $V{caja_COUNT} + ($V{caja_COUNT}.intValue() == 1 ? " documento" : " documentos")]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="24" width="150" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+					<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Tipo de documento]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="150" y="24" width="330" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+					<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Detalle]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="480" y="24" width="90" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+					<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Gestión]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="570" y="24" width="80" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+					<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Empresa]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="650" y="24" width="102" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+					<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="SansSerif" size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Observación]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="6" splitType="Stretch"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="72" splitType="Stretch">
+			<image scaleImage="RetainShape" onErrorType="Blank">
+				<reportElement x="0" y="0" width="90" height="40"/>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<textField isBlankWhenNull="true">
+				<reportElement x="100" y="0" width="482" height="22" forecolor="#263238"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement x="100" y="22" width="482" height="18" forecolor="#455A64"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{filtros}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="582" y="0" width="170" height="14" forecolor="#455A64"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Generado: " + $P{generado}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="582" y="14" width="170" height="14" forecolor="#455A64"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Por: " + $P{usuario}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="0" y="46" width="752" height="20" forecolor="#00695C" backcolor="#E0F2F1"/>
+				<box leftPadding="8"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total: " + $P{totales}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="15" splitType="Prevent">
+			<rectangle>
+				<reportElement style="filaZebra" stretchType="ContainerHeight" x="0" y="0" width="752" height="15"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreTipoDocumento}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="150" y="0" width="330" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{detalle}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="480" y="0" width="90" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gestionTexto}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="570" y="0" width="80" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empresaTexto}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="650" y="0" width="102" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{observacion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="16" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="400" height="14" forecolor="#607D8B"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Archivo de documentos · " + $P{titulo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="602" y="0" width="110" height="14" forecolor="#607D8B"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="712" y="0" width="40" height="14" forecolor="#607D8B"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
