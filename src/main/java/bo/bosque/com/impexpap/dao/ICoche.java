@@ -21,6 +21,13 @@ public interface ICoche {
     List<Coche> listar(Coche filtro);
 
     /**
+     * [S] Listado para la pantalla de gestion: igual que {@link #listar} pero con
+     * {@code nombreSucursal}. A diferencia de {@code listar}, un {@code estado = 0}
+     * SI filtra (coches inactivos); {@code null} o texto en blanco no filtran.
+     */
+    List<Coche> listarGestion(Coche filtro);
+
+    /**
      * [L] Carga UN coche por ID exacto (para load-before-update).
      * Solo envía @idCoche al SP; todo lo demás queda en DEFAULT NULL.
      */

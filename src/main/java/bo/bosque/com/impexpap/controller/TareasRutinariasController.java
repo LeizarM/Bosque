@@ -1352,6 +1352,17 @@ public class TareasRutinariasController {
     }
 
     /**
+     * Corta con 403 si quien llama no tiene la pantalla en su menú. A diferencia de
+     * {@link #exigirSubmodulo} no pide empleado: sirve para los catálogos, que no
+     * dependen del cargo de quien llama.
+     */
+    private void exigirPantalla(Authentication auth, String pantalla) {
+        if (!tienePantalla(auth, pantalla)) {
+            throw new AccessDeniedException("No tiene habilitada la pantalla '" + pantalla + "'.");
+        }
+    }
+
+    /**
      * Caja Fuerte, Revisar Autos y Caja Chica ya no tienen ocurrencia (archivo
      * SQL 96): el permiso es la vista del submódulo y el alcance, el empleado
      * del token, nunca del body. Los SP sacan la sucursal de su cargo vigente.
@@ -1359,9 +1370,7 @@ public class TareasRutinariasController {
      * @return el codEmpleado de quien llama
      */
     private long exigirSubmodulo(Authentication auth, String pantalla) {
-        if (!tienePantalla(auth, pantalla)) {
-            throw new AccessDeniedException("No tiene habilitada la pantalla '" + pantalla + "'.");
-        }
+        exigirPantalla(auth, pantalla);
         Long codEmpleado = accesoModuloHelper.codEmpleadoDelToken(auth);
         if (codEmpleado == null) {
             // Un dato mal cargado, no un permiso: sin empleado no hay sucursal.
@@ -2201,9 +2210,15 @@ public class TareasRutinariasController {
         return procesarLista(cocheLlegadasDao.listar(mb), "No se encontraron llegadas de coche.");
     }
 
+    // Los tres endpoints de coche exigen la MISMA vista que la pantalla nueva
+    // (CocheController.PANTALLA): antes cualquier ROLE_LIM con sesión
+    // podía crear o borrar coches por aquí aunque no tuviera la pantalla. La nueva
+    // API es /coches/*; estos quedan por compatibilidad.
+
     /** Registra o actualiza un coche (catálogo de vehículos por sucursal). */
     @PostMapping("/registrar-coche")
     public ResponseEntity<ApiResponse<?>> registrarCoche(@RequestBody Coche mb, Authentication auth) {
+        exigirPantalla(auth, CocheController.PANTALLA);
         mb.setAudUsuario(DatosToken.codUsuarioDe(auth));
         return respuestaEscritura(cocheDao.registrar(mb, mb.getIdCoche() == 0 ? "I" : "U"));
     }
@@ -2211,13 +2226,16 @@ public class TareasRutinariasController {
     /** Elimina un coche por su ID. audUsuario se resuelve del JWT, no del body. */
     @PostMapping("/eliminar-coche")
     public ResponseEntity<ApiResponse<?>> eliminarCoche(@RequestBody Coche mb, Authentication auth) {
+        exigirPantalla(auth, CocheController.PANTALLA);
         mb.setAudUsuario(DatosToken.codUsuarioDe(auth));
         return respuestaEscritura(cocheDao.registrar(mb, "D"));
     }
 
     /** Obtiene coches. Body null/vacío → retorna todos. */
     @PostMapping("/obtener-coche")
-    public ResponseEntity<ApiResponse<?>> obtenerCoche(@RequestBody(required = false) Coche mb) {
+    public ResponseEntity<ApiResponse<?>> obtenerCoche(@RequestBody(required = false) Coche mb,
+                                                       Authentication auth) {
+        exigirPantalla(auth, CocheController.PANTALLA);
         return procesarLista(cocheDao.listar(mb), "No se encontraron coches.");
     }
 

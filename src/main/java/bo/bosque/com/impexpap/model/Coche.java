@@ -29,4 +29,8 @@ public class Coche implements Serializable {
     private Integer estado;
     private int audUsuario;
     private Date audFecha;
+
+    // Solo lectura: lo trae p_list_tac_Coche ACCION 'S' (JOIN a tb_sucursal). No es
+    // columna de tac_coche ni parametro de p_abm_tac_Coche; SimpleJdbcCall lo ignora.
+    private String nombreSucursal;
 }
