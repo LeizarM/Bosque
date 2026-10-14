@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # BOSQUE — Backend Spring Boot
 
-ERP backend for Bosque (paper im/export, RRHH, fleet, treasury). Spring Boot monolith, Angular SPA frontend (separate repo). **No JPA/ORM** — all persistence is SQL Server Stored Procedures.
+ERP backend for Bosque (paper im/export, RRHH, fleet, treasury). Spring Boot monolith; its client is the Flutter app (`D:\Proyectos\AppEsppapel2`). **No JPA/ORM** — all persistence is SQL Server Stored Procedures.
 
 ## Commands
 Maven wrapper (`mvnw.cmd` on Windows / `./mvnw` on *nix):
@@ -84,4 +84,4 @@ Reference impl to copy: `TransaccionesDao` / `CargosDao` (DAO), `PagosExtranjero
 Table `tpex_Asientos` exists. Model `Asientos.java` fields: idAsiento, idTransaccion, numero, tipoAsiento(PR/PE/MP), codBancoRef(FK tch_banco), cuentaDebe/Haber, descripcion, debito/credito Us/Bs, tcAplicado, audUsuario/Fecha; read-only joins (banco, estadoTransaccion, fechaTransaccion) and cuadre fields (totalDebito/Credito Us/Bs, diferenciaBs, estadoCuadre CUADRADO/DESCUADRADO) only on ACCION "V". Endpoints to add: `registrar-asiento` (ABM I/U/D), `obtener-asientos-transaccion` (list T), `validar-cuadre-asientos` (list V).
 
 ## Database
-SQL Server 2008, BD `BOSQUE-2_0`. Runtime DataSource in `application.properties` (`192.168.3.116:1433`). A readonly account `claude_readonly` exists at `181.114.119.194:8800` for inspection. `schema.sql` / `src/main/resources/sql/` hold reference DDL/fixes. All business logic lives in SPs — to understand behavior, read the SP, not Java.
+SQL Server 2008, BD `BOSQUE-2_0`. Runtime DataSource in `application.properties` (`192.168.3.116:1433`). A read-only account `claude_ro` exists on that same host for inspection (no EXECUTE on SPs). `schema.sql` / `src/main/resources/sql/` hold reference DDL/fixes. All business logic lives in SPs — to understand behavior, read the SP, not Java.

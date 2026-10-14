@@ -55,7 +55,7 @@ public class JwtProvider {
 jwt.secret=${JWT_SECRET}
 ```
 
-Generar: `openssl rand -base64 64`. Borrar `JwtConfig.java` entero (`RSA_PUBLIC` tampoco se usa). **Rotar la clave invalida todos los tokens vivos** — coordinar con la app Flutter y el frontend Angular, y avisar antes del despliegue.
+Generar: `openssl rand -base64 64`. Borrar `JwtConfig.java` entero (`RSA_PUBLIC` tampoco se usa). **Rotar la clave invalida todos los tokens vivos** — coordinar con la app Flutter y avisar antes del despliegue.
 
 ---
 

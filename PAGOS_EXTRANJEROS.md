@@ -22,7 +22,7 @@
 ## 🏛️ Arquitectura general
 
 ```
-Angular Frontend
+App Flutter
       │  POST JSON
       ▼
 PagosExtranjerosController  (/pagos-extranjeros/*)
@@ -607,7 +607,7 @@ Todos los métodos son `POST`. Requiere JWT válido + rol `ROLE_ADM` o `ROLE_LIM
 ### Acceso
 - Ruta base: `POST /pagos-extranjeros/**`
 - Requiere JWT válido + rol `ROLE_ADM` o `ROLE_LIM`
-- `@CrossOrigin(origins = "*")` habilitado para el frontend Angular
+- `@CrossOrigin(origins = "*")` habilitado (la app Flutter web lo necesita)
 - `@PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")` a nivel de clase
 
 ### Códigos de respuesta
