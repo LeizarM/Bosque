@@ -1380,13 +1380,25 @@ public class TareasRutinariasController {
     }
 
     /**
-     * Retirado con el SQL 96: solo lo llama una app anterior, que muestra este mensaje
-     * en vez de un 404 mudo ("Error en la operación").
+     * Solo para la app anterior al SQL 96, que pide la ocurrencia del día antes de
+     * entrar a Caja Fuerte, Revisar Autos o Caja Chica. Ya no hay ocurrencia y esos
+     * endpoints ignoran el idBitTarea: se devuelve el codEmpleado, que solo tiene que
+     * ser mayor que 0. Así sigue funcionando sin obligar a actualizar (2026-10-13).
      */
     @PostMapping("/abrir-flujo")
-    public ResponseEntity<ApiResponse<?>> abrirFlujoRetirado() {
-        throw new SpBusinessException("Tu app está desactualizada. En el celular instala la versión nueva; "
-                + "en el navegador recarga la página con Ctrl+F5.");
+    public ResponseEntity<ApiResponse<?>> abrirFlujoAppAnterior(
+            @RequestBody(required = false) Map<String, Object> body, Authentication auth) {
+        Object idTarRuti = body == null ? null : body.get("idTarRuti");
+        long id = idTarRuti instanceof Number ? ((Number) idTarRuti).longValue() : 0L;
+        String pantalla = id == TAREA_CAJA_FUERTE ? PANTALLA_CAJA_FUERTE
+                : id == TAREA_COCHES ? PANTALLA_COCHES
+                : id == 42L ? PANTALLA_CAJA_CHICA // Caja Chica
+                : null;
+        if (pantalla == null) {
+            throw new SpBusinessException("Ese flujo no se abre a requerimiento.");
+        }
+        long codEmpleado = exigirSubmodulo(auth, pantalla);
+        return ResponseEntity.ok(new ApiResponse<>(SUCCESS_MESSAGE, codEmpleado, HttpStatus.OK.value()));
     }
 
     // ==================== CATÁLOGOS Y ENTIDADES ESTÁNDAR ====================
