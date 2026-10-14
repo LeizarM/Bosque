@@ -1379,6 +1379,16 @@ public class TareasRutinariasController {
         return codEmpleado;
     }
 
+    /**
+     * Retirado con el SQL 96: solo lo llama una app anterior, que muestra este mensaje
+     * en vez de un 404 mudo ("Error en la operación").
+     */
+    @PostMapping("/abrir-flujo")
+    public ResponseEntity<ApiResponse<?>> abrirFlujoRetirado() {
+        throw new SpBusinessException("Tu app está desactualizada. En el celular instala la versión nueva; "
+                + "en el navegador recarga la página con Ctrl+F5.");
+    }
+
     // ==================== CATÁLOGOS Y ENTIDADES ESTÁNDAR ====================
     // Cada entidad sigue el mismo patrón:
     //   - Registrar: idX == 0 → INSERT ("I"), idX > 0 → UPDATE ("U")
