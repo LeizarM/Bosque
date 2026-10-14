@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bo.bosque.com.impexpap.commons.AccesoPantalla;
 import bo.bosque.com.impexpap.commons.JasperReportExport;
 import bo.bosque.com.impexpap.dao.*;
 import bo.bosque.com.impexpap.dto.ReporteProduccionDto;
 import bo.bosque.com.impexpap.model.*;
+import bo.bosque.com.impexpap.security.jwt.DatosToken;
 import bo.bosque.com.impexpap.utils.ApiResponse;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.Utiles;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/loteProduccion")
 public class LoteProduccionController {
 
+    /** {@code tb_vista.direccion} de Realizar Lote Produccion (codVista 107). */
+    public static final String PANTALLA_REGISTRO = "tprod_loteProduccion/loteProduccion";
 
     private final ILoteProduccion loteProducionDao;
     private final IMaterialIngreso materialIngresoDao;
@@ -33,6 +39,8 @@ public class LoteProduccionController {
     private final IMaquinaProduccion maquinaProduccionDao;
     private final IEmpresa empresaDao;
     private final JasperReportExport jasperReportExport;
+    private final IArticuloPropuesto articuloPropuestoDao;
+    private final AccesoPantalla pantallas;
 
     /**
      * Constructor de la clase
@@ -43,8 +51,10 @@ public class LoteProduccionController {
      * @param maquinaProduccionDao
      * @param empresaDao
      * @param jasperReportExport
+     * @param articuloPropuestoDao
+     * @param pantallas
      */
-    public LoteProduccionController(ILoteProduccion loteProducionDao, IMaterialIngreso materialIngresoDao, IMaterialSalida materialSalidaDao, IMerma mermaDao, IMaquinaProduccion maquinaProduccionDao, IEmpresa empresaDao, JasperReportExport jasperReportExport) {
+    public LoteProduccionController(ILoteProduccion loteProducionDao, IMaterialIngreso materialIngresoDao, IMaterialSalida materialSalidaDao, IMerma mermaDao, IMaquinaProduccion maquinaProduccionDao, IEmpresa empresaDao, JasperReportExport jasperReportExport, IArticuloPropuesto articuloPropuestoDao, AccesoPantalla pantallas) {
         this.loteProducionDao = loteProducionDao;
         this.materialIngresoDao = materialIngresoDao;
         this.materialSalidaDao = materialSalidaDao;
@@ -52,6 +62,8 @@ public class LoteProduccionController {
         this.maquinaProduccionDao = maquinaProduccionDao;
         this.empresaDao = empresaDao;
         this.jasperReportExport = jasperReportExport;
+        this.articuloPropuestoDao = articuloPropuestoDao;
+        this.pantallas = pantallas;
     }
 
     /**
@@ -84,6 +96,26 @@ public class LoteProduccionController {
 
         return lstTemp;
 
+    }
+
+    /**
+     * Trae a tpr_articulo los articulos nuevos de SAP y refresca stock y UTM de los que ya
+     * estan ({@code p_abm_ArticuloProp 'F'}), para que la orden de fabricacion encuentre sus
+     * articulos de ingreso y salida. Es la misma rama que usa Precios; puede tardar minutos.
+     *
+     * <p>Solo entran los articulos cuya familia existe en tpr_producto: el SP descarta el resto.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/sincronizarArticulosSap")
+    public ResponseEntity<ApiResponse<?>> sincronizarArticulosSap(Authentication auth) {
+        pantallas.exigir(auth, PANTALLA_REGISTRO);
+        RespuestaSp res = articuloPropuestoDao.sincronizarArticulosSap((long) DatosToken.codUsuarioDe(auth));
+        if (res.getError() != 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(res.getErrormsg(), null, HttpStatus.BAD_REQUEST.value()));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("Artículos actualizados desde SAP.", null, HttpStatus.CREATED.value()));
     }
 
     /**
