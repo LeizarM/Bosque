@@ -3,6 +3,8 @@ package bo.bosque.com.impexpap.dto;
 
 import lombok.*;
 
+import java.util.Date;
+
 /** Cuerpo de POST /tareas-rutinarias/caja-chica/registrar-egreso. */
 @Getter
 @Setter
@@ -18,4 +20,6 @@ public class RegistrarEgresoCajaChicaRequest {
     private Integer numFactura;
     private Integer numVale;
     private String moneda;
+    /** Archivo SQL 100: sin fecha, el SP usa hoy (la app anterior no la manda). */
+    private Date fecha;
 }

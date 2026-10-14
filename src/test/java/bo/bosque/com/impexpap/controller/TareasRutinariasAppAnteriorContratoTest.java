@@ -323,6 +323,7 @@ class TareasRutinariasAppAnteriorContratoTest {
         assertNull(req.getValue().getNumFactura());
         assertEquals(Integer.valueOf(7), req.getValue().getNumVale());
         assertEquals("BS", req.getValue().getMoneda());
+        assertNull(req.getValue().getFecha(), "la app anterior no manda fecha: el SP usa hoy");
 
         // Sin "Entregado a" ni recibo la app manda null: el backend lo recibe igual.
         postear("/caja-chica/registrar-egreso",
@@ -339,6 +340,24 @@ class TareasRutinariasAppAnteriorContratoTest {
         // PDF de un lote que no es de su sucursal: el cuerpo de la app ({lote, codSucursal}) se lee.
         String rechazo = postear("/caja-chica/reporte-pdf", "{\"lote\":99,\"codSucursal\":20}", 400, null);
         assertEquals("Ese lote no es de la caja chica de tu sucursal.", json(rechazo).get("message"));
+    }
+
+    // ------------------------------------------------- fecha (archivo SQL 100)
+
+    @Test
+    void laAppNuevaMandaLaFechaDelEgreso() throws Exception {
+        ArgumentCaptor<RegistrarEgresoCajaChicaRequest> req = ArgumentCaptor.forClass(RegistrarEgresoCajaChicaRequest.class);
+        when(cajaChicaFlujoDao.registrarEgreso(req.capture(), eq(COD_EMPLEADO), eq((long) COD_USUARIO)))
+                .thenReturn(new RespuestaSp(0, "Egreso registrado.", 1004L));
+
+        postear("/caja-chica/registrar-egreso",
+                "{\"montoEg\":12,\"descripcion\":\"Pasajes\",\"codEmpDestino\":120,"
+                        + "\"numFactura\":null,\"numVale\":null,\"fecha\":\"2026-10-14\"}",
+                201, null);
+
+        java.text.SimpleDateFormat dia = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        dia.setTimeZone(java.util.TimeZone.getTimeZone("America/La_Paz"));
+        assertEquals("2026-10-14", dia.format(req.getValue().getFecha()));
     }
 
     // ------------------------------------------------------------- vacios

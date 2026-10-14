@@ -47,6 +47,7 @@ public class CajaChicaFlujoDao implements ICajaChicaFlujo {
         params.put("numFactura", req.getNumFactura());
         params.put("numVale", req.getNumVale());
         params.put("moneda", req.getMoneda() != null ? req.getMoneda() : "BS");
+        if (req.getFecha() != null) params.put("fecha", req.getFecha());  // Archivo SQL 100
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarAbmMap("p_abm_tac_CajaChica", params, "R");
     }
