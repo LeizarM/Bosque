@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.IntFunction;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -213,7 +214,12 @@ public class CiudadesVentaHelper {
 
     /** La ciudad del login, ya normalizada. {@code verifyUser} es solo lectura. */
     private Login ciudadDelLogin(Authentication auth) {
-        Login login = loginDao.verifyUser(acceso.loginDelToken(auth), null);
+        Login login;
+        try {
+            login = loginDao.verifyUser(acceso.loginDelToken(auth), null);
+        } catch (DataAccessException e) {
+            login = null;   // verifyUser ya no oculta una base caída; aquí se conserva lo de antes: sin ciudad
+        }
         if (login == null) login = new Login();
         login.setCodCiudad(normalizar(login.getCodCiudad()));
         return login;

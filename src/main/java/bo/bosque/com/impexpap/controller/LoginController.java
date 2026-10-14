@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.controller;
 
 
 
+import bo.bosque.com.impexpap.commons.SesionService;
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.ILoginDao;
 import bo.bosque.com.impexpap.dao.IUsuarioBtn;
@@ -10,11 +11,15 @@ import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.UsuarioBtn;
 import bo.bosque.com.impexpap.model.VistaUsuario;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import bo.bosque.com.impexpap.security.ClienteIp;
+import bo.bosque.com.impexpap.security.jwt.DatosToken;
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
 import bo.bosque.com.impexpap.security.model.Jwt;
 import bo.bosque.com.impexpap.model.Login;
@@ -49,8 +55,21 @@ public class LoginController {
     private final IEmpleado empleadoDao;
     private final IUsuarioBtn usuarioBtnDao;
     private final ClienteIp clienteIp;
+    private final SesionService sesiones;
 
-    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao, ClienteIp clienteIp){
+    static final String MSG_CREDENCIALES =
+            "Usuario o contraseña incorrectos. Después de 3 intentos fallidos en una hora el usuario se bloquea.";
+    // Público porque JwtTokenFilter da el mismo motivo al cerrar la sesión abierta de un ex empleado.
+    public static final String MSG_INACTIVO = "Usuario inactivo. Si crees que es un error, comunícate con Recursos Humanos.";
+    public static final String MSG_BLOQUEADO =
+            "Usuario bloqueado. Desbloquéalo con «¿Olvidaste tu contraseña?» o comunícate con un administrador.";
+    static final String MSG_CLAVE_AJENA = "Solo un administrador puede cambiar la contraseña de otro usuario.";
+    static final String MSG_SIN_BASE = "No se pudo conectar con la base de datos. Intenta de nuevo en unos minutos.";
+    // La app los manda en el login y en el chequeo de sesión, para la pantalla Sesiones.
+    static final String ENCABEZADO_PLATAFORMA = "X-Plataforma";
+    static final String ENCABEZADO_VERSION = "X-Version-App";
+
+    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao, ClienteIp clienteIp, SesionService sesiones){
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
@@ -59,6 +78,7 @@ public class LoginController {
         this.empleadoDao = empleadoDao;
         this.usuarioBtnDao = usuarioBtnDao;
         this.clienteIp = clienteIp;
+        this.sesiones = sesiones;
     }
 
 
@@ -104,23 +124,23 @@ public class LoginController {
             );
 
             // Paso 2: Verificar diferentes estados de autenticación.
-            //
-            // El motivo real va al log y NUNCA a la respuesta. Antes se distinguía
-            // "El usuario ingresado no existe" (401) de "Su cuenta ha sido bloqueada"
-            // (403) de "Contraseña incorrecta" (401), y con eso se enumeraban los 134
-            // usuarios de tb_usuario sin acertar una sola contraseña: alcanzaba con
-            // mirar cuál de los tres mensajes volvía. La cuenta bloqueada era la que
-            // más informaba, porque además confirma que ese login existe. Las tres
-            // respuestas son ahora idénticas, byte por byte.
-            if (loginTemp.getCodUsuario() < 0) {
-                log.warn("Login rechazado (cuenta bloqueada): usuario '{}' desde {}",
-                        login.getUsername(), clienteIp.de(request));
-                return credencialesInvalidas(response);
-
-            } else if (loginTemp.getCodUsuario() == 0) {
+            if (loginTemp.getCodUsuario() == 0) {
                 log.warn("Login rechazado (usuario inexistente): '{}' desde {}",
                         login.getUsername(), clienteIp.de(request));
                 return credencialesInvalidas(response);
+            }
+
+            // Inactivo y bloqueado se informan sin validar la contraseña, por decisión del negocio:
+            // a cambio, quien pruebe logins puede saber cuáles existen y en qué estado están.
+            if (!loginTemp.isRelacionActiva()) {
+                log.warn("Login rechazado (relación laboral inactiva): usuario '{}' desde {}",
+                        login.getUsername(), clienteIp.de(request));
+                return accesoDenegado(response, MSG_INACTIVO);
+            }
+            if (loginTemp.getCodUsuario() < 0) {
+                log.warn("Login rechazado (cuenta bloqueada): usuario '{}' desde {}",
+                        login.getUsername(), clienteIp.de(request));
+                return accesoDenegado(response, MSG_BLOQUEADO);
             }
 
 
@@ -137,8 +157,10 @@ public class LoginController {
                 // IMPORTANTE: Registrar el intento exitoso en la bitácora
                 this.ldao.registerSuccessfulLogin(login.getUsername(), clienteIp.de(request));
 
-                // Generación del token JWT
-                String jwt = jwtProvider.generateToken(authentication, loginTemp);
+                // La sesión (trec_sesion) viaja en el token; si no se pudo registrar, el token sale sin ella.
+                long idSesion = sesiones.iniciar(loginTemp.getCodUsuario(), request.getHeader(ENCABEZADO_PLATAFORMA),
+                        request.getHeader(ENCABEZADO_VERSION), clienteIp.de(request));
+                String jwt = jwtProvider.generateToken(authentication, loginTemp, idSesion);
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
                 // Creación del objeto de respuesta con el token
@@ -181,17 +203,19 @@ public class LoginController {
                 log.warn("Login rechazado (contraseña incorrecta): usuario '{}' desde {}",
                         login.getUsername(), clienteIp.de(request));
 
-                // Registramos el intento fallido. El resultado dice si la cuenta quedó
-                // bloqueada por este intento, y eso se anota en el log — pero NO cambia
-                // la respuesta: decirle al que está probando contraseñas que acaba de
-                // bloquear la cuenta le confirma que el usuario existe.
+                // Si este intento bloqueó la cuenta se avisa ya, como se haría en el siguiente.
                 Login updatedLogin = this.ldao.registerFailedAttempt(login.getUsername(), clienteIp.de(request));
                 if (updatedLogin != null && updatedLogin.getCodUsuario() < 0) {
                     log.warn("La cuenta '{}' quedó bloqueada por intentos fallidos", login.getUsername());
+                    return accesoDenegado(response, MSG_BLOQUEADO);
                 }
 
                 return credencialesInvalidas(response);
+            } catch (DisabledException | LockedException e) {
+                // El estado cambió entre la verificación del paso 1 y esta (RR. HH. o un administrador, justo ahora).
+                return accesoDenegado(response, e instanceof DisabledException ? MSG_INACTIVO : MSG_BLOQUEADO);
             } catch (Exception e) {
+                if (esFallaDeBase(e)) return sinBase(response, e);
                 // Otros errores durante la autenticación
                 log.error("Error durante la autenticación: " + e.getMessage());
                 response.put("mensaje", "Error en el proceso de autenticación");
@@ -200,6 +224,7 @@ public class LoginController {
             }
 
         } catch (Exception e) {
+            if (esFallaDeBase(e)) return sinBase(response, e);
             // Error general en el proceso
             log.error("Error en el proceso de login: " + e.getMessage());
             response.put("mensaje", "Error en el servicio de autenticación");
@@ -208,39 +233,62 @@ public class LoginController {
         }
     }
 
-    /**
-     * La única respuesta de login fallido que sale del servidor.
-     *
-     * <p>Es el mismo cuerpo y el mismo 401 para las tres causas: usuario que no
-     * existe, cuenta bloqueada y contraseña incorrecta. Que sea un solo método
-     * es a propósito — con tres <em>return</em> sueltos, el próximo que agregue
-     * un caso vuelve a escribir un mensaje distinto sin darse cuenta, y ahí
-     * mismo se reabre la enumeración de usuarios.
-     *
-     * <p>El detalle de qué pasó realmente queda en el log del servidor, que es
-     * donde le sirve al que administra y no al que ataca.
-     */
+    /** Base caída o lenta, también cuando Spring Security la envuelve (InternalAuthenticationServiceException). */
+    private static boolean esFallaDeBase(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof DataAccessResourceFailureException || t instanceof TransientDataAccessException) return true;
+        }
+        return false;
+    }
+
+    /** 503 en vez de culpar a la contraseña o dar un error genérico. */
+    private ResponseEntity<?> sinBase(Map<String, Object> response, Exception e) {
+        log.error("Login sin base de datos: {}", e.getMessage());
+        response.put("mensaje", MSG_SIN_BASE);
+        response.put("status", "error");
+        return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    /** Mismo 401 para usuario inexistente y contraseña errada: entre esos dos no se distingue. */
     private ResponseEntity<?> credencialesInvalidas(Map<String, Object> response) {
-        response.put("mensaje", "Usuario o contraseña incorrectos.");
+        response.put("mensaje", MSG_CREDENCIALES);
         response.put("status", "error");
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
+    /** Cuenta inactiva o bloqueada: 403 con el motivo, que el frontend muestra tal cual. */
+    private ResponseEntity<?> accesoDenegado(Map<String, Object> response, String mensaje) {
+        response.put("mensaje", mensaje);
+        response.put("status", "error");
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
     /**
-     * Registra un intento fallido de login y verifica si la cuenta debe ser bloqueada
-     * @param username Nombre de usuario
-     * @param ip Dirección IP del cliente
-     * @return Login actualizado con información de intentos fallidos
+     * Chequeo periódico de la app: JwtTokenFilter responde 401 SESION_CERRADA si la sesión ya no vale; si vale, aquí
+     * se anota la señal. Es público (/auth/**) para que un token vencido o una falla de la base no cierren sesiones.
      */
-    private Login registerFailedAttempt(String username, String ip) {
-        try {
-            // Llamamos a un procedimiento almacenado específico para registrar el intento fallido
-            // y verificar si debemos bloquear la cuenta
-            return this.ldao.registerFailedAttempt(username, ip);
-        } catch (Exception e) {
-            log.error("Error al registrar intento fallido: " + e.getMessage());
-            return null;
+    @PostMapping("/sesion")
+    public ResponseEntity<Void> verificarSesion(Authentication auth, HttpServletRequest request) {
+        sesiones.senal(DatosToken.deONull(auth), request.getHeader(ENCABEZADO_PLATAFORMA), request.getHeader(ENCABEZADO_VERSION),
+                clienteIp.de(request));
+        return ResponseEntity.noContent().build();
+    }
+
+    /** «Cerrar sesión» en la app: la sesión queda cerrada en el servidor y su token ya no sirve. */
+    @PostMapping("/salir")
+    public ResponseEntity<Void> salir(Authentication auth) {
+        sesiones.salir(DatosToken.deONull(auth));
+        return ResponseEntity.noContent().build();
+    }
+
+    /** Si otro (un administrador) le cambió la clave, se cierran todas sus sesiones; si la cambió él, salvo la actual. */
+    private void cerrarSesionesTrasCambioDeClave(long codUsuario, DatosToken quien) {
+        if (quien == null) {
+            sesiones.cerrarTodas(codUsuario, SesionService.MOTIVO_CLAVE, null);
+            return;
         }
+        long excepto = quien.getCodUsuario() == codUsuario ? quien.getIdSesion() : 0;
+        sesiones.cerrarTodas(codUsuario, SesionService.MOTIVO_CLAVE, Long.valueOf(quien.getCodUsuario()), excepto);
     }
 
     /**
@@ -249,23 +297,49 @@ public class LoginController {
      * @return
      */
     @PostMapping("/changePassword")
-    public ResponseEntity<?>login(@RequestBody Login login) {
+    public ResponseEntity<?>login(@RequestBody Login login, Authentication auth) {
         Map<String, Object> response = new HashMap<>();
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();  // extraemos la ip de donde se esta logueando
+        String ip = clienteIp.de(request);
 
         // Antes esta llamada mandaba passwordEncoder.encode(...) como @password2 del
         // SP: un hash BCrypt recién generado, que no coincide con nada guardado. Que
         // este endpoint funcionara igual es la prueba de que el SP nunca verificó ese
         // parámetro. Ahora directamente no se manda. Quien verifica es el
         // authenticationManager de tres líneas más abajo, como siempre.
-        Login loginTemp = this.ldao.verifyUser(login.getUsername(), clienteIp.de(request));
+        Login loginTemp = this.ldao.verifyUser(login.getUsername(), ip);
 
-        if( loginTemp.getCodUsuario() <= 0 ){
+        if( loginTemp.getCodUsuario() == 0 ){
             response.put("error", "Error al reconocer el usuario");
             response.put("ok", false);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken( login.getLogin(), login.getPassword2() ) );
+        // Sin esto, authenticate lanzaba DisabledException y el ex empleado veía un error 500.
+        if (!loginTemp.isRelacionActiva()) {
+            response.put("error", MSG_INACTIVO);
+            response.put("ok", false);
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+        if (loginTemp.getCodUsuario() < 0) {
+            response.put("error", MSG_BLOQUEADO);
+            response.put("ok", false);
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+        // Es público: una clave errada cuenta como intento fallido, igual que en el login (3 y se bloquea).
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken( login.getLogin(), login.getPassword2() ) );
+        } catch (BadCredentialsException e) {
+            Login tras = this.ldao.registerFailedAttempt(login.getUsername(), ip);
+            boolean bloqueado = tras != null && tras.getCodUsuario() < 0;
+            response.put("error", bloqueado ? MSG_BLOQUEADO : MSG_CREDENCIALES);
+            response.put("ok", false);
+            return new ResponseEntity<>(response, bloqueado ? HttpStatus.FORBIDDEN : HttpStatus.UNAUTHORIZED);
+        } catch (DisabledException | LockedException e) {
+            response.put("error", e instanceof DisabledException ? MSG_INACTIVO : MSG_BLOQUEADO);
+            response.put("ok", false);
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
         SecurityContextHolder.getContext().setAuthentication( authentication );
         if( !authentication.isAuthenticated() ){
             response.put("error", "Error En las credenciales");
@@ -278,6 +352,7 @@ public class LoginController {
             response.put("ok", false);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+        cerrarSesionesTrasCambioDeClave(loginTemp.getCodUsuario(), DatosToken.deONull(auth));
         response.put("msg", "Constraseña actualizada correctamente");
         response.put("ok", "ok");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -292,7 +367,7 @@ public class LoginController {
      */
     @Secured({ "ROLE_ADM", "ROLE_LIM" })
     @PostMapping("/changePasswordDefault")
-    public ResponseEntity<?> changePasswordDefault(@RequestBody Map<String, Object> datos) {
+    public ResponseEntity<?> changePasswordDefault(@RequestBody Map<String, Object> datos, Authentication auth) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -304,6 +379,15 @@ public class LoginController {
                 response.put("error", "Datos incompletos");
                 response.put("ok", false);
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+            // ROLE_LIM es todo el que no es de Sistemas: solo cambia su propia clave (la por defecto).
+            DatosToken quien = DatosToken.deONull(auth);
+            boolean esAdministrador = auth != null && auth.getAuthorities().stream()
+                    .anyMatch(a -> "ROLE_ADM".equals(a.getAuthority()));
+            if (!esAdministrador && (quien == null || quien.getCodUsuario() != codUsuario)) {
+                response.put("error", MSG_CLAVE_AJENA);
+                response.put("ok", false);
+                return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
             }
 
             // Crear objeto Login con información mínima necesaria
@@ -318,6 +402,7 @@ public class LoginController {
                 response.put("ok", false);
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
+            cerrarSesionesTrasCambioDeClave(codUsuario, quien);
 
             response.put("msg", "Contraseña actualizada correctamente");
             response.put("ok", true);

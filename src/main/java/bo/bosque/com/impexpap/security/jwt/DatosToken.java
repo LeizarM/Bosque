@@ -41,6 +41,7 @@ public final class DatosToken {
     private final int codEmpresa;
     private final String tipoUsuario;
     private final String nombreCompleto;
+    private final long idSesion;
 
     public DatosToken(int codUsuario, int codEmpleado, int codEmpresa, String tipoUsuario) {
         this(codUsuario, codEmpleado, codEmpresa, tipoUsuario, null);
@@ -51,17 +52,25 @@ public final class DatosToken {
      *                       para rotular lo que se imprime ("impreso por"); {@code null} en tokens viejos
      */
     public DatosToken(int codUsuario, int codEmpleado, int codEmpresa, String tipoUsuario, String nombreCompleto) {
+        this(codUsuario, codEmpleado, codEmpresa, tipoUsuario, nombreCompleto, 0);
+    }
+
+    /** @param idSesion el claim {@code sid} (trec_sesion); 0 en los tokens emitidos antes de sql/07 */
+    public DatosToken(int codUsuario, int codEmpleado, int codEmpresa, String tipoUsuario, String nombreCompleto,
+                      long idSesion) {
         this.codUsuario  = codUsuario;
         this.codEmpleado = codEmpleado;
         this.codEmpresa  = codEmpresa;
         this.tipoUsuario = tipoUsuario;
         this.nombreCompleto = nombreCompleto;
+        this.idSesion = idSesion;
     }
 
     public int getCodUsuario()     { return codUsuario; }
     public int getCodEmpleado()    { return codEmpleado; }
     public int getCodEmpresa()     { return codEmpresa; }
     public String getTipoUsuario() { return tipoUsuario; }
+    public long getIdSesion()      { return idSesion; }
 
     /** Nombre de la persona para rotular reportes; vacio (nunca {@code null}) si el token no lo trae. */
     public String getNombreCompleto() { return nombreCompleto == null ? "" : nombreCompleto; }
@@ -78,17 +87,22 @@ public final class DatosToken {
      * @throws AccessDeniedException 403, que {@code GlobalExceptionHandler} ya sabe traducir
      */
     public static DatosToken de(Authentication auth) {
-        Object detalles = auth != null ? auth.getDetails() : null;
-        if (!(detalles instanceof DatosToken)) {
+        DatosToken datos = deONull(auth);
+        if (datos == null) {
             throw new AccessDeniedException(
                     "No se pudo identificar su usuario. Cierre sesión y vuelva a entrar.");
         }
-        DatosToken datos = (DatosToken) detalles;
         if (datos.codUsuario <= 0) {
             throw new AccessDeniedException(
                     "Su token no identifica un usuario válido. Cierre sesión y vuelva a entrar.");
         }
         return datos;
+    }
+
+    /** La identidad del token, o null si el pedido llegó sin uno válido (rutas públicas como /auth/**). */
+    public static DatosToken deONull(Authentication auth) {
+        Object detalles = auth != null ? auth.getDetails() : null;
+        return detalles instanceof DatosToken ? (DatosToken) detalles : null;
     }
 
     /** El {@code codUsuario} del que llama, para {@code audUsuario} y para el ACL. */

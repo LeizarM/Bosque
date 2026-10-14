@@ -123,11 +123,16 @@ public class JwtProvider {
      * @return
      */
     public String generateToken(Authentication authentication, Login login) {
+        return generateToken(authentication, login, 0);
+    }
+
+    /** {@code idSesion} (trec_sesion) viaja como claim {@code sid}; con 0 no va, como en los tokens anteriores a sql/07. */
+    public String generateToken(Authentication authentication, Login login, long idSesion) {
 
         login.setLogin( authentication.getName() );
         login.setAuthorities(authentication.getAuthorities() );
 
-        return Jwts.builder().setSubject( login.getLogin() )
+        JwtBuilder token = Jwts.builder().setSubject( login.getLogin() )
                 .setId( String.valueOf ( login.getCodUsuario() ) )
                 .claim ("nombreCompleto", login.getEmpleado().getPersona().getDatoPersona() )
                 .claim("codEmpleado", login.getCodEmpleado())
@@ -138,46 +143,25 @@ public class JwtProvider {
                 .claim( "tipoUsuario", login.getTipoUsuario())
                 .claim("versionApp", login.getVersionApp())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + expiration * 1000L))
-                .signWith(SignatureAlgorithm.HS512, claveFirma)
-                .compact();
+                .setExpiration(new Date(new Date().getTime() + expiration * 1000L));
+        if (idSesion > 0) token.claim("sid", idSesion);
+        return token.signWith(SignatureAlgorithm.HS512, claveFirma).compact();
+    }
+
+    /** Lo que dura un token, en segundos (jwt.expiration ya validado). */
+    public int getExpiracionSegundos() {
+        return expiration;
     }
 
     /**
-     * Procedimiento para obtener el token enviado por el usuario
-     * @param token
-     * @return
-     */
-    public String getNombreUsuarioFromToken(String token) {
-        return parseClaims(token).getSubject();
-    }
-
-    /**
-     * La identidad que viaja firmada dentro del token.
+     * Los claims de un token válido, o null si no lo es (mal formado, vencido, con otra firma o vacío).
      *
-     * <p>Se llama una sola vez por request, desde {@link JwtTokenFilter}: parsear
-     * el token es barato pero no gratis, y todos los que lo necesitan lo leen
-     * despues del {@code Authentication}.
+     * <p>{@link JwtTokenFilter} verifica la firma una sola vez por pedido y saca de aquí el login
+     * ({@code getSubject()}) y la identidad ({@link #datosDe}).
      */
-    public DatosToken getDatosFromToken(String token) {
-        Claims c = parseClaims(token);
-        return new DatosToken(
-                aEntero(c.getId()),
-                aEntero(c.get("codEmpleado")),
-                aEntero(c.get("codEmpresa")),
-                c.get("tipoUsuario", String.class),
-                c.get("nombreCompleto", String.class));
-    }
-
-    /**
-     * Procedimiento para validar el token
-     * @param token
-     * @return
-     */
-    public boolean validateToken(String token) {
+    public Claims leer(String token) {
         try {
-            parseClaims(token);
-            return true;
+            return parseClaims(token);
         } catch (MalformedJwtException e) {
             logger.error("token mal formado");
         } catch (UnsupportedJwtException e) {
@@ -189,7 +173,18 @@ public class JwtProvider {
         } catch (SignatureException e) {
             logger.error("fail en la firma");
         }
-        return false;
+        return null;
+    }
+
+    /** La identidad que viaja firmada dentro del token, de los claims que devolvió {@link #leer}. */
+    public DatosToken datosDe(Claims c) {
+        return new DatosToken(
+                aEntero(c.getId()),
+                aEntero(c.get("codEmpleado")),
+                aEntero(c.get("codEmpresa")),
+                c.get("tipoUsuario", String.class),
+                c.get("nombreCompleto", String.class),
+                aLargo(c.get("sid")));
     }
 
     private Claims parseClaims(String token) {
@@ -207,6 +202,17 @@ public class JwtProvider {
         if (valor instanceof Number) return ((Number) valor).intValue();
         try {
             return Integer.parseInt(valor.toString().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    /** Igual que {@link #aEntero} pero para el {@code sid}, que es BIGINT en la base. */
+    private static long aLargo(Object valor) {
+        if (valor == null) return 0;
+        if (valor instanceof Number) return ((Number) valor).longValue();
+        try {
+            return Long.parseLong(valor.toString().trim());
         } catch (NumberFormatException e) {
             return 0;
         }

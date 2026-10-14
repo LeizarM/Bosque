@@ -3,14 +3,16 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.model.Login;
 import bo.bosque.com.impexpap.model.Precio;
 import bo.bosque.com.impexpap.model.SociosTigo;
+import bo.bosque.com.impexpap.security.jwt.UsuarioToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,10 +24,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 //@Repository
 public class LoginDaoImpl implements ILoginDao, UserDetailsService {
+
+    private static final AtomicBoolean AVISO_SIN_SQL_06 = new AtomicBoolean(false);
 
     /**
      * El Datasource
@@ -141,9 +146,19 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
                             login1.setIntentosFallidos(0);
                         }
 
+                        // Si el SP todavía no devuelve la columna, queda el valor por defecto (activa).
+                        try {
+                            login1.setRelacionActiva(rs.getInt("relacionActiva") == 1);
+                        } catch (SQLException e) {
+                            System.out.println("p_list_Usuario 'C' no devuelve relacionActiva: " + e.getMessage());
+                        }
+
                         return login1;
                     }
             );
+        } catch (DataAccessResourceFailureException | TransientDataAccessException e) {
+            // Base caída o lenta: con un Login vacío el login respondía «contraseña incorrecta».
+            throw e;
         } catch (BadSqlGrammarException e) {
             System.out.println("Error en verifyUser: " + e.getMessage() +
                     ", SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
@@ -249,31 +264,72 @@ public class LoginDaoImpl implements ILoginDao, UserDetailsService {
      * @throws UsernameNotFoundException
      */
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        return cargar(login, 0);
+    }
 
-        Login temp = new Login();
+    @Override
+    public UsuarioToken cargarParaToken(String login, long idSesion) {
+        return cargar(login, idSesion);
+    }
+
+    /** Una fila de p_list_Usuario 'B'. */
+    private static final class FilaUsuarioToken {
+        Login login = new Login();
+        boolean sesionCerrada;
+        String motivoCierreSesion;
+    }
+
+    /**
+     * p_list_Usuario 'B'. @idSesion solo va con un sid (token emitido con sql/07, que exige el 06 que lo recibe):
+     * así el login y los tokens viejos no dependen de que el SP ya lo tenga.
+     */
+    private UsuarioToken cargar(String login, long idSesion) {
+        boolean conSesion = idSesion > 0;
+        FilaUsuarioToken fila = new FilaUsuarioToken();
         try {
-            temp = this.jdbcTemplate.queryForObject("execute p_list_Usuario @login=?, @ACCION=?",
-                    new Object[]{login, "B"},
-                    new int[]{Types.VARCHAR, Types.VARCHAR}
+            fila = this.jdbcTemplate.queryForObject(
+                    conSesion ? "execute p_list_Usuario @login=?, @idSesion=?, @ACCION=?"
+                              : "execute p_list_Usuario @login=?, @ACCION=?",
+                    conSesion ? new Object[]{login, idSesion, "B"} : new Object[]{login, "B"},
+                    conSesion ? new int[]{Types.VARCHAR, Types.BIGINT, Types.VARCHAR} : new int[]{Types.VARCHAR, Types.VARCHAR}
                     , (rs, rowNum) -> {
-                        Login login1 = new Login();
+                        FilaUsuarioToken f = new FilaUsuarioToken();
+                        Login login1 = f.login;
                         login1.setLogin(rs.getString(1));
                         login1.setTipoUsuario( rs.getString( 2) );
                         login1.setPassword( rs.getString( 3 ) );
-                        return login1;
+                        // Columnas de sql/06; si el SP todavía no las devuelve, el usuario queda activo como antes.
+                        // Se avisa una sola vez: esto corre en cada pedido autenticado.
+                        try {
+                            login1.setRelacionActiva(rs.getInt("relacionActiva") == 1);
+                            login1.setBloqueoAdministrador(rs.getInt("bloqueoAdministrador") == 1);
+                            if (conSesion) {
+                                f.sesionCerrada = rs.getInt("sesionCerrada") == 1;
+                                f.motivoCierreSesion = rs.getString("motivoCierreSesion");
+                            }
+                        } catch (SQLException e) {
+                            if (AVISO_SIN_SQL_06.compareAndSet(false, true)) {
+                                System.out.println("p_list_Usuario 'B' no devuelve las columnas de sql/06: " + e.getMessage());
+                            }
+                        }
+                        return f;
                     });
 
         } catch (BadSqlGrammarException e) {
             System.out.println("Error: LoginDaoImpl en loadUserByUsername, DataAccessException->" + e.getMessage() + ",SQL Code->" + ((SQLException) e.getCause()).getErrorCode());
-            temp = new Login();
+            fila = new FilaUsuarioToken();
         } catch (UsernameNotFoundException e) {
             System.out.println("Error: LoginDaoImpl en loadUserByUsername, UsernameNotFoundException->" + e.getMessage());
         }catch (EmptyResultDataAccessException e) {
             System.out.println("No record found in database for "+login+" "+ e.getMessage());
 
         }
+        Login temp = fila.login;
         GrantedAuthority authority = new SimpleGrantedAuthority(temp.getTipoUsuario());
-        return new User(temp.getLogin(), temp.getPassword() ,Arrays.asList( authority ));
+        // enabled = relación laboral vigente; accountNonLocked = no lo bloqueó un administrador (por intentos sigue).
+        // JwtTokenFilter cierra la sesión si falta alguno, o si la sesión del token ya no vale.
+        return new UsuarioToken(temp.getLogin(), temp.getPassword(), temp.isRelacionActiva(),
+                !temp.isBloqueoAdministrador(), Arrays.asList( authority ), fila.sesionCerrada, fila.motivoCierreSesion);
 
     }
 

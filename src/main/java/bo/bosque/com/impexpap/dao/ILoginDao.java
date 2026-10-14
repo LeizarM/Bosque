@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.model.Login;
+import bo.bosque.com.impexpap.security.jwt.UsuarioToken;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
@@ -30,6 +31,12 @@ public interface ILoginDao {
      * Procedimiento para verificar los usuarios por nombre
      */
     UserDetails loadUserByUsername( String login );
+
+    /**
+     * Lo mismo que {@link #loadUserByUsername} más el estado de la sesión del token, en una sola consulta.
+     * Con {@code idSesion} 0 (token sin sid) la sesión nunca figura cerrada.
+     */
+    UsuarioToken cargarParaToken( String login, long idSesion );
 
     /**
      * Obtendra todos los usuarios

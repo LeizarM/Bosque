@@ -40,6 +40,10 @@ public class Login implements Serializable, UserDetails {
    private String nombreCompleto;
    private int fila;
    private int intentosFallidos = 0;
+   // Última relación laboral (tb_relEmplEmpr). True por defecto: si el SP aún no la devuelve, nadie queda afuera.
+   private boolean relacionActiva = true;
+   // Bloqueado por un administrador (p_list_Usuario 'B', sql/06); un bloqueo por intentos no cuenta.
+   private boolean bloqueoAdministrador = false;
 
     /**
      * Variables Auxiliares

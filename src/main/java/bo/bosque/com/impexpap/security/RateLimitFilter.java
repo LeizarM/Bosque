@@ -39,6 +39,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     // Lista de rutas protegidas
     private final List<String> protectedPaths = Arrays.asList(
             "/auth/login",
+            "/auth/recuperacion",
             "/api/sensitive-endpoint",
             "/api/another-protected-path"
             // Añade aquí todas las rutas que quieras proteger
@@ -66,8 +67,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         String requestPath = request.getRequestURI();
 
-        // Verificar si la ruta actual está en la lista de rutas protegidas
-        boolean isProtectedPath = protectedPaths.stream()
+        // Verificar si la ruta actual está en la lista de rutas protegidas. El cambio de clave con la actual es
+        // público y se compara entero: con contains también limitaría a /auth/changePasswordDefault.
+        boolean cambioDeClave = requestPath.endsWith("/auth/changePassword");
+        boolean isProtectedPath = cambioDeClave || protectedPaths.stream()
                 .anyMatch(requestPath::contains);
 
         if (isProtectedPath) {
@@ -75,7 +78,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
             // escribe el cliente, y con un valor distinto por request este limite de
             // 5/minuto se evadia por completo.
             String ip = clienteIp.de(request);
-            Bucket bucket = resolveBucket(ip);
+            // La recuperación de acceso y el cambio de clave llevan su propio cupo: no le gastan intentos al login.
+            Bucket bucket = resolveBucket(requestPath.contains("/auth/recuperacion") ? ip + "|recuperacion"
+                    : cambioDeClave ? ip + "|clave" : ip);
 
             if (bucket.tryConsume(1)) {
                 // Permitir la solicitud

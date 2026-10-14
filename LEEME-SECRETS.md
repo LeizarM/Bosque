@@ -46,6 +46,12 @@ sola si no hay `DB_PASSWORD`. Por eso `package` pasa en limpio.)
 | `OPENWA_API_KEY` | No — default vacío | Clave de openWA |
 | `OPENWA_SESSION_ID` | No — default vacío | Sesión de openWA |
 | `OPENWA_WEBHOOK_SECRET` | No — default vacío | Secreto HMAC del webhook |
+| `CONFIG_CIFRADO_CLAVE` | No — default vacío | Clave que cifra la contraseña SMTP de la recuperación de acceso dentro de `trec_configuracion`. Base64 de 32 bytes o más (la clave AES-256 es el SHA-256 de lo que se ponga, así que 64 no da más seguridad que 32): `openssl rand -base64 32`, que imprime una sola línea. Con 64 bytes `openssl` la parte en dos líneas y hay que pegar las dos juntas, o generarla con `openssl rand 64 | base64 -w0`. Que no sea el mismo valor que `JWT_SECRET`. Sin ella la app arranca, pero esa contraseña no se puede guardar ni usar. **No cambiarla después**: lo ya cifrado deja de poder leerse y hay que volver a cargar la contraseña desde la pantalla |
+
+El servidor SMTP, la casilla, su contraseña, el remitente, los dominios corporativos y los límites
+de la recuperación de acceso **no son variables de entorno**: viven en `trec_configuracion` y los
+cambia un administrador desde la pantalla «Recuperación de acceso» del menú Administración, sin
+compilar ni reiniciar.
 
 **Las tres primeras no tienen valor por defecto y eso es deliberado.** Si faltan,
 la aplicación **no arranca** y dice cuál falta. Es preferible a la alternativa:
@@ -153,6 +159,7 @@ PROXIES_CONFIABLES=
 OPENWA_API_KEY=<la clave>
 OPENWA_SESSION_ID=<el uuid>
 OPENWA_WEBHOOK_SECRET=<openssl rand -hex 32>
+CONFIG_CIFRADO_CLAVE=<openssl rand -base64 32>
 TZ=America/La_Paz
 EOF
 
