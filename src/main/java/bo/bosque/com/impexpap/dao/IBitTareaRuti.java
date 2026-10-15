@@ -26,6 +26,12 @@ public interface IBitTareaRuti {
     List<BitTareaRuti> listar(BitTareaRuti filtro);
 
     /**
+     * [M] Mis tareas (archivo SQL 104): de una persona, solo las del día (las de hoy y las que
+     * siguen en plazo). Sin el 104, falla con un mensaje claro.
+     */
+    List<BitTareaRuti> misTareas(long codEmpleado);
+
+    /**
      * [L] Carga UNA bitácora de tarea rutinaria por ID exacto (para load-before-update).
      * Solo envía @idBitTarea al SP; todo lo demás queda en DEFAULT NULL.
      */

@@ -2024,14 +2024,22 @@ public class TareasRutinariasController {
         return respuestaEscritura(bitTareaRutiDao.registrar(mb, "D"));
     }
 
-    /** Obtiene bitácoras de tarea rutinaria. Body null/vacío → retorna todas. */
+    /**
+     * Mis tareas: las del día de quien entra (el codEmpleado del token; archivo
+     * SQL 104). Antes devolvía la tabla entera y la app filtraba;
+     * por LTE no llegaba en 30 s. El body se ignora: la app no manda ninguno.
+     */
     @PostMapping("/obtener-bit-tarea-ruti")
     public ResponseEntity<ApiResponse<?>> obtenerBitTareaRuti(@RequestBody(required = false) BitTareaRuti mb,
                                                               Authentication auth) {
+        Long yo = accesoModuloHelper.codEmpleadoDelToken(auth);
         // Al entrar a Mis tareas, las de hoy de quien entra (archivo SQL 90):
         // no depende de que el Job de las 00:05 haya corrido.
-        generacionAlInstante.generarPara(accesoModuloHelper.codEmpleadoDelToken(auth));
-        return procesarLista(bitTareaRutiDao.listar(mb), "No se encontraron bitácoras de tarea rutinaria.");
+        generacionAlInstante.generarPara(yo);
+        List<BitTareaRuti> mias = yo == null || yo <= 0
+                ? Collections.<BitTareaRuti>emptyList()
+                : bitTareaRutiDao.misTareas(yo);
+        return procesarLista(mias, "No se encontraron bitácoras de tarea rutinaria.");
     }
 
     /** Registra o actualiza un movimiento de caja (SAP, ligado a un arqueo). */

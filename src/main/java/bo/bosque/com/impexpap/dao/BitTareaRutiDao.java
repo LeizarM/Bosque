@@ -67,6 +67,21 @@ public class BitTareaRutiDao implements IBitTareaRuti {
         return spHelper.ejecutarListadoSinCero(SP_LIST, filtro, "L", BitTareaRuti.class);
     }
 
+    // Archivo SQL 104: la L sin filtros mandaba la tabla entera (175 mil filas)
+    // a cada teléfono. Sin la M en la base no cae a la L: traería todo el
+    // historial de la persona (hasta 32 mil filas).
+    @Override
+    public List<BitTareaRuti> misTareas(long codEmpleado) {
+        Map<String, Object> p = new HashMap<>();
+        p.put("codEmpleado", codEmpleado);
+        try {
+            return spHelper.ejecutarListado(SP_LIST, p, "M", BitTareaRuti.class);
+        } catch (RuntimeException e) {
+            log.error("p_list_tac_BitTareaRuti M falló (¿falta el SQL 104?): {}", e.getMessage());
+            throw new IllegalStateException("Falta correr el SQL 104 (Mis tareas) en la base.", e);
+        }
+    }
+
     // FIX: usa Map (no el modelo) para que idBitTarea==0 no viaje como filtro real —
     // el SP trata @idBitTarea IS NULL como "sin filtro"; con el overload de modelo,
     // Jackson serializa el primitivo long en 0 y el SP lo tomaría como un id real.
