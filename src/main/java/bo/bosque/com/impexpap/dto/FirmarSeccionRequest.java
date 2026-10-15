@@ -3,6 +3,8 @@ package bo.bosque.com.impexpap.dto;
 
 import lombok.*;
 
+import java.util.Date;
+
 /**
  * Firmar una celda de Verificar Cierre (archivo SQL 81). Todas las reglas
  * (filas sin marcar, hallazgos sin observación, autorrevisión) las valida
@@ -19,4 +21,6 @@ public class FirmarSeccionRequest {
     /** Null para traspasos, cheques y tareas del día (toda la empresa). */
     private Long codSucursal;
     private String obs;
+    /** Otro día que se firma desde la tarea de hoy (archivo SQL 109); null = el de la tarea. */
+    private Date fecha;
 }

@@ -49,6 +49,8 @@ public class FirmaCierreDao implements IFirmaCierre {
         params.put("seccion", req.getSeccion());
         if (req.getCodSucursal() != null) params.put("codSucursal", req.getCodSucursal());
         params.put("obs", req.getObs());
+        // Otro día, desde la tarea de hoy: la firma queda con la fecha de hoy (archivo SQL 109).
+        if (req.getFecha() != null) params.put("fechaRevisada", req.getFecha());
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarAbmMap(SP_ABM, params, "F");
     }
@@ -94,6 +96,7 @@ public class FirmaCierreDao implements IFirmaCierre {
         if (req.getCodSucursal() != null) params.put("codSucursal", req.getCodSucursal());
         if (req.getClave() != null) params.put("clave", req.getClave());
         if (req.getMarca() != null) params.put("marca", req.getMarca());
+        if (req.getFecha() != null) params.put("fechaRevisada", req.getFecha());
         params.put("audUsuario", audUsuario);
         return spHelper.ejecutarAbmMap(SP_ABM, params, "G");
     }
