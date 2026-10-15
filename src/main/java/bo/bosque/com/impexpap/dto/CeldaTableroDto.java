@@ -36,4 +36,6 @@ public class CeldaTableroDto {
     private String obs;
     /** Quienes tienen la celda en la matriz, separados por coma. */
     private String responsables;
+    /** La 39 de quien mira que revisa ese día: desde ella se firma (archivo SQL 108). */
+    private Long idBitTarea;
 }
