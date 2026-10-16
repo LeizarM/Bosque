@@ -6,6 +6,8 @@ import bo.bosque.com.impexpap.dao.IEmpresa;
 import bo.bosque.com.impexpap.dto.DetalleArchivoRptDto;
 import bo.bosque.com.impexpap.dto.FiltroReporteArchivo;
 import bo.bosque.com.impexpap.dto.ResumenArchivoRptDto;
+import bo.bosque.com.impexpap.model.ArchivoFisico;
+import bo.bosque.com.impexpap.model.CajaArchivo;
 import bo.bosque.com.impexpap.model.Empresa;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,8 @@ public class ReporteArchivoService {
     public enum Reporte {
         POR_SUCURSAL("RptTarcPorSucursal", "Documentos por sucursal"),
         POR_TIPO("RptTarcPorTipo", "Dónde está cada tipo de documento"),
-        DETALLE("RptTarcDetalle", "Detalle de documentos por caja");
+        DETALLE("RptTarcDetalle", "Detalle de documentos por caja"),
+        POR_CAJA("RptTarcCaja", "Contenido de la caja");
 
         private final String jrxml;
         private final String titulo;
@@ -62,12 +65,23 @@ public class ReporteArchivoService {
 
     public byte[] generar(FiltroReporteArchivo filtro, String usuario) {
         Reporte reporte = reporteDe(filtro);
-        validarAnios(filtro);
+        Map<String, Object> p = new HashMap<>();
+        List<?> filas = reporte == Reporte.POR_CAJA ? porCaja(filtro, p) : inventario(reporte, filtro, p);
 
+        p.put("usuario", usuario == null || usuario.trim().isEmpty() ? "-" : usuario.trim());
+        p.put("generado", ahora());
+        // Un stream nuevo por llamada: el llenado lo consume.
+        p.put("logoEmpresa", getClass().getResourceAsStream("/logos/logoEmpresa.jpg"));
+        return jasper.exportPDFDesdeColeccion(reporte.getJrxml(), filas, p);
+    }
+
+    /** Los tres reportes del inventario (sin lo destruido): por sucursal, por tipo y el detalle por caja. */
+    private List<?> inventario(Reporte reporte, FiltroReporteArchivo filtro, Map<String, Object> p) {
+        validarAnios(filtro);
         List<?> filas;
         String totales;
-        String sucursal = null;
-        String tipo = null;
+        String sucursal;
+        String tipo;
         if (reporte == Reporte.DETALLE) {
             List<DetalleArchivoRptDto> detalle = dao.detalleReporte(filtro);
             sinFilas(detalle);
@@ -90,16 +104,35 @@ public class ReporteArchivoService {
             sucursal = resumen.get(0).getSucursalTexto();
             tipo = resumen.get(0).getNombreTipoDocumento();
         }
-
-        Map<String, Object> p = new HashMap<>();
         p.put("titulo", reporte.getTitulo());
         p.put("filtros", describir(filtro, sucursal, tipo));
         p.put("totales", totales);
-        p.put("usuario", usuario == null || usuario.trim().isEmpty() ? "-" : usuario.trim());
-        p.put("generado", ahora());
-        // Un stream nuevo por llamada: el llenado lo consume.
-        p.put("logoEmpresa", getClass().getResourceAsStream("/logos/logoEmpresa.jpg"));
-        return jasper.exportPDFDesdeColeccion(reporte.getJrxml(), filas, p);
+        return filas;
+    }
+
+    /** Una caja con todos sus documentos, tambien los prestados y los destruidos, cada uno con su situacion. */
+    private List<?> porCaja(FiltroReporteArchivo filtro, Map<String, Object> p) {
+        long codCaja = filtro.getCodCaja() == null ? 0 : filtro.getCodCaja();
+        CajaArchivo caja = dao.obtenerCaja(codCaja);
+        if (caja == null) throw new SpBusinessException("Elige la caja del reporte.");
+        List<DetalleArchivoRptDto> filas = dao.contenidoCajaReporte(codCaja);
+        if (filas.isEmpty()) {
+            throw new SpBusinessException("La caja " + caja.getNumero() + " no tiene documentos registrados.");
+        }
+
+        List<String> datos = new ArrayList<>();
+        datos.add(filas.get(0).getSucursalTexto());
+        datos.add(filas.get(0).getUbicacionTexto());
+        String responsable = responsableDe(caja.getCodArchivo());
+        if (responsable != null) datos.add("Responsable: " + responsable);
+
+        p.put("titulo", "Caja " + caja.getNumero() + " · " + texto(caja.getNombreArchivo()));
+        p.put("filtros", String.join(SEPARADOR, datos));
+        p.put("totales", totalesCaja(filas));
+        p.put("estadoCaja", estadoCaja(caja));
+        String obs = texto(caja.getObservacion());
+        p.put("observacionCaja", obs.isEmpty() ? null : obs);
+        return filas;
     }
 
     static Reporte reporteDe(FiltroReporteArchivo filtro) {
@@ -150,6 +183,41 @@ public class ReporteArchivoService {
             archivos.add(f.getCodArchivo());
         }
         return totales(filas.size(), cajas.size(), archivos.size());
+    }
+
+    /** "12 documentos · 2 prestados · 1 destruido": lo que esta afuera solo se nombra si hay. */
+    static String totalesCaja(List<DetalleArchivoRptDto> filas) {
+        int prestados = 0;
+        int destruidos = 0;
+        for (DetalleArchivoRptDto f : filas) {
+            if ("P".equals(f.getSituacion())) prestados++;
+            if ("X".equals(f.getSituacion())) destruidos++;
+        }
+        StringBuilder t = new StringBuilder(ResumenArchivoRptDto.cuenta(filas.size(), "documento", "documentos"));
+        if (prestados > 0) t.append(SEPARADOR).append(ResumenArchivoRptDto.cuenta(prestados, "prestado", "prestados"));
+        if (destruidos > 0) t.append(SEPARADOR).append(ResumenArchivoRptDto.cuenta(destruidos, "destruido", "destruidos"));
+        return t.toString();
+    }
+
+    /** La caja completa afuera o destruida, o null si esta en su lugar. */
+    static String estadoCaja(CajaArchivo c) {
+        if (!texto(c.getFechaDestruccion()).isEmpty()) return "Caja destruida el " + c.getFechaDestruccion();
+        if (c.getCodPrestamoCaja() != null) {
+            return "Caja prestada completa a " + (texto(c.getPrestadaA()).isEmpty() ? "--" : c.getPrestadaA().trim())
+                    + (texto(c.getFechaPrestamo()).isEmpty() ? "" : " desde " + c.getFechaPrestamo());
+        }
+        return null;
+    }
+
+    private String responsableDe(Long codArchivo) {
+        if (codArchivo == null) return null;
+        for (ArchivoFisico a : dao.listarArchivos()) {
+            if (a.getCodArchivo() == codArchivo) {
+                String n = texto(a.getNombreResponsable());
+                return n.isEmpty() ? null : n;
+            }
+        }
+        return null;
     }
 
     private static String totales(int documentos, int cajas, int archivos) {

@@ -1,13 +1,19 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.dto.DetalleArchivoRptDto;
+import bo.bosque.com.impexpap.dto.EmpleadoArchivoDto;
 import bo.bosque.com.impexpap.dto.FiltroReporteArchivo;
+import bo.bosque.com.impexpap.dto.PedidoEntrega;
+import bo.bosque.com.impexpap.dto.PedidoMovimientoCaja;
 import bo.bosque.com.impexpap.dto.ResumenArchivoRptDto;
 import bo.bosque.com.impexpap.dto.SucursalArchivoDto;
 import bo.bosque.com.impexpap.model.ArchivoFisico;
 import bo.bosque.com.impexpap.model.CajaArchivo;
 import bo.bosque.com.impexpap.model.ContenidoCaja;
+import bo.bosque.com.impexpap.model.DestruccionDocumento;
+import bo.bosque.com.impexpap.model.EntregaDocumento;
 import bo.bosque.com.impexpap.model.FotoCaja;
+import bo.bosque.com.impexpap.model.PrestamoDocumento;
 import bo.bosque.com.impexpap.model.TipoDocumentoArchivo;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
@@ -18,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /** Los listados arman el Map a mano: los p_list_tarc_* toman NULL como "sin filtro" y un id en 0 si filtraria. */
 @Slf4j
@@ -50,6 +57,12 @@ public class ArchivoDocumentalDao implements IArchivoDocumental {
     }
 
     @Override
+    public List<EmpleadoArchivoDto> listarEmpleados() {
+        return spHelper.ejecutarListado("p_list_tarc_Archivo", new HashMap<String, Object>(), "E",
+                EmpleadoArchivoDto.class);
+    }
+
+    @Override
     public List<ResumenArchivoRptDto> resumenReporte(FiltroReporteArchivo filtro) {
         return spHelper.ejecutarListado("p_list_tarc_Contenido", filtrosDeReporte(filtro), "R",
                 ResumenArchivoRptDto.class);
@@ -58,6 +71,14 @@ public class ArchivoDocumentalDao implements IArchivoDocumental {
     @Override
     public List<DetalleArchivoRptDto> detalleReporte(FiltroReporteArchivo filtro) {
         return spHelper.ejecutarListado("p_list_tarc_Contenido", filtrosDeReporte(filtro), "D",
+                DetalleArchivoRptDto.class);
+    }
+
+    @Override
+    public List<DetalleArchivoRptDto> contenidoCajaReporte(long codCaja) {
+        // Sin caja el SP no devolveria nada: se corta antes.
+        if (codCaja <= 0) return new ArrayList<>();
+        return spHelper.ejecutarListado("p_list_tarc_Contenido", soloPositivo("codCaja", codCaja), "C",
                 DetalleArchivoRptDto.class);
     }
 
@@ -132,8 +153,114 @@ public class ArchivoDocumentalDao implements IArchivoDocumental {
 
     @Override
     public RespuestaSp registrarFoto(FotoCaja mb, String acc) {
-        log.info("Foto de caja: {} accion {}", mb, acc);
+        log.info("Foto o PDF de caja: {} accion {}", mb, acc);
         return spHelper.ejecutarAbm("p_abm_tarc_CajaFoto", mb, acc);
+    }
+
+    // ------------------------------------------------------------------ entregas, prestamos y destrucciones
+    // Las altas llevan listas de ids, que no son columnas de la tabla: por eso van con ejecutarAbmMap.
+
+    @Override
+    public List<EntregaDocumento> listarEntregas() {
+        return spHelper.ejecutarListado("p_list_tarc_Entrega", new HashMap<String, Object>(), LISTAR,
+                EntregaDocumento.class);
+    }
+
+    @Override
+    public RespuestaSp registrarEntrega(PedidoEntrega pedido, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        if (pedido.getCodEmpleado() != null) params.put("codEmpleado", pedido.getCodEmpleado());
+        String cajas = ids(pedido.getCajas());
+        if (!cajas.isEmpty()) params.put("cajas", cajas);
+        String lineas = ids(pedido.getLineas());
+        if (!lineas.isEmpty()) params.put("lineas", lineas);
+        if (pedido.getObservacion() != null) params.put("observacion", pedido.getObservacion());
+        params.put("audUsuario", audUsuario);
+        log.info("Entrega de documentos: {}", params);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Entrega", params, "I");
+    }
+
+    @Override
+    public RespuestaSp devolverEntrega(long codEntrega, String observacion, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEntrega", codEntrega);
+        if (observacion != null) params.put("observacion", observacion);
+        params.put("audUsuario", audUsuario);
+        log.info("Devolucion de la entrega {}", codEntrega);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Entrega", params, "U");
+    }
+
+    @Override
+    public RespuestaSp anularEntrega(long codEntrega, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codEntrega", codEntrega);
+        params.put("audUsuario", audUsuario);
+        log.info("Anulacion de la entrega {}", codEntrega);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Entrega", params, "D");
+    }
+
+    @Override
+    public List<PrestamoDocumento> listarPrestamos(Long codCaja) {
+        return spHelper.ejecutarListado("p_list_tarc_Prestamo", soloPositivo("codCaja", codCaja), LISTAR,
+                PrestamoDocumento.class);
+    }
+
+    @Override
+    public RespuestaSp devolver(long codPrestamo, String observacionDevolucion, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codPrestamo", codPrestamo);
+        if (observacionDevolucion != null) params.put("observacionDevolucion", observacionDevolucion);
+        params.put("audUsuario", audUsuario);
+        log.info("Devolucion del prestamo {}", codPrestamo);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Prestamo", params, "U");
+    }
+
+    @Override
+    public RespuestaSp anularPrestamo(long codPrestamo, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codPrestamo", codPrestamo);
+        params.put("audUsuario", audUsuario);
+        log.info("Anulacion del prestamo {}", codPrestamo);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Prestamo", params, "D");
+    }
+
+    @Override
+    public List<DestruccionDocumento> listarDestrucciones(Long codCaja) {
+        return spHelper.ejecutarListado("p_list_tarc_Destruccion", soloPositivo("codCaja", codCaja), LISTAR,
+                DestruccionDocumento.class);
+    }
+
+    @Override
+    public RespuestaSp destruir(PedidoMovimientoCaja pedido, long audUsuario) {
+        Map<String, Object> params = movimiento(pedido, audUsuario);
+        log.info("Destruccion de documentos: {}", params);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Destruccion", params, "I");
+    }
+
+    @Override
+    public RespuestaSp anularDestruccion(long codDestruccion, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codDestruccion", codDestruccion);
+        params.put("audUsuario", audUsuario);
+        log.info("Anulacion de la destruccion {}", codDestruccion);
+        return spHelper.ejecutarAbmMap("p_abm_tarc_Destruccion", params, "D");
+    }
+
+    /** Caja, lineas como "12,15" (sin lineas = la caja completa) y observacion; un null no viaja. */
+    private static Map<String, Object> movimiento(PedidoMovimientoCaja p, long audUsuario) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("codCaja", p.getCodCaja() == null ? 0L : p.getCodCaja());
+        String lineas = ids(p.getLineas());
+        if (!lineas.isEmpty()) params.put("lineas", lineas);
+        if (p.getObservacion() != null) params.put("observacion", p.getObservacion());
+        params.put("audUsuario", audUsuario);
+        return params;
+    }
+
+    /** Los ids positivos como "12,15", la lista que leen los SP; sin ids, cadena vacia. */
+    private static String ids(List<Long> lista) {
+        return lista == null ? "" : lista.stream()
+                .filter(l -> l != null && l > 0).map(String::valueOf).collect(Collectors.joining(","));
     }
 
     /** Los ids viajan solo si son positivos; la empresa tambien en 0, que el SP lee como "sin empresa". */

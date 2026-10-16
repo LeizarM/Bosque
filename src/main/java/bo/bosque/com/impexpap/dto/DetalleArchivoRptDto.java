@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Una fila de {@code p_list_tarc_Contenido} 'D': un documento con su caja, ubicacion y sucursal.
- * Alimenta RptTarcDetalle; los getters sin campo son para el jrxml.
+ * Una fila de {@code p_list_tarc_Contenido} 'D' o 'C': un documento con su caja, ubicacion y sucursal.
+ * Alimenta RptTarcDetalle y RptTarcCaja; los getters sin campo son para el jrxml. La situacion solo la trae 'C'.
  */
 @Getter
 @Setter
@@ -31,6 +31,11 @@ public class DetalleArchivoRptDto implements Serializable {
     private Integer anioHasta;
     private String nombreEmpresa;
     private String observacion;
+    /** C en la caja, P prestado, X destruido. */
+    private String situacion;
+    private String prestadoA;
+    private String fechaPrestamo;
+    private String fechaDestruccion;
 
     public String getSucursalTexto() {
         return ResumenArchivoRptDto.textoSucursal(nombreSucursal, ciudadSucursal);
@@ -50,5 +55,19 @@ public class DetalleArchivoRptDto implements Serializable {
 
     public String getGestionTexto() {
         return gestion == null || gestion.trim().isEmpty() ? "Sin gestión" : gestion.trim();
+    }
+
+    /** "En la caja", "Prestado a X desde dd/mm/aaaa hh:mm" o "Destruido el dd/mm/aaaa hh:mm". */
+    public String getSituacionTexto() {
+        if ("X".equals(situacion)) return "Destruido" + (vacio(fechaDestruccion) ? "" : " el " + fechaDestruccion);
+        if ("P".equals(situacion)) {
+            return "Prestado a " + (vacio(prestadoA) ? "--" : prestadoA.trim())
+                    + (vacio(fechaPrestamo) ? "" : " desde " + fechaPrestamo);
+        }
+        return "En la caja";
+    }
+
+    private static boolean vacio(String s) {
+        return s == null || s.trim().isEmpty();
     }
 }

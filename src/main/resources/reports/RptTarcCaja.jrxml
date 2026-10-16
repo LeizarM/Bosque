@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptTarcCaja" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="net.sf.jasperreports.default.text.field.blank.when.null" value="true"/>
+	<!-- Archivo de documentos: una caja con todos sus documentos y la situacion de cada uno (p_list_tarc_Contenido 'C').
+	     Se llena desde una coleccion de DetalleArchivoRptDto, sin queryString; los destruidos van en gris.
+	     El encabezado de columnas se repite en cada pagina. -->
+	<style name="filaZebra" mode="Opaque" backcolor="#FFFFFF">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue() % 2 == 0)]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F5F7FA"/>
+		</conditionalStyle>
+	</style>
+	<style name="textoFila" forecolor="#263238" fontName="SansSerif" fontSize="7">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf("X".equals($F{situacion}))]]></conditionExpression>
+			<style forecolor="#9E9E9E"/>
+		</conditionalStyle>
+	</style>
+	<style name="situacion" forecolor="#2E7D32" fontName="SansSerif" fontSize="7" isBold="true">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf("P".equals($F{situacion}))]]></conditionExpression>
+			<style forecolor="#E65100"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf("X".equals($F{situacion}))]]></conditionExpression>
+			<style forecolor="#9E9E9E"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="titulo" class="java.lang.String"/>
+	<parameter name="filtros" class="java.lang.String"/>
+	<parameter name="totales" class="java.lang.String"/>
+	<parameter name="usuario" class="java.lang.String"/>
+	<parameter name="generado" class="java.lang.String"/>
+	<parameter name="estadoCaja" class="java.lang.String"/>
+	<parameter name="observacionCaja" class="java.lang.String"/>
+	<parameter name="logoEmpresa" class="java.io.InputStream"/>
+	<field name="nombreTipoDocumento" class="java.lang.String"/>
+	<field name="detalle" class="java.lang.String"/>
+	<field name="gestionTexto" class="java.lang.String"/>
+	<field name="empresaTexto" class="java.lang.String"/>
+	<field name="observacion" class="java.lang.String"/>
+	<field name="situacion" class="java.lang.String"/>
+	<field name="situacionTexto" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="112" splitType="Stretch">
+			<image scaleImage="RetainShape" onErrorType="Blank">
+				<reportElement x="0" y="0" width="90" height="40"/>
+				<imageExpression><![CDATA[$P{logoEmpresa}]]></imageExpression>
+			</image>
+			<textField isBlankWhenNull="true">
+				<reportElement x="100" y="0" width="482" height="22" forecolor="#263238"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement x="100" y="22" width="482" height="18" forecolor="#455A64"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{filtros}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="582" y="0" width="170" height="14" forecolor="#455A64"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Generado: " + $P{generado}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="582" y="14" width="170" height="14" forecolor="#455A64"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Por: " + $P{usuario}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement mode="Opaque" x="0" y="46" width="752" height="20" forecolor="#5D4037" backcolor="#F3E5D0"/>
+				<box leftPadding="8"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Contenido: " + $P{totales}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement positionType="Float" mode="Opaque" x="0" y="70" width="752" height="18" forecolor="#BF360C" backcolor="#FBE9E7" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{estadoCaja} != null)]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="8" topPadding="3" bottomPadding="3"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{estadoCaja}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="0" y="90" width="752" height="16" forecolor="#455A64" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[Boolean.valueOf($P{observacionCaja} != null)]]></printWhenExpression>
+				</reportElement>
+				<box leftPadding="8" topPadding="2" bottomPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Observación de la caja: " + $P{observacionCaja}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="18" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="120" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+				<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="120" y="0" width="250" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+				<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Detalle]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="370" y="0" width="70" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+				<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gestión]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="440" y="0" width="75" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+				<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Empresa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="515" y="0" width="150" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+				<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Situación]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="665" y="0" width="87" height="18" forecolor="#FFFFFF" backcolor="#37474F"/>
+				<box leftPadding="4"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Observación]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Prevent">
+			<rectangle>
+				<reportElement style="filaZebra" stretchType="ContainerHeight" x="0" y="0" width="752" height="15"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="textoFila" stretchType="ContainerHeight" x="0" y="0" width="120" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreTipoDocumento}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="textoFila" stretchType="ContainerHeight" x="120" y="0" width="250" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textFieldExpression><![CDATA[$F{detalle}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="textoFila" stretchType="ContainerHeight" x="370" y="0" width="70" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textFieldExpression><![CDATA[$F{gestionTexto}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="textoFila" stretchType="ContainerHeight" x="440" y="0" width="75" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textFieldExpression><![CDATA[$F{empresaTexto}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="situacion" stretchType="ContainerHeight" x="515" y="0" width="150" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textFieldExpression><![CDATA[$F{situacionTexto}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement style="textoFila" stretchType="ContainerHeight" x="665" y="0" width="87" height="15"/>
+				<box leftPadding="4" topPadding="2" bottomPadding="2"><bottomPen lineWidth="0.5" lineColor="#E0E0E0"/></box>
+				<textFieldExpression><![CDATA[$F{observacion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="16" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="400" height="14" forecolor="#607D8B"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Archivo de documentos · " + $P{titulo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="602" y="0" width="110" height="14" forecolor="#607D8B"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="712" y="0" width="40" height="14" forecolor="#607D8B"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

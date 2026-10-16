@@ -23,7 +23,7 @@ public class CajaArchivo implements Serializable {
     private Date audFecha;
 
     // Solo lectura (p_list_tarc_Caja 'L'): nombre del archivo, lineas, fotos, rango de anios del contenido
-    // y la portada (la foto de menor orden), para la miniatura del listado.
+    // y la portada (la foto de menor orden, nunca un PDF), para la miniatura del listado.
     private String nombreArchivo;
     private Integer lineas;
     private Integer fotos;
@@ -31,4 +31,13 @@ public class CajaArchivo implements Serializable {
     private Integer anioHasta;
     private Long codFotoPortada;
     private String rutaPortada;
+
+    // Solo lectura: el prestamo abierto de la caja completa, su destruccion y cuantas lineas estan afuera o destruidas.
+    // Las fechas llegan como texto "dd/mm/aaaa hh:mm".
+    private Long codPrestamoCaja;
+    private String prestadaA;
+    private String fechaPrestamo;
+    private String fechaDestruccion;
+    private Integer prestados;
+    private Integer destruidos;
 }

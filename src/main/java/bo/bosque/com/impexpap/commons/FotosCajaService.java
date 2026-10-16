@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Las fotos de las cajas del archivo: el archivo vive en {@code <uploads.dir>/archivo-cajas} y la ruta relativa en
- * {@code tarc_cajaFoto}. El orden es siempre disco y despues base al subir (si el SP rechaza se borra el archivo
+ * Las fotos y PDF de las cajas del archivo: el archivo vive en {@code <uploads.dir>/archivo-cajas} y la ruta relativa
+ * en {@code tarc_cajaFoto}. El orden es siempre disco y despues base al subir (si el SP rechaza se borra el archivo
  * nuevo), y base y despues disco al quitar (un archivo huerfano no rompe nada; una fila sin archivo si).
  */
 @Service
@@ -36,12 +36,12 @@ public class FotosCajaService {
     /** Carpeta dentro de uploads.dir; toda ruta guardada en la base empieza con ella. */
     static final String CARPETA = "archivo-cajas";
 
-    /** La app comprime antes de subir; el tope deja pasar una foto de telefono sin comprimir. */
-    public static final long TAMANO_MAXIMO_BYTES = 8L * 1024 * 1024;
+    /** Por debajo del tope de multipart (15 MB): deja pasar una foto sin comprimir o un PDF escaneado de varias hojas. */
+    public static final long TAMANO_MAXIMO_BYTES = 10L * 1024 * 1024;
 
     public static final int MAXIMO_FOTOS = 3;
 
-    /** Los bytes de una foto y su tipo MIME, listos para responder. */
+    /** Los bytes de una foto o un PDF y su tipo MIME, listos para responder. */
     public static final class Imagen {
         private final byte[] contenido;
         private final String tipo;
@@ -69,12 +69,12 @@ public class FotosCajaService {
         this.base = Paths.get(uploadsDir).toAbsolutePath().normalize();
     }
 
-    /** Agrega una foto en el primer lugar libre de la caja. Devuelve el codFoto. */
+    /** Agrega una foto o un PDF en el primer lugar libre de la caja. Devuelve el codFoto. */
     public long subir(long codCaja, MultipartFile archivo, long audUsuario) {
         if (dao.obtenerCaja(codCaja) == null) throw new SpBusinessException("La caja indicada no existe.");
         // El SP tambien lo rechaza; comprobarlo antes evita escribir en disco para nada.
         if (dao.listarFotos(codCaja).size() >= MAXIMO_FOTOS) {
-            throw new SpBusinessException("La caja ya tiene 3 fotos. Reemplaza o elimina una antes de agregar otra.");
+            throw new SpBusinessException("La caja ya tiene 3 fotos o PDF. Reemplaza o elimina uno antes de agregar otro.");
         }
         String ruta = guardar(codCaja, archivo);
 
@@ -90,7 +90,7 @@ public class FotosCajaService {
         }
     }
 
-    /** Cambia la imagen de una foto existente; conserva caja y posicion. */
+    /** Cambia el archivo de una foto o PDF existente (puede pasar de uno a otro); conserva caja y posicion. */
     public void reemplazar(long codFoto, MultipartFile archivo, long audUsuario) {
         FotoCaja actual = existente(codFoto);
         String nueva = guardar(actual.getCodCaja(), archivo);
@@ -117,7 +117,7 @@ public class FotosCajaService {
         borrar(actual.getRuta());
     }
 
-    /** Elimina una caja vacia; el SP borra las filas de sus fotos y aqui se borran los archivos. */
+    /** Elimina una caja vacia; el SP borra las filas de sus fotos y PDF y aqui se borran los archivos. */
     public RespuestaSp eliminarCaja(long codCaja, long audUsuario) {
         List<FotoCaja> fotos = dao.listarFotos(codCaja);
         CajaArchivo baja = new CajaArchivo();
@@ -134,10 +134,10 @@ public class FotosCajaService {
         try {
             return new Imagen(Files.readAllBytes(archivo), tipoMime(archivo));
         } catch (NoSuchFileException e) {
-            throw new SpBusinessException("La foto ya no esta en el servidor. Reemplazala por una nueva.");
+            throw new SpBusinessException("El archivo ya no esta en el servidor. Reemplazalo por uno nuevo.");
         } catch (IOException e) {
-            log.error("No se pudo leer la foto {} ({}): {}", codFoto, archivo, e.toString());
-            throw new SpBusinessException("No se pudo leer la foto.");
+            log.error("No se pudo leer la foto o PDF {} ({}): {}", codFoto, archivo, e.toString());
+            throw new SpBusinessException("No se pudo leer el archivo.");
         }
     }
 
@@ -145,20 +145,22 @@ public class FotosCajaService {
 
     private FotoCaja existente(long codFoto) {
         FotoCaja foto = dao.obtenerFoto(codFoto);
-        if (foto == null) throw new SpBusinessException("La foto indicada no existe.");
+        if (foto == null) throw new SpBusinessException("La foto o PDF indicado no existe.");
         return foto;
     }
 
-    /** Valida el contenido real y escribe un temporal que despues se mueve: un corte no deja una foto a medias. */
+    /** Valida el contenido real y escribe un temporal que despues se mueve: un corte no deja un archivo a medias. */
     String guardar(long codCaja, MultipartFile archivo) {
-        if (archivo == null || archivo.isEmpty()) throw new SpBusinessException("No se recibio ninguna foto.");
+        if (archivo == null || archivo.isEmpty()) throw new SpBusinessException("No se recibio ninguna foto ni PDF.");
         if (archivo.getSize() > TAMANO_MAXIMO_BYTES) {
-            throw new SpBusinessException("La foto pesa mas de 8 MB. Elige una mas liviana.");
+            throw new SpBusinessException("El archivo pesa mas de 10 MB. Elige uno mas liviano.");
         }
         try {
             byte[] datos = archivo.getBytes();
-            String extension = extensionDeImagen(datos);
-            if (extension == null) throw new SpBusinessException("La foto debe ser una imagen JPG, PNG o WEBP.");
+            String extension = extensionAdmitida(datos);
+            if (extension == null) {
+                throw new SpBusinessException("El archivo debe ser una imagen JPG, PNG o WEBP, o un PDF.");
+            }
 
             Path carpeta = base.resolve(CARPETA);
             Files.createDirectories(carpeta);
@@ -175,9 +177,18 @@ public class FotosCajaService {
             }
             return CARPETA + "/" + nombre;
         } catch (IOException e) {
-            log.error("No se pudo guardar la foto de la caja {}: {}", codCaja, e.toString());
-            throw new SpBusinessException("No se pudo guardar la foto en el servidor.");
+            log.error("No se pudo guardar la foto o PDF de la caja {}: {}", codCaja, e.toString());
+            throw new SpBusinessException("No se pudo guardar el archivo en el servidor.");
         }
+    }
+
+    /** jpg, png, webp o pdf segun la firma de los primeros bytes; null si no es ninguno. */
+    static String extensionAdmitida(byte[] d) {
+        String imagen = extensionDeImagen(d);
+        if (imagen != null) return imagen;
+        // Todo PDF empieza con "%PDF-"; la extension de la ruta es la que despues dice que no es una foto.
+        if (d != null && d.length >= 5 && d[0] == '%' && d[1] == 'P' && d[2] == 'D' && d[3] == 'F' && d[4] == '-') return "pdf";
+        return null;
     }
 
     /** jpg, png o webp segun la firma de los primeros bytes; null si no es ninguna. */
@@ -202,6 +213,7 @@ public class FotosCajaService {
 
     private static String tipoMime(Path archivo) {
         String n = archivo.getFileName().toString().toLowerCase();
+        if (n.endsWith(".pdf")) return "application/pdf";
         if (n.endsWith(".png")) return "image/png";
         if (n.endsWith(".webp")) return "image/webp";
         return "image/jpeg";
@@ -212,7 +224,7 @@ public class FotosCajaService {
         try {
             Files.deleteIfExists(resolver(ruta));
         } catch (IOException | RuntimeException e) {
-            log.warn("No se pudo borrar la foto {}: {}", ruta, e.toString());
+            log.warn("No se pudo borrar la foto o PDF {}: {}", ruta, e.toString());
         }
     }
 }

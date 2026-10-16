@@ -29,4 +29,11 @@ public class ContenidoCaja implements Serializable {
     // Solo lectura (p_list_tarc_Contenido 'L').
     private String nombreTipoDocumento;
     private String nombreEmpresa;
+    /** C en la caja, P prestada (sola o con su caja), X destruida (sola o con su caja). */
+    private String situacion;
+    /** El prestamo abierto que la tiene afuera (el de la linea o el de la caja completa). */
+    private Long codPrestamo;
+    private String prestadoA;
+    private String fechaPrestamo;
+    private String fechaDestruccion;
 }
