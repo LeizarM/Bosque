@@ -4,7 +4,6 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -19,22 +18,17 @@ import java.util.Map;
  * p_abm_tac_BitTareaRuti (no en procs con nombre propio — ver
  * sql/2026-09-03_tac_tareaRutinaria_24_flujos_especiales_sobre_procs_genericos.sql).
  * <p>
- * {@link #resolverCodSucursal} usa {@code jdbcTemplate} directo (no
- * {@code spHelper}, pensado para "execute p_proc") porque es un SELECT
- * plano de 2 pasos, sin proc propio — se agrega aquí y no como un nuevo SP
- * (ver memoria "no new SP names") replicando exactamente el mismo join que
- * p_list_tac_ArqueoCajaSucursales ya usa server-side para lo mismo.
+ * {@link #resolverCodSucursal} es la 'S' de p_list_tac_BitTareaRuti (archivo SQL 112):
+ * antes eran dos SELECT armados aquí.
  */
 @Slf4j
 @Repository
 public class VerificarCierreOperacionesDao implements IVerificarCierreOperaciones {
 
     private final SpHelper spHelper;
-    private final JdbcTemplate jdbcTemplate;
 
-    public VerificarCierreOperacionesDao(SpHelper spHelper, JdbcTemplate jdbcTemplate) {
+    public VerificarCierreOperacionesDao(SpHelper spHelper) {
         this.spHelper = spHelper;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -71,19 +65,22 @@ public class VerificarCierreOperacionesDao implements IVerificarCierreOperacione
         if (todasSucursales) {
             return 0;
         }
-        List<Long> empleados = jdbcTemplate.query(
-                "SELECT codEmpleado FROM dbo.tac_bitTareaRuti WHERE idBitTarea = ?",
-                (rs, rowNum) -> rs.getLong(1), idBitTarea);
-        if (empleados.isEmpty()) {
-            return 0;
+        Map<String, Object> params = new HashMap<>();
+        params.put("idBitTarea", idBitTarea);
+        params.put("ACCION", "S");
+        List<Map<String, Object>> filas;
+        try {
+            filas = spHelper.ejecutarListadoDinamico("p_list_tac_BitTareaRuti", params);
+        } catch (RuntimeException e) {
+            log.error("p_list_tac_BitTareaRuti S falló (¿falta el SQL 112?): {}", e.getMessage());
+            throw new IllegalStateException("Falta correr el SQL 112 (sucursal de la ocurrencia) en la base.", e);
         }
-        List<Integer> sucursales = jdbcTemplate.query(
-                "SELECT TOP 1 cs.codSucursal " +
-                        "FROM dbo.trh_empleadoCargo ec " +
-                        "JOIN dbo.tb_cargo_sucursal cs ON cs.codCargoSucursal = ec.codCargoSucursal " +
-                        "WHERE ec.codEmpleado = ? " +
-                        "ORDER BY ec.fechaInicio DESC, ec.codCargoSucursal DESC",
-                (rs, rowNum) -> rs.getInt(1), empleados.get(0));
-        return sucursales.isEmpty() ? 0 : sucursales.get(0);
+        // La 'S' siempre devuelve una fila (0 = sin resolver): sin filas, falta el SQL 112.
+        // No se cae a 0: 0 es "todas las sucursales" y el PDF mostraría las de otros.
+        if (filas.isEmpty()) {
+            throw new IllegalStateException("Falta correr el SQL 112 (sucursal de la ocurrencia) en la base.");
+        }
+        Object codSucursal = filas.get(0).get("codSucursal");
+        return codSucursal instanceof Number ? ((Number) codSucursal).intValue() : 0;
     }
 }
