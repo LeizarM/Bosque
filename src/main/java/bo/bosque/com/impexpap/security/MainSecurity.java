@@ -5,6 +5,7 @@ import bo.bosque.com.impexpap.security.jwt.JwtEntryPoint;
 import bo.bosque.com.impexpap.security.jwt.JwtTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -63,10 +64,23 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
         return new RateLimitFilter(clienteIp);
     }
 
+    /**
+     * {@code @Primary}: el módulo de exámenes registra su propio encoder ({@code TcpeSeguridadConfig}, con
+     * qualifier). Sin esta marca, todo lo que inyecta un {@code PasswordEncoder} a secas (LoginController,
+     * RecuperacionAccesoService) vería dos candidatos y la aplicación no arrancaría.
+     */
     @Bean
+    @Primary
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder( 14 );
     }
+
+    /**
+     * Cualquier usuario con sesión <b>que no sea un postulante</b> del módulo de exámenes. El token del
+     * postulante es válido y autenticado, así que con {@code authenticated()} a secas entraría a todos los
+     * endpoints existentes que no piden un rol.
+     */
+    static final String SOLO_EMPLEADO = "isAuthenticated() and !hasRole('POSTULANTE')";
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -135,8 +149,14 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
                    sintoma seria un 401 del JwtEntryPoint que parece un problema de openWA.
                    Solo esta ruta exacta, no /whatsapp/**. */
                 .antMatchers(HttpMethod.POST, "/whatsapp/webhook").permitAll()
-                .antMatchers("/rrhh/eliminarFoto").authenticated()
-                .anyRequest().authenticated()
+                /* Módulo de exámenes, postulantes externos (tcpe_usuario). El login y la configuración son
+                   públicos; el resto de /examen-publico/** pide el token del postulante (ROLE_POSTULANTE), y un
+                   token de empleado no entra. Al revés lo cierra SOLO_EMPLEADO: el postulante no llega a otra ruta. */
+                .antMatchers("/examen-publico/auth/**").permitAll()
+                .antMatchers("/examen-publico/config").permitAll()
+                .antMatchers("/examen-publico/**").hasRole("POSTULANTE")
+                .antMatchers("/rrhh/eliminarFoto").access(SOLO_EMPLEADO)
+                .anyRequest().access(SOLO_EMPLEADO)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()

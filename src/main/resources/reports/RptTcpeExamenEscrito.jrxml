@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RptTcpeExamenEscrito" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="36" bottomMargin="30">
+	<property name="net.sf.jasperreports.default.text.field.blank.when.null" value="true"/>
+	<!-- Examen escrito y solucionario (contrato 7.7), A4. Sin queryString: cada field es un getter de TcpeEscritoFilaDto,
+	     una fila por opcion (la abierta, con opcionRspta nula). Grupo examen: hoja y numeracion propias; grupo pregunta:
+	     la pregunta con sus opciones. solucionario = true marca las correctas con (X) y no dibuja lineas. -->
+	<style name="base" isDefault="true" fontName="SansSerif" fontSize="10" forecolor="#212121"/>
+	<style name="opcion" style="base">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[Boolean.valueOf(Boolean.TRUE.equals($P{solucionario}) && Boolean.TRUE.equals($F{esValido}))]]></conditionExpression>
+			<style isBold="true" forecolor="#1B5E20"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="solucionario" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[Boolean.FALSE]]></defaultValueExpression>
+	</parameter>
+	<field name="codExamen" class="java.lang.Long"/>
+	<field name="numero" class="java.lang.Long"/>
+	<field name="tituloLote" class="java.lang.String"/>
+	<field name="nombreClasificacion" class="java.lang.String"/>
+	<field name="nombreArea" class="java.lang.String"/>
+	<field name="fecha" class="java.util.Date"/>
+	<field name="duracionMinutos" class="java.lang.Integer"/>
+	<field name="notaAprobacion" class="java.math.BigDecimal"/>
+	<field name="nombreCompleto" class="java.lang.String"/>
+	<field name="ci" class="java.lang.String"/>
+	<field name="codPreguntaH" class="java.lang.Long"/>
+	<field name="orden" class="java.lang.Integer"/>
+	<field name="pregunta" class="java.lang.String"/>
+	<field name="esCerrada" class="java.lang.Boolean"/>
+	<field name="letra" class="java.lang.String"/>
+	<field name="opcionRspta" class="java.lang.String"/>
+	<field name="esValido" class="java.lang.Boolean"/>
+	<field name="respuestaModelo" class="java.lang.String"/>
+	<group name="examen" isStartNewPage="true" isResetPageNumber="true">
+		<groupExpression><![CDATA[$F{codExamen}]]></groupExpression>
+		<groupHeader>
+			<band height="150" splitType="Prevent">
+				<textField textAdjust="StretchHeight">
+					<reportElement style="base" x="0" y="0" width="385" height="20"/>
+					<textElement verticalAlignment="Middle">
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tituloLote}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="base" x="385" y="0" width="130" height="20"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Examen N.º " + ($F{numero} == null ? "" : $F{numero})]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="base" x="0" y="21" width="385" height="15" forecolor="#546E7A"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{nombreArea} == null ? "" : $F{nombreArea} + "  ·  ") + ($F{nombreClasificacion} == null ? "" : $F{nombreClasificacion})]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="base" x="385" y="21" width="130" height="15" forecolor="#1B5E20">
+						<printWhenExpression><![CDATA[$P{solucionario}]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[SOLUCIONARIO]]></text>
+				</staticText>
+				<textField>
+					<reportElement style="base" x="0" y="37" width="515" height="15"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Fecha: " + ($F{fecha} == null ? "____ / ____ / ________" : new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{fecha}))
++ "     Duración: " + ($F{duracionMinutos} == null ? "-" : $F{duracionMinutos} + " min")
++ "     Nota mínima de aprobación: " + ($F{notaAprobacion} == null ? "-" : new java.text.DecimalFormat("0.##").format($F{notaAprobacion}))]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="56" width="515" height="1"/>
+					<graphicElement>
+						<pen lineWidth="1.0" lineColor="#37474F"/>
+					</graphicElement>
+				</line>
+				<rectangle>
+					<reportElement x="0" y="64" width="515" height="58"/>
+					<graphicElement>
+						<pen lineWidth="0.5" lineColor="#90A4AE"/>
+					</graphicElement>
+				</rectangle>
+				<textField>
+					<reportElement style="base" x="8" y="70" width="499" height="16"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA["Nombre completo: " + ($F{nombreCompleto} == null ? "______________________________________________________________" : $F{nombreCompleto})]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="base" x="8" y="90" width="250" height="16"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA["CI: " + ($F{ci} == null ? "______________________" : $F{ci})]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement style="base" x="262" y="90" width="245" height="16"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<text><![CDATA[Firma: ____________________     Nota: ________]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="base" x="0" y="128" width="515" height="16" forecolor="#546E7A">
+						<printWhenExpression><![CDATA[Boolean.valueOf(!Boolean.TRUE.equals($P{solucionario}))]]></printWhenExpression>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Marque con una X la opción correcta. En las preguntas abiertas, responda en las líneas.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="base" x="0" y="128" width="515" height="16" forecolor="#546E7A">
+						<printWhenExpression><![CDATA[$P{solucionario}]]></printWhenExpression>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Las opciones correctas van marcadas con (X). Las preguntas abiertas las califica el evaluador.]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="pregunta" keepTogether="true">
+		<groupExpression><![CDATA[$F{codPreguntaH}]]></groupExpression>
+		<groupHeader>
+			<band height="24" splitType="Stretch">
+				<textField textAdjust="StretchHeight">
+					<reportElement style="base" positionType="Float" x="0" y="8" width="515" height="16"/>
+					<textElement verticalAlignment="Top">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{orden} == null ? "" : $F{orden} + ". ") + $F{pregunta}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<printWhenExpression><![CDATA[Boolean.valueOf($F{opcionRspta} != null)]]></printWhenExpression>
+			<textField textAdjust="StretchHeight">
+				<reportElement style="opcion" x="16" y="2" width="499" height="15"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[(Boolean.TRUE.equals($P{solucionario}) && Boolean.TRUE.equals($F{esValido}) ? "(X)  " : "(    )  ")
++ ($F{letra} == null ? "" : $F{letra} + ")  ") + $F{opcionRspta}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="66" splitType="Prevent">
+			<printWhenExpression><![CDATA[Boolean.valueOf($F{opcionRspta} == null && !Boolean.TRUE.equals($P{solucionario}))]]></printWhenExpression>
+			<line>
+				<reportElement x="16" y="20" width="499" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#9E9E9E"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="16" y="40" width="499" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#9E9E9E"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="16" y="60" width="499" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#9E9E9E"/>
+				</graphicElement>
+			</line>
+		</band>
+		<band height="17" splitType="Stretch">
+			<printWhenExpression><![CDATA[Boolean.valueOf($F{opcionRspta} == null && Boolean.TRUE.equals($P{solucionario}) && $F{respuestaModelo} == null)]]></printWhenExpression>
+			<staticText>
+				<reportElement style="base" x="16" y="2" width="499" height="15" forecolor="#546E7A"/>
+				<textElement verticalAlignment="Top">
+					<font size="9" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Respuesta abierta: la califica el evaluador.]]></text>
+			</staticText>
+		</band>
+		<band height="32" splitType="Stretch">
+			<printWhenExpression><![CDATA[Boolean.valueOf($F{opcionRspta} == null && Boolean.TRUE.equals($P{solucionario}) && $F{respuestaModelo} != null)]]></printWhenExpression>
+			<staticText>
+				<reportElement style="base" x="16" y="2" width="499" height="13" forecolor="#1B5E20"/>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Respuesta modelo (la califica el evaluador):]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement style="base" positionType="Float" x="16" y="16" width="499" height="15" forecolor="#37474F"/>
+				<textElement verticalAlignment="Top">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{respuestaModelo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="18" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="515" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#B0BEC5"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement style="base" x="0" y="3" width="415" height="14" forecolor="#78909C"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{tituloLote} == null ? "" : $F{tituloLote} + "  ·  ") + "Examen N.º " + ($F{numero} == null ? "" : $F{numero})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="base" x="415" y="3" width="100" height="14" forecolor="#78909C"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

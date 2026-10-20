@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -69,6 +71,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             String token = getToken(req);
             // La firma se verifica una vez; el usuario y su sesión salen de una sola consulta.
             Claims claims = token != null ? jwtProvider.leer(token) : null;
+            if (JwtProvider.esPostulante(claims)) {
+                // El postulante del módulo de exámenes vive en tcpe_usuario, no en tb_usuario: no sigue por el
+                // camino del empleado (cargarParaToken, sesiones). Ver DatosPostulante.
+                autenticarPostulante(claims);
+                claims = null;
+            }
             if (claims != null) {
                 String nombreUsuario = claims.getSubject();
                 DatosToken datos = jwtProvider.datosDe(claims);
@@ -108,6 +116,24 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(req, res);
+    }
+
+    /**
+     * Autentica al postulante con {@code ROLE_POSTULANTE} y su {@link DatosPostulante} como details. No se
+     * consulta la base: el token ya está verificado y los SP de rendición validan que el usuario siga activo y
+     * que el examen sea suyo. {@code MainSecurity} lo deja entrar solo a {@code /examen-publico/**}.
+     */
+    private void autenticarPostulante(Claims claims) {
+        DatosPostulante datos = jwtProvider.datosPostulanteDe(claims);
+        if (datos.getCodUsuario() <= 0) {
+            logger.warn("Token de postulante sin codUsuario válido; se ignora");
+            return;
+        }
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                datos.getLogin(), null,
+                Collections.singletonList(new SimpleGrantedAuthority(DatosPostulante.ROL)));
+        auth.setDetails(datos);
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     /**

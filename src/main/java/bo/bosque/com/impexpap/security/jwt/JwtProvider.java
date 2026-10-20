@@ -153,6 +153,43 @@ public class JwtProvider {
         return expiration;
     }
 
+    // ── Postulantes externos del módulo de exámenes (tcpe_usuario) ─────────────────────────
+
+    /** Claim que distingue el token del postulante. Los tokens de empleado no lo llevan. */
+    public static final String CLAIM_TIPO = "tipo";
+    public static final String TIPO_POSTULANTE = "POSTULANTE";
+
+    /** Cuándo vencería un token emitido ahora (misma vida que el de empleado: jwt.expiration). */
+    public Date expiracionDesdeAhora() {
+        return new Date(System.currentTimeMillis() + expiration * 1000L);
+    }
+
+    /**
+     * Token del postulante: {@code sub} = login de {@code tcpe_usuario}, {@code jti} = su {@code codUsuario}
+     * (de {@code tcpe_usuario}, no de {@code tb_usuario}) y {@code tipo = POSTULANTE}. Sin {@code sid}:
+     * el postulante no abre sesión en {@code trec_sesion}.
+     */
+    public String generarTokenPostulante(long codUsuario, String login, Date expira) {
+        return Jwts.builder()
+                .setSubject(login)
+                .setId(String.valueOf(codUsuario))
+                .claim(CLAIM_TIPO, TIPO_POSTULANTE)
+                .setIssuedAt(new Date())
+                .setExpiration(expira)
+                .signWith(SignatureAlgorithm.HS512, claveFirma)
+                .compact();
+    }
+
+    /** Si los claims (ya verificados) son de un postulante. */
+    public static boolean esPostulante(Claims c) {
+        return c != null && TIPO_POSTULANTE.equals(c.get(CLAIM_TIPO, String.class));
+    }
+
+    /** La identidad del postulante a partir de sus claims verificados. */
+    public DatosPostulante datosPostulanteDe(Claims c) {
+        return new DatosPostulante(aLargo(c.getId()), c.getSubject());
+    }
+
     /**
      * Los claims de un token válido, o null si no lo es (mal formado, vencido, con otra firma o vacío).
      *

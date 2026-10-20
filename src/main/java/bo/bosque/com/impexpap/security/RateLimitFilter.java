@@ -27,8 +27,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     // Configuración del límite: 5 solicitudes por minuto por IP
     private final int CAPACITY = 5;
-    private final int REFILL_TOKENS = 5;
     private final int REFILL_MINUTES = 1;
+
+    /**
+     * El login de postulantes (examenes) lleva cupo propio y mas amplio: una sala entera rinde detras de la
+     * misma IP y con 5 por minuto se bloqueaban entre ellos y a los empleados. Sus claves son de 10 caracteres
+     * al azar, asi que 60 por minuto no abre la puerta a la fuerza bruta.
+     */
+    private static final int CAPACIDAD_POSTULANTE = 60;
 
     /**
      * Cuanto se guarda el bucket de una IP que dejo de aparecer. Con el bucket
@@ -79,8 +85,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
             // 5/minuto se evadia por completo.
             String ip = clienteIp.de(request);
             // La recuperación de acceso y el cambio de clave llevan su propio cupo: no le gastan intentos al login.
-            Bucket bucket = resolveBucket(requestPath.contains("/auth/recuperacion") ? ip + "|recuperacion"
-                    : cambioDeClave ? ip + "|clave" : ip);
+            Bucket bucket = requestPath.contains("/examen-publico/auth/login")
+                    ? resolveBucket(ip + "|postulante", CAPACIDAD_POSTULANTE)
+                    : resolveBucket(requestPath.contains("/auth/recuperacion") ? ip + "|recuperacion"
+                    : cambioDeClave ? ip + "|clave" : ip, CAPACITY);
 
             if (bucket.tryConsume(1)) {
                 // Permitir la solicitud
@@ -98,10 +106,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
     }
 
-    private Bucket resolveBucket(String ip) {
+    private Bucket resolveBucket(String ip, int capacidad) {
         Registro registro = buckets.computeIfAbsent(ip, key -> {
             // Crear un nuevo bucket para esta IP
-            Bandwidth limit = Bandwidth.classic(CAPACITY, Refill.greedy(REFILL_TOKENS, Duration.ofMinutes(REFILL_MINUTES)));
+            Bandwidth limit = Bandwidth.classic(capacidad, Refill.greedy(capacidad, Duration.ofMinutes(REFILL_MINUTES)));
             return new Registro(Bucket.builder().addLimit(limit).build(), System.currentTimeMillis());
         });
         registro.ultimoUso = System.currentTimeMillis();

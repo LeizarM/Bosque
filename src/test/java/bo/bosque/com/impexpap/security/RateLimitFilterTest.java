@@ -56,6 +56,31 @@ class RateLimitFilterTest {
     }
 
     @Test
+    void elLoginDePostulantesTieneCupoPropioDeSesentaPorMinuto() throws Exception {
+        pedir("POST", "/examen-publico/auth/login", 61);
+
+        verify(cadena, times(60)).doFilter(any(), any());
+    }
+
+    @Test
+    void elLoginDePostulantesNoGastaElCupoDeLosEmpleados() throws Exception {
+        pedir("POST", "/examen-publico/auth/login", 30);
+        pedir("POST", "/auth/login", 5);
+
+        verify(cadena, times(35)).doFilter(any(), any());
+    }
+
+    @Test
+    void losLatidosYLaConfiguracionDelExamenNoTienenCupo() throws Exception {
+        // Una sala entera late cada 15 s desde la misma IP: el latido no puede caer en el cupo del login.
+        pedir("POST", "/examen-publico/examenes/latido", 100);
+        pedir("POST", "/examenes/mis-examenes/latido", 100);
+        pedir("POST", "/examen-publico/config", 100);
+
+        verify(cadena, times(300)).doFilter(any(), any());
+    }
+
+    @Test
     void elCambioDeClaveConSesionNoTieneCupo() throws Exception {
         pedir("POST", "/auth/changePasswordDefault", 10);
 
