@@ -13,8 +13,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Fila de {@code tcpe_rsptaSemana} (v12): lo que un usuario de BOSQUE escribió en una pregunta de la semana, una sola
- * respuesta por pregunta. Se lee con {@code p_list_tcpe_RsptaSemana}; se registra desde el inicio con
+ * Fila de {@code tcpe_rsptaSemana} (v12/v13): lo que un usuario de BOSQUE respondió a una pregunta de la semana (un
+ * texto si es abierta, un número si es de escala), una sola respuesta por pregunta. Se lee con {@code p_list_tcpe_RsptaSemana}; se registra desde el inicio con
  * {@code p_abm_tcpe_RsptaSemana 'I'} y el usuario del token, nunca por el catálogo genérico.
  */
 @Getter
@@ -34,9 +34,12 @@ public class TcpeRsptaSemana implements Serializable {
     /** bigint. NOT NULL. FK a {@code tb_usuario}: quien respondió. */
     private Long codUsuario;
 
-    /** nvarchar(1000). NOT NULL. El largo que se acepta lo fija la configuración ({@code maxRespuestaSemana}). */
+    /** nvarchar(1000). Abierta: el texto (el largo lo fija {@code maxRespuestaSemana}); de escala, NULL. */
     @Size(max = 1000, message = "Máximo 1000 caracteres.")
     private String respuesta;
+
+    /** tinyint. De escala: el número elegido, dentro del rango de la pregunta; abierta, NULL. */
+    private Integer valor;
 
     /** bigint. Lo pone el backend con el usuario del token; nunca sale del cuerpo. */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dto.TcpePreguntaSemanaDto;
+import bo.bosque.com.impexpap.dto.TcpePreguntaSemanaEscalaDto;
 import bo.bosque.com.impexpap.dto.TcpePreguntaSemanaVigenteDto;
 import bo.bosque.com.impexpap.dto.TcpeRankingPreguntaDto;
 import bo.bosque.com.impexpap.dto.TcpeRsptaSemanaDetalleDto;
@@ -33,8 +34,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * v11/v12 (contrato 15): cada llamada a {@code p_list/p_abm_tcpe_PreguntaSemana}, {@code p_abm_tcpe_RsptaSemana} y
- * {@code p_list_tcpe_Resultado 'P'} lleva sus parámetros y su ACCION; la respuesta es un texto libre.
+ * v11 a v13 (contratos 15 a 17): cada llamada a {@code p_list/p_abm_tcpe_PreguntaSemana}, {@code p_abm_tcpe_RsptaSemana}
+ * y {@code p_list_tcpe_Resultado 'P'} lleva sus parámetros y su ACCION; se responde con un texto o un valor.
  */
 class TcpePreguntaSemanaDaoTest {
 
@@ -93,6 +94,18 @@ class TcpePreguntaSemanaDaoTest {
     }
 
     @Test
+    @DisplayName("E: solo codPreguntaSemana; las filas del SP vuelven tal cual")
+    void distribucion() {
+        List<TcpePreguntaSemanaEscalaDto> filas = Collections.singletonList(new TcpePreguntaSemanaEscalaDto());
+        when(sp.ejecutarListado(eq("p_list_tcpe_PreguntaSemana"), anyMap(), eq("E"), eq(TcpePreguntaSemanaEscalaDto.class)))
+                .thenReturn(filas);
+
+        assertSame(filas, preguntas.distribucion(7L));
+        assertEquals(Collections.singletonMap("codPreguntaSemana", 7L),
+                listado("p_list_tcpe_PreguntaSemana", "E", TcpePreguntaSemanaEscalaDto.class));
+    }
+
+    @Test
     @DisplayName("R con código 0: no se manda y el SP no devuelve filas")
     void respuestasSinCodigo() {
         preguntas.respuestas(0L);
@@ -129,13 +142,36 @@ class TcpePreguntaSemanaDaoTest {
         assertFalse(p.containsKey("titulo"));
         assertFalse(p.containsKey("activo"), "nulo: el SP pone 1");
         assertFalse(p.containsKey("codPregunta"), "v12: ya no sale del banco");
+        assertFalse(p.containsKey("tipo"), "nulo: el SP la deja abierta");
         assertEquals(7L, p.get("audUsuario"));
+    }
+
+    @Test
+    @DisplayName("guardar de escala: tipo, rango y etiquetas viajan; la etiqueta nula no se manda")
+    void guardarEscala() {
+        TcpePreguntaSemana m = new TcpePreguntaSemana();
+        m.setCodPreguntaSemana(4L);
+        m.setPregunta("¿Cómo ves el ambiente laboral?");
+        m.setTipo("E");
+        m.setEscalaMin(0);
+        m.setEscalaMax(10);
+        m.setEtiquetaMax("Excelente");
+
+        preguntas.guardar(m, 7L);
+
+        Map<String, Object> p = abm("p_abm_tcpe_PreguntaSemana", "U");
+        assertEquals(4L, p.get("codPreguntaSemana"));
+        assertEquals("E", p.get("tipo"));
+        assertEquals(0, p.get("escalaMin"), "el 0 es un valor de la escala, no un vacío");
+        assertEquals(10, p.get("escalaMax"));
+        assertEquals("Excelente", p.get("etiquetaMax"));
+        assertFalse(p.containsKey("etiquetaMin"));
     }
 
     @Test
     @DisplayName("responder: I con el texto y el codUsuario del token también como audUsuario; idGenerado del SP")
     void responder() {
-        RespuestaSp r = respuestas.responder(1L, "Muy bien, gracias \uD83D\uDE0A", 34L);
+        RespuestaSp r = respuestas.responder(1L, "Muy bien, gracias \uD83D\uDE0A", null, 34L);
         Map<String, Object> p = abm("p_abm_tcpe_RsptaSemana", "I");
         assertEquals(4, p.size());
         assertEquals(1L, p.get("codPreguntaSemana"));
@@ -148,8 +184,18 @@ class TcpePreguntaSemanaDaoTest {
     @Test
     @DisplayName("responder sin texto: no se manda respuesta y el SP responde 'Escribe tu respuesta.'")
     void responderSinTexto() {
-        respuestas.responder(1L, null, 34L);
+        respuestas.responder(1L, null, null, 34L);
         assertFalse(abm("p_abm_tcpe_RsptaSemana", "I").containsKey("respuesta"));
+    }
+
+    @Test
+    @DisplayName("responder una de escala: el valor viaja, también el 0; sin texto")
+    void responderEscala() {
+        respuestas.responder(1L, null, 0, 34L);
+        Map<String, Object> p = abm("p_abm_tcpe_RsptaSemana", "I");
+        assertEquals(4, p.size());
+        assertEquals(0, p.get("valor"));
+        assertFalse(p.containsKey("respuesta"));
     }
 
     @Test

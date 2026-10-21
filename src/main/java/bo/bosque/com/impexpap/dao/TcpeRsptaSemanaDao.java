@@ -22,7 +22,7 @@ public class TcpeRsptaSemanaDao extends TcpeCrudDao<TcpeRsptaSemana> implements 
     private static final String[] FILTROS = { "codRsptaSemana", "codPreguntaSemana", "codUsuario" };
 
     /** Columnas de datos de p_abm, sin PK, audUsuario ni audFecha. */
-    private static final String[] COLUMNAS = { "codPreguntaSemana", "codUsuario", "respuesta" };
+    private static final String[] COLUMNAS = { "codPreguntaSemana", "codUsuario", "respuesta", "valor" };
 
     private final SpHelper sp;
 
@@ -38,11 +38,12 @@ public class TcpeRsptaSemanaDao extends TcpeCrudDao<TcpeRsptaSemana> implements 
     }
 
     @Override
-    public RespuestaSp responder(Long codPreguntaSemana, String respuesta, long codUsuario) {
+    public RespuestaSp responder(Long codPreguntaSemana, String respuesta, Integer valor, long codUsuario) {
         Map<String, Object> p = new LinkedHashMap<>();
         TcpeParametros.poner(p, "codPreguntaSemana", TcpeParametros.id(codPreguntaSemana));
         p.put("codUsuario", codUsuario);
         TcpeParametros.poner(p, "respuesta", respuesta);
+        TcpeParametros.poner(p, "valor", valor);
         p.put("audUsuario", codUsuario);
         return sp.ejecutarAbmMap(SP_ABM, p, "I");
     }

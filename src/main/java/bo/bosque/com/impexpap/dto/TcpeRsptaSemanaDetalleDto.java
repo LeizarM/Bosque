@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * Fila de {@code p_list_tcpe_PreguntaSemana 'R'} (gestión): quién respondió, su cargo actual de trabajo, qué
- * escribió y cuándo.
+ * respondió (el texto o, si es de escala, el valor) y cuándo.
  */
 @Getter
 @Setter
@@ -31,6 +31,8 @@ public class TcpeRsptaSemanaDetalleDto implements Serializable {
     private String cargo;
 
     private String respuesta;
+
+    private Integer valor;
 
     private Date fechaRespuesta;
 }

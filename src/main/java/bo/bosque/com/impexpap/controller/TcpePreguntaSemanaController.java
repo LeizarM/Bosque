@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 /**
- * Preguntas de la semana (contrato 15.3). {@code vigentes} y {@code responder} son del inicio: cualquier empleado,
+ * Preguntas de la semana (contratos 16 y 17). {@code vigentes} y {@code responder} son del inicio: cualquier empleado,
  * sin pantalla, con el usuario del token. La gestión pide {@code tcpeExamenes/PreguntaSemana} (el admin pasa).
  * Los roles de clase son los de todo empleado (adm o lim); MainSecurity ya deja fuera al postulante.
  */
@@ -52,7 +52,7 @@ public class TcpePreguntaSemanaController {
     public ResponseEntity<ApiResponse<?>> responder(@Valid @RequestBody TcpePreguntaSemanaFiltroDto dto,
                                                     Authentication auth) {
         return TcpeRespuestas.escritura(respuestas.responder(dto.getCodPreguntaSemana(), dto.getRespuesta(),
-                DatosToken.codUsuarioDe(auth)));
+                dto.getValor(), DatosToken.codUsuarioDe(auth)));
     }
 
     @PostMapping("/listar")
@@ -89,6 +89,14 @@ public class TcpePreguntaSemanaController {
                                                      Authentication auth) {
         permisos.exigirAlguna(auth, TcpePermisos.PREGUNTA_SEMANA);
         return TcpeRespuestas.listado(preguntas.respuestas(dto.getCodPreguntaSemana()));
+    }
+
+    /** De escala: cuántos eligieron cada valor, con el promedio; una abierta responde 204. */
+    @PostMapping("/distribucion")
+    public ResponseEntity<ApiResponse<?>> distribucion(@Valid @RequestBody TcpePreguntaSemanaFiltroDto dto,
+                                                       Authentication auth) {
+        permisos.exigirAlguna(auth, TcpePermisos.PREGUNTA_SEMANA);
+        return TcpeRespuestas.listado(preguntas.distribucion(dto.getCodPreguntaSemana()));
     }
 
     /** Quita una respuesta (por ejemplo, un texto fuera de lugar): la persona puede volver a responder. */

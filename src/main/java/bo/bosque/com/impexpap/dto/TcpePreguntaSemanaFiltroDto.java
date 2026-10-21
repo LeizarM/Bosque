@@ -26,9 +26,12 @@ public class TcpePreguntaSemanaFiltroDto implements Serializable {
     /** {@code listar}: filtro; {@code activar}: el valor nuevo. */
     private Boolean activo;
 
-    /** {@code responder}: lo que escribió quien responde. */
+    /** {@code responder} una abierta: lo que escribió quien responde. */
     @Size(max = 1000, message = "Máximo 1000 caracteres.")
     private String respuesta;
+
+    /** {@code responder} una de escala: el número elegido. */
+    private Integer valor;
 
     /** {@code quitar-respuesta}: la respuesta que se quita. */
     private Long codRsptaSemana;

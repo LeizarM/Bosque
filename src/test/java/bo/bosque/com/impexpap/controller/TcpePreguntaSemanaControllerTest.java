@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Permisos de las preguntas de la semana (contrato 15.3), con la regla real de {@link TcpePermisos}: el inicio
+ * Permisos de las preguntas de la semana (contratos 16 y 17), con la regla real de {@link TcpePermisos}: el inicio
  * (vigentes y responder) no pide pantalla y usa el usuario del token; la gestión pide {@code PreguntaSemana}.
  */
 class TcpePreguntaSemanaControllerTest {
@@ -100,7 +100,7 @@ class TcpePreguntaSemanaControllerTest {
     void responder() {
         TcpePreguntaSemanaFiltroDto d = pregunta(1L);
         d.setRespuesta("Bien, gracias");
-        when(respuestas.responder(1L, "Bien, gracias", 34L)).thenReturn(new RespuestaSp(0, "¡Gracias!", 11L));
+        when(respuestas.responder(1L, "Bien, gracias", null, 34L)).thenReturn(new RespuestaSp(0, "¡Gracias!", 11L));
 
         ResponseEntity<ApiResponse<?>> r = controlador.responder(d, usuario("ROLE_LIM"));
 
@@ -108,6 +108,17 @@ class TcpePreguntaSemanaControllerTest {
         assertEquals("¡Gracias!", r.getBody().getMessage());
         assertEquals(11L, r.getBody().getData());
         verify(vistas, never()).obtainRoutes(anyInt());
+    }
+
+    @Test
+    @DisplayName("responder una de escala: el valor llega al DAO con el codUsuario del token")
+    void responderEscala() {
+        TcpePreguntaSemanaFiltroDto d = pregunta(2L);
+        d.setValor(4);
+        when(respuestas.responder(2L, null, 4, 34L)).thenReturn(new RespuestaSp(0, "¡Gracias!", 12L));
+
+        assertEquals(12L, controlador.responder(d, usuario("ROLE_LIM")).getBody().getData());
+        verify(respuestas).responder(2L, null, 4, 34L);
     }
 
     @Test
@@ -129,6 +140,7 @@ class TcpePreguntaSemanaControllerTest {
         assertEquals(201, controlador.activar(a, lim).getStatusCodeValue());
         assertEquals(201, controlador.eliminar(pregunta(4L), lim).getStatusCodeValue());
         assertEquals(204, controlador.respuestas(pregunta(4L), lim).getStatusCodeValue());
+        assertEquals(204, controlador.distribucion(pregunta(4L), lim).getStatusCodeValue());
         TcpePreguntaSemanaFiltroDto q = new TcpePreguntaSemanaFiltroDto();
         q.setCodRsptaSemana(8L);
         assertEquals("Respuesta eliminada.", controlador.quitarRespuesta(q, lim).getBody().getMessage());
@@ -137,6 +149,7 @@ class TcpePreguntaSemanaControllerTest {
         verify(preguntas).activar(4L, false, 34L);
         verify(preguntas).eliminar(4L, 34L);
         verify(preguntas).respuestas(4L);
+        verify(preguntas).distribucion(4L);
         verify(respuestas).eliminar(8L, 34L);
     }
 
@@ -151,8 +164,10 @@ class TcpePreguntaSemanaControllerTest {
         assertThrows(SinPermisoException.class, () -> controlador.activar(pregunta(4L), lim));
         assertThrows(SinPermisoException.class, () -> controlador.eliminar(pregunta(4L), lim));
         assertThrows(SinPermisoException.class, () -> controlador.respuestas(pregunta(4L), lim));
+        assertThrows(SinPermisoException.class, () -> controlador.distribucion(pregunta(4L), lim));
         assertThrows(SinPermisoException.class, () -> controlador.quitarRespuesta(pregunta(4L), lim));
         verify(preguntas, never()).gestion(any());
+        verify(preguntas, never()).distribucion(any());
         verify(preguntas, never()).guardar(any(), anyLong());
         verify(preguntas, never()).eliminar(any(), anyLong());
         verify(respuestas, never()).eliminar(any(), anyLong());

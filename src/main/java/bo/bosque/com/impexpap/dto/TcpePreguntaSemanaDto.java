@@ -10,8 +10,9 @@ import java.time.LocalDate;
 import java.util.Date;
 
 /**
- * Fila de {@code p_list_tcpe_PreguntaSemana 'L'} para la gestión (contrato 15.3): la tabla, el estado de hoy
- * ({@code INACTIVA}, {@code PROGRAMADA}, {@code TERMINADA} o {@code VIGENTE}) y cuántos respondieron.
+ * Fila de {@code p_list_tcpe_PreguntaSemana 'L'} para la gestión (contratos 16 y 17): la tabla, el estado de hoy
+ * ({@code INACTIVA}, {@code PROGRAMADA}, {@code TERMINADA} o {@code VIGENTE}), cuántos respondieron y, si es de
+ * escala, el promedio.
  */
 @Getter
 @Setter
@@ -35,6 +36,17 @@ public class TcpePreguntaSemanaDto implements Serializable {
 
     private Boolean activo;
 
+    /** A abierta o E escala. */
+    private String tipo;
+
+    private Integer escalaMin;
+
+    private Integer escalaMax;
+
+    private String etiquetaMin;
+
+    private String etiquetaMax;
+
     private Long audUsuario;
 
     private Date audFecha;
@@ -44,7 +56,13 @@ public class TcpePreguntaSemanaDto implements Serializable {
     /** {@code titulo} o, si no tiene, el título de la configuración. */
     private String tituloMostrado;
 
+    /** "Abierta" o "Escala del 1 al 5", armado por el SP. */
+    private String tipoMostrado;
+
     private String estado;
 
     private Integer respuestas;
+
+    /** Solo escala: el promedio con un decimal; nulo si nadie respondió. */
+    private Double promedio;
 }

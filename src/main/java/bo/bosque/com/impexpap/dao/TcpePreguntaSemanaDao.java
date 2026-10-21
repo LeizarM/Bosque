@@ -1,6 +1,7 @@
 package bo.bosque.com.impexpap.dao;
 
 import bo.bosque.com.impexpap.dto.TcpePreguntaSemanaDto;
+import bo.bosque.com.impexpap.dto.TcpePreguntaSemanaEscalaDto;
 import bo.bosque.com.impexpap.dto.TcpePreguntaSemanaVigenteDto;
 import bo.bosque.com.impexpap.dto.TcpeRsptaSemanaDetalleDto;
 import bo.bosque.com.impexpap.model.TcpePreguntaSemana;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 /**
  * {@code tcpe_preguntaSemana} vía {@code p_list_tcpe_PreguntaSemana} y {@code p_abm_tcpe_PreguntaSemana}: el CRUD
- * genérico y las acciones de proceso del contrato 15.3.
+ * genérico y las acciones de proceso de los contratos 16 y 17.
  */
 @Repository
 public class TcpePreguntaSemanaDao extends TcpeCrudDao<TcpePreguntaSemana> implements ITcpePreguntaSemana {
@@ -26,7 +27,8 @@ public class TcpePreguntaSemanaDao extends TcpeCrudDao<TcpePreguntaSemana> imple
     private static final String[] FILTROS = { "codPreguntaSemana", "activo" };
 
     /** Columnas de datos de p_abm, sin PK, audUsuario ni audFecha. */
-    private static final String[] COLUMNAS = { "titulo", "pregunta", "fechaInicio", "fechaFin", "activo" };
+    private static final String[] COLUMNAS = { "titulo", "pregunta", "fechaInicio", "fechaFin", "activo", "tipo",
+            "escalaMin", "escalaMax", "etiquetaMin", "etiquetaMax" };
 
     private final SpHelper sp;
 
@@ -54,6 +56,13 @@ public class TcpePreguntaSemanaDao extends TcpeCrudDao<TcpePreguntaSemana> imple
         Map<String, Object> p = new LinkedHashMap<>();
         TcpeParametros.filtro(p, "codPreguntaSemana", codPreguntaSemana);
         return sp.ejecutarListado(SP_LIST, p, "R", TcpeRsptaSemanaDetalleDto.class);
+    }
+
+    @Override
+    public List<TcpePreguntaSemanaEscalaDto> distribucion(Long codPreguntaSemana) {
+        Map<String, Object> p = new LinkedHashMap<>();
+        TcpeParametros.filtro(p, "codPreguntaSemana", codPreguntaSemana);
+        return sp.ejecutarListado(SP_LIST, p, "E", TcpePreguntaSemanaEscalaDto.class);
     }
 
     @Override

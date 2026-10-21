@@ -10,8 +10,8 @@ import java.time.LocalDate;
 import java.util.Date;
 
 /**
- * Fila de {@code p_list_tcpe_PreguntaSemana 'V'} (inicio): la pregunta vigente, lo que respondió quien mira y, para
- * el campo de texto, la ayuda y el largo máximo. {@code mensaje} (el agradecimiento) llega solo ya respondida.
+ * Fila de {@code p_list_tcpe_PreguntaSemana 'V'} (inicio): la pregunta vigente con su tipo y escala, lo que
+ * respondió quien mira (texto o valor) y la ayuda y el largo máximo. {@code mensaje} llega solo ya respondida.
  */
 @Getter
 @Setter
@@ -28,6 +28,17 @@ public class TcpePreguntaSemanaVigenteDto implements Serializable {
 
     private String pregunta;
 
+    /** A abierta o E escala. */
+    private String tipo;
+
+    private Integer escalaMin;
+
+    private Integer escalaMax;
+
+    private String etiquetaMin;
+
+    private String etiquetaMax;
+
     @FechaDiaJson
     private LocalDate fechaInicio;
 
@@ -38,8 +49,11 @@ public class TcpePreguntaSemanaVigenteDto implements Serializable {
 
     private Boolean respondida;
 
-    /** Lo que escribió quien mira; nulo si todavía no respondió. */
+    /** Lo que escribió quien mira en una abierta; nulo si todavía no respondió. */
     private String respuesta;
+
+    /** El número que eligió quien mira en una de escala; nulo si todavía no respondió. */
+    private Integer valor;
 
     private Date fechaRespuesta;
 
