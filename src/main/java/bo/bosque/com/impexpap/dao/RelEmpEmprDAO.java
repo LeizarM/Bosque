@@ -16,6 +16,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class RelEmpEmprDAO implements IRelEmpEmpr {
@@ -30,9 +31,10 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
     SpHelper spHelper;
 
     @Override
-    public List<AgendaEmpleadoDto> agenda() {
-        return spHelper.ejecutarListado("p_list_RelEmplEmpr", new LinkedHashMap<String, Object>(), "G",
-                AgendaEmpleadoDto.class);
+    public List<AgendaEmpleadoDto> agenda(int codEmpleadoConsulta) {
+        Map<String, Object> p = new LinkedHashMap<>();
+        p.put("codEmpleadoConsulta", codEmpleadoConsulta);
+        return spHelper.ejecutarListado("p_list_RelEmplEmpr", p, "G", AgendaEmpleadoDto.class);
     }
 
     /**

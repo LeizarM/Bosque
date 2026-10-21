@@ -46,7 +46,8 @@ public interface IRelEmpEmpr {
 
     /**
      * {@code p_list_RelEmplEmpr 'G'}: la agenda del Dashboard. Empleados con relación vigente, su cargo
-     * y sucursal actuales y sus teléfonos corporativos.
+     * y sucursal actuales, sus teléfonos corporativos y si {@code codEmpleadoConsulta} puede abrir su
+     * ficha (misma regla que la ficha del trabajador).
      */
-    List<AgendaEmpleadoDto> agenda();
+    List<AgendaEmpleadoDto> agenda(int codEmpleadoConsulta);
 }

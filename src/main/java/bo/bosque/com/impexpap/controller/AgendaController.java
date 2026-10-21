@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import bo.bosque.com.impexpap.dao.IRelEmpEmpr;
+import bo.bosque.com.impexpap.security.jwt.DatosToken;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 
 /**
@@ -28,8 +30,9 @@ public class AgendaController {
         this.relaciones = relaciones;
     }
 
+    /** Quién consulta sale del token: el SP decide con él qué fichas puede abrir. */
     @PostMapping("/empleados")
-    public ResponseEntity<ApiResponse<?>> empleados() {
-        return ParametrosRespuestas.listado(relaciones.agenda());
+    public ResponseEntity<ApiResponse<?>> empleados(Authentication auth) {
+        return ParametrosRespuestas.listado(relaciones.agenda(DatosToken.de(auth).getCodEmpleado()));
     }
 }

@@ -24,4 +24,6 @@ public class AgendaEmpleadoDto implements Serializable {
     private String sucursal;
     private String empresa;
     private String telefonos;
+    /** Si quien consulta puede abrir la ficha de este empleado (lo decide el SP). */
+    private boolean puedeVerFicha;
 }
