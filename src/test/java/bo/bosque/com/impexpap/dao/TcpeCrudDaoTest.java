@@ -227,8 +227,8 @@ class TcpeCrudDaoTest {
     }
 
     @Test
-    @DisplayName("hay 38 DAO tcpe_, uno por tabla, y cada filtro y columna existe en su modelo")
-    void losTreintaYOchoSonCoherentes() throws Exception {
+    @DisplayName("hay 40 DAO tcpe_, uno por tabla, y cada filtro y columna existe en su modelo")
+    void losCuarentaSonCoherentes() throws Exception {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AssignableTypeFilter(TcpeCrudDao.class));
 
@@ -257,7 +257,7 @@ class TcpeCrudDaoTest {
             if (!dao.filtros().contains(dao.pk())) problemas.add(clase.getSimpleName() + ": el PK no es filtro");
             if (dao.columnas().contains("password2")) problemas.add(clase.getSimpleName() + ": manda password2");
         }
-        assertEquals(38, cantidad, "DAO tcpe_ encontrados");
+        assertEquals(40, cantidad, "DAO tcpe_ encontrados");
         assertTrue(problemas.isEmpty(), String.join("\n", problemas));
     }
 

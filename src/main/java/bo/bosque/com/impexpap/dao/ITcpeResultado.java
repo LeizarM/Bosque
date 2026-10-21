@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.dto.TcpeExamenCabeceraDto;
 import bo.bosque.com.impexpap.dto.TcpeHistorialDto;
 import bo.bosque.com.impexpap.dto.TcpeInformeDto;
+import bo.bosque.com.impexpap.dto.TcpeRankingPreguntaDto;
 import bo.bosque.com.impexpap.dto.TcpeResultadoExamenDto;
 import bo.bosque.com.impexpap.dto.TcpeRevisionDto;
 import bo.bosque.com.impexpap.dto.TcpeSolucionarioDto;
@@ -30,4 +31,8 @@ public interface ITcpeResultado {
 
     /** {@code C}: informe por categoría y fechas (cualquiera puede ir nulo). */
     List<TcpeInformeDto> informe(Long codClasificacion, LocalDate fechaDesde, LocalDate fechaHasta);
+
+    /** {@code P} (v11): preguntas más falladas por categoría; los mismos filtros de {@code C}, todos opcionales. */
+    List<TcpeRankingPreguntaDto> ranking(Long codClasificacion, Long codRolExamen, LocalDate fechaDesde,
+                                         LocalDate fechaHasta);
 }

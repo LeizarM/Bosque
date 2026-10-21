@@ -19,8 +19,8 @@ import javax.validation.Validator;
 import java.util.Map;
 
 /**
- * Catálogo del banco de preguntas: {@code area}, {@code clasificacion}, {@code pregunta}, {@code respuesta} y
- * {@code rsptaOpcion}. Para guardar una pregunta completa (con su respuesta y opciones) está
+ * Catálogo del banco de preguntas: {@code area}, {@code clasificacion}, {@code pregunta}, {@code respuesta},
+ * {@code rsptaOpcion} y las preguntas de la semana con sus respuestas (v11). Para guardar una pregunta completa está
  * {@code /examenes/banco/guardar}; esto es el CRUD fila por fila. Ver {@link TcpeCatalogoBase}.
  */
 @RestController
@@ -29,7 +29,7 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ROLE_ADM', 'ROLE_LIM')")
 public class TcpeCatalogoBancoController extends TcpeCatalogoBase {
 
-    static final String ENTIDADES = "area|clasificacion|pregunta|respuesta|rsptaOpcion";
+    static final String ENTIDADES = "area|clasificacion|pregunta|respuesta|rsptaOpcion|preguntaSemana|rsptaSemana";
 
     public TcpeCatalogoBancoController(TcpeCatalogo catalogo, TcpePermisos permisos, ObjectMapper mapper,
                                        Validator validator) {

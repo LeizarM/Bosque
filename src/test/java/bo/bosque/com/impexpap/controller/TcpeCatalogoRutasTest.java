@@ -19,15 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
- * Los tres controladores de catálogo se reparten las 38 entidades sin huecos ni repetidas, y el {@code {entidad}} de
+ * Los tres controladores de catálogo se reparten las 40 entidades sin huecos ni repetidas, y el {@code {entidad}} de
  * cada ruta es exactamente el {@code entidad()} de su DAO, el mismo nombre que arma el frontend: una entidad fuera
  * de todo regex da 404 sin que nada lo avise antes.
  */
 class TcpeCatalogoRutasTest {
 
     @Test
-    @DisplayName("los tres regex ENTIDADES cubren los 38 DAO tcpe_, sin repetir y con su mismo nombre")
-    void regexCubreLosTreintaYOcho() throws Exception {
+    @DisplayName("los tres regex ENTIDADES cubren los 40 DAO tcpe_, sin repetir y con su mismo nombre")
+    void regexCubreLosCuarenta() throws Exception {
         List<String> enRutas = new ArrayList<>();
         for (String regex : new String[] { TcpeCatalogoBancoController.ENTIDADES,
                 TcpeCatalogoExamenController.ENTIDADES, TcpeCatalogoPostulacionController.ENTIDADES }) {
@@ -45,8 +45,18 @@ class TcpeCatalogoRutasTest {
                     .getConstructor(SpHelper.class).newInstance(sp);
             daos.add(dao.entidad());
         }
-        assertEquals(38, daos.size());
+        assertEquals(40, daos.size());
         assertEquals(daos, sinRepetir);
+    }
+
+    @Test
+    @DisplayName("v11: preguntaSemana y rsptaSemana van por el catálogo del banco, sin pisar a pregunta ni rsptaOpcion")
+    void preguntasDeLaSemana() {
+        Pattern banco = Pattern.compile(TcpeCatalogoBancoController.ENTIDADES);
+        assertEquals(true, banco.matcher("preguntaSemana").matches());
+        assertEquals(true, banco.matcher("rsptaSemana").matches());
+        assertEquals(true, banco.matcher("pregunta").matches());
+        assertEquals(false, banco.matcher("preguntaSemanas").matches());
     }
 
     @Test

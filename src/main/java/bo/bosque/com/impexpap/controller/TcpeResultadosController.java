@@ -93,6 +93,16 @@ public class TcpeResultadosController {
                 resultados.informe(filtro.getCodClasificacion(), filtro.getFechaDesde(), filtro.getFechaHasta()));
     }
 
+    /** Preguntas más falladas por categoría (contrato 15.1); cuerpo opcional, sin filtros es todo el historial. */
+    @PostMapping("/resultados/ranking-preguntas")
+    public ResponseEntity<ApiResponse<?>> rankingPreguntas(@Valid @RequestBody(required = false) TcpeResultadoFiltroDto f,
+                                                           Authentication auth) {
+        permisos.exigirAlguna(auth, TcpePermisos.INFORMES, TcpePermisos.RESULTADOS);
+        TcpeResultadoFiltroDto filtro = f != null ? f : new TcpeResultadoFiltroDto();
+        return TcpeRespuestas.listado(resultados.ranking(filtro.getCodClasificacion(), filtro.getCodRolExamen(),
+                filtro.getFechaDesde(), filtro.getFechaHasta()));
+    }
+
     @PostMapping("/calificacion/marcar")
     public ResponseEntity<ApiResponse<?>> marcar(@Valid @RequestBody TcpeCalificacionDto dto, Authentication auth) {
         permisos.exigirAlguna(auth, TcpePermisos.RESULTADOS);

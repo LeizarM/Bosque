@@ -44,7 +44,7 @@ class TcpeCorsControladoresTest {
     private static final String WEB = "https://web.bosque.bo";
 
     @Test
-    @DisplayName("los 12 controladores Tcpe* llevan @CrossOrigin(originPatterns = placeholder, methods = POST)")
+    @DisplayName("los 13 controladores Tcpe* llevan @CrossOrigin(originPatterns = placeholder, methods = POST)")
     void todosConCrossOrigin() throws Exception {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(RestController.class));
@@ -63,7 +63,8 @@ class TcpeCorsControladoresTest {
                 "TcpeBancoController", "TcpeCatalogoBancoController", "TcpeCatalogoExamenController",
                 "TcpeCatalogoPostulacionController", "TcpeConfigController", "TcpeExamenPublicoAuthController",
                 "TcpeExamenPublicoController", "TcpeLotesController", "TcpeMisExamenesController",
-                "TcpeMonitorController", "TcpeResultadosController", "TcpeUsuariosController")), nombres);
+                "TcpeMonitorController", "TcpePreguntaSemanaController", "TcpeResultadosController",
+                "TcpeUsuariosController")), nombres);
     }
 
     /** MVC real (con el adaptador del preflight) y solo el controlador público; la propiedad es opcional. */

@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.dao;
 import bo.bosque.com.impexpap.dto.TcpeExamenCabeceraDto;
 import bo.bosque.com.impexpap.dto.TcpeHistorialDto;
 import bo.bosque.com.impexpap.dto.TcpeInformeDto;
+import bo.bosque.com.impexpap.dto.TcpeRankingPreguntaDto;
 import bo.bosque.com.impexpap.dto.TcpeResultadoExamenDto;
 import bo.bosque.com.impexpap.dto.TcpeRevisionDto;
 import bo.bosque.com.impexpap.dto.TcpeSolucionarioDto;
@@ -69,5 +70,16 @@ public class TcpeResultadoDao implements ITcpeResultado {
         TcpeParametros.filtro(p, "fechaDesde", fechaDesde);
         TcpeParametros.filtro(p, "fechaHasta", fechaHasta);
         return spHelper.ejecutarListado(SP_LIST, p, "C", TcpeInformeDto.class);
+    }
+
+    @Override
+    public List<TcpeRankingPreguntaDto> ranking(Long codClasificacion, Long codRolExamen, LocalDate fechaDesde,
+                                                LocalDate fechaHasta) {
+        Map<String, Object> p = new LinkedHashMap<>();
+        TcpeParametros.filtro(p, "codClasificacion", codClasificacion);
+        TcpeParametros.filtro(p, "codRolExamen", codRolExamen);
+        TcpeParametros.filtro(p, "fechaDesde", fechaDesde);
+        TcpeParametros.filtro(p, "fechaHasta", fechaHasta);
+        return spHelper.ejecutarListado(SP_LIST, p, "P", TcpeRankingPreguntaDto.class);
     }
 }

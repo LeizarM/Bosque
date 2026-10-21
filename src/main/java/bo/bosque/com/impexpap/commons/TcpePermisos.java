@@ -30,9 +30,11 @@ public class TcpePermisos {
     public static final String MIS_EXAMENES = "tcpeExamenes/MisExamenes";
     /** Panel "En vivo" del evaluador (contrato 8). */
     public static final String EN_VIVO = "tcpeExamenes/EnVivo";
+    /** Gestión de las preguntas de la semana (contrato 15.3). Responderlas, desde el inicio, no la pide. */
+    public static final String PREGUNTA_SEMANA = "tcpeExamenes/PreguntaSemana";
 
-    /** Cualquier pantalla de evaluador: alcanza para leer y mantener los catálogos. */
-    public static final String[] EVALUADOR = { BANCO, LOTES, RESULTADOS, INFORMES, USUARIOS, EN_VIVO };
+    /** Cualquier pantalla de evaluador: alcanza para leer y mantener los catálogos (categorías incluidas). */
+    public static final String[] EVALUADOR = { BANCO, LOTES, RESULTADOS, INFORMES, USUARIOS, EN_VIVO, PREGUNTA_SEMANA };
 
     private final IVistaDao vistaDao;
     private final AccesoModuloHelper acceso;
