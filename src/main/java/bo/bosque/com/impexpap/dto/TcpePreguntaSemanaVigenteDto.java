@@ -7,12 +7,11 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 /**
- * Fila de {@code p_list_tcpe_PreguntaSemana 'V'} (inicio) más sus opciones de {@code 'O'}. {@code esCorrecta},
- * {@code respuestaCorrecta} y {@code mensaje} los decide el SP: llegan solo después de responder.
+ * Fila de {@code p_list_tcpe_PreguntaSemana 'V'} (inicio): la pregunta vigente, lo que respondió quien mira y, para
+ * el campo de texto, la ayuda y el largo máximo. {@code mensaje} (el agradecimiento) llega solo ya respondida.
  */
 @Getter
 @Setter
@@ -37,20 +36,16 @@ public class TcpePreguntaSemanaVigenteDto implements Serializable {
 
     private Integer diasRestantes;
 
-    private Boolean mostrarRespuesta;
-
     private Boolean respondida;
 
-    private Long codRsptaOpElegida;
+    /** Lo que escribió quien mira; nulo si todavía no respondió. */
+    private String respuesta;
 
-    private Boolean esCorrecta;
-
-    private String respuestaCorrecta;
+    private Date fechaRespuesta;
 
     private String mensaje;
 
-    /** Cuántas personas respondieron en total. */
-    private Integer respuestas;
+    private String ayuda;
 
-    private List<TcpePreguntaSemanaOpcionDto> opciones = new ArrayList<>();
+    private Integer maxRespuesta;
 }

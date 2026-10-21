@@ -41,17 +41,17 @@ public class TcpePreguntaSemanaController {
         this.permisos = permisos;
     }
 
-    /** Las vigentes de hoy para quien mira, cada una con sus opciones; 204 si no hay ninguna. */
+    /** Las vigentes de hoy para quien mira, con lo que ya respondió; 204 si no hay ninguna. */
     @PostMapping("/vigentes")
     public ResponseEntity<ApiResponse<?>> vigentes(Authentication auth) {
         return TcpeRespuestas.listado(preguntas.vigentes(DatosToken.codUsuarioDe(auth)));
     }
 
-    /** {@code message} = el resultado que escribe el SP; {@code data} = codRsptaSemana. */
+    /** {@code message} = el agradecimiento que escribe el SP; {@code data} = codRsptaSemana. */
     @PostMapping("/responder")
     public ResponseEntity<ApiResponse<?>> responder(@Valid @RequestBody TcpePreguntaSemanaFiltroDto dto,
                                                     Authentication auth) {
-        return TcpeRespuestas.escritura(respuestas.responder(dto.getCodPreguntaSemana(), dto.getCodRsptaOp(),
+        return TcpeRespuestas.escritura(respuestas.responder(dto.getCodPreguntaSemana(), dto.getRespuesta(),
                 DatosToken.codUsuarioDe(auth)));
     }
 
@@ -91,18 +91,11 @@ public class TcpePreguntaSemanaController {
         return TcpeRespuestas.listado(preguntas.respuestas(dto.getCodPreguntaSemana()));
     }
 
-    @PostMapping("/estadistica")
-    public ResponseEntity<ApiResponse<?>> estadistica(@Valid @RequestBody TcpePreguntaSemanaFiltroDto dto,
-                                                      Authentication auth) {
+    /** Quita una respuesta (por ejemplo, un texto fuera de lugar): la persona puede volver a responder. */
+    @PostMapping("/quitar-respuesta")
+    public ResponseEntity<ApiResponse<?>> quitarRespuesta(@Valid @RequestBody TcpePreguntaSemanaFiltroDto dto,
+                                                          Authentication auth) {
         permisos.exigirAlguna(auth, TcpePermisos.PREGUNTA_SEMANA);
-        return TcpeRespuestas.listado(preguntas.estadistica(dto.getCodPreguntaSemana()));
-    }
-
-    /** Preguntas del banco para elegir, por categoría o texto. */
-    @PostMapping("/banco")
-    public ResponseEntity<ApiResponse<?>> banco(@Valid @RequestBody TcpePreguntaSemanaFiltroDto dto,
-                                                Authentication auth) {
-        permisos.exigirAlguna(auth, TcpePermisos.PREGUNTA_SEMANA);
-        return TcpeRespuestas.listado(preguntas.banco(dto.getCodClasificacion(), dto.getTexto()));
+        return TcpeRespuestas.escritura(respuestas.eliminar(dto.getCodRsptaSemana(), DatosToken.codUsuarioDe(auth)));
     }
 }

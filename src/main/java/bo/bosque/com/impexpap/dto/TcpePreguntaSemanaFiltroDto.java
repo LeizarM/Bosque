@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * Cuerpo de {@code /examenes/pregunta-semana/*} salvo {@code guardar}: cada endpoint usa una parte. Solo tipos: las
- * reglas (vigencia, opción de la pregunta, una respuesta por persona) las decide el SP.
+ * reglas (vigencia, largo de la respuesta, una respuesta por persona) las decide el SP.
  */
 @Getter
 @Setter
@@ -26,13 +26,10 @@ public class TcpePreguntaSemanaFiltroDto implements Serializable {
     /** {@code listar}: filtro; {@code activar}: el valor nuevo. */
     private Boolean activo;
 
-    /** {@code responder}: la opción elegida. */
-    private Long codRsptaOp;
+    /** {@code responder}: lo que escribió quien responde. */
+    @Size(max = 1000, message = "Máximo 1000 caracteres.")
+    private String respuesta;
 
-    /** {@code banco}: categoría. */
-    private Long codClasificacion;
-
-    /** {@code banco}: busca dentro del texto de la pregunta. */
-    @Size(max = 200, message = "Máximo 200 caracteres.")
-    private String texto;
+    /** {@code quitar-respuesta}: la respuesta que se quita. */
+    private Long codRsptaSemana;
 }

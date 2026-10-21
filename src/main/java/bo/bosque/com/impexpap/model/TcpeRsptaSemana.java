@@ -2,6 +2,8 @@ package bo.bosque.com.impexpap.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.Size;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,8 +13,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Fila de {@code tcpe_rsptaSemana} (v11): la respuesta de un usuario de BOSQUE a una pregunta de la semana, una sola
- * por pregunta. Se lee con {@code p_list_tcpe_RsptaSemana}; se registra desde el inicio con
+ * Fila de {@code tcpe_rsptaSemana} (v12): lo que un usuario de BOSQUE escribió en una pregunta de la semana, una sola
+ * respuesta por pregunta. Se lee con {@code p_list_tcpe_RsptaSemana}; se registra desde el inicio con
  * {@code p_abm_tcpe_RsptaSemana 'I'} y el usuario del token, nunca por el catálogo genérico.
  */
 @Getter
@@ -32,11 +34,9 @@ public class TcpeRsptaSemana implements Serializable {
     /** bigint. NOT NULL. FK a {@code tb_usuario}: quien respondió. */
     private Long codUsuario;
 
-    /** bigint. NOT NULL. FK a {@code tcpe_rsptaOpcion}: la opción elegida. */
-    private Long codRsptaOp;
-
-    /** bit. NOT NULL. La calcula el SP con la opción elegida. */
-    private Boolean esCorrecta;
+    /** nvarchar(1000). NOT NULL. El largo que se acepta lo fija la configuración ({@code maxRespuestaSemana}). */
+    @Size(max = 1000, message = "Máximo 1000 caracteres.")
+    private String respuesta;
 
     /** bigint. Lo pone el backend con el usuario del token; nunca sale del cuerpo. */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

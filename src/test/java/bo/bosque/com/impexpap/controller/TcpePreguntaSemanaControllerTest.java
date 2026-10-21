@@ -96,28 +96,29 @@ class TcpePreguntaSemanaControllerTest {
     }
 
     @Test
-    @DisplayName("responder: sin pantalla; message = errormsg del SP y data = codRsptaSemana")
+    @DisplayName("responder: sin pantalla, con el texto; message = errormsg del SP y data = codRsptaSemana")
     void responder() {
         TcpePreguntaSemanaFiltroDto d = pregunta(1L);
-        d.setCodRsptaOp(3L);
-        when(respuestas.responder(1L, 3L, 34L)).thenReturn(new RespuestaSp(0, "¡Correcto!", 11L));
+        d.setRespuesta("Bien, gracias");
+        when(respuestas.responder(1L, "Bien, gracias", 34L)).thenReturn(new RespuestaSp(0, "¡Gracias!", 11L));
 
         ResponseEntity<ApiResponse<?>> r = controlador.responder(d, usuario("ROLE_LIM"));
 
         assertEquals(201, r.getStatusCodeValue());
-        assertEquals("¡Correcto!", r.getBody().getMessage());
+        assertEquals("¡Gracias!", r.getBody().getMessage());
         assertEquals(11L, r.getBody().getData());
         verify(vistas, never()).obtainRoutes(anyInt());
     }
 
     @Test
-    @DisplayName("gestión con la pantalla PreguntaSemana: lista, guarda, activa, elimina y consulta")
+    @DisplayName("gestión con la pantalla PreguntaSemana: lista, guarda, activa, elimina, consulta y quita respuestas")
     void gestionConPantalla() {
         conPantalla(TcpePermisos.PREGUNTA_SEMANA);
         when(preguntas.gestion(null)).thenReturn(Collections.singletonList(new TcpePreguntaSemanaDto()));
         when(preguntas.guardar(any(), anyLong())).thenReturn(new RespuestaSp(0, "Pregunta de la semana registrada.", 4L));
         when(preguntas.activar(eq(4L), eq(false), anyLong())).thenReturn(new RespuestaSp(0, "", 4L));
         when(preguntas.eliminar(eq(4L), anyLong())).thenReturn(new RespuestaSp(0, "", 4L));
+        when(respuestas.eliminar(eq(8L), anyLong())).thenReturn(new RespuestaSp(0, "Respuesta eliminada.", 8L));
         Authentication lim = usuario("ROLE_LIM");
 
         assertEquals(200, controlador.listar(null, lim).getStatusCodeValue());
@@ -128,14 +129,15 @@ class TcpePreguntaSemanaControllerTest {
         assertEquals(201, controlador.activar(a, lim).getStatusCodeValue());
         assertEquals(201, controlador.eliminar(pregunta(4L), lim).getStatusCodeValue());
         assertEquals(204, controlador.respuestas(pregunta(4L), lim).getStatusCodeValue());
-        assertEquals(204, controlador.estadistica(pregunta(4L), lim).getStatusCodeValue());
-        assertEquals(204, controlador.banco(new TcpePreguntaSemanaFiltroDto(), lim).getStatusCodeValue());
+        TcpePreguntaSemanaFiltroDto q = new TcpePreguntaSemanaFiltroDto();
+        q.setCodRsptaSemana(8L);
+        assertEquals("Respuesta eliminada.", controlador.quitarRespuesta(q, lim).getBody().getMessage());
 
         verify(preguntas).guardar(any(), eq(34L));
         verify(preguntas).activar(4L, false, 34L);
         verify(preguntas).eliminar(4L, 34L);
         verify(preguntas).respuestas(4L);
-        verify(preguntas).estadistica(4L);
+        verify(respuestas).eliminar(8L, 34L);
     }
 
     @Test
@@ -149,11 +151,11 @@ class TcpePreguntaSemanaControllerTest {
         assertThrows(SinPermisoException.class, () -> controlador.activar(pregunta(4L), lim));
         assertThrows(SinPermisoException.class, () -> controlador.eliminar(pregunta(4L), lim));
         assertThrows(SinPermisoException.class, () -> controlador.respuestas(pregunta(4L), lim));
-        assertThrows(SinPermisoException.class, () -> controlador.estadistica(pregunta(4L), lim));
-        assertThrows(SinPermisoException.class, () -> controlador.banco(pregunta(4L), lim));
+        assertThrows(SinPermisoException.class, () -> controlador.quitarRespuesta(pregunta(4L), lim));
         verify(preguntas, never()).gestion(any());
         verify(preguntas, never()).guardar(any(), anyLong());
         verify(preguntas, never()).eliminar(any(), anyLong());
+        verify(respuestas, never()).eliminar(any(), anyLong());
     }
 
     @Test

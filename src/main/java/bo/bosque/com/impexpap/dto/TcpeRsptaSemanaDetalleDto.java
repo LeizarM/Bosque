@@ -9,8 +9,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Fila de {@code p_list_tcpe_PreguntaSemana 'R'} (gestión): quién respondió, su cargo actual de trabajo, qué eligió
- * y cuándo.
+ * Fila de {@code p_list_tcpe_PreguntaSemana 'R'} (gestión): quién respondió, su cargo actual de trabajo, qué
+ * escribió y cuándo.
  */
 @Getter
 @Setter
@@ -30,11 +30,7 @@ public class TcpeRsptaSemanaDetalleDto implements Serializable {
 
     private String cargo;
 
-    private Long codRsptaOp;
-
-    private String opcionRspta;
-
-    private Boolean esCorrecta;
+    private String respuesta;
 
     private Date fechaRespuesta;
 }

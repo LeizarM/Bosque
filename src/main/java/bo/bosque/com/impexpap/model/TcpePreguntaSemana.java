@@ -15,9 +15,9 @@ import java.time.LocalDate;
 import java.util.Date;
 
 /**
- * Fila de {@code tcpe_preguntaSemana} (v11): una pregunta cerrada del banco con su plazo para el inicio. Tipos
- * envoltorio para que un NULL de la base siga siendo null. Se lee con {@code p_list_tcpe_PreguntaSemana} y se escribe
- * con {@code p_abm_tcpe_PreguntaSemana}.
+ * Fila de {@code tcpe_preguntaSemana} (v12): una pregunta libre ("¿Qué tal tu día?") con su plazo para el inicio.
+ * Tipos envoltorio para que un NULL de la base siga siendo null. Se lee con {@code p_list_tcpe_PreguntaSemana} y se
+ * escribe con {@code p_abm_tcpe_PreguntaSemana}.
  */
 @Getter
 @Setter
@@ -30,12 +30,13 @@ public class TcpePreguntaSemana implements Serializable {
     /** bigint. PK IDENTITY. Nulo o 0 = alta. */
     private Long codPreguntaSemana;
 
-    /** bigint. NOT NULL. FK a {@code tcpe_pregunta}. */
-    private Long codPregunta;
-
-    /** varchar(100). NULL: sin título se muestra el de la configuración. */
+    /** nvarchar(100). NULL: sin título se muestra el de la configuración. */
     @Size(max = 100, message = "Máximo 100 caracteres.")
     private String titulo;
+
+    /** nvarchar(500). NOT NULL: lo que se pregunta. */
+    @Size(max = 500, message = "Máximo 500 caracteres.")
+    private String pregunta;
 
     /** date. NOT NULL. Viaja como yyyy-MM-dd. */
     @FechaDiaJson
@@ -44,9 +45,6 @@ public class TcpePreguntaSemana implements Serializable {
     /** date. NOT NULL, no antes de {@code fechaInicio}. Viaja como yyyy-MM-dd. */
     @FechaDiaJson
     private LocalDate fechaFin;
-
-    /** bit. NOT NULL, default 1 si llega nulo. */
-    private Boolean mostrarRespuesta;
 
     /** bit. NOT NULL, default 1 si llega nulo. */
     private Boolean activo;

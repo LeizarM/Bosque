@@ -19,10 +19,10 @@ public class TcpeRsptaSemanaDao extends TcpeCrudDao<TcpeRsptaSemana> implements 
     static final String SP_ABM = "p_abm_tcpe_RsptaSemana";
 
     /** Parámetros de p_list (PK, FK); NULL = sin filtro. */
-    private static final String[] FILTROS = { "codRsptaSemana", "codPreguntaSemana", "codUsuario", "codRsptaOp" };
+    private static final String[] FILTROS = { "codRsptaSemana", "codPreguntaSemana", "codUsuario" };
 
     /** Columnas de datos de p_abm, sin PK, audUsuario ni audFecha. */
-    private static final String[] COLUMNAS = { "codPreguntaSemana", "codUsuario", "codRsptaOp", "esCorrecta" };
+    private static final String[] COLUMNAS = { "codPreguntaSemana", "codUsuario", "respuesta" };
 
     private final SpHelper sp;
 
@@ -38,11 +38,11 @@ public class TcpeRsptaSemanaDao extends TcpeCrudDao<TcpeRsptaSemana> implements 
     }
 
     @Override
-    public RespuestaSp responder(Long codPreguntaSemana, Long codRsptaOp, long codUsuario) {
+    public RespuestaSp responder(Long codPreguntaSemana, String respuesta, long codUsuario) {
         Map<String, Object> p = new LinkedHashMap<>();
         TcpeParametros.poner(p, "codPreguntaSemana", TcpeParametros.id(codPreguntaSemana));
         p.put("codUsuario", codUsuario);
-        TcpeParametros.poner(p, "codRsptaOp", TcpeParametros.id(codRsptaOp));
+        TcpeParametros.poner(p, "respuesta", respuesta);
         p.put("audUsuario", codUsuario);
         return sp.ejecutarAbmMap(SP_ABM, p, "I");
     }
