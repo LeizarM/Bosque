@@ -71,6 +71,13 @@ public class ChBancoController {
         return this.chBdao.listBancosPlanilla();
     }
 
+    /** La pantalla de bancos: cada banco con su uso ({@code p_list_Banco} 'P'). 204 si no hay. */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/listar")
+    public ResponseEntity<ApiResponse<?>> listar() {
+        return ParametrosRespuestas.listado(chBdao.listarConUso());
+    }
+
     /**
      * Alta (codBanco 0/null) o edicion. Botones {@code btnNuevoB} / {@code btnEditarB}. El nombre es
      * obligatorio y tiene el formato del validador del legacy.

@@ -2,6 +2,7 @@ package bo.bosque.com.impexpap.dao;
 import java.util.Date;
 import java.util.List;
 
+import bo.bosque.com.impexpap.dto.AgendaEmpleadoDto;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
@@ -42,4 +43,10 @@ public interface IRelEmpEmpr {
      * Procedimiento para obtener el ultimo codRelEmplEmpr (relacion laboral registrada)
      */
     RelEmplEmpr obtenerUltimoCodRelEmplEmpr (int codEmpleado);
+
+    /**
+     * {@code p_list_RelEmplEmpr 'G'}: la agenda del Dashboard. Empleados con relación vigente, su cargo
+     * y sucursal actuales y sus teléfonos corporativos.
+     */
+    List<AgendaEmpleadoDto> agenda();
 }

@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.dao;
 import java.util.List;
 
 import bo.bosque.com.impexpap.dto.BancoDto;
+import bo.bosque.com.impexpap.dto.BancoUsoDto;
 import bo.bosque.com.impexpap.model.ChBanco;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 
@@ -17,6 +18,9 @@ public interface IChBanco {
      * y 9 escritos dentro del procedimiento</b>, no una columna de la tabla.
      */
     List<BancoDto> listBancosPlanilla();
+
+    /** {@code p_list_Banco} 'P': cada banco con su uso (cheques, cuentas, movimientos), por nombre. */
+    List<BancoUsoDto> listarConUso();
 
     /** Un banco por su codigo, o {@code null} si no existe. */
     ChBanco obtener(int codBanco);

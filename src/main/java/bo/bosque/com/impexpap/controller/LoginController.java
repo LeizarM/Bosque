@@ -31,6 +31,11 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.regex.Pattern;
+
+import bo.bosque.com.impexpap.config.SpBusinessException;
+import bo.bosque.com.impexpap.dto.CambioClaveDto;
+import bo.bosque.com.impexpap.utils.ApiResponse;
 
 import bo.bosque.com.impexpap.security.ClienteIp;
 import bo.bosque.com.impexpap.security.jwt.DatosToken;
@@ -359,6 +364,65 @@ public class LoginController {
 
     }
 
+
+    /** La regla de la pantalla tbUsuario/cpassword del legacy: 6 a 15 de estos caracteres. */
+    private static final Pattern CLAVE_VALIDA =
+            Pattern.compile("^[a-zA-Z0-9ñÑ '@(){}\\[\\]_<>~]{6,15}$");
+
+    /**
+     * Cambio de la propia contraseña desde el Dashboard (tbUsuario/cpassword). El usuario sale del token y
+     * una clave actual errada responde 400, no 401: la app cierra la sesión ante cualquier 401. Los intentos
+     * fallidos se cuentan como en el login y, al cambiarla, se cierran las demás sesiones.
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @PostMapping("/cambiarClave")
+    public ResponseEntity<ApiResponse<?>> cambiarClave(
+            @RequestBody CambioClaveDto datos, Authentication auth,
+            HttpServletRequest request) {
+        String nueva = datos.getNueva() == null ? "" : datos.getNueva();
+        if (!nueva.equals(datos.getConfirmacion())) {
+            throw new SpBusinessException(
+                    "La nueva contraseña y su confirmación no coinciden.");
+        }
+        if (!CLAVE_VALIDA.matcher(nueva).matches()) {
+            throw new SpBusinessException(
+                    "La nueva contraseña debe tener entre 6 y 15 caracteres: letras, números, espacio o @ ( ) { } [ ] _ < > ~ '.");
+        }
+        if (nueva.equals(datos.getActual())) {
+            throw new SpBusinessException(
+                    "La nueva contraseña debe ser distinta de la actual.");
+        }
+
+        String login = auth.getName();
+        String ip = clienteIp.de(request);
+        Login usuario = this.ldao.verifyUser(login, ip);
+        if (usuario == null || usuario.getCodUsuario() == 0) {
+            throw new SpBusinessException(
+                    "No se pudo identificar su usuario. Cierre sesión y vuelva a entrar.");
+        }
+        if (usuario.getCodUsuario() < 0) throw new SpBusinessException(MSG_BLOQUEADO);
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, datos.getActual()));
+        } catch (BadCredentialsException e) {
+            Login tras = this.ldao.registerFailedAttempt(login, ip);
+            boolean bloqueado = tras != null && tras.getCodUsuario() < 0;
+            throw new SpBusinessException(bloqueado ? MSG_BLOQUEADO
+                    : "La contraseña actual no es correcta. Después de 3 intentos fallidos en una hora el usuario se bloquea.");
+        } catch (DisabledException | LockedException e) {
+            throw new SpBusinessException(
+                    e instanceof DisabledException ? MSG_INACTIVO : MSG_BLOQUEADO);
+        }
+
+        usuario.setPassword2(passwordEncoder.encode(nueva));
+        if (!this.ldao.abmLogin(usuario, "Q")) {
+            throw new SpBusinessException(
+                    "No se pudo guardar la nueva contraseña. Intente de nuevo.");
+        }
+        cerrarSesionesTrasCambioDeClave(usuario.getCodUsuario(), DatosToken.deONull(auth));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                "Contraseña actualizada. Las demás sesiones abiertas con su usuario se cerraron.",
+                usuario.getCodUsuario(), HttpStatus.CREATED.value()));
+    }
 
     /**
      * Serv. para cambiar la contraseña que aparece por default

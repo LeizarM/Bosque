@@ -20,4 +20,7 @@ public class NivelJerarquico {
 
     /// Atributos Auxiliares
     private int activo;
+
+    /** Cuántos cargos usan la escala; solo lo llena {@code p_list_NivelJerarquico 'P'}. */
+    private int cargos;
 }

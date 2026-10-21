@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.stereotype.Repository;
 
 import bo.bosque.com.impexpap.dto.BancoDto;
+import bo.bosque.com.impexpap.dto.BancoUsoDto;
 import bo.bosque.com.impexpap.model.ChBanco;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
 import bo.bosque.com.impexpap.utils.SpHelper;
@@ -38,6 +39,11 @@ public class ChBancoDAO implements IChBanco {
     @Override
     public List<BancoDto> listBancosPlanilla() {
         return numerar(spHelper.ejecutarListadoPorPosicion(SP_LIST, new LinkedHashMap<String, Object>(), "A", MAPA));
+    }
+
+    @Override
+    public List<BancoUsoDto> listarConUso() {
+        return spHelper.ejecutarListado(SP_LIST, new LinkedHashMap<String, Object>(), "P", BancoUsoDto.class);
     }
 
     @Override

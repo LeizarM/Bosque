@@ -115,7 +115,7 @@ class ChChequeControllerTest {
             "/pdf/estado", "/pdf/subir", "/pdf/descargar"));
 
     private static final Set<String> RUTAS_BANCO = new TreeSet<>(Arrays.asList(
-            "/bancosX", "/bancosPlanilla", "/registrar", "/eliminar"));
+            "/bancosX", "/bancosPlanilla", "/listar", "/registrar", "/eliminar"));
 
     private static Set<String> rutasDe(Class<?> clase) {
         Set<String> rutas = new TreeSet<>();

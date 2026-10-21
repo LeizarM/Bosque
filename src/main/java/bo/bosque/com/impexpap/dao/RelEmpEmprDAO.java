@@ -1,7 +1,9 @@
 package bo.bosque.com.impexpap.dao;
 
+import bo.bosque.com.impexpap.dto.AgendaEmpleadoDto;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
+import bo.bosque.com.impexpap.utils.SpHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -12,6 +14,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Repository
@@ -22,6 +25,15 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
      */
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    SpHelper spHelper;
+
+    @Override
+    public List<AgendaEmpleadoDto> agenda() {
+        return spHelper.ejecutarListado("p_list_RelEmplEmpr", new LinkedHashMap<String, Object>(), "G",
+                AgendaEmpleadoDto.class);
+    }
 
     /**
      * Procedimiento para obtener el listado de relaciones laborales de un empleado

@@ -28,6 +28,11 @@ public class Sucursal implements Serializable {
     private int codSucursalPlanilla;
     private String nombrePlanilla;
 
+    /** Solo los llena {@code p_list_Sucursal 'P'}: nombre de la empresa, estado y cargos asignados. */
+    private String nombreEmpresa;
+    private int estado;
+    private int cargos;
+
     /**
      * Constructores
      */

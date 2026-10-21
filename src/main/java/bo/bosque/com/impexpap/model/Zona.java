@@ -15,4 +15,8 @@ public class Zona implements Serializable {
     private int codCiudad;
     private String zona;
     private int audUsuario;
+
+    /** Solo los llena {@code p_list_Zona 'P'}: nombre de la ciudad y personas con esa zona. */
+    private String ciudad;
+    private int personas;
 }
