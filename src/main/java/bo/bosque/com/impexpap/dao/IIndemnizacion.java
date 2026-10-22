@@ -11,4 +11,5 @@ public interface IIndemnizacion {
     List<Indemnizacion> listarHistorialIndemnizacion(Indemnizacion indemnizacion);
     RespuestaSp abmIndemnizacion(Indemnizacion indemnizacion, String acc);
     List<Map<String, Object>> reporteProvision(String fechaCorte);
+    Map<String, Object> obtenerDatosFiniquito(Integer codEmpleado, String fechaCorte);
 }

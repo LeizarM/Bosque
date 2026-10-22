@@ -6,7 +6,7 @@ import bo.bosque.com.impexpap.dto.AgendaEmpleadoDto;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.EmpleadoCargo;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
-
+import bo.bosque.com.impexpap.utils.Tipos;
 
 
 public interface IRelEmpEmpr {
@@ -56,4 +56,10 @@ public interface IRelEmpEmpr {
      * no tiene relación vigente o si el SP todavía no las devuelve.
      */
     String inicialesDe(int codEmpleado);
+    /**
+     * Obtendrá la lista de tipos de motivo de fin de relación laboral (ACCION 'F')
+     * @return Lista de tipos
+     */
+    List<Tipos> listTipoMotivoFin();
+
 }

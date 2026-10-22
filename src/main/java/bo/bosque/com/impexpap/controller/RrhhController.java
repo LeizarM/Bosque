@@ -1572,6 +1572,17 @@ public class RrhhController {
     }
 
     /**
+     * Procedimiento para obtener los tipos de motivo de finalización de relación laboral (ACCION 'F')
+     * 
+     * @return Lista de tipos
+     */
+    @Secured({ "ROLE_ADM", "ROLE_LIM" })
+    @RequestMapping(value = "/tipoMotivoFin", method = { RequestMethod.GET, RequestMethod.POST })
+    public List<Tipos> listTipoMotivoFin() {
+        return this.reeDao.listTipoMotivoFin();
+    }
+
+    /**
      * PARA GENERAR EL RPT NOMINA EMPLEADOS
      * 
      * @return

@@ -39,4 +39,16 @@ public class IndemnizacionDao implements IIndemnizacion {
         params.put("ACCION", "R");
         return this.spHelper.ejecutarListadoDinamico("p_list_Indemnizacion", params);
     }
+
+    @Override
+    public Map<String, Object> obtenerDatosFiniquito(Integer codEmpleado, String fechaCorte) {
+        Map<String, Object> params = new java.util.HashMap<>();
+        params.put("codEmpleado", codEmpleado);
+        if (fechaCorte != null && !fechaCorte.trim().isEmpty()) {
+            params.put("FechaActual", fechaCorte.trim());
+        }
+        params.put("ACCION", "F");
+        List<Map<String, Object>> list = this.spHelper.ejecutarListadoDinamico("p_list_Indemnizacion", params);
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
+    }
 }

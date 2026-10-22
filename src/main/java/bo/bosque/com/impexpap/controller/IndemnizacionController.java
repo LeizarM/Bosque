@@ -5,6 +5,9 @@ import bo.bosque.com.impexpap.dao.IIndemnizacion;
 import bo.bosque.com.impexpap.model.Indemnizacion;
 import bo.bosque.com.impexpap.utils.ApiResponse;
 import bo.bosque.com.impexpap.utils.RespuestaSp;
+import bo.bosque.com.impexpap.commons.service.FiniquitoExcelService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,14 +27,17 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('ROLE_ADM','ROLE_LIM', 'ROLE_RRHH')")
 public class IndemnizacionController {
 
+    private static final Logger logger = LoggerFactory.getLogger(IndemnizacionController.class);
     private static final String SUCCESS_MESSAGE = "OPERACION REALIZADA EXITOSAMENTE";
 
     private final IIndemnizacion indemnizacionDao;
     private final JasperReportExport jasperReportExport;
+    private final FiniquitoExcelService finiquitoExcelService;
 
-    public IndemnizacionController(IIndemnizacion indemnizacionDao, JasperReportExport jasperReportExport) {
+    public IndemnizacionController(IIndemnizacion indemnizacionDao, JasperReportExport jasperReportExport, FiniquitoExcelService finiquitoExcelService) {
         this.indemnizacionDao = indemnizacionDao;
         this.jasperReportExport = jasperReportExport;
+        this.finiquitoExcelService = finiquitoExcelService;
     }
 
     @PostMapping("/listar")
@@ -94,6 +100,36 @@ public class IndemnizacionController {
         }
         String reportName = "RRHH".equals(tipo) ? "RptIndemnizacionRRHH" : "RptIndemnizacion";
         return generarReportePdf(reportName, tipo, payload);
+    }
+
+    @PostMapping("/finiquitoExcel")
+    public ResponseEntity<?> finiquitoExcel(@RequestBody(required = false) Map<String, Object> payload) {
+        try {
+            if (payload == null || payload.get("codEmpleado") == null) {
+                return ResponseEntity.badRequest().body(
+                        new ApiResponse<>("El parámetro codEmpleado es requerido.", null, HttpStatus.BAD_REQUEST.value())
+                );
+            }
+
+            Integer codEmpleado = Integer.parseInt(payload.get("codEmpleado").toString().trim());
+            String fechaCorte = payload.get("fechaCorte") != null ? payload.get("fechaCorte").toString().trim() : null;
+            String motivoRetiro = payload.get("motivoRetiro") != null ? payload.get("motivoRetiro").toString().trim() : null;
+            String domicilioEmpresa = payload.get("domicilioEmpresa") != null ? payload.get("domicilioEmpresa").toString().trim() : null;
+
+            byte[] excelBytes = finiquitoExcelService.generarFiniquitoExcel(codEmpleado, fechaCorte, motivoRetiro, domicilioEmpresa);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(excelBytes.length);
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Finiquito_" + codEmpleado + ".xlsx\"");
+
+            return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error generando finiquito Excel: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ApiResponse<>("Error al generar finiquito Excel: " + e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR.value())
+            );
+        }
     }
 
     private ResponseEntity<?> generarReportePdf(String reportName, String tipoReporte, Map<String, Object> payload) {

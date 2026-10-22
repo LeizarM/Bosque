@@ -4,6 +4,7 @@ import bo.bosque.com.impexpap.dto.AgendaEmpleadoDto;
 import bo.bosque.com.impexpap.model.Empleado;
 import bo.bosque.com.impexpap.model.RelEmplEmpr;
 import bo.bosque.com.impexpap.utils.SpHelper;
+import bo.bosque.com.impexpap.utils.Tipos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -13,10 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class RelEmpEmprDAO implements IRelEmpEmpr {
@@ -173,6 +171,14 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
     @Override
     public boolean obtenerRelEmpEmpr() {
         return false;
+    }
+    /**
+     * Procedimiento para obtener los tipos de motivo fin de relación laboral (ACCION 'F')
+     * @return Lista de Tipos
+     */
+    @Override
+    public List<Tipos> listTipoMotivoFin() {
+        return this.spHelper.ejecutarListado("p_list_RelEmplEmpr", Collections.emptyMap(), "F", Tipos.class);
     }
 
 }

@@ -29,6 +29,7 @@ public class Indemnizacion {
     private String nombreCompleto;
     private String empresa;
     private String apellidos;
+    private String ciNumero;
     private String fechaIngreso;
     private String periodo;
     private String fechaSalida;
@@ -43,11 +44,15 @@ public class Indemnizacion {
     private Integer dias30;
     private Double indemnizacion;
     private Double indemnizacionActual;
+    private Integer diasAguinaldo;
+    private Double aguinaldo;
+    private Double diasVacacion;
     private Double pagoFiniquitoQuinq;
     private Double indemnizacionFinal;
     private String caja;
     private String sucursal;
     private String area;
+    private String cargo;
 
     // Metadatos Paginacion
     private Integer pagina;
