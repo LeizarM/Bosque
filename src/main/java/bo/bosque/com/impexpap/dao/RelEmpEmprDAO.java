@@ -37,6 +37,16 @@ public class RelEmpEmprDAO implements IRelEmpEmpr {
         return spHelper.ejecutarListado("p_list_RelEmplEmpr", p, "G", AgendaEmpleadoDto.class);
     }
 
+    @Override
+    public String inicialesDe(int codEmpleado) {
+        Map<String, Object> p = new LinkedHashMap<>();
+        p.put("codEmpleado", codEmpleado);
+        List<AgendaEmpleadoDto> filas =
+                spHelper.ejecutarListado("p_list_RelEmplEmpr", p, "G", AgendaEmpleadoDto.class);
+        String iniciales = filas.isEmpty() ? null : filas.get(0).getIniciales();
+        return iniciales == null ? "" : iniciales.trim();
+    }
+
     /**
      * Procedimiento para obtener el listado de relaciones laborales de un empleado
      * @param codEmpleado

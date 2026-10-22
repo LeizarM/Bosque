@@ -3,12 +3,14 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.commons.SesionService;
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.ILoginDao;
+import bo.bosque.com.impexpap.dao.IRelEmpEmpr;
 import bo.bosque.com.impexpap.dao.IUsuarioBtn;
 import bo.bosque.com.impexpap.dao.IVistaUsuario;
 import bo.bosque.com.impexpap.model.Login;
 import bo.bosque.com.impexpap.security.ClienteIp;
 import bo.bosque.com.impexpap.security.jwt.DatosToken;
 import bo.bosque.com.impexpap.security.jwt.JwtProvider;
+import bo.bosque.com.impexpap.security.model.Jwt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,7 @@ class LoginControllerTest {
     private AuthenticationManager autenticador;
     private JwtProvider jwt;
     private SesionService sesiones;
+    private IRelEmpEmpr relaciones;
     private MockHttpServletRequest pedido;
     private LoginController controlador;
 
@@ -63,10 +66,11 @@ class LoginControllerTest {
         autenticador = mock(AuthenticationManager.class);
         jwt = mock(JwtProvider.class);
         sesiones = mock(SesionService.class);
+        relaciones = mock(IRelEmpEmpr.class);
         ClienteIp ip = mock(ClienteIp.class);
         when(ip.de(any())).thenReturn("10.0.0.1");
         controlador = new LoginController(mock(PasswordEncoder.class), autenticador, jwt, dao,
-                mock(IVistaUsuario.class), mock(IEmpleado.class), mock(IUsuarioBtn.class), ip, sesiones);
+                mock(IVistaUsuario.class), mock(IEmpleado.class), mock(IUsuarioBtn.class), ip, sesiones, relaciones);
         pedido = new MockHttpServletRequest();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(pedido));
     }
@@ -209,6 +213,26 @@ class LoginControllerTest {
         assertEquals(HttpStatus.OK, r.getStatusCode());
         verify(dao).registerSuccessfulLogin("jperez", "10.0.0.1");
         verify(jwt).generateToken(any(), any(), eq(33L));
+    }
+
+    @Test
+    void elLoginTraeLasInicialesDelAvatarYSiFallanEntraIgual() {
+        Login l = new Login();
+        l.setCodUsuario(5);
+        l.setCodEmpleado(172);
+        when(dao.verifyUser(anyString(), anyString())).thenReturn(l);
+        List<GrantedAuthority> roles = Collections.singletonList(new SimpleGrantedAuthority("ROLE_LIM"));
+        when(autenticador.authenticate(any()))
+                .thenReturn(new UsernamePasswordAuthenticationToken(new User("jperez", "hash", roles), null, roles));
+        when(relaciones.inicialesDe(172)).thenReturn("MJ");
+
+        assertEquals("MJ", ((Jwt) ((Map<?, ?>) entrar().getBody()).get("data")).getIniciales());
+
+        when(relaciones.inicialesDe(172)).thenThrow(new RuntimeException("SP sin la columna"));
+        ResponseEntity<?> r = entrar();
+
+        assertEquals(HttpStatus.OK, r.getStatusCode());
+        assertEquals("", ((Jwt) ((Map<?, ?>) r.getBody()).get("data")).getIniciales());
     }
 
     @Test

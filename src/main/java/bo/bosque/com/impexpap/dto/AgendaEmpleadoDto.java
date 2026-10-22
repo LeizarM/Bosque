@@ -19,6 +19,8 @@ public class AgendaEmpleadoDto implements Serializable {
 
     private long codEmpleado;
     private String nombreCompleto;
+    /** Las del avatar: primer nombre + apellido paterno, o el materno si no hay (lo arma el SP). */
+    private String iniciales;
     private String cargo;
     private long codSucursal;
     private String sucursal;

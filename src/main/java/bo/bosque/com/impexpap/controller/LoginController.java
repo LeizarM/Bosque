@@ -5,6 +5,7 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.commons.SesionService;
 import bo.bosque.com.impexpap.dao.IEmpleado;
 import bo.bosque.com.impexpap.dao.ILoginDao;
+import bo.bosque.com.impexpap.dao.IRelEmpEmpr;
 import bo.bosque.com.impexpap.dao.IUsuarioBtn;
 import bo.bosque.com.impexpap.dao.IVistaUsuario;
 import bo.bosque.com.impexpap.model.Empleado;
@@ -61,6 +62,7 @@ public class LoginController {
     private final IUsuarioBtn usuarioBtnDao;
     private final ClienteIp clienteIp;
     private final SesionService sesiones;
+    private final IRelEmpEmpr relaciones;
 
     static final String MSG_CREDENCIALES =
             "Usuario o contraseña incorrectos. Después de 3 intentos fallidos en una hora el usuario se bloquea.";
@@ -74,7 +76,7 @@ public class LoginController {
     static final String ENCABEZADO_PLATAFORMA = "X-Plataforma";
     static final String ENCABEZADO_VERSION = "X-Version-App";
 
-    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao, ClienteIp clienteIp, SesionService sesiones){
+    public LoginController(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider, ILoginDao ldao, IVistaUsuario vistaUsuarioDao, IEmpleado empleadoDao, IUsuarioBtn usuarioBtnDao, ClienteIp clienteIp, SesionService sesiones, IRelEmpEmpr relaciones){
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
@@ -84,6 +86,7 @@ public class LoginController {
         this.usuarioBtnDao = usuarioBtnDao;
         this.clienteIp = clienteIp;
         this.sesiones = sesiones;
+        this.relaciones = relaciones;
     }
 
 
@@ -196,6 +199,7 @@ public class LoginController {
                         loginTemp.getNombreSucursal(),
                         userDetails.getAuthorities()
                 );
+                jwtT.setIniciales(inicialesDe(loginTemp.getCodEmpleado()));
 
                 // Respuesta exitosa
                 response.put("data", jwtT);
@@ -266,6 +270,18 @@ public class LoginController {
         response.put("mensaje", mensaje);
         response.put("status", "error");
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    /** Las iniciales del avatar no deben tumbar el login: si fallan, la app las toma del nombre. */
+    private String inicialesDe(int codEmpleado) {
+        if (codEmpleado <= 0) return "";
+        try {
+            String iniciales = relaciones.inicialesDe(codEmpleado);
+            return iniciales == null ? "" : iniciales;
+        } catch (RuntimeException e) {
+            log.warn("Login sin iniciales del empleado {}: {}", codEmpleado, e.getMessage());
+            return "";
+        }
     }
 
     /**

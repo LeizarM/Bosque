@@ -50,4 +50,10 @@ public interface IRelEmpEmpr {
      * ficha (misma regla que la ficha del trabajador).
      */
     List<AgendaEmpleadoDto> agenda(int codEmpleadoConsulta);
+
+    /**
+     * Las iniciales del avatar de un empleado con la misma regla de la agenda ({@code 'G'}); vacías si
+     * no tiene relación vigente o si el SP todavía no las devuelve.
+     */
+    String inicialesDe(int codEmpleado);
 }

@@ -25,6 +25,8 @@ public class Jwt implements Serializable {
     private String versionApp;
     private int codSucursal;
     private String nombreSucursal;
+    /** Las del avatar del sidebar (p_list_RelEmplEmpr 'G'); vacías, la app las toma del nombre. */
+    private String iniciales = "";
     private Collection<? extends GrantedAuthority> authorities;
 
     /**
