@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -61,6 +62,30 @@ public class AccesoPantalla {
             // Es lo que hay que buscar en el log cuando alguien dice "le di permisos y no entra".
             log.warn("ACL: codUsuario={} sin la pantalla '{}' en su menu; se niega el acceso",
                     codUsuario, direccion);
+        }
+        return tiene;
+    }
+
+    /** Corta con 403 si quien llama no tiene ninguna de esas pantallas (endpoints compartidos). */
+    public void exigirAlguna(Authentication auth, String... direcciones) {
+        if (!tieneAlguna(auth, direcciones)) {
+            throw new AccessDeniedException("No tiene habilitada ninguna de las pantallas "
+                    + Arrays.toString(direcciones) + ".");
+        }
+    }
+
+    /** Como {@link #tiene}, pero basta una de varias pantallas y se consulta el menú una sola vez. */
+    public boolean tieneAlguna(Authentication auth, String... direcciones) {
+        if (direcciones == null || direcciones.length == 0) return false;
+        if (acceso.esAdmin(auth)) return true;
+
+        int codUsuario = DatosToken.codUsuarioDe(auth);
+        List<Vista> rutas = vistaDao.obtainRoutes(codUsuario);
+        boolean tiene = rutas != null && rutas.stream().anyMatch(v -> v.getDireccion() != null
+                && Arrays.stream(direcciones).anyMatch(d -> d != null && d.equalsIgnoreCase(v.getDireccion().trim())));
+        if (!tiene) {
+            log.warn("ACL: codUsuario={} sin ninguna de las pantallas {} en su menu; se niega el acceso",
+                    codUsuario, Arrays.toString(direcciones));
         }
         return tiene;
     }
