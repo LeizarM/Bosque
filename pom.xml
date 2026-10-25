@@ -74,6 +74,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!-- Bingo en vivo (módulo ttk): STOMP sobre WebSocket nativo con broker simple en memoria, sin Redis. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
         <!-- Envío del código de recuperación de acceso al correo corporativo (CorreoRecuperacion). -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

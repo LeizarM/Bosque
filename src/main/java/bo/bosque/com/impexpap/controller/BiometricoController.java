@@ -1001,7 +1001,7 @@ public class BiometricoController {
                             fila.isEntradaManual() && fila.isSalidaManual() ? "Entrada y salida"
                                     : fila.isEntradaManual() ? "Entrada"
                                     : "Salida";
-                    fila.setMotivo(pierna + " registrada a mano (marcación olvidada)");
+                    fila.setMotivo(pierna + " registro manual (marcación olvidada)");
                 }
             }
 

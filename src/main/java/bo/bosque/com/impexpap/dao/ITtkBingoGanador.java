@@ -1,0 +1,16 @@
+package bo.bosque.com.impexpap.dao;
+
+import bo.bosque.com.impexpap.model.TtkBingoGanador;
+import bo.bosque.com.impexpap.utils.RespuestaSp;
+
+import java.util.List;
+
+/** Ganadores confirmados por el encargado (p_list_ttk_BingoGanador / p_abm_ttk_BingoGanador). */
+public interface ITtkBingoGanador {
+
+    /** L: ganadores de un bingo, de un juego o una confirmación (codGanador). */
+    List<TtkBingoGanador> listar(TtkBingoGanador filtro);
+
+    /** I: confirma el cartón (codBingo + nroCarton o codCarton) en el juego en curso; D: anula codGanador. */
+    RespuestaSp registrar(TtkBingoGanador mb, String accion);
+}

@@ -1,5 +1,6 @@
 package bo.bosque.com.impexpap.security;
 
+import bo.bosque.com.impexpap.config.WebSocketConfig;
 import bo.bosque.com.impexpap.dao.LoginDaoImpl;
 import bo.bosque.com.impexpap.security.jwt.JwtEntryPoint;
 import bo.bosque.com.impexpap.security.jwt.JwtTokenFilter;
@@ -155,6 +156,10 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/examen-publico/auth/**").permitAll()
                 .antMatchers("/examen-publico/config").permitAll()
                 .antMatchers("/examen-publico/**").hasRole("POSTULANTE")
+                /* Handshake del STOMP (tiempo real, /ws y su alias /ws-bingo): un navegador no puede mandar
+                   Authorization en el upgrade, así que el JWT se valida en el frame CONNECT (StompSeguridad). */
+                .antMatchers(WebSocketConfig.ENDPOINT, WebSocketConfig.ENDPOINT + "/**",
+                        WebSocketConfig.ENDPOINT_BINGO, WebSocketConfig.ENDPOINT_BINGO + "/**").permitAll()
                 .antMatchers("/rrhh/eliminarFoto").access(SOLO_EMPLEADO)
                 .anyRequest().access(SOLO_EMPLEADO)
                 .and()
