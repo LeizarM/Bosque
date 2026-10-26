@@ -8,8 +8,10 @@ public final class TtkPantallas {
 
     /** RRHH: eventos, tipos de vale, participantes e impresión de tickets. */
     public static final String EVENTOS = "ttkEventos/Eventos";
-    /** Encargados: configuración del bingo, cartones y su asignación. */
+    /** Encargados: parámetros, figuras, generación de cartones y estados del bingo. */
     public static final String CONFIG = "ttkBingo/Configuracion";
+    /** Encargados: listar, asignar, liberar e imprimir cartones (sin tocar la configuración). */
+    public static final String CARTONES = "ttkBingo/Cartones";
     /** Encargados: panel en vivo (marcar bolillos, ranking, ganadores). */
     public static final String PANEL = "ttkBingo/Panel";
     /** Todos los empleados: elegir e imprimir su cartón. */
@@ -27,6 +29,11 @@ public final class TtkPantallas {
 
     /** Pantallas de los encargados (listar bingos). */
     public static String[] encargado() {
-        return new String[] { CONFIG, PANEL };
+        return new String[] { CONFIG, PANEL, CARTONES };
+    }
+
+    /** Pantallas que manejan cartones con su dueño: Configuración (resumen e impresión) y Cartones. */
+    public static String[] cartones() {
+        return new String[] { CONFIG, CARTONES };
     }
 }

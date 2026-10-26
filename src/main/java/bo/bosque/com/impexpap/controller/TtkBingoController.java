@@ -132,14 +132,14 @@ public class TtkBingoController {
     @PostMapping("/carton/listar")
     public ResponseEntity<ApiResponse<?>> listarCartones(@RequestBody(required = false) TtkBingoCarton f,
                                                          Authentication auth) {
-        pantallas.exigir(auth, TtkPantallas.CONFIG);
+        pantallas.exigirAlguna(auth, TtkPantallas.cartones());
         return TtkRespuestas.listado(cartones.listar(f == null ? new TtkBingoCarton() : f));
     }
 
     @PostMapping("/carton/empleados")
     public ResponseEntity<ApiResponse<?>> empleadosParaAsignar(@RequestBody(required = false) TtkBingoCarton f,
                                                                Authentication auth) {
-        pantallas.exigir(auth, TtkPantallas.CONFIG);
+        pantallas.exigirAlguna(auth, TtkPantallas.cartones());
         return TtkRespuestas.listado(cartones.empleados(f == null ? new TtkBingoCarton() : f));
     }
 
@@ -163,7 +163,7 @@ public class TtkBingoController {
     @PostMapping("/carton/celdas")
     public ResponseEntity<ApiResponse<?>> celdasDeCarton(@RequestBody(required = false) TtkBingoCelda f,
                                                          Authentication auth) {
-        pantallas.exigir(auth, TtkPantallas.CONFIG);
+        pantallas.exigirAlguna(auth, TtkPantallas.cartones());
         if (f == null || f.getCodCarton() == null) return TtkRespuestas.sinDatos();
         return TtkRespuestas.listado(celdas.delCarton(f.getCodCarton()));
     }
@@ -171,7 +171,7 @@ public class TtkBingoController {
     @PostMapping("/carton/impresion")
     public ResponseEntity<ApiResponse<?>> impresionCartones(@RequestBody(required = false) TtkBingoCelda f,
                                                             Authentication auth) {
-        pantallas.exigir(auth, TtkPantallas.CONFIG);
+        pantallas.exigirAlguna(auth, TtkPantallas.cartones());
         return TtkRespuestas.listado(celdas.impresion(f == null ? new TtkBingoCelda() : f));
     }
 
@@ -354,7 +354,7 @@ public class TtkBingoController {
     // ------------------------------------------------------------------ apoyo
 
     private ResponseEntity<ApiResponse<?>> cartonDelEncargado(TtkBingoCarton mb, Authentication auth, String accion) {
-        pantallas.exigir(auth, TtkPantallas.CONFIG);
+        pantallas.exigirAlguna(auth, TtkPantallas.cartones());
         mb.setAudUsuario(usuario(auth));
         RespuestaSp res = cartones.registrar(mb, accion);
         refrescar(bingoDeCarton(mb.getCodCarton()), res);
