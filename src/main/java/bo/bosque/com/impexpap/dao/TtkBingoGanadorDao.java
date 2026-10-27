@@ -38,7 +38,8 @@ public class TtkBingoGanadorDao implements ITtkBingoGanador {
         Map<String, Object> p = "I".equals(accion)
                 ? TtkParametros.de("codBingo", mb.getCodBingo(), "codCarton", mb.getCodCarton(),
                         "nroCarton", mb.getNroCarton(), "audUsuario", mb.getAudUsuario())
-                : TtkParametros.de("codGanador", mb.getCodGanador(), "audUsuario", mb.getAudUsuario());
+                : TtkParametros.de("codGanador", mb.getCodGanador(), "motivoDesempate", mb.getMotivoDesempate(),
+                        "audUsuario", mb.getAudUsuario());
         return spHelper.ejecutarAbmMap(SP_ABM, p, accion);
     }
 }

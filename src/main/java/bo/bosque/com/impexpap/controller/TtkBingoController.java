@@ -240,6 +240,19 @@ public class TtkBingoController {
         return TtkRespuestas.escritura(res);
     }
 
+    /**
+     * Quién ganó el desempate entre los confirmados del juego en curso y por qué (el SP lo exige para cerrar
+     * un juego con empate). Refresca la sala: el ganador se destaca con su motivo.
+     */
+    @PostMapping("/ganador/desempate")
+    public ResponseEntity<ApiResponse<?>> resolverEmpate(@Valid @RequestBody TtkBingoGanador mb, Authentication auth) {
+        pantallas.exigir(auth, TtkPantallas.PANEL);
+        mb.setAudUsuario(usuario(auth));
+        RespuestaSp res = ganadores.registrar(mb, "E");
+        refrescar(bingoDeGanador(mb.getCodGanador()), res);
+        return TtkRespuestas.escritura(res);
+    }
+
     @PostMapping("/ganador/listar")
     public ResponseEntity<ApiResponse<?>> listarGanadores(@RequestBody(required = false) TtkBingoGanador f,
                                                           Authentication auth) {

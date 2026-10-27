@@ -46,6 +46,8 @@ public class TtkBingoJuego implements Serializable {
     private Integer puedeEditarPremio;
     private Integer puedeComenzar;
     private Integer puedeFinalizar;
+    /** 1 con dos o más ganadores sin desempate resuelto: el juego no se puede cerrar todavía. */
+    private Integer empatePendiente;
 
     /** Lo pone el backend con el usuario del token; nunca sale del cuerpo. */
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
