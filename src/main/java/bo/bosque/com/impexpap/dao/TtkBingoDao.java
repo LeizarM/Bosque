@@ -52,7 +52,7 @@ public class TtkBingoDao implements ITtkBingo {
                         "nroCartones", mb.getNroCartones(), "maxCartonesEmpleado", mb.getMaxCartonesEmpleado(),
                         "tamRanking", mb.getTamRanking(), "codTipoTicket", mb.getCodTipoTicket(),
                         "modalidad", mb.getModalidad(), "conAviso", mb.getConAviso(),
-                        "audUsuario", mb.getAudUsuario())
+                        "reglaEmpate", mb.getReglaEmpate(), "audUsuario", mb.getAudUsuario())
                 : TtkParametros.de("codBingo", mb.getCodBingo(), "audUsuario", mb.getAudUsuario());
         return spHelper.ejecutarAbmMap(SP_ABM, p, accion);
     }

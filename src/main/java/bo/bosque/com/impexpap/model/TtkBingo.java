@@ -44,6 +44,8 @@ public class TtkBingo implements Serializable {
     private String modalidadTexto;
     /** 1 = el participante tiene el botón «¡Bingo!» para avisar al encargado. En guardar, null no cambia. */
     private Integer conAviso;
+    /** Cómo se desempata si hay más de un ganador; se ve en la pantalla en vivo. En guardar, null no cambia y "" la quita. */
+    private String reglaEmpate;
     private String estado;
     private String estadoTexto;
     private Integer nroGeneracion;

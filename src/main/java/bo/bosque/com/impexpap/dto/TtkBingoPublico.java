@@ -7,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 
-/** Estado público de un bingo (juego actual, figura y último bolillo), sin ganadores: p_list_ttk_Bingo P. */
+/** Estado público de un bingo (juego actual, figura, premio, desempate y último bolillo): p_list_ttk_Bingo P. */
 @Getter
 @Setter
 @ToString
@@ -32,9 +32,16 @@ public class TtkBingoPublico implements Serializable {
     private String estadoJuego;
     private Integer totalMarcados;
     private Integer ultimoBolillo;
-    /** 1 si el juego ya tiene un ganador confirmado; el mensaje lo anuncia sin nombres. */
+    /** 1 si el juego ya tiene un ganador confirmado; sus nombres van en TtkEstadoPublico.ganadores. */
     private Integer hayGanador;
     /** 1 si hay juego en curso y el encargado dejó prendido el botón «¡Bingo!» (solo avisa, nunca dice si ganó). */
     private Integer puedeAvisar;
+    private String premio;
+    /** «Se está jugando por …» en curso, «Premio: …» con ganador; null sin premio. */
+    private String textoPremio;
+    private String reglaEmpate;
+    /** «Si hay empate: …» antes; «¡Empate! …» con más de un ganador; null si no aplica. */
+    private String textoEmpate;
+    private Integer nroGanadores;
     private String mensaje;
 }

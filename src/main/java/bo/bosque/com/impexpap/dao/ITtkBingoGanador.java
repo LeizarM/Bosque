@@ -11,6 +11,9 @@ public interface ITtkBingoGanador {
     /** L: ganadores de un bingo, de un juego o una confirmación (codGanador). */
     List<TtkBingoGanador> listar(TtkBingoGanador filtro);
 
+    /** P: confirmados de un juego para la pantalla en vivo (nombre y codEmpleado para la foto, sin cartón). */
+    List<TtkBingoGanador> publicos(long codBingo, int nroJuego);
+
     /** I: confirma el cartón (codBingo + nroCarton o codCarton) en el juego en curso; D: anula codGanador. */
     RespuestaSp registrar(TtkBingoGanador mb, String accion);
 }

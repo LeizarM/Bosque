@@ -107,12 +107,17 @@ public class TtkBingoController {
         return TtkRespuestas.escritura(res);
     }
 
-    /** Nombre y figura (máscara 0/1) de un juego pendiente. */
+    /**
+     * Nombre, figura (máscara 0/1) y premio de un juego pendiente; con el juego en curso solo cambia el premio.
+     * Refresca el estado en vivo para que «Se está jugando por …» cambie al instante en la sala.
+     */
     @PostMapping("/juego/guardar")
     public ResponseEntity<ApiResponse<?>> guardarJuego(@Valid @RequestBody TtkBingoJuego mb, Authentication auth) {
         pantallas.exigir(auth, TtkPantallas.CONFIG);
         mb.setAudUsuario(usuario(auth));
-        return TtkRespuestas.escritura(juegos.registrar(mb, "U"));
+        RespuestaSp res = juegos.registrar(mb, "U");
+        refrescar(mb.getCodBingo() != null ? mb.getCodBingo() : bingoDeJuego(mb.getCodJuego()), res);
+        return TtkRespuestas.escritura(res);
     }
 
     /**

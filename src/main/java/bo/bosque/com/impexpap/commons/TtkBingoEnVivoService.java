@@ -3,12 +3,14 @@ package bo.bosque.com.impexpap.commons;
 import bo.bosque.com.impexpap.dao.ITtkBingo;
 import bo.bosque.com.impexpap.dao.ITtkBingoAviso;
 import bo.bosque.com.impexpap.dao.ITtkBingoCarton;
+import bo.bosque.com.impexpap.dao.ITtkBingoGanador;
 import bo.bosque.com.impexpap.dao.ITtkBingoSorteo;
 import bo.bosque.com.impexpap.dto.TtkBingoPublico;
 import bo.bosque.com.impexpap.dto.TtkEstadoEncargado;
 import bo.bosque.com.impexpap.dto.TtkEstadoPublico;
 import bo.bosque.com.impexpap.dto.TtkRankingCarton;
 import bo.bosque.com.impexpap.model.TtkBingoAviso;
+import bo.bosque.com.impexpap.model.TtkBingoGanador;
 import bo.bosque.com.impexpap.model.TtkBingoSorteo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ public class TtkBingoEnVivoService {
     private final ITtkBingoSorteo sorteos;
     private final ITtkBingoCarton cartones;
     private final ITtkBingoAviso avisos;
+    private final ITtkBingoGanador ganadores;
     private final TiempoRealPublicador publicador;
 
     private final ConcurrentHashMap<Long, TtkEstadoEncargado> encargados = new ConcurrentHashMap<>();
@@ -44,11 +47,12 @@ public class TtkBingoEnVivoService {
     private final AtomicLong versiones = new AtomicLong(System.currentTimeMillis());
 
     public TtkBingoEnVivoService(ITtkBingo bingos, ITtkBingoSorteo sorteos, ITtkBingoCarton cartones,
-                                 ITtkBingoAviso avisos, TiempoRealPublicador publicador) {
+                                 ITtkBingoAviso avisos, ITtkBingoGanador ganadores, TiempoRealPublicador publicador) {
         this.bingos = bingos;
         this.sorteos = sorteos;
         this.cartones = cartones;
         this.avisos = avisos;
+        this.ganadores = ganadores;
         this.publicador = publicador;
     }
 
@@ -97,18 +101,25 @@ public class TtkBingoEnVivoService {
         }
     }
 
-    /** Lee los cuatro SP, arma ambos estados con la misma versión y los deja en la caché. Llamar con el candado. */
+    /**
+     * Lee los SP, arma ambos estados con la misma versión y los deja en la caché. Llamar con el candado.
+     * Los ganadores (nombre y foto en la pantalla en vivo) solo se consultan si el juego ya tiene alguno confirmado.
+     */
     private TtkEstadoEncargado cargar(long codBingo, String aviso) {
         TtkBingoPublico publico = bingos.publico(codBingo);
         if (publico == null) return null;
         List<TtkBingoSorteo> tablero = inmutable(sorteos.tablero(codBingo));
         List<TtkRankingCarton> ranking = inmutable(cartones.ranking(codBingo));
         List<TtkBingoAviso> pendientes = inmutable(avisos.pendientes(codBingo));
+        List<TtkBingoGanador> confirmados = publico.getHayGanador() != null && publico.getHayGanador() == 1
+                && publico.getNroJuego() != null
+                ? inmutable(ganadores.publicos(codBingo, publico.getNroJuego()))
+                : Collections.<TtkBingoGanador>emptyList();
         long version = versiones.incrementAndGet();
 
         TtkEstadoEncargado encargado = new TtkEstadoEncargado(version, publico, tablero, ranking, aviso, pendientes);
         encargados.put(codBingo, encargado);
-        publicos.put(codBingo, new TtkEstadoPublico(version, publico, tablero));
+        publicos.put(codBingo, new TtkEstadoPublico(version, publico, tablero, confirmados));
         return encargado;
     }
 

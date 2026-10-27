@@ -28,6 +28,12 @@ public class TtkBingoGanadorDao implements ITtkBingoGanador {
     }
 
     @Override
+    public List<TtkBingoGanador> publicos(long codBingo, int nroJuego) {
+        return spHelper.ejecutarListado(SP_LIST, TtkParametros.de("codBingo", codBingo, "nroJuego", nroJuego), "P",
+                TtkBingoGanador.class);
+    }
+
+    @Override
     public RespuestaSp registrar(TtkBingoGanador mb, String accion) {
         Map<String, Object> p = "I".equals(accion)
                 ? TtkParametros.de("codBingo", mb.getCodBingo(), "codCarton", mb.getCodCarton(),

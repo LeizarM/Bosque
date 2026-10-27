@@ -27,6 +27,8 @@ public class TtkBingoJuego implements Serializable {
     private Integer nroJuego;
     private String nombre;
     private String figura;
+    /** Lo que se gana: «Se está jugando por …». En guardar, null no cambia y "" lo quita. */
+    private String premio;
     private Integer filas;
     private Integer columnas;
     private Integer conComodin;
@@ -40,6 +42,8 @@ public class TtkBingoJuego implements Serializable {
     private Integer bolillosMarcados;
     private Integer ganadoresConfirmados;
     private Integer puedeEditarFigura;
+    /** 1 mientras el juego no terminó: el premio también cambia con el juego en curso. */
+    private Integer puedeEditarPremio;
     private Integer puedeComenzar;
     private Integer puedeFinalizar;
 

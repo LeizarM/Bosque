@@ -30,7 +30,7 @@ public class TtkBingoJuegoDao implements ITtkBingoJuego {
     public RespuestaSp registrar(TtkBingoJuego mb, String accion) {
         Map<String, Object> p = "U".equals(accion)
                 ? TtkParametros.de("codJuego", mb.getCodJuego(), "nombre", mb.getNombre(), "figura", mb.getFigura(),
-                        "audUsuario", mb.getAudUsuario())
+                        "premio", mb.getPremio(), "audUsuario", mb.getAudUsuario())
                 : TtkParametros.de("codJuego", mb.getCodJuego(), "audUsuario", mb.getAudUsuario());
         return spHelper.ejecutarAbmMap(SP_ABM, p, accion);
     }
