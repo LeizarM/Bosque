@@ -35,12 +35,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Cliente mínimo del Service Layer de SAP B1: sesión, buscar asientos por referencia, crear un asiento.
- * La URL, la base y el usuario son de cada empresa; el truststore es uno solo para todo el servidor.
+ * Cliente mínimo del Service Layer de SAP B1: abrir y cerrar sesión, y pedir cualquier recurso. Lo
+ * usa {@link SapConexiones}; los módulos no lo llaman directo, piden una {@link SapSesion}.
  *
  * <p>El certificado del Service Layer es autofirmado. El script de Node lo resolvía apagando la
  * verificación ({@code rejectUnauthorized: false}); aquí no hay esa opción: el certificado se agrega
- * a un truststore ({@code sap.asiento-planilla.service-layer.truststore}) y se verifica como cualquier otro.
+ * a un truststore ({@code sap.service-layer.truststore}) y se verifica como cualquier otro.
  */
 @Component
 public class SapServiceLayerCliente {
@@ -62,13 +62,13 @@ public class SapServiceLayerCliente {
         }
     }
 
-    private final AsientoPlanillaSapPropiedades props;
+    private final SapServiceLayerPropiedades props;
     private final ObjectMapper mapper;
 
     /** Se arma en el primer uso: un truststore mal configurado no debe impedir que arranque el backend. */
     private volatile RestTemplate rest;
 
-    public SapServiceLayerCliente(AsientoPlanillaSapPropiedades props, ObjectMapper mapper) {
+    public SapServiceLayerCliente(SapServiceLayerPropiedades props, ObjectMapper mapper) {
         this.props = props;
         this.mapper = mapper;
     }
@@ -80,7 +80,7 @@ public class SapServiceLayerCliente {
         cuerpo.put("UserName", usuario);
         cuerpo.put("Password", clave);
         ResponseEntity<Map<String, Object>> r =
-                llamar(HttpMethod.POST, uri(url, "Login"), null, cuerpo, "iniciar sesión", "");
+                llamar(HttpMethod.POST, uri(url, "Login", null), null, cuerpo, "iniciar sesión", "");
 
         // B1SESSION y, detrás de un balanceador, ROUTEID. Solo el nombre=valor de cada uno.
         List<String> partes = new ArrayList<>();
@@ -100,40 +100,28 @@ public class SapServiceLayerCliente {
         return new Sesion(url, String.join("; ", partes));
     }
 
-    /** Los {@code JdtNum} de los asientos que ya tienen esa referencia en ese campo. */
-    public List<Integer> asientosConReferencia(Sesion s, String campo, String referencia) {
-        URI u = base(s.url).pathSegment("JournalEntries")
-                .queryParam("$select", "JdtNum")
-                .queryParam("$filter", campo + " eq '" + referencia.replace("'", "''") + "'")
-                .build().encode().toUri();
-        ResponseEntity<Map<String, Object>> r = llamar(HttpMethod.GET, u, s.cookie, null, "buscar asientos anteriores", "");
-        List<Integer> numeros = new ArrayList<>();
-        Object valor = r.getBody() == null ? null : r.getBody().get("value");
-        if (valor instanceof List) {
-            for (Object o : (List<?>) valor) {
-                Object n = o instanceof Map ? ((Map<?, ?>) o).get("JdtNum") : null;
-                if (n instanceof Number) numeros.add(((Number) n).intValue());
-            }
-        }
-        return numeros;
-    }
-
-    /** Crea el asiento y devuelve su {@code JdtNum}. */
-    public int crearAsiento(Sesion s, Map<String, Object> asiento) {
-        ResponseEntity<Map<String, Object>> r = llamar(HttpMethod.POST, uri(s.url, "JournalEntries"), s.cookie, asiento,
-                "crear el asiento", " Revisa en SAP si el asiento se creó antes de volver a enviarlo.");
-        Object n = r.getBody() == null ? null : r.getBody().get("JdtNum");
-        if (!(n instanceof Number)) {
-            throw new SpBusinessException("SAP respondió sin el número del asiento (JdtNum). "
-                    + "Revisa en SAP si se creó antes de volver a enviarlo.");
-        }
-        return ((Number) n).intValue();
+    /**
+     * Pide un recurso con la sesión abierta.
+     *
+     * @param recurso   la ruta debajo de la URL del Service Layer: {@code JournalEntries},
+     *                  {@code BusinessPartners('C0001')}
+     * @param query     parámetros de OData ({@code $select}, {@code $filter}...); se codifican aquí
+     * @param paraQue   qué se estaba haciendo, para el mensaje de error ("crear el asiento")
+     * @param siSeCorta lo que se agrega al mensaje si se corta la conexión (en las escrituras, avisar que
+     *                  revisen en SAP si quedó hecho)
+     * @return el cuerpo de la respuesta; vacío si SAP no devuelve nada (un PATCH devuelve 204)
+     */
+    public Map<String, Object> pedir(Sesion s, HttpMethod metodo, String recurso, Map<String, String> query,
+                                     Object cuerpo, String paraQue, String siSeCorta) {
+        ResponseEntity<Map<String, Object>> r = llamar(metodo, uri(s.url, recurso, query), s.cookie, cuerpo,
+                paraQue, siSeCorta);
+        return r.getBody() == null ? Collections.<String, Object>emptyMap() : r.getBody();
     }
 
     /** Nunca lanza: si falla, la sesión vence sola en el Service Layer. */
     public void cerrarSesion(Sesion s) {
         try {
-            llamar(HttpMethod.POST, uri(s.url, "Logout"), s.cookie, null, "cerrar sesión", "");
+            llamar(HttpMethod.POST, uri(s.url, "Logout", null), s.cookie, null, "cerrar sesión", "");
         } catch (RuntimeException e) {
             log.debug("No se pudo cerrar la sesión del Service Layer: {}", e.getMessage());
         }
@@ -152,7 +140,7 @@ public class SapServiceLayerCliente {
         } catch (ResourceAccessException e) {
             String causa = e.getMostSpecificCause().getMessage();
             String pista = causa != null && (causa.contains("PKIX") || causa.contains("certification path"))
-                    ? " Falta el certificado del Service Layer en el truststore (sap.asiento-planilla.service-layer.truststore)."
+                    ? " Falta el certificado del Service Layer en el truststore (sap.service-layer.truststore, SAP_SL_TRUSTSTORE)."
                     : "";
             throw new SpBusinessException("No se pudo conectar con el Service Layer de SAP al " + paraQue
                     + " (" + causa + ")." + pista + siSeCorta);
@@ -171,15 +159,21 @@ public class SapServiceLayerCliente {
         return "HTTP " + e.getRawStatusCode();
     }
 
-    private static URI uri(String url, String recurso) {
-        return base(url).pathSegment(recurso).build().toUri();
-    }
-
-    private static UriComponentsBuilder base(String url) {
+    /** La URL de la conexión + el recurso, con la query codificada ({@code $filter} lleva espacios y comillas). */
+    private static URI uri(String url, String recurso, Map<String, String> query) {
         if (url == null || url.trim().isEmpty()) {
-            throw new SpBusinessException("Falta la URL del Service Layer en la configuración de la empresa.");
+            throw new SpBusinessException("Falta la URL del Service Layer en la conexión de SAP.");
         }
-        return UriComponentsBuilder.fromHttpUrl(url.trim());
+        UriComponentsBuilder b = UriComponentsBuilder.fromHttpUrl(url.trim());
+        for (String parte : recurso.split("/")) {
+            if (!parte.isEmpty()) b.pathSegment(parte);
+        }
+        if (query != null) {
+            for (Map.Entry<String, String> q : query.entrySet()) {
+                b.queryParam(q.getKey(), q.getValue());
+            }
+        }
+        return b.build().encode().toUri();
     }
 
     private RestTemplate cliente() {
@@ -188,7 +182,7 @@ public class SapServiceLayerCliente {
             synchronized (this) {
                 r = rest;
                 if (r == null) {
-                    r = new RestTemplate(fabrica(props.getServiceLayer()));
+                    r = new RestTemplate(fabrica(props));
                     rest = r;
                 }
             }
@@ -196,7 +190,7 @@ public class SapServiceLayerCliente {
         return r;
     }
 
-    private static SimpleClientHttpRequestFactory fabrica(AsientoPlanillaSapPropiedades.ServiceLayer sl) {
+    private static SimpleClientHttpRequestFactory fabrica(SapServiceLayerPropiedades sl) {
         final SSLSocketFactory ssl = vacio(sl.getTruststore()) ? null : socketsDe(sl);
         SimpleClientHttpRequestFactory f = new SimpleClientHttpRequestFactory() {
             @Override
@@ -212,7 +206,7 @@ public class SapServiceLayerCliente {
         return f;
     }
 
-    private static SSLSocketFactory socketsDe(AsientoPlanillaSapPropiedades.ServiceLayer sl) {
+    private static SSLSocketFactory socketsDe(SapServiceLayerPropiedades sl) {
         String ruta = sl.getTruststore().trim();
         try (InputStream in = new FileInputStream(ruta)) {
             KeyStore ks = KeyStore.getInstance(ruta.toLowerCase().endsWith(".p12") ? "PKCS12" : "JKS");

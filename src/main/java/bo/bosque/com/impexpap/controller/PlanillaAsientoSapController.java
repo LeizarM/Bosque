@@ -3,6 +3,7 @@ package bo.bosque.com.impexpap.controller;
 import bo.bosque.com.impexpap.commons.AccesoPantalla;
 import bo.bosque.com.impexpap.commons.AsientoPlanillaSapService;
 import bo.bosque.com.impexpap.commons.AsientoSapConfigService;
+import bo.bosque.com.impexpap.commons.SapConexiones;
 import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dto.AsientoSapEmpresaDto;
 import bo.bosque.com.impexpap.dto.AsientoSapPeriodo;
@@ -23,9 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Asiento contable de la planilla de sueldos en SAP B1, por empresa.
  *
- * <p>La app manda solo el periodo y la empresa. Lo de cada empresa (SP, columnas, base de SAP, usuario
- * y contraseña cifrada del Service Layer) está en {@code tsap_AsientoPlanilla} y se edita con los
- * endpoints {@code /config/*}, que exigen la pantalla de configuración.
+ * <p>La app manda solo el periodo y la empresa. Lo de cada empresa (SP, columnas, textos y su conexión
+ * a SAP) está en {@code tsap_AsientoPlanilla} y se edita con los endpoints {@code /config/*}, que exigen
+ * la pantalla de configuración. La conexión misma (base, usuario y contraseña del Service Layer) se
+ * administra en {@code /sap/conexiones}, desde Administración.
  */
 @RestController
 @RequestMapping("/planilla/asiento-sap")
@@ -35,12 +37,14 @@ public class PlanillaAsientoSapController {
     private final AccesoPantalla pantallas;
     private final AsientoPlanillaSapService asientos;
     private final AsientoSapConfigService configuracion;
+    private final SapConexiones conexiones;
 
     public PlanillaAsientoSapController(AccesoPantalla pantallas, AsientoPlanillaSapService asientos,
-                                        AsientoSapConfigService configuracion) {
+                                        AsientoSapConfigService configuracion, SapConexiones conexiones) {
         this.pantallas = pantallas;
         this.asientos = asientos;
         this.configuracion = configuracion;
+        this.conexiones = conexiones;
     }
 
     // ── El asiento ─────────────────────────────────────────────────────────────────────
@@ -81,7 +85,7 @@ public class PlanillaAsientoSapController {
                 configuracion.paraPantalla(), HttpStatus.OK.value()));
     }
 
-    /** Alta o cambio de una empresa. No toca la contraseña, que tiene su propio endpoint. */
+    /** Alta o cambio de una empresa. La conexión tiene que ser de la misma empresa. */
     @PostMapping("/config/guardar")
     public ResponseEntity<ApiResponse<?>> guardarConfig(@RequestBody AsientoSapConfig c, Authentication auth) {
         pantallas.exigirAlguna(auth, asientos.pantallasConfig());
@@ -89,12 +93,11 @@ public class PlanillaAsientoSapController {
         return respuesta("Guardado. Rige desde el próximo asiento.");
     }
 
-    /** La contraseña del Service Layer; se guarda cifrada y nunca vuelve a la app. */
-    @PostMapping("/config/clave")
-    public ResponseEntity<ApiResponse<?>> guardarClave(@RequestBody AsientoSapEmpresaDto dto, Authentication auth) {
+    /** Las conexiones a SAP para el desplegable, sin URL, usuario ni contraseña. */
+    @PostMapping("/config/conexiones")
+    public ResponseEntity<ApiResponse<?>> conexiones(Authentication auth) {
         pantallas.exigirAlguna(auth, asientos.pantallasConfig());
-        configuracion.guardarClave(empresa(dto), dto.getClave(), DatosToken.codUsuarioDe(auth));
-        return respuesta("Contraseña guardada.");
+        return ResponseEntity.ok(new ApiResponse<>("Conexiones SAP.", conexiones.opciones(), HttpStatus.OK.value()));
     }
 
     @PostMapping("/config/eliminar")
@@ -104,7 +107,7 @@ public class PlanillaAsientoSapController {
         return respuesta("Configuración eliminada.");
     }
 
-    /** Inicia y cierra sesión en SAP con lo guardado, para comprobar usuario, contraseña y certificado. */
+    /** Inicia y cierra sesión con la conexión de esa empresa, para comprobar usuario, contraseña y certificado. */
     @PostMapping("/config/probar")
     public ResponseEntity<ApiResponse<?>> probar(@RequestBody AsientoSapEmpresaDto dto, Authentication auth) {
         pantallas.exigirAlguna(auth, asientos.pantallasConfig());

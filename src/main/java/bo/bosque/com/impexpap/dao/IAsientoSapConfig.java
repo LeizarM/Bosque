@@ -16,8 +16,5 @@ public interface IAsientoSapConfig {
     /** Alta o cambio; no toca la clave del Service Layer. */
     RespuestaSp guardar(AsientoSapConfig c, long audUsuario);
 
-    /** {@code claveCifrada} ya viene cifrada por el backend. */
-    RespuestaSp guardarClave(int codEmpresa, String claveCifrada, long audUsuario);
-
     RespuestaSp eliminar(int codEmpresa, long audUsuario);
 }

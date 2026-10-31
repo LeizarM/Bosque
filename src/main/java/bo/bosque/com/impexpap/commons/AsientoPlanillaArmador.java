@@ -4,6 +4,7 @@ import bo.bosque.com.impexpap.config.SpBusinessException;
 import bo.bosque.com.impexpap.dto.AsientoSapLinea;
 import bo.bosque.com.impexpap.dto.AsientoSapResumen;
 import bo.bosque.com.impexpap.model.AsientoSapConfig;
+import bo.bosque.com.impexpap.model.SapConexion;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,7 +36,9 @@ public final class AsientoPlanillaArmador {
     private AsientoPlanillaArmador() {
     }
 
-    public static AsientoSapResumen armar(List<Map<String, Object>> filas, int anio, int mes, AsientoSapConfig cfg) {
+    /** @param cx la conexión a la que va: su base es el {@code CompanyDB} del resumen */
+    public static AsientoSapResumen armar(List<Map<String, Object>> filas, int anio, int mes, AsientoSapConfig cfg,
+                                          SapConexion cx) {
         exigirColumnas(filas, cfg);
         List<String> prefijos = prefijos(cfg.getPrefijosSocio());
 
@@ -70,7 +73,9 @@ public final class AsientoPlanillaArmador {
                 .mes(mes)
                 .codEmpresa(cfg.getCodEmpresa())
                 .empresa(cfg.getEmpresa())
-                .baseSap(cfg.getBaseSap().trim())
+                .baseSap(cx.getBaseSap().trim())
+                .conexion(cx.getNombre())
+                .ambiente(cx.getAmbiente())
                 .fecha(fecha(anio, mes, dia).toString())
                 .memo(recortar(texto(cfg.getMemo(), anio, mes), LARGO_MEMO))
                 .referencia(texto(cfg.getReferencia(), anio, mes))

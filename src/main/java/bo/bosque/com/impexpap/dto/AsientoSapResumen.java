@@ -17,6 +17,10 @@ public class AsientoSapResumen {
     private final String empresa;
     /** {@code CompanyDB} del Service Layer y base donde corre el SP. */
     private final String baseSap;
+    /** El nombre de la conexión a SAP a la que va. */
+    private final String conexion;
+    /** {@code PRODUCCION} o {@code PRUEBA}: la app lo destaca para que nadie envíe a la base equivocada. */
+    private final String ambiente;
     /** {@code yyyy-MM-dd}: {@code ReferenceDate}, {@code TaxDate} y {@code DueDate}. */
     private final String fecha;
     private final String memo;

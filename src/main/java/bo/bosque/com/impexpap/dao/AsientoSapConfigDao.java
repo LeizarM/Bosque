@@ -41,8 +41,7 @@ public class AsientoSapConfigDao implements IAsientoSapConfig {
         Map<String, Object> p = new LinkedHashMap<>();
         p.put("codEmpresa", c.getCodEmpresa());
         p.put("habilitado", c.getHabilitado());
-        p.put("baseSap", c.getBaseSap());
-        p.put("linkedServer", c.getLinkedServer());
+        p.put("idConexion", c.getIdConexion());
         p.put("esquema", c.getEsquema());
         p.put("sp", c.getSp());
         p.put("paramAnio", c.getParamAnio());
@@ -59,19 +58,8 @@ public class AsientoSapConfigDao implements IAsientoSapConfig {
         p.put("campoReferencia", c.getCampoReferencia());
         p.put("evitarDuplicados", c.getEvitarDuplicados());
         p.put("tolerancia", c.getTolerancia());
-        p.put("slUrl", c.getSlUrl());
-        p.put("slUsuario", c.getSlUsuario());
         p.put("audUsuario", audUsuario);
         return spHelper.ejecutarAbmMap(SP_ABM, p, "G");
-    }
-
-    @Override
-    public RespuestaSp guardarClave(int codEmpresa, String claveCifrada, long audUsuario) {
-        Map<String, Object> p = new LinkedHashMap<>();
-        p.put("codEmpresa", codEmpresa);
-        p.put("slClave", claveCifrada);
-        p.put("audUsuario", audUsuario);
-        return spHelper.ejecutarAbmMap(SP_ABM, p, "C");
     }
 
     @Override

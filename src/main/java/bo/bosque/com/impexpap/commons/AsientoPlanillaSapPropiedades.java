@@ -12,9 +12,10 @@ import java.util.List;
 /**
  * Lo del asiento de planilla en SAP que es del servidor y no de una empresa ({@code sap.asiento-planilla.*}).
  *
- * <p>Lo de cada empresa (SP, columnas, base de SAP, usuario y contraseña del Service Layer) está en
- * {@code tsap_AsientoPlanilla} y se edita desde la pantalla {@code tplPlanilla/asientoSapConfig}:
- * un cambio rige al instante, sin compilar ni reiniciar.
+ * <p>Lo de cada empresa (SP, columnas, textos y su conexión a SAP) está en {@code tsap_AsientoPlanilla}
+ * y se edita desde la pantalla {@code tplPlanilla/asientoSapConfig}; la conexión (base, usuario y
+ * contraseña del Service Layer), en Administración &gt; Conexiones SAP. Un cambio rige al instante, sin
+ * compilar ni reiniciar. El truststore del Service Layer está en {@link SapServiceLayerPropiedades}.
  */
 @Getter
 @Setter
@@ -33,16 +34,4 @@ public class AsientoPlanillaSapPropiedades {
 
     /** Tope del SP que arma el asiento: 0 sería "sin límite" y retendría una de las conexiones del pool. */
     private int timeoutSegundos = 120;
-
-    private ServiceLayer serviceLayer = new ServiceLayer();
-
-    @Getter
-    @Setter
-    public static class ServiceLayer {
-        /** Archivo .jks con los certificados de los Service Layer. Vacío = el truststore de la JVM. */
-        private String truststore = "";
-        private String truststorePassword = "";
-        private int timeoutConexionMs = 5000;
-        private int timeoutLecturaMs = 60000;
-    }
 }

@@ -49,6 +49,9 @@ sola si no hay `DB_PASSWORD`. Por eso `package` pasa en limpio.)
 | `OPENWA_WEBHOOK_SECRET` | No — default vacío | Secreto HMAC del webhook |
 | `OPENWA_TELEFONO_PRUEBA` | No — default vacío | Si se setea, todos los avisos de entrega van a este número en vez de al cliente real. Solo para desarrollo — dejarlo vacío en producción |
 | `CONFIG_CIFRADO_CLAVE` | No — default vacío | Clave que cifra la contraseña SMTP de la recuperación de acceso dentro de `trec_configuracion`. Base64 de 32 bytes o más (la clave AES-256 es el SHA-256 de lo que se ponga, así que 64 no da más seguridad que 32): `openssl rand -base64 32`, que imprime una sola línea. Con 64 bytes `openssl` la parte en dos líneas y hay que pegar las dos juntas, o generarla con `openssl rand 64 | base64 -w0`. Que no sea el mismo valor que `JWT_SECRET`. Sin ella la app arranca, pero esa contraseña no se puede guardar ni usar. **No cambiarla después**: lo ya cifrado deja de poder leerse y hay que volver a cargar la contraseña desde la pantalla |
+| `SAP_ASIENTO_HABILITADO` | No — default `true` | Interruptor general del asiento de planilla en SAP: con `false`, ninguna empresa envía aunque esté habilitada en su configuración |
+| `SAP_SL_TRUSTSTORE` | No — default vacío | Ruta, dentro del contenedor, del `.jks` con el certificado del Service Layer de SAP (en producción, `/etc/bosque/sap-sl.jks`; ver «El Service Layer de SAP»). Vacío = el truststore de la JVM |
+| `SAP_SL_TRUSTSTORE_PASSWORD` | No — default vacío | Contraseña de ese `.jks`. No hace falta: solo guarda un certificado público y se lee sin ella |
 
 El servidor SMTP, la casilla, su contraseña, el remitente, los dominios corporativos y los límites
 de la recuperación de acceso **no son variables de entorno**: viven en `trec_configuracion` y los
@@ -177,6 +180,7 @@ DB_NAME=BOSQUE-2_0
 DB_USERNAME=bosque_app
 JWT_EXPIRATION=36000
 PROXIES_CONFIABLES=181.114.119.195,127.0.0.1
+SAP_SL_TRUSTSTORE=/etc/bosque/sap-sl.jks
 EOF
 chmod 600 ~/.config/bosque/bosque.env
 ```
@@ -208,25 +212,28 @@ Para cambiar una clave: `decrypt` al mismo archivo de `/run/user`, editarlo,
   porque intenta leer la clave de la máquina, que es solo de root.
   `systemd-creds --user` sí funciona porque se la pide a un servicio del
   sistema. Por eso la unidad lo llama en `ExecStartPre`.
+- `deploy.sh` revisa las variables obligatorias en los dos archivos antes de
+  compilar. Del `.cred` lee solo los nombres.
 
 ### 2. La unidad systemd (de usuario)
 
 No es `/etc/systemd/system/bosque.service`. Es
 `~/.config/systemd/user/container-bosque-app.service`, y se administra con
-`systemctl --user`, sin `sudo`:
+`systemctl --user`, sin `sudo`. Así está en el servidor (31/10/2026):
 
 ```ini
 [Unit]
 Description=Podman container-bosque-app.service
+Documentation=man:podman-generate-systemd(1)
 Wants=network-online.target
 After=network-online.target
 RequiresMountsFor=%t/containers
 
 [Service]
-ExecStartPre=/bin/sh -c 'umask 077 && systemd-creds --user decrypt --name=secretos.env %h/.config/bosque/secretos.env.cred %t/bosque-secretos.env'
 Environment=PODMAN_SYSTEMD_UNIT=%n
 Restart=always
 TimeoutStopSec=70
+ExecStartPre=/bin/sh -c 'umask 077 && systemd-creds --user decrypt --name=secretos.env %h/.config/bosque/secretos.env.cred %t/bosque-secretos.env'
 ExecStart=/usr/bin/podman run \
         --cidfile=%t/%n.ctr-id \
         --cgroups=no-conmon \
@@ -239,8 +246,11 @@ ExecStart=/usr/bin/podman run \
         --env-file=%t/bosque-secretos.env \
         -p 127.0.0.1:8008:8443 \
         -v bosque-uploads:/app/uploads:Z \
+        -v %h/bosque/sap-sl.jks:/etc/bosque/sap-sl.jks:ro,Z \
+        --add-host sequoia:192.168.3.114 \
         --security-opt label=type:container_t \
         --cap-drop=ALL \
+        --read-only=false \
         --tz America/La_Paz localhost/bosque-app:latest
 ExecStartPost=/usr/bin/rm -f %t/bosque-secretos.env
 ExecStop=/usr/bin/podman stop --ignore -t 10 --cidfile=%t/%n.ctr-id
@@ -260,21 +270,28 @@ loginctl enable-linger newimpexpap   # para que siga corriendo sin sesion SSH ab
 journalctl --user -u container-bosque-app.service -f
 ```
 
+- **`-v bosque-uploads:/app/uploads:Z` es la línea que guarda los archivos
+  subidos** (vouchers, fotos, PDF de cheques: más de 14 000 archivos). El
+  contenedor se crea con `--rm`, así que sin ese volumen cada reinicio borra
+  lo que se subió desde el anterior. Al editar la unidad, no borrar líneas con
+  `sed` por patrón; después de reiniciar, comprobar que el volumen sigue
+  montado (ver «Comprobar», más abajo).
 - `%h` y `%t` los resuelve systemd: el `HOME` del usuario y su directorio de
   runtime (`/run/user/<uid>`, en memoria).
 - El archivo descifrado existe unos segundos: lo crea `ExecStartPre`, lo lee
   `podman run` y lo borra `ExecStartPost`. Si el arranque falla, lo borra
   `ExecStopPost`.
 - `-p 127.0.0.1:8008:8443`: Spring solo se alcanza desde el propio servidor;
-  de afuera todo entra por Caddy. No se monta ningún keystore.
-- `uploads/` vive en el volumen nombrado `bosque-uploads`, montado en
-  `/app/uploads`, así que sobrevive a que se recree el contenedor.
+  de afuera todo entra por Caddy.
+- El `.jks` y `--add-host` son del Service Layer de SAP (sección 4).
 - `loginctl enable-linger` es imprescindible: sin él, la unidad de usuario se
   apaga sola en cuanto se cierra la última sesión SSH de `newimpexpap`.
 
 `./deploy.sh` reconstruye la imagen (`podman build`) y hace `systemctl --user
 restart container-bosque-app.service`, pero **no** regenera la unidad ni los
-archivos de variables: son provisión manual, una sola vez.
+archivos de variables: son provisión manual, una sola vez. Si un `git pull`
+trae un `deploy.sh` nuevo, llega sin permiso de ejecución: correrlo con
+`bash deploy.sh`.
 
 ### 3. Caddy delante
 
@@ -346,7 +363,43 @@ app.esppapel.com, app.esppapel.com:8443 {
   echo | openssl s_client -connect app.esppapel.com:8443 -servername app.esppapel.com 2>/dev/null | openssl x509 -noout -issuer -startdate -enddate
   ```
 
-### 4. Nunca pasar secretos por `-e` ni por el `Dockerfile`
+### 4. El Service Layer de SAP
+
+Los módulos que hablan con SAP (hoy, el asiento de planilla) usan las conexiones
+de Administración > Conexiones SAP (`tsap_Conexion`): cada una tiene su base,
+su linked server, la URL del Service Layer (`https://sequoia:50000/b1s/v1/`),
+el usuario y la contraseña cifrada, y cada módulo elige la suya en su propia
+configuración. Desde el contenedor hacen falta dos cosas:
+
+- **El nombre `sequoia`.** El servidor no lo resuelve (en las PC con Windows
+  sí). `--add-host sequoia:192.168.3.114` lo agrega al `/etc/hosts` del
+  contenedor. Sin eso, «Probar» dice «No se pudo conectar con el Service Layer
+  de SAP al iniciar sesión (sequoia)».
+- **Su certificado, que es autofirmado** (`CN=SEQUOIA`, vence el 19/03/2028).
+  Va en un truststore propio, montado en el contenedor, y `SAP_SL_TRUSTSTORE`
+  dice dónde está. No lleva contraseña: solo tiene el certificado público, y
+  la app lo lee sin ella.
+
+  ```bash
+  mkdir -p ~/bosque
+  echo | openssl s_client -connect 192.168.3.114:50000 -servername sequoia 2>/dev/null | openssl x509 -outform PEM > ~/bosque/sap-sl.pem
+  openssl x509 -in ~/bosque/sap-sl.pem -noout -subject -enddate -fingerprint -sha256
+  keytool -importcert -noprompt -alias sequoia -file ~/bosque/sap-sl.pem -keystore ~/bosque/sap-sl.jks -storetype JKS -storepass changeit
+  chmod 600 ~/bosque/sap-sl.jks
+  ```
+
+  Cuando SAP renueve su certificado, el envío falla con «Falta el certificado
+  del Service Layer en el truststore»: se borra el `.jks`, se repiten estos
+  comandos y se reinicia la unidad.
+
+Para comprobar el camino de red desde el contenedor:
+
+```bash
+podman exec bosque-app getent hosts sequoia
+podman exec bosque-app bash -c 'exec 3<>/dev/tcp/192.168.3.114/50000 && echo "50000 abierto"'
+```
+
+### 5. Nunca pasar secretos por `-e` ni por el `Dockerfile`
 
 ```ini
 # MAL: cualquier usuario del servidor los ve con `ps aux`
@@ -359,11 +412,19 @@ cualquier proceso Linux. Por eso la unidad pasa la RUTA a un archivo
 como `ENV` en el `Dockerfile`: queda grabado en la imagen para siempre, visible
 con `podman history` para cualquiera que pueda hacer `podman pull` de ella.
 
-### 5. Comprobar que las variables llegaron
+### 6. Comprobar
+
+Después de cada cambio en la unidad o en las variables:
 
 ```bash
-podman exec bosque-app printenv | grep -E 'DB_|JWT_|CONFIG_|PROXIES_' | sed 's/=.*/=.../'
+podman inspect bosque-app --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{"\n"}}{{end}}'
+podman exec bosque-app sh -c 'echo "archivos subidos: $(find /app/uploads -type f | wc -l)"'
+podman exec bosque-app printenv | grep -E 'DB_|JWT_|CONFIG_|PROXIES_|SAP_' | sed 's/=.*/=.../'
+curl -s https://app.esppapel.com:8443/actuator/health; echo
 ```
+
+Tienen que aparecer los dos montajes (`bosque-uploads` en `/app/uploads` y el
+`.jks`), los miles de archivos subidos, las variables y `{"status":"UP"}`.
 
 Si la aplicación no arranca, el journal de la unidad dice exactamente qué
 falta:
