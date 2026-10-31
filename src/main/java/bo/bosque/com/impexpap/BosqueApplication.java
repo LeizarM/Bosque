@@ -1,16 +1,7 @@
 package bo.bosque.com.impexpap;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.connector.Connector;
-import org.apache.tomcat.util.descriptor.web.SecurityCollection;
-import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -35,80 +26,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * excluir la autoconfiguracion deja igual el jar cargado de codigo que nadie
  * usa, y encima obliga a acordarse de la exclusion para siempre.
  *
- * <h3>El conector HTTP</h3>
- * Ver {@link #servletContainer()}.
+ * <h3>Sin TLS ni conector de redireccion</h3>
+ * El HTTPS lo atiende el Caddy del servidor, que renueva el certificado solo
+ * (ver application-prod.properties y LEEME-SECRETS.md): Tomcat escucha solo
+ * HTTP, con la fabrica por defecto de Spring Boot. Por eso se quito el segundo
+ * conector que redirigia de 8080 a HTTPS; ademas, ese puerto nunca se publico.
  */
 @SpringBootApplication
 @EnableScheduling
 public class BosqueApplication {
 
-    /** Puerto del conector en texto plano que solo redirige. Ver {@link #servletContainer()}. */
-    @Value("${http.port:8080}")
-    private int httpPort;
-
-    /**
-     * Puerto HTTPS al que se redirige. Sale de {@code server.port} en vez de
-     * estar escrito a mano: la version anterior tenia {@code 8443} fijo, asi que
-     * el dia que cambiara el puerto la redireccion habria apuntado a un puerto
-     * muerto — y el sintoma habria sido un bucle de 302 sin explicacion.
-     */
-    @Value("${server.port:8443}")
-    private int httpsPort;
-
     public static void main(String[] args) {
         System.out.println("Iniciando Bosque...");
         SpringApplication.run(BosqueApplication.class, args);
-    }
-
-    /**
-     * Tomcat con un segundo conector en texto plano que <b>solo redirige</b> a
-     * HTTPS. El trabajo lo hace la restriccion {@code CONFIDENTIAL} sobre
-     * {@code /*}: Tomcat responde 302 hacia {@code redirectPort} a cualquier
-     * peticion que llegue sin cifrar.
-     *
-     * <h3>Por que es condicional</h3>
-     * {@code @ConditionalOnProperty} sobre {@code server.ssl.enabled}: sin TLS
-     * este bean <b>no se crea</b> y Spring Boot pone su fabrica por defecto.
-     *
-     * <p>Sin esa condicion, levantar el perfil {@code prod} con
-     * {@code SSL_ENABLED=false} —que es como se prueba la configuracion de
-     * produccion en una maquina de desarrollo, sin copiarle el certificado—
-     * deja a Tomcat redirigiendo TODO hacia un 8443 que no esta escuchando. La
-     * aplicacion arranca perfecto y no responde a nada, que es la peor forma de
-     * fallar.
-     *
-     * <h3>Ojo con la publicacion de puertos</h3>
-     * El contenedor hoy publica solo {@code -p 8443:8443}, asi que a este
-     * conector no llega nadie desde afuera y la redireccion no se usa nunca.
-     * Para que sirva de verdad —que alguien escriba {@code http://} y termine en
-     * {@code https://}— hay que publicar tambien {@code http.port} en el
-     * {@code podman run}. Se deja igual: no cuesta nada y el dia que se publique
-     * el puerto ya funciona.
-     */
-    @Bean
-    @ConditionalOnProperty(name = "server.ssl.enabled", havingValue = "true")
-    public ServletWebServerFactory servletContainer() {
-        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
-            @Override
-            protected void postProcessContext(Context context) {
-                SecurityConstraint securityConstraint = new SecurityConstraint();
-                securityConstraint.setUserConstraint("CONFIDENTIAL");
-                SecurityCollection collection = new SecurityCollection();
-                collection.addPattern("/*");
-                securityConstraint.addCollection(collection);
-                context.addConstraint(securityConstraint);
-            }
-        };
-        tomcat.addAdditionalTomcatConnectors(redirectConnector());
-        return tomcat;
-    }
-
-    private Connector redirectConnector() {
-        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-        connector.setScheme("http");
-        connector.setPort(httpPort);
-        connector.setSecure(false);
-        connector.setRedirectPort(httpsPort);
-        return connector;
     }
 }

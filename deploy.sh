@@ -20,6 +20,9 @@ set -euo pipefail
 PROYECTO="/home/newimpexpap/proyectos/Bosque"
 SERVICIO="container-bosque-app.service"
 ENV_FILE="$HOME/.config/bosque/bosque.env"
+# Las claves van cifradas aparte, y la unidad las pasa como segundo --env-file.
+# Ver LEEME-SECRETS.md, "Linux Fedora".
+CRED_FILE="$HOME/.config/bosque/secretos.env.cred"
 IMAGEN="bosque-app"
 JAR="target/bosque-1.0.0.jar"
 CONTENEDOR="bosque-app"
@@ -44,23 +47,43 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
+# De cada linea queda solo NOMBRE=ok o NOMBRE=plantilla: los valores, sobre todo
+# los descifrados, no pasan a ninguna variable de bash. Una linea "NOMBRE=" sin
+# valor no deja nada, y cuenta como ausente.
+estado_de() {
+    sed -nE -e 's/^([A-Za-z_][A-Za-z0-9_]*)=(PEGAR_AQUI|CAMBIAR|TODO)$/\1=plantilla/p' \
+            -e 't' \
+            -e 's/^([A-Za-z_][A-Za-z0-9_]*)=.+$/\1=ok/p'
+}
+
+ESTADO=$(estado_de < "$ENV_FILE")
+if [ -f "$CRED_FILE" ]; then
+    if ! CIFRADAS=$(systemd-creds --user decrypt --name=secretos.env "$CRED_FILE" - | estado_de); then
+        echo "ERROR: no se pudo descifrar $CRED_FILE"
+        echo "       Probar a mano: systemd-creds --user decrypt --name=secretos.env $CRED_FILE - | cut -d= -f1"
+        exit 1
+    fi
+    ESTADO="${ESTADO}"$'\n'"${CIFRADAS}"
+fi
+
 FALTAN=()
 for VAR in "${REQUERIDAS[@]}"; do
-    if ! grep -qE "^${VAR}=.+" "$ENV_FILE"; then
-        FALTAN+=("$VAR (ausente o vacia)")
-    elif grep -qE "^${VAR}=(PEGAR_AQUI|CAMBIAR|TODO)$" "$ENV_FILE"; then
-        FALTAN+=("$VAR (quedo el valor de plantilla sin reemplazar)")
-    fi
+    # Gana la ultima aparicion, como con los dos --env-file de la unidad.
+    case "$(printf '%s\n' "$ESTADO" | grep -E "^${VAR}=" | tail -1 || true)" in
+        "${VAR}=ok")        ;;
+        "${VAR}=plantilla") FALTAN+=("$VAR (quedo el valor de plantilla sin reemplazar)") ;;
+        *)                  FALTAN+=("$VAR (ausente o vacia)") ;;
+    esac
 done
 
 if [ ${#FALTAN[@]} -gt 0 ]; then
-    echo "ERROR: faltan variables en $ENV_FILE"
+    echo "ERROR: faltan variables en $ENV_FILE y $CRED_FILE"
     for F in "${FALTAN[@]}"; do
         echo "       - $F"
     done
     exit 1
 fi
-echo "OK  Secretos presentes en $ENV_FILE"
+echo "OK  Secretos presentes en $ENV_FILE y $CRED_FILE"
 
 # ============================================================
 # 1. JAVA 8 JDK (se busca javac, no java)
@@ -176,13 +199,19 @@ fi
 
 podman logs "$CONTENEDOR" 2>&1 | grep -E "Started BosqueApplication|Tomcat started|profile is active" | tail -3
 
-# Prueba de vida real: 401 en /actuator/health es la respuesta CORRECTA —
-# significa que Tomcat atiende y que la cadena de seguridad esta puesta.
-CODIGO=$(curl -k -s -o /dev/null -w "%{http_code}" --max-time 10 \
-         https://localhost:8443/actuator/health || echo "000")
+# Prueba de vida real, por el mismo camino que la app Flutter: Caddy en el 8443,
+# con el certificado verificado (sin -k), y Spring detras. --resolve conecta a
+# este mismo servidor sin depender del DNS. 401 en /actuator/health tambien es
+# correcto: Tomcat atiende y la cadena de seguridad esta puesta.
+# Sin '|| echo 000': curl ya escribe 000 cuando no conecta, y sumarle otro daba
+# 000000. El '|| true' es por 'set -e'.
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+         --resolve app.esppapel.com:8443:127.0.0.1 \
+         https://app.esppapel.com:8443/actuator/health || true)
 case "$CODIGO" in
-    401|200) echo "OK  Responde HTTPS en 8443 (HTTP $CODIGO)" ;;
-    000)     echo "AVISO: no respondio el puerto 8443 - revisar" ;;
+    401|200) echo "OK  Responde por Caddy en 8443 (HTTP $CODIGO)" ;;
+    000)     echo "AVISO: https://app.esppapel.com:8443 no respondio - revisar Caddy y el certificado" ;;
+    502)     echo "AVISO: Caddy responde pero Spring no (127.0.0.1:8008) - revisar el contenedor" ;;
     *)       echo "AVISO: HTTP $CODIGO inesperado en /actuator/health" ;;
 esac
 

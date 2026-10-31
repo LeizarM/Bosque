@@ -74,10 +74,10 @@ ENV JAVA_OPTS="-Djava.awt.headless=true \
 -XX:MaxRAMPercentage=75.0 \
 -XX:+ExitOnOutOfMemoryError"
 
-# 8443 es el HTTPS real. 8080 lo abre BosqueApplication solo para redirigir a
-# HTTPS, y hoy no se publica en el podman run: si se quiere que alguien escriba
-# http:// y termine en https://, hay que mapearlo tambien.
-EXPOSE 8443 8080
+# 8443 es Spring en HTTP. El HTTPS lo atiende el Caddy del servidor, que reenvia
+# a 127.0.0.1:8008; la unidad publica ese puerto con -p 127.0.0.1:8008:8443, asi
+# que desde afuera no se llega directo. Ver LEEME-SECRETS.md.
+EXPOSE 8443
 
 # Sonda de vida sin instalar nada: /dev/tcp es una facilidad de bash, no un
 # programa. Solo confirma que el puerto acepta conexiones; el estado sale en
